@@ -1,0 +1,15 @@
+# Release folders
+/Release/*
+
+# Debug folders
+/Debug/*
+
+# Visual Studio user files
+*.vs/
+*.filters
+*.user
+*.sdf
+*.suo
+
+# Ignore log files
+*.log
