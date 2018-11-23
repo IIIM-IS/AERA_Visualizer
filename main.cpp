@@ -1,0 +1,29 @@
+#include "aera-visualizer-window.h"
+#include "graph-visualizer-window.h"
+
+#include <QApplication>
+
+using namespace aera_visualizer;
+
+int main(int argv, char *args[])
+{
+  Q_INIT_RESOURCE(aera_visualizer);
+
+  QApplication app(argv, args);
+  AeraVisulizerWindow mainWindow;
+  const int left = 100;
+  const int top = 100;
+  const int width = 800;
+  const int height = 500;
+  mainWindow.setGeometry(left, top, width, height);
+
+  GraphVisulizerWindow* graphWindow = new GraphVisulizerWindow(&mainWindow);
+  // Disable the close button for the child window.
+  graphWindow->setWindowFlag(Qt::WindowCloseButtonHint, false);
+  graphWindow->setGeometry(left + width + 15, top, width, height);
+  graphWindow->show();
+
+  mainWindow.show();
+
+  return app.exec();
+}
