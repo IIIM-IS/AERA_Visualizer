@@ -1,8 +1,9 @@
-# Release folders
+# Compiler output
 /Release/*
-
-# Debug folders
 /Debug/*
+/GeneratedFiles/*
+/Win32/*
+/x64/*
 
 # Visual Studio user files
 *.vs/
