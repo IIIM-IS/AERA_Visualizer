@@ -19,6 +19,14 @@ public:
    * @param parent The main parent window for this window.
    */
   GraphVisulizerWindow(AeraVisulizerWindowBase* mainWindow);
+
+protected:
+  // TODO: Implement.
+  bool haveMoreEvents() override { return false; }
+  // TODO: Implement.
+  core::uint64 stepEvent(core::uint64 maximumTime) override { return uint64_MAX; }
+  // TODO: Implement.
+  core::uint64 unstepEvent() override { return uint64_MAX; }
 };
 
 }

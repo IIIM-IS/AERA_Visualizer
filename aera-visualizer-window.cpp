@@ -25,7 +25,8 @@ addExampleEvents(vector<shared_ptr<AeraEvent> >& events)
 }
 
 AeraVisulizerWindow::AeraVisulizerWindow()
-: AeraVisulizerWindowBase(0)
+: AeraVisulizerWindowBase(0),
+  iNextEvent_(0)
 {
   createActions();
   createMenus();
@@ -42,10 +43,6 @@ AeraVisulizerWindow::AeraVisulizerWindow()
   view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   centralLayout->addWidget(view);
   centralLayout->addWidget(getPlayerControlPanel());
-  connect(playPauseButton_, SIGNAL(clicked()), this, SLOT(playPauseButtonClicked()));
-  connect(stepBackButton_, SIGNAL(clicked()), this, SLOT(stepBackButtonClicked()));
-  connect(playSlider_, SIGNAL(valueChanged(int)), this, SLOT(playSliderValueChanged(int)));
-  connect(stepButton_, SIGNAL(clicked()), this, SLOT(stepButtonClicked()));
 
   QWidget* centralWidget = new QWidget();
   centralWidget->setLayout(centralLayout);
@@ -134,29 +131,6 @@ uint64 AeraVisulizerWindow::unstepEvent()
     return 0;
 }
 
-void AeraVisulizerWindow::startPlay()
-{
-  if (isPlaying_)
-    // Already playing.
-    return;
-
-  playPauseButton_->setIcon(pauseIcon_);
-  isPlaying_ = true;
-  if (playTimerId_ == 0)
-    playTimerId_ = startTimer(playTimerMicroseconds_ / 1000);
-}
-
-void AeraVisulizerWindow::stopPlay()
-{
-  if (playTimerId_ != 0) {
-    killTimer(playTimerId_);
-    playTimerId_ = 0;
-  }
-
-  playPauseButton_->setIcon(playIcon_);
-  isPlaying_ = false;
-}
-
 void AeraVisulizerWindow::zoomIn()
 {
   scene_->scaleViewBy(1.09);
@@ -202,34 +176,6 @@ void AeraVisulizerWindow::sendToBack()
       zValue = item->zValue() - 0.1;
   }
   selectedItem->setZValue(zValue);
-}
-
-void AeraVisulizerWindow::playPauseButtonClicked()
-{
-  if (isPlaying_)
-    stopPlay();
-  else
-    startPlay();
-}
-
-void AeraVisulizerWindow::stepButtonClicked()
-{
-  stopPlay();
-  uint64 newTime = stepEvent(uint64_MAX);
-  if (newTime != uint64_MAX) {
-    setPlayTime(newTime);
-    setSliderToPlayTime();
-  }
-}
-
-void AeraVisulizerWindow::stepBackButtonClicked()
-{
-  stopPlay();
-  uint64 newTime = unstepEvent();
-  if (newTime != uint64_MAX) {
-    setPlayTime(newTime);
-    setSliderToPlayTime();
-  }
 }
 
 void AeraVisulizerWindow::createActions()
@@ -281,42 +227,6 @@ void AeraVisulizerWindow::createToolbars()
   toolbar->addAction(zoomInAction_);
   toolbar->addAction(zoomOutAction_);
   toolbar->addAction(zoomHomeAction_);
-}
-
-void AeraVisulizerWindow::timerEvent(QTimerEvent* event)
-{
-  // TODO: Make sure we don't re-enter.
-
-  if (event->timerId() != playTimerId_)
-    // This timer event is not for us.
-    return;
-
-  if (events_.size() == 0) {
-    stopPlay();
-    return;
-  }
-
-  auto maximumEventTime = events_.back()->time_;
-  // TODO: Make this track the passage of real clock time.
-  uint64 playTime = playTime_ + playTimerMicroseconds_;
-
-  // Step events while events_[iNextEvent_] is less than or equal to the playTime.
-  while (stepEvent(playTime) != uint64_MAX);
-
-  if (iNextEvent_ >= events_.size()) {
-    // We have played all events.
-    playTime = maximumEventTime;
-    stopPlay();
-  }
-
-  setPlayTime(playTime);
-  setSliderToPlayTime();
-}
-
-void AeraVisulizerWindow::playSliderValueChanged(int value)
-{
-  // TODO: Implement to check if the user moved the slider,
-  // stopPlay, update the play time.
 }
 
 }

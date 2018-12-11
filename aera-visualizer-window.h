@@ -33,21 +33,9 @@ public:
    */
   AeraVisulizerWindow();
 
-private slots:
-  void zoomIn();
-  void zoomOut();
-  void zoomHome();
-  void bringToFront();
-  void sendToBack();
-  void playPauseButtonClicked();
-  void stepButtonClicked();
-  void stepBackButtonClicked();
-  void playSliderValueChanged(int value);
-
 protected:
-  void timerEvent(QTimerEvent* event) override;
+  bool haveMoreEvents() override { return iNextEvent_ >= events_.size(); }
 
-private:
   /**
    * Perform the event at events_[iNextEvent_] and then increment iNextEvent_.
    * @param if the time of next event is greater than maximumTime, don't perform the
@@ -55,25 +43,23 @@ private:
    * @return The time of the next event. If there is no next event,
    * return uint64_MAX.
    */
-  core::uint64 stepEvent(core::uint64 maximumTime);
+  core::uint64 stepEvent(core::uint64 maximumTime) override;
 
   /**
    * Decrement iNextEvent_ and undo the event at events_[iNextEvent_].
    * @return The time of the previous event. If there is no previous event, 
    * return uint64_MAX.
    */
-  core::uint64 unstepEvent();
+  core::uint64 unstepEvent() override;
 
-  /**
-   * Enable the play timer to play events and set the playPauseButton_ icon.
-   * If isPlaying_ is already true, do nothing.
-   */
-  void startPlay();
+private slots:
+  void zoomIn();
+  void zoomOut();
+  void zoomHome();
+  void bringToFront();
+  void sendToBack();
 
-  /**
-   * Disable the play timer, set the playPauseButton_ icon and set isPlaying_ false.
-   */
-  void stopPlay();
+private:
   void createActions();
   void createMenus();
   void createToolbars();
@@ -81,15 +67,15 @@ private:
   AeraVisualizerScene* scene_;
 
   QAction* exitAction_;
-
   QAction* toFrontAction_;
   QAction* sendBackAction_;
-
   QAction* zoomInAction_;
   QAction* zoomOutAction_;
   QAction* zoomHomeAction_;
 
   QMenu* itemMenu_;
+
+  size_t iNextEvent_;
 };
 
 }
