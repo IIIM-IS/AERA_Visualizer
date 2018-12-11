@@ -19,11 +19,18 @@ class QGraphicsView;
 
 namespace aera_visualizer {
 
+/**
+ * AeraVisulizerWindow extends AeraVisulizerWindowBase to present the player
+ * control panel and a window for visualizing the processing of AERA models.
+ */
 class AeraVisulizerWindow : public AeraVisulizerWindowBase
 {
   Q_OBJECT
 
 public:
+  /**
+   * Create an AeraVisulizerWindow.
+   */
   AeraVisulizerWindow();
 
 private slots:
@@ -49,17 +56,20 @@ private:
    * return uint64_MAX.
    */
   core::uint64 stepEvent(core::uint64 maximumTime);
+
   /**
    * Decrement iNextEvent_ and undo the event at events_[iNextEvent_].
    * @return The time of the previous event. If there is no previous event, 
    * return uint64_MAX.
    */
   core::uint64 unstepEvent();
+
   /**
    * Enable the play timer to play events and set the playPauseButton_ icon.
    * If isPlaying_ is already true, do nothing.
    */
   void startPlay();
+
   /**
    * Disable the play timer, set the playPauseButton_ icon and set isPlaying_ false.
    */

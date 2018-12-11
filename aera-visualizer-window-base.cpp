@@ -15,11 +15,13 @@ AeraVisulizerWindowBase::AeraVisulizerWindowBase(AeraVisulizerWindowBase* parent
   playTimerId_(0),
   isPlaying_(false)
 {
+  createPlayerControlPanel();
+
   if (parent_)
     parent_->children_.push_back(this);
 }
 
-QWidget* AeraVisulizerWindowBase::createPlayerWidget()
+void AeraVisulizerWindowBase::createPlayerControlPanel()
 {
   QHBoxLayout* playerLayout = new QHBoxLayout();
   playIcon_ = QIcon(":/images/play.png");
@@ -46,9 +48,8 @@ QWidget* AeraVisulizerWindowBase::createPlayerWidget()
   playTimeLabel_->setFont(QFont("Courier", 10));
   playerLayout->addWidget(playTimeLabel_);
 
-  QWidget* playerWidget = new QWidget();
-  playerWidget->setLayout(playerLayout);
-  return playerWidget;
+  playerControlPanel_ = new QWidget();
+  playerControlPanel_->setLayout(playerLayout);
 }
 
 void AeraVisulizerWindowBase::setPlayTime(uint64 time)

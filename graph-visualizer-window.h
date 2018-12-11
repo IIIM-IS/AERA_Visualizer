@@ -5,13 +5,17 @@
 
 namespace aera_visualizer {
 
+/**
+ * GraphVisulizerWindow extends AeraVisulizerWindowBase to present the player
+ * control panel and a window for visualizing a graph.
+ */
 class GraphVisulizerWindow : public AeraVisulizerWindowBase
 {
   Q_OBJECT
 
 public:
   /**
-   * Create a new GraphVisulizerWindow.
+   * Create a GraphVisulizerWindow.
    * @param parent The main parent window for this window.
    */
   GraphVisulizerWindow(AeraVisulizerWindowBase* mainWindow);

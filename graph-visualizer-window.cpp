@@ -9,7 +9,7 @@ GraphVisulizerWindow::GraphVisulizerWindow(AeraVisulizerWindowBase* mainWindow)
   QVBoxLayout* centralLayout = new QVBoxLayout();
   QTextEdit* textEdit = new QTextEdit(this);
   centralLayout->addWidget(textEdit);
-  centralLayout->addWidget(createPlayerWidget());
+  centralLayout->addWidget(getPlayerControlPanel());
 
   QWidget* centralWidget = new QWidget();
   centralWidget->setLayout(centralLayout);

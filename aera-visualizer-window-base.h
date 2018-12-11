@@ -13,6 +13,11 @@
 
 namespace aera_visualizer {
 
+/**
+ * AeraVisulizerWindowBase extends QMainWindow and is a base class for
+ * visualizer windows like AeraVisulizerWindow which manages the player
+ * control panel of the main window and derived windows.
+ */
 class AeraVisulizerWindowBase : public QMainWindow
 {
   Q_OBJECT
@@ -21,22 +26,24 @@ protected:
   static const core::uint64 uint64_MAX = 0xFFFFFFFFFFFFFFFFull;
 
   /**
-   * Create a new AeraVisulizerWindowBase. This is called by the derived class.
+   * Create an AeraVisulizerWindowBase and create the player control panel widget. This is 
+   * called by the derived class, which should add getPlayerControlPanel() to its window.
    * @param parent The main parent window for this window, or 0 if this is already
    * The main window.
    */
   AeraVisulizerWindowBase(AeraVisulizerWindowBase* parent);
 
   /**
-   * Create and return the player widget which has a play button, slider bar and time label.
-   * You should add this to your window.
+   * Get the player control panel widget which has a play button, slider bar and time label.
+   * The derived class should add this to its window.
    */
-  QWidget* createPlayerWidget();
+  QWidget* getPlayerControlPanel() { return playerControlPanel_;  }
 
   /**
    * Set playTime_ and update the playTimeLabel_.
    */
   void setPlayTime(core::uint64 time);
+
   /**
    * Set the playSlider_ position based on playTime_.
    */
@@ -60,7 +67,10 @@ protected:
   std::vector<std::shared_ptr<AeraEvent> > events_;
 
 private:
+  void createPlayerControlPanel();
+
   AeraVisulizerWindowBase* parent_;
+  QWidget* playerControlPanel_;
 };
 
 }

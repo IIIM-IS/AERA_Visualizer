@@ -41,7 +41,7 @@ AeraVisulizerWindow::AeraVisulizerWindow()
   view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   centralLayout->addWidget(view);
-  centralLayout->addWidget(createPlayerWidget());
+  centralLayout->addWidget(getPlayerControlPanel());
   connect(playPauseButton_, SIGNAL(clicked()), this, SLOT(playPauseButtonClicked()));
   connect(stepBackButton_, SIGNAL(clicked()), this, SLOT(stepBackButtonClicked()));
   connect(playSlider_, SIGNAL(valueChanged(int)), this, SLOT(playSliderValueChanged(int)));
