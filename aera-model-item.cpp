@@ -49,8 +49,8 @@ AeraModelItem::AeraModelItem(QMenu* contextMenu, NewModelEvent* newModelEvent, Q
 void AeraModelItem::removeArrows()
 {
   foreach(Arrow* arrow, arrows_) {
-    arrow->startItem()->removeArrow(arrow);
-    arrow->endItem()->removeArrow(arrow);
+    qgraphicsitem_cast<AeraModelItem*>(arrow->startItem())->removeArrow(arrow);
+    qgraphicsitem_cast<AeraModelItem*>(arrow->endItem())->removeArrow(arrow);
     scene()->removeItem(arrow);
     delete arrow;
   }

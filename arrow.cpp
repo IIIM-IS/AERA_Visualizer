@@ -6,7 +6,7 @@
 
 namespace aera_visualizer {
 
-Arrow::Arrow(AeraModelItem* startItem, AeraModelItem* endItem, QGraphicsItem* parent)
+Arrow::Arrow(QGraphicsPolygonItem* startItem, QGraphicsPolygonItem* endItem, QGraphicsItem* parent)
   : QGraphicsLineItem(parent)
 {
   startItem_ = startItem;
