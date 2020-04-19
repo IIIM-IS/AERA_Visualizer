@@ -3,7 +3,7 @@
 
 #include <QPointF>
 // TODO: Include this directly from the Replicode source.
-#include "types.h"
+#include "submodules/replicode/submodules/CoreLibrary/CoreLibrary/types.h" 
 
 namespace aera_visualizer {
 
