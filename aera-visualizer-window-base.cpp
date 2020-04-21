@@ -3,6 +3,7 @@
 #include <QtWidgets>
 
 using namespace std;
+using namespace std::chrono;
 using namespace core;
 
 namespace aera_visualizer {
@@ -68,7 +69,7 @@ void AeraVisulizerWindowBase::startPlay()
     children_[i]->playPauseButton_->setIcon(pauseIcon_);
   isPlaying_ = true;
   if (playTimerId_ == 0)
-    playTimerId_ = startTimer(playTimerMicroseconds_ / 1000);
+    playTimerId_ = startTimer(AeraVisulizer_playTimerTick.count());
 }
 
 void AeraVisulizerWindowBase::stopPlay()
@@ -204,7 +205,7 @@ void AeraVisulizerWindowBase::timerEvent(QTimerEvent* event)
 
   auto maximumEventTime = events_.back()->time_;
   // TODO: Make this track the passage of real clock time.
-  uint64 playTime = playTime_ + playTimerMicroseconds_;
+  uint64 playTime = playTime_ + duration_cast<microseconds>(AeraVisulizer_playTimerTick).count();
 
   // Step events while events_[iNextEvent_] is less than or equal to the playTime.
   // Debug: How to step the children also?

@@ -106,8 +106,9 @@ private:
   core::uint64 playTime_;
   int playTimerId_;
   bool isPlaying_;
-  static const core::uint64 playTimerMicroseconds_ = 100000;
 };
+
+static const std::chrono::milliseconds AeraVisulizer_playTimerTick(100);
 
 }
 
