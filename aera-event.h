@@ -9,18 +9,18 @@ namespace aera_visualizer {
 
 class AeraEvent {
 public:
-  AeraEvent(int eventType, core::uint64 time)
+  AeraEvent(int eventType, core::Timestamp time)
     : eventType_(eventType),
     time_(time)
   {}
 
   int eventType_;
-  core::uint64 time_;
+  core::Timestamp time_;
 };
 
 class NewModelEvent : public AeraEvent {
 public:
-  NewModelEvent(core::uint64 time, core::uint32 oid, core::float32 confidence)
+  NewModelEvent(core::Timestamp time, core::uint32 oid, core::float32 confidence)
     : AeraEvent(EVENT_TYPE, time),
     oid_(oid),
     confidence_(confidence),
@@ -36,7 +36,7 @@ public:
 
 class DeleteModelEvent : public AeraEvent {
 public:
-  DeleteModelEvent(core::uint64 time, core::uint32 modelOid)
+  DeleteModelEvent(core::Timestamp time, core::uint32 modelOid)
     : AeraEvent(EVENT_TYPE, time)
   {
     // TODO: Implement.
@@ -48,7 +48,7 @@ public:
 class SetModelConfidenceEvent : public AeraEvent {
 public:
   SetModelConfidenceEvent
-  (core::uint64 time, core::uint32 modelOid, core::float32 confidence)
+  (core::Timestamp time, core::uint32 modelOid, core::float32 confidence)
     : AeraEvent(EVENT_TYPE, time),
     modelOid_(modelOid),
     confidence_(confidence),

@@ -6,22 +6,24 @@
 #include <QtWidgets>
 
 using namespace std;
+using namespace std::chrono;
 using namespace core;
+using namespace r_code;
 
 namespace aera_visualizer {
 
 static void
 addExampleEvents(vector<shared_ptr<AeraEvent> >& events)
 {
-  events.push_back(make_shared<NewModelEvent>(50000, 2400, 0.5));
-  events.push_back(make_shared<NewModelEvent>(2000044, 2401, 0.51));
-  events.push_back(make_shared<SetModelConfidenceEvent>(4003044, 2400, 0.8));
-  events.push_back(make_shared<NewModelEvent>(6000366, 2641, 0.52));
-  events.push_back(make_shared<SetModelConfidenceEvent>(8070244, 2401, 0.55));
-  events.push_back(make_shared<SetModelConfidenceEvent>(8603044, 2400, 0.75));
-  events.push_back(make_shared<SetModelConfidenceEvent>(11060000, 2401, 0.45));
-  events.push_back(make_shared<SetModelConfidenceEvent>(12030000, 2641, 0.71));
-  events.push_back(make_shared<SetModelConfidenceEvent>(14080000, 2400, 0.76));
+  events.push_back(make_shared<NewModelEvent>(Timestamp(microseconds(50000)), 2400, 0.5));
+  events.push_back(make_shared<NewModelEvent>(Timestamp(microseconds(2000044)), 2401, 0.51));
+  events.push_back(make_shared<SetModelConfidenceEvent>(Timestamp(microseconds(4003044)), 2400, 0.8));
+  events.push_back(make_shared<NewModelEvent>(Timestamp(microseconds(6000366)), 2641, 0.52));
+  events.push_back(make_shared<SetModelConfidenceEvent>(Timestamp(microseconds(8070244)), 2401, 0.55));
+  events.push_back(make_shared<SetModelConfidenceEvent>(Timestamp(microseconds(8603044)), 2400, 0.75));
+  events.push_back(make_shared<SetModelConfidenceEvent>(Timestamp(microseconds(11060000)), 2401, 0.45));
+  events.push_back(make_shared<SetModelConfidenceEvent>(Timestamp(microseconds(12030000)), 2641, 0.71));
+  events.push_back(make_shared<SetModelConfidenceEvent>(Timestamp(microseconds(14080000)), 2400, 0.76));
 }
 
 AeraVisulizerWindow::AeraVisulizerWindow()
@@ -54,15 +56,15 @@ AeraVisulizerWindow::AeraVisulizerWindow()
   addExampleEvents(events_);
 }
 
-uint64 AeraVisulizerWindow::stepEvent(uint64 maximumTime)
+Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 {
   if (iNextEvent_ >= events_.size())
     // Return the value meaning no change.
-    return uint64_MAX;
+    return Utils_MaxTime;
 
   AeraEvent* event = events_[iNextEvent_].get();
   if (event->time_ > maximumTime)
-    return uint64_MAX;
+    return Utils_MaxTime;
 
   if (event->eventType_ == NewModelEvent::EVENT_TYPE) {
     // Add the new model.
@@ -95,11 +97,11 @@ uint64 AeraVisulizerWindow::stepEvent(uint64 maximumTime)
   return event->time_;
 }
 
-uint64 AeraVisulizerWindow::unstepEvent()
+Timestamp AeraVisulizerWindow::unstepEvent()
 {
   if (iNextEvent_ == 0)
     // Return the value meaning no change.
-    return uint64_MAX;
+    return Utils_MaxTime;
 
   --iNextEvent_;
 
@@ -128,7 +130,7 @@ uint64 AeraVisulizerWindow::unstepEvent()
   if (iNextEvent_ > 0)
     return events_[iNextEvent_ - 1]->time_;
   else
-    return 0;
+    return Timestamp(seconds(0)); // Debug: Allow for nonzero start time.
 }
 
 void AeraVisulizerWindow::zoomIn()

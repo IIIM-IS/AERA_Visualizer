@@ -8,6 +8,14 @@
 #include <QSlider>
 #include <QLabel>
 #include "aera-event.h"
+#if 0
+#include "submodules/replicode/r_code/utils.h"
+#else // Debug: Until we link to Replicode, copy this here.
+namespace r_code {
+const core::Timestamp Utils_MaxTime(std::chrono::duration_cast<std::chrono::microseconds>
+                                    (std::chrono::nanoseconds(0x7FFFFFFFFFFFFFFFll)));
+}
+#endif
 
 namespace aera_visualizer {
 
@@ -21,8 +29,6 @@ class AeraVisulizerWindowBase : public QMainWindow
   Q_OBJECT
 
 protected:
-  static const core::uint64 uint64_MAX = 0xFFFFFFFFFFFFFFFFull;
-
   /**
    * Create an AeraVisulizerWindowBase and create the player control panel widget. This is 
    * called by the derived class, which should add getPlayerControlPanel() to its window.
@@ -42,18 +48,18 @@ protected:
   /**
    * Perform the event at events_[iNextEvent_] and then increment iNextEvent_.
    * @param if the time of next event is greater than maximumTime, don't perform the
-   * event, and return uint64_MAX.
+   * event, and return Utils_MaxTime.
    * @return The time of the next event. If there is no next event,
-   * return uint64_MAX.
+   * return Utils_MaxTime.
    */
-  virtual core::uint64 stepEvent(core::uint64 maximumTime) = 0;
+  virtual core::Timestamp stepEvent(core::Timestamp maximumTime) = 0;
 
   /**
    * Decrement iNextEvent_ and undo the event at events_[iNextEvent_].
    * @return The time of the previous event. If there is no previous event,
-   * return uint64_MAX.
+   * return Utils_MaxTime.
    */
-  virtual core::uint64 unstepEvent() = 0;
+  virtual core::Timestamp unstepEvent() = 0;
 
   void timerEvent(QTimerEvent* event) override;
 
@@ -83,7 +89,7 @@ private:
   /**
    * Set playTime_ and update the playTimeLabel_.
    */
-  void setPlayTime(core::uint64 time);
+  void setPlayTime(core::Timestamp time);
 
   /**
    * Set the playSlider_ position based on playTime_.
@@ -103,7 +109,7 @@ private:
   QWidget* playerControlPanel_;
 
   // These are only used in the main window.
-  core::uint64 playTime_;
+  core::Timestamp playTime_;
   int playTimerId_;
   bool isPlaying_;
 };

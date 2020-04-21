@@ -39,18 +39,18 @@ protected:
   /**
    * Perform the event at events_[iNextEvent_] and then increment iNextEvent_.
    * @param if the time of next event is greater than maximumTime, don't perform the
-   * event, and return uint64_MAX.
+   * event, and return Utils_MaxTime.
    * @return The time of the next event. If there is no next event,
-   * return uint64_MAX.
+   * return Utils_MaxTime.
    */
-  core::uint64 stepEvent(core::uint64 maximumTime) override;
+  core::Timestamp stepEvent(core::Timestamp maximumTime) override;
 
   /**
    * Decrement iNextEvent_ and undo the event at events_[iNextEvent_].
    * @return The time of the previous event. If there is no previous event, 
-   * return uint64_MAX.
+   * return Utils_MaxTime.
    */
-  core::uint64 unstepEvent() override;
+  core::Timestamp unstepEvent() override;
 
 private slots:
   void zoomIn();

@@ -5,13 +5,14 @@
 using namespace std;
 using namespace std::chrono;
 using namespace core;
+using namespace r_code;
 
 namespace aera_visualizer {
 
 AeraVisulizerWindowBase::AeraVisulizerWindowBase(AeraVisulizerWindowBase* parent)
 : QMainWindow(parent),
   parent_(parent),
-  playTime_(0),
+  playTime_(seconds(0)), // Debug: Allow for nonzero start time.
   playTimerId_(0),
   isPlaying_(false)
 {
@@ -91,7 +92,7 @@ void AeraVisulizerWindowBase::stopPlay()
   isPlaying_ = false;
 }
 
-void AeraVisulizerWindowBase::setPlayTime(uint64 time)
+void AeraVisulizerWindowBase::setPlayTime(Timestamp time)
 {
   if (parent_) {
     // Only do this from the main window.
@@ -101,8 +102,9 @@ void AeraVisulizerWindowBase::setPlayTime(uint64 time)
 
   playTime_ = time;
 
-  uint64 us = time % 1000;
-  uint64 ms = time / 1000;
+  uint64 total_us = duration_cast<microseconds>(time.time_since_epoch()).count(); // Debug: Allow for nonzero start time.
+  uint64 us = total_us % 1000;
+  uint64 ms = total_us / 1000;
   uint64 s = ms / 1000;
   ms = ms % 1000;
 
@@ -130,7 +132,9 @@ void AeraVisulizerWindowBase::setSliderToPlayTime()
 
   auto maximumEventTime = events_.back()->time_;
   auto debugmax = playSlider_->maximum();
-  int value = playSlider_->maximum() * ((double)playTime_ / maximumEventTime);
+  // Debug: Allow for nonzero start time.
+  int value = playSlider_->maximum() * ((double)duration_cast<microseconds>(playTime_.time_since_epoch()).count() / 
+                                                duration_cast<microseconds>(maximumEventTime.time_since_epoch()).count());
   playSlider_->setValue(value);
   for (size_t i = 0; i < children_.size(); ++i)
     children_[i]->playSlider_->setValue(value);
@@ -159,9 +163,9 @@ void AeraVisulizerWindowBase::stepButtonClicked()
   }
 
   stopPlay();
-  uint64 newTime = stepEvent(uint64_MAX);
+  auto newTime = stepEvent(Utils_MaxTime);
   // Debug: How to step the children also?
-  if (newTime != uint64_MAX) {
+  if (newTime != Utils_MaxTime) {
     setPlayTime(newTime);
     setSliderToPlayTime();
   }
@@ -176,9 +180,9 @@ void AeraVisulizerWindowBase::stepBackButtonClicked()
   }
 
   stopPlay();
-  uint64 newTime = unstepEvent();
+  auto newTime = unstepEvent();
   // Debug: How to step the children also?
-  if (newTime != uint64_MAX) {
+  if (newTime != Utils_MaxTime) {
     setPlayTime(newTime);
     setSliderToPlayTime();
   }
@@ -205,11 +209,11 @@ void AeraVisulizerWindowBase::timerEvent(QTimerEvent* event)
 
   auto maximumEventTime = events_.back()->time_;
   // TODO: Make this track the passage of real clock time.
-  uint64 playTime = playTime_ + duration_cast<microseconds>(AeraVisulizer_playTimerTick).count();
+  auto playTime = playTime_ + AeraVisulizer_playTimerTick;
 
   // Step events while events_[iNextEvent_] is less than or equal to the playTime.
   // Debug: How to step the children also?
-  while (stepEvent(playTime) != uint64_MAX);
+  while (stepEvent(playTime) != Utils_MaxTime);
 
   if (haveMoreEvents()) {
     // We have played all events.

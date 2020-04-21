@@ -24,9 +24,9 @@ protected:
   // TODO: Implement.
   bool haveMoreEvents() override { return false; }
   // TODO: Implement.
-  core::uint64 stepEvent(core::uint64 maximumTime) override { return uint64_MAX; }
+  core::Timestamp stepEvent(core::Timestamp maximumTime) override { return r_code::Utils_MaxTime; }
   // TODO: Implement.
-  core::uint64 unstepEvent() override { return uint64_MAX; }
+  core::Timestamp unstepEvent() override { return r_code::Utils_MaxTime; }
 };
 
 }
