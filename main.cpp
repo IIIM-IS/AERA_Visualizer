@@ -1,5 +1,5 @@
-#include "aera-visualizer-window.h"
-#include "graph-visualizer-window.h"
+#include "aera-visualizer-window.hpp"
+#include "graph-visualizer-window.hpp"
 
 #include <QApplication>
 

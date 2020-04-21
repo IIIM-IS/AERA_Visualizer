@@ -1,9 +1,9 @@
 #ifndef AERA_VISUALIZER_WINDOW_H
 #define AERA_VISUALIZER_WINDOW_H
 
-#include "aera-model-item.h"
-#include "aera-event.h"
-#include "aera-visualizer-window-base.h"
+#include "aera-model-item.hpp"
+#include "aera-event.hpp"
+#include "aera-visualizer-window-base.hpp"
 
 #include <vector>
 #include <QIcon>

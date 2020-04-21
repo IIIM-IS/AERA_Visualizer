@@ -1,7 +1,7 @@
-#include "arrow.h"
-#include "aera-model-item.h"
-#include "aera-visualizer-scene.h"
-#include "aera-visualizer-window.h"
+#include "arrow.hpp"
+#include "aera-model-item.hpp"
+#include "aera-visualizer-scene.hpp"
+#include "aera-visualizer-window.hpp"
 
 #include <QtWidgets>
 

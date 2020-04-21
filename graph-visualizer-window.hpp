@@ -1,7 +1,7 @@
 #ifndef GRAPH_VISUALIZER_WINDOW_H
 #define GRAPH_VISUALIZER_WINDOW_H
 
-#include "aera-visualizer-window-base.h"
+#include "aera-visualizer-window-base.hpp"
 
 namespace aera_visualizer {
 

@@ -1,5 +1,5 @@
-#include "aera-model-item.h"
-#include "arrow.h"
+#include "aera-model-item.hpp"
+#include "arrow.hpp"
 
 #include <QGraphicsScene>
 #include <QGraphicsSceneContextMenuEvent>

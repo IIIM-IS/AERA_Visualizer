@@ -1,5 +1,5 @@
-#include "aera-visualizer-scene.h"
-#include "arrow.h"
+#include "aera-visualizer-scene.hpp"
+#include "arrow.hpp"
 
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>

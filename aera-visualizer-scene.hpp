@@ -2,8 +2,8 @@
 #define AERA_VISUALIZER_SCENE_H
 
 #include <map>
-#include "aera-model-item.h"
-#include "aera-event.h"
+#include "aera-model-item.hpp"
+#include "aera-event.hpp"
 
 #include <QGraphicsScene>
 

@@ -4,7 +4,7 @@
 #include <QGraphicsPixmapItem>
 #include <QList>
 #include <QPen>
-#include "aera-event.h"
+#include "aera-event.hpp"
 
 class QPixmap;
 class QGraphicsItem;

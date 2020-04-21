@@ -1,5 +1,5 @@
 #include <QtWidgets>
-#include "graph-visualizer-window.h"
+#include "graph-visualizer-window.hpp"
 
 namespace aera_visualizer {
 

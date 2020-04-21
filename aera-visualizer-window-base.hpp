@@ -7,7 +7,7 @@
 #include <QToolButton>
 #include <QSlider>
 #include <QLabel>
-#include "aera-event.h"
+#include "aera-event.hpp"
 #if 0
 #include "submodules/replicode/r_code/utils.h"
 #else // Debug: Until we link to Replicode, copy this here.
