@@ -7,8 +7,6 @@
 #include <QToolButton>
 #include <QSlider>
 #include <QLabel>
-// TODO: Include this directly from the Replicode source.
-#include "types.h"
 #include "aera-event.h"
 
 namespace aera_visualizer {
