@@ -1,5 +1,5 @@
-#ifndef GRAPH_VISUALIZER_WINDOW_H
-#define GRAPH_VISUALIZER_WINDOW_H
+#ifndef GRAPH_VISUALIZER_WINDOW_HPP
+#define GRAPH_VISUALIZER_WINDOW_HPP
 
 #include "aera-visualizer-window-base.hpp"
 

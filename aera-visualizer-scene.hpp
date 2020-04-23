@@ -1,5 +1,5 @@
-#ifndef AERA_VISUALIZER_SCENE_H
-#define AERA_VISUALIZER_SCENE_H
+#ifndef AERA_VISUALIZER_SCENE_HPP
+#define AERA_VISUALIZER_SCENE_HPP
 
 #include <map>
 #include "aera-model-item.hpp"

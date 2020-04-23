@@ -1,5 +1,5 @@
-#ifndef AERA_VISUALIZER_WINDOW_H
-#define AERA_VISUALIZER_WINDOW_H
+#ifndef AERA_VISUALIZER_WINDOW_HPP
+#define AERA_VISUALIZER_WINDOW_HPP
 
 #include "aera-model-item.hpp"
 #include "aera-event.hpp"

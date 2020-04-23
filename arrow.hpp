@@ -1,5 +1,5 @@
-#ifndef ARROW_H
-#define ARROW_H
+#ifndef ARROW_HPP
+#define ARROW_HPP
 
 #include <QGraphicsLineItem>
 #include <QGraphicsPolygonItem>

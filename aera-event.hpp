@@ -1,5 +1,5 @@
-#ifndef AERA_EVENT_H
-#define AERA_EVENT_H
+#ifndef AERA_EVENT_HPP
+#define AERA_EVENT_HPP
 
 #include <QPointF>
 // TODO: Include this directly from the Replicode source.

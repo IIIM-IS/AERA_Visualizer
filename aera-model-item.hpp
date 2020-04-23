@@ -1,5 +1,5 @@
-#ifndef AERA_MODEL_ITEM_H
-#define AERA_MODEL_ITEM_H
+#ifndef AERA_MODEL_ITEM_HPP
+#define AERA_MODEL_ITEM_HPP
 
 #include <QGraphicsPixmapItem>
 #include <QList>
