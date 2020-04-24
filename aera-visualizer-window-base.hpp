@@ -8,14 +8,7 @@
 #include <QSlider>
 #include <QLabel>
 #include "aera-event.hpp"
-#if 0
 #include "submodules/replicode/r_code/utils.h"
-#else // Debug: Until we link to Replicode, copy this here.
-namespace r_code {
-const core::Timestamp Utils_MaxTime(std::chrono::duration_cast<std::chrono::microseconds>
-                                    (std::chrono::nanoseconds(0x7FFFFFFFFFFFFFFFll)));
-}
-#endif
 
 namespace aera_visualizer {
 
