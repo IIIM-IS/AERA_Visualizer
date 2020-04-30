@@ -8,12 +8,11 @@
 using namespace std;
 using namespace std::chrono;
 using namespace core;
-using namespace r_code;
 
 namespace aera_visualizer {
 
 static void
-addExampleEvents(vector<shared_ptr<AeraEvent> >& events)
+addExampleEvents(std::vector<shared_ptr<AeraEvent> >& events)
 {
   events.push_back(make_shared<NewModelEvent>(Timestamp(microseconds(50000)), 2400, 0.5));
   events.push_back(make_shared<NewModelEvent>(Timestamp(microseconds(2000044)), 2401, 0.51));
@@ -32,6 +31,10 @@ AeraVisulizerWindow::AeraVisulizerWindow()
 {
   createActions();
   createMenus();
+
+  string userOperatorsFilePath = "C:\\Users\\Jeff\\AERA\\replicode\\Test\\V1.2\\user.classes.replicode";
+  string decompiledFilePath = "C:\\Users\\Jeff\\AERA\\replicode\\Test\\decompiled_objects.txt";
+  replicodeObjects_.init(userOperatorsFilePath, decompiledFilePath);
 
   scene_ = new AeraVisualizerScene(itemMenu_, this);
   scene_->setSceneRect(QRectF(0, 0, 5000, 5000));
