@@ -114,7 +114,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING;WIN64;_DEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING;WIN64;_DEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;EXECUTIVE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -207,13 +207,14 @@
     </QtRcc>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="graph-visualizer-window.cpp" />
+    <ClCompile Include="explanation-log-window.cpp" />
     <ClCompile Include="aera-visualizer-window-base.cpp" />
     <ClCompile Include="arrow.cpp" />
     <ClCompile Include="aera-model-item.cpp" />
     <ClCompile Include="aera-visualizer-scene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="aera-visualizer-window.cpp" />
+    <ClCompile Include="replicode-objects.cpp" />
     <ClCompile Include="submodules\replicode\r_code\atom.cpp" />
     <ClCompile Include="submodules\replicode\r_code\code_utils.cpp" />
     <ClCompile Include="submodules\replicode\r_code\image.cpp" />
@@ -229,8 +230,68 @@
     <ClCompile Include="submodules\replicode\r_comp\segments.cpp" />
     <ClCompile Include="submodules\replicode\r_comp\string_utils.cpp" />
     <ClCompile Include="submodules\replicode\r_comp\structure_member.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\ast_controller.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\ast_controller.tpl.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="submodules\replicode\r_exec\auto_focus.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\binding_map.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\callbacks.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\context.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\cpp_programs.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\cst_controller.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\factory.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\group.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\group.inline.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="submodules\replicode\r_exec\guard_builder.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\g_monitor.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\hlp_context.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\hlp_controller.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\hlp_overlay.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\init.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\mdl_controller.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\mem.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\mem.tpl.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="submodules\replicode\r_exec\model_base.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\monitor.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\object.tpl.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="submodules\replicode\r_exec\opcodes.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\operator.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\overlay.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\pattern_extractor.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\pgm_controller.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\pgm_overlay.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\pgm_overlay.inline.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="submodules\replicode\r_exec\p_monitor.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\reduction_core.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\reduction_job.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\time_core.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\time_job.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\view.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\view.inline.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="submodules\replicode\r_exec\_context.cpp" />
     <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\base.cpp" />
+    <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\base.tpl.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\pipe.tpl.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\utils.cpp" />
+    <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\utils.tpl.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="submodules\replicode\usr_operators\auto_focus_callback.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="aera_visualizer.qrc" />
@@ -239,6 +300,7 @@
     <ClInclude Include="aera-event.hpp" />
     <ClInclude Include="aera-model-item.hpp" />
     <ClInclude Include="arrow.hpp" />
+    <ClInclude Include="replicode-objects.hpp" />
     <ClInclude Include="submodules\replicode\r_code\atom.h" />
     <ClInclude Include="submodules\replicode\r_code\image.h" />
     <ClInclude Include="submodules\replicode\r_code\image_impl.h" />
@@ -258,10 +320,45 @@
     <ClInclude Include="submodules\replicode\r_comp\segments.h" />
     <ClInclude Include="submodules\replicode\r_comp\string_utils.h" />
     <ClInclude Include="submodules\replicode\r_comp\structure_member.h" />
+    <ClInclude Include="submodules\replicode\r_exec\ast_controller.h" />
+    <ClInclude Include="submodules\replicode\r_exec\auto_focus.h" />
+    <ClInclude Include="submodules\replicode\r_exec\binding_map.h" />
+    <ClInclude Include="submodules\replicode\r_exec\callbacks.h" />
+    <ClInclude Include="submodules\replicode\r_exec\context.h" />
+    <ClInclude Include="submodules\replicode\r_exec\cpp_programs.h" />
+    <ClInclude Include="submodules\replicode\r_exec\cst_controller.h" />
+    <ClInclude Include="submodules\replicode\r_exec\dll.h" />
+    <ClInclude Include="submodules\replicode\r_exec\factory.h" />
+    <ClInclude Include="submodules\replicode\r_exec\group.h" />
+    <ClInclude Include="submodules\replicode\r_exec\guard_builder.h" />
+    <ClInclude Include="submodules\replicode\r_exec\g_monitor.h" />
+    <ClInclude Include="submodules\replicode\r_exec\hlp_context.h" />
+    <ClInclude Include="submodules\replicode\r_exec\hlp_controller.h" />
+    <ClInclude Include="submodules\replicode\r_exec\hlp_overlay.h" />
+    <ClInclude Include="submodules\replicode\r_exec\init.h" />
+    <ClInclude Include="submodules\replicode\r_exec\mdl_controller.h" />
+    <ClInclude Include="submodules\replicode\r_exec\mem.h" />
+    <ClInclude Include="submodules\replicode\r_exec\model_base.h" />
+    <ClInclude Include="submodules\replicode\r_exec\monitor.h" />
+    <ClInclude Include="submodules\replicode\r_exec\object.h" />
+    <ClInclude Include="submodules\replicode\r_exec\opcodes.h" />
+    <ClInclude Include="submodules\replicode\r_exec\operator.h" />
+    <ClInclude Include="submodules\replicode\r_exec\overlay.h" />
+    <ClInclude Include="submodules\replicode\r_exec\pattern_extractor.h" />
+    <ClInclude Include="submodules\replicode\r_exec\pgm_controller.h" />
+    <ClInclude Include="submodules\replicode\r_exec\pgm_overlay.h" />
+    <ClInclude Include="submodules\replicode\r_exec\p_monitor.h" />
+    <ClInclude Include="submodules\replicode\r_exec\reduction_core.h" />
+    <ClInclude Include="submodules\replicode\r_exec\reduction_job.h" />
+    <ClInclude Include="submodules\replicode\r_exec\time_core.h" />
+    <ClInclude Include="submodules\replicode\r_exec\time_job.h" />
+    <ClInclude Include="submodules\replicode\r_exec\view.h" />
+    <ClInclude Include="submodules\replicode\r_exec\_context.h" />
     <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\base.h" />
     <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\types.h" />
     <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\utils.h" />
-    <QtMoc Include="graph-visualizer-window.hpp" />
+    <ClInclude Include="submodules\replicode\usr_operators\auto_focus_callback.h" />
+    <QtMoc Include="explanation-log-window.hpp" />
     <QtMoc Include="aera-visualizer-window-base.hpp" />
     <QtMoc Include="aera-visualizer-window.hpp" />
     <QtMoc Include="aera-visualizer-scene.hpp" />
@@ -309,6 +406,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="submodules\replicode\r_exec\r_exec.vcxproj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

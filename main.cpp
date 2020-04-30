@@ -1,5 +1,5 @@
 #include "aera-visualizer-window.hpp"
-#include "graph-visualizer-window.hpp"
+#include "explanation-log-window.hpp"
 
 #include <QApplication>
 
@@ -17,11 +17,11 @@ int main(int argv, char *args[])
   const int height = 500;
   mainWindow.setGeometry(left, top, width, height);
 
-  GraphVisulizerWindow* graphWindow = new GraphVisulizerWindow(&mainWindow);
+  auto explanationLogWindow = new ExplanationLogWindow(&mainWindow);
   // Disable the close button for the child window.
-  graphWindow->setWindowFlag(Qt::WindowCloseButtonHint, false);
-  graphWindow->setGeometry(left + width, top, width, height);
-  graphWindow->show();
+  explanationLogWindow->setWindowFlag(Qt::WindowCloseButtonHint, false);
+  explanationLogWindow->setGeometry(left + width, top, width, height);
+  explanationLogWindow->show();
 
   mainWindow.show();
 
