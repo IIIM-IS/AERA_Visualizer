@@ -133,15 +133,26 @@ void AeraVisualizerScene::timerEvent(QTimerEvent* event)
         modelItem->setPen(lineColor_);
     }
 
-    if (modelItem->confidenceFlashCountdown_ > 0) {
+    if (modelItem->evidenceCountFlashCountdown_ > 0) {
       isFlashing = true;
 
-      --modelItem->confidenceFlashCountdown_;
-      if (modelItem->confidenceFlashCountdown_ % 2 == 1)
-        modelItem->setConfidenceBrush
-        (modelItem->confidenceIncreased_ ? valueUpFlashColor_ : valueDownFlashColor_);
+      --modelItem->evidenceCountFlashCountdown_;
+      if (modelItem->evidenceCountFlashCountdown_ % 2 == 1)
+        modelItem->setEvidenceCountBrush
+        (modelItem->evidenceCountIncreased_ ? valueUpFlashColor_ : valueDownFlashColor_);
       else
-        modelItem->setConfidenceBrush(lineColor_);
+        modelItem->setEvidenceCountBrush(lineColor_);
+    }
+
+    if (modelItem->successRateFlashCountdown_ > 0) {
+      isFlashing = true;
+
+      --modelItem->successRateFlashCountdown_;
+      if (modelItem->successRateFlashCountdown_ % 2 == 1)
+        modelItem->setSuccessRateBrush
+        (modelItem->successRateIncreased_ ? valueUpFlashColor_ : valueDownFlashColor_);
+      else
+        modelItem->setSuccessRateBrush(lineColor_);
     }
   }
 

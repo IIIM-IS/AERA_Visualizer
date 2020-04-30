@@ -20,17 +20,19 @@ public:
 
 class NewModelEvent : public AeraEvent {
 public:
-  NewModelEvent(core::Timestamp time, core::uint32 oid, core::float32 confidence)
+  NewModelEvent(core::Timestamp time, core::uint32 oid, core::float32 evidenceCount, core::float32 successRate)
     : AeraEvent(EVENT_TYPE, time),
     oid_(oid),
-    confidence_(confidence),
+    evidenceCount_(evidenceCount),
+    successRate_(successRate),
     itemPosition_(qQNaN(), qQNaN())
   {}
 
   static const int EVENT_TYPE = 1;
 
   core::uint32 oid_;
-  core::float32 confidence_;
+  core::float32 evidenceCount_;
+  core::float32 successRate_;
   QPointF itemPosition_;
 };
 
@@ -45,21 +47,25 @@ public:
   static const int EVENT_TYPE = 2;
 };
 
-class SetModelConfidenceEvent : public AeraEvent {
+class SetModelEvidenceCountAndSuccessRateEvent : public AeraEvent {
 public:
-  SetModelConfidenceEvent
-  (core::Timestamp time, core::uint32 modelOid, core::float32 confidence)
+  SetModelEvidenceCountAndSuccessRateEvent
+  (core::Timestamp time, core::uint32 modelOid, core::float32 evidenceCount, core::float32 successRate)
     : AeraEvent(EVENT_TYPE, time),
     modelOid_(modelOid),
-    confidence_(confidence),
-    oldConfidence_(qQNaN())
+    evidenceCount_(evidenceCount),
+    successRate_(successRate),
+    oldEvidenceCount_(qQNaN()),
+    oldSuccessRate_(qQNaN())
   {}
 
   static const int EVENT_TYPE = 3;
 
   core::uint32 modelOid_;
-  core::float32 confidence_;
-  core::float32 oldConfidence_;
+  core::float32 evidenceCount_;
+  core::float32 successRate_;
+  core::float32 oldEvidenceCount_;
+  core::float32 oldSuccessRate_;
 };
 
 }

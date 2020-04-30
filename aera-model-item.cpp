@@ -38,12 +38,17 @@ AeraModelItem::AeraModelItem(QMenu* contextMenu, NewModelEvent* newModelEvent, Q
   ("OID: " + QString::number(newModelEvent_->oid_), this);
   oidLabel->setPos(left + 10, top + 10);
 
-  confidenceLabel_ = new QGraphicsSimpleTextItem(this);
-  confidenceLabel_->setPos(left + 10, top + 25);
-  setConfidence(newModelEvent->confidence_);
+  evidenceCountLabel_ = new QGraphicsSimpleTextItem(this);
+  evidenceCountLabel_->setPos(left + 10, top + 25);
+  setEvidenceCount(newModelEvent->evidenceCount_);
+
+  successRateLabel_ = new QGraphicsSimpleTextItem(this);
+  successRateLabel_->setPos(left + 10, top + 40);
+  setSuccessRate(newModelEvent->successRate_);
 
   borderFlashCountdown_ = 6;
-  confidenceFlashCountdown_ = 0;
+  evidenceCountFlashCountdown_ = 0;
+  successRateFlashCountdown_ = 0;
 }
 
 void AeraModelItem::removeArrows()
@@ -68,11 +73,18 @@ void AeraModelItem::addArrow(Arrow* arrow)
   arrows_.append(arrow);
 }
 
-void AeraModelItem::setConfidence(float32 confidence)
+void AeraModelItem::setEvidenceCount(float32 evidenceCount)
 {
-  confidenceIncreased_ = (confidence >= confidence_);
-  confidence_ = confidence;
-  confidenceLabel_->setText("Confidence: " + QString::number(confidence_));
+  evidenceCountIncreased_ = (evidenceCount >= evidenceCount_);
+  evidenceCount_ = evidenceCount;
+  evidenceCountLabel_->setText("Evidence Count: " + QString::number(evidenceCount_));
+}
+
+void AeraModelItem::setSuccessRate(float32 successRate)
+{
+  successRateIncreased_ = (successRate >= successRate_);
+  successRate_ = successRate;
+  successRateLabel_->setText("    Success Rate: " + QString::number(successRate_));
 }
 
 void AeraModelItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)

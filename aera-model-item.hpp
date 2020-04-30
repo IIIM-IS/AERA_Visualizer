@@ -35,12 +35,17 @@ public:
   void addArrow(Arrow* arrow);
   int type() const override { return Type; }
   NewModelEvent* getNewModelEvent() { return newModelEvent_; }
-  void setConfidence(core::float32 confidence);
-  core::float32 getConfidence() { return confidence_; }
-  void setConfidenceBrush(QBrush brush) { confidenceLabel_->setBrush(brush); };
+  void setEvidenceCount(core::float32 evidenceCount);
+  void setSuccessRate(core::float32 successRate);
+  core::float32 getEvidenceCount() { return evidenceCount_; }
+  core::float32 getSuccessRate() { return successRate_; }
+  void setEvidenceCountBrush(QBrush brush) { evidenceCountLabel_->setBrush(brush); };
+  void setSuccessRateBrush(QBrush brush) { successRateLabel_->setBrush(brush); };
   int borderFlashCountdown_;
-  int confidenceFlashCountdown_;
-  bool confidenceIncreased_;
+  int evidenceCountFlashCountdown_;
+  bool evidenceCountIncreased_;
+  int successRateFlashCountdown_;
+  bool successRateIncreased_;
 
 protected:
   void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
@@ -53,8 +58,10 @@ private:
   QMenu* contextMenu_;
   NewModelEvent* newModelEvent_;
   QList<Arrow*> arrows_;
-  core::float32 confidence_;
-  QGraphicsSimpleTextItem* confidenceLabel_;
+  core::float32 evidenceCount_;
+  QGraphicsSimpleTextItem* evidenceCountLabel_;
+  core::float32 successRate_;
+  QGraphicsSimpleTextItem* successRateLabel_;
 };
 
 }
