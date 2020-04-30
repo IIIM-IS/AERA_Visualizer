@@ -12,17 +12,17 @@ using namespace core;
 namespace aera_visualizer {
 
 static void
-addExampleEvents(std::vector<shared_ptr<AeraEvent> >& events)
+addExampleEvents(std::vector<shared_ptr<AeraEvent> >& events, Timestamp timeReference)
 {
-  events.push_back(make_shared<NewModelEvent>(Timestamp(microseconds(50000)), 2400, 0.5));
-  events.push_back(make_shared<NewModelEvent>(Timestamp(microseconds(2000044)), 2401, 0.51));
-  events.push_back(make_shared<SetModelConfidenceEvent>(Timestamp(microseconds(4003044)), 2400, 0.8));
-  events.push_back(make_shared<NewModelEvent>(Timestamp(microseconds(6000366)), 2641, 0.52));
-  events.push_back(make_shared<SetModelConfidenceEvent>(Timestamp(microseconds(8070244)), 2401, 0.55));
-  events.push_back(make_shared<SetModelConfidenceEvent>(Timestamp(microseconds(8603044)), 2400, 0.75));
-  events.push_back(make_shared<SetModelConfidenceEvent>(Timestamp(microseconds(11060000)), 2401, 0.45));
-  events.push_back(make_shared<SetModelConfidenceEvent>(Timestamp(microseconds(12030000)), 2641, 0.71));
-  events.push_back(make_shared<SetModelConfidenceEvent>(Timestamp(microseconds(14080000)), 2400, 0.76));
+  events.push_back(make_shared<NewModelEvent>(timeReference + microseconds(50000), 2400, 0.5));
+  events.push_back(make_shared<NewModelEvent>(timeReference + microseconds(2000044), 2401, 0.51));
+  events.push_back(make_shared<SetModelConfidenceEvent>(timeReference + microseconds(4003044), 2400, 0.8));
+  events.push_back(make_shared<NewModelEvent>(timeReference + microseconds(6000366), 2641, 0.52));
+  events.push_back(make_shared<SetModelConfidenceEvent>(timeReference + microseconds(8070244), 2401, 0.55));
+  events.push_back(make_shared<SetModelConfidenceEvent>(timeReference + microseconds(8603044), 2400, 0.75));
+  events.push_back(make_shared<SetModelConfidenceEvent>(timeReference + microseconds(11060000), 2401, 0.45));
+  events.push_back(make_shared<SetModelConfidenceEvent>(timeReference + microseconds(12030000), 2641, 0.71));
+  events.push_back(make_shared<SetModelConfidenceEvent>(timeReference + microseconds(14080000), 2400, 0.76));
 }
 
 AeraVisulizerWindow::AeraVisulizerWindow()
@@ -35,6 +35,7 @@ AeraVisulizerWindow::AeraVisulizerWindow()
   string userOperatorsFilePath = "C:\\Users\\Jeff\\AERA\\replicode\\Test\\V1.2\\user.classes.replicode";
   string decompiledFilePath = "C:\\Users\\Jeff\\AERA\\replicode\\Test\\decompiled_objects.txt";
   replicodeObjects_.init(userOperatorsFilePath, decompiledFilePath);
+  setTimeReference(replicodeObjects_.getTimeReference());
 
   scene_ = new AeraVisualizerScene(itemMenu_, this);
   scene_->setSceneRect(QRectF(0, 0, 5000, 5000));
@@ -56,7 +57,7 @@ AeraVisulizerWindow::AeraVisulizerWindow()
   setWindowTitle(tr("AERA Visualizer"));
   setUnifiedTitleAndToolBarOnMac(true);
 
-  addExampleEvents(events_);
+  addExampleEvents(events_, replicodeObjects_.getTimeReference());
 }
 
 Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
@@ -133,7 +134,8 @@ Timestamp AeraVisulizerWindow::unstepEvent()
   if (iNextEvent_ > 0)
     return events_[iNextEvent_ - 1]->time_;
   else
-    return Timestamp(seconds(0)); // Debug: Allow for nonzero start time.
+    // The caller will use the time reference.
+    return Timestamp(seconds(0));
 }
 
 void AeraVisulizerWindow::zoomIn()

@@ -12,7 +12,8 @@ namespace aera_visualizer {
 AeraVisulizerWindowBase::AeraVisulizerWindowBase(AeraVisulizerWindowBase* parent)
 : QMainWindow(parent),
   parent_(parent),
-  playTime_(seconds(0)), // Debug: Allow for nonzero start time.
+  timeReference_(seconds(0)),
+  playTime_(seconds(0)),
   playTimerId_(0),
   isPlaying_(false)
 {
@@ -102,7 +103,7 @@ void AeraVisulizerWindowBase::setPlayTime(Timestamp time)
 
   playTime_ = time;
 
-  uint64 total_us = duration_cast<microseconds>(time.time_since_epoch()).count(); // Debug: Allow for nonzero start time.
+  uint64 total_us = duration_cast<microseconds>(time - timeReference_).count();
   uint64 us = total_us % 1000;
   uint64 ms = total_us / 1000;
   uint64 s = ms / 1000;
@@ -131,10 +132,8 @@ void AeraVisulizerWindowBase::setSliderToPlayTime()
   }
 
   auto maximumEventTime = events_.back()->time_;
-  auto debugmax = playSlider_->maximum();
-  // Debug: Allow for nonzero start time.
-  int value = playSlider_->maximum() * ((double)duration_cast<microseconds>(playTime_.time_since_epoch()).count() / 
-                                                duration_cast<microseconds>(maximumEventTime.time_since_epoch()).count());
+  int value = playSlider_->maximum() * ((double)duration_cast<microseconds>(playTime_ - timeReference_).count() / 
+                                                duration_cast<microseconds>(maximumEventTime - timeReference_).count());
   playSlider_->setValue(value);
   for (size_t i = 0; i < children_.size(); ++i)
     children_[i]->playSlider_->setValue(value);
@@ -180,7 +179,7 @@ void AeraVisulizerWindowBase::stepBackButtonClicked()
   }
 
   stopPlay();
-  auto newTime = unstepEvent();
+  auto newTime = max(unstepEvent(), timeReference_);
   // Debug: How to step the children also?
   if (newTime != Utils_MaxTime) {
     setPlayTime(newTime);

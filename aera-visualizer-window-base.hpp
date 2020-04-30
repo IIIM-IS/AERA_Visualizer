@@ -36,6 +36,17 @@ protected:
    */
   QWidget* getPlayerControlPanel() { return playerControlPanel_;  }
 
+  /**
+   * Set the time reference for the event time stamps (typically the events start time).
+   * This resets the play time to the timeReference.
+   * \param timeReference The time reference.
+   */
+  void setTimeReference(core::Timestamp timeReference)
+  {
+    timeReference_ = timeReference;
+    setPlayTime(timeReference_);
+  }
+
   virtual bool haveMoreEvents() = 0;
 
   /**
@@ -102,6 +113,7 @@ private:
   QWidget* playerControlPanel_;
 
   // These are only used in the main window.
+  core::Timestamp timeReference_;
   core::Timestamp playTime_;
   int playTimerId_;
   bool isPlaying_;
