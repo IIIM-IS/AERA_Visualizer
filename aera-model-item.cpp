@@ -70,7 +70,7 @@ void AeraModelItem::addArrow(Arrow* arrow)
 
 void AeraModelItem::setConfidence(float32 confidence)
 {
-  confidenceIncreased_ = (confidence > confidence_);
+  confidenceIncreased_ = (confidence >= confidence_);
   confidence_ = confidence;
   confidenceLabel_->setText("Confidence: " + QString::number(confidence_));
 }
