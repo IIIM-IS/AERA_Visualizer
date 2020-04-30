@@ -1,6 +1,7 @@
 #ifndef AERA_VISUALIZER_WINDOW_HPP
 #define AERA_VISUALIZER_WINDOW_HPP
 
+#include <regex>
 #include "aera-model-item.hpp"
 #include "aera-event.hpp"
 #include "aera-visualizer-window-base.hpp"
@@ -64,6 +65,21 @@ private:
   void createActions();
   void createMenus();
   void createToolbars();
+  /**
+   * Scan the consoleOutputFilePath and add to events_.
+   * \param consoleOutputFilePath The file path of the console output,
+   * typically ending in "Test.out.txt".
+   */
+  void addEvents(const std::string& consoleOutputFilePath);
+
+  /**
+   * Get the time stamp from the decimal strings of seconds, milliseconds and
+   * microseconds at matches[1], matches[2] and matches[3], then add
+   * replicodeObjects_.getTimeReference().
+   * \param matches The smatch object.
+   * \return The timestamp.
+   */
+  core::Timestamp getTimestamp(const smatch& matches);
 
   AeraVisualizerScene* scene_;
 

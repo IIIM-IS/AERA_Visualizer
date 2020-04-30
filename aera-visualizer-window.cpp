@@ -1,3 +1,4 @@
+#include <fstream>
 #include "arrow.hpp"
 #include "aera-model-item.hpp"
 #include "aera-visualizer-scene.hpp"
@@ -11,19 +12,6 @@ using namespace core;
 
 namespace aera_visualizer {
 
-static void
-addExampleEvents(std::vector<shared_ptr<AeraEvent> >& events, Timestamp timeReference)
-{
-  events.push_back(make_shared<NewModelEvent>(timeReference + microseconds(50000), 53, 1, 1));
-  events.push_back(make_shared<NewModelEvent>(timeReference + microseconds(2000044), 54, 1, 1));
-  events.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(timeReference + microseconds(4003044), 53, 2, 0.8));
-  events.push_back(make_shared<NewModelEvent>(timeReference + microseconds(6000366), 54, 1, 0.52));
-  events.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(timeReference + microseconds(8070244), 54, 2, 0.55));
-  events.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(timeReference + microseconds(8603044), 53, 3, 0.75));
-  events.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(timeReference + microseconds(11060000), 54, 3, 0.45));
-  events.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(timeReference + microseconds(14080000), 53, 4, 0.76));
-}
-
 AeraVisulizerWindow::AeraVisulizerWindow()
 : AeraVisulizerWindowBase(0),
   iNextEvent_(0)
@@ -33,6 +21,8 @@ AeraVisulizerWindow::AeraVisulizerWindow()
 
   string userOperatorsFilePath = "C:\\Users\\Jeff\\AERA\\replicode\\Test\\V1.2\\user.classes.replicode";
   string decompiledFilePath = "C:\\Users\\Jeff\\AERA\\replicode\\Test\\decompiled_objects.txt";
+  string consoleOutputFilePath = "C:\\Users\\Jeff\\temp\\Test.out.txt";
+
   replicodeObjects_.init(userOperatorsFilePath, decompiledFilePath);
   setTimeReference(replicodeObjects_.getTimeReference());
 
@@ -56,7 +46,37 @@ AeraVisulizerWindow::AeraVisulizerWindow()
   setWindowTitle(tr("AERA Visualizer"));
   setUnifiedTitleAndToolBarOnMac(true);
 
-  addExampleEvents(events_, replicodeObjects_.getTimeReference());
+  addEvents(consoleOutputFilePath);
+}
+
+void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
+{
+  ifstream consoleOutputFile(consoleOutputFilePath);
+  regex newModelRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> mdl (\\d+)$");
+  regex setEvidenceCountAndSuccessRateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl (\\d+) cnt:(\\d+) sr:([\\d\\.]+)$");
+
+  string line;
+  while (getline(consoleOutputFile, line)) {
+    smatch matches;
+
+    if (regex_search(line, matches, newModelRegex))
+      // Assume the initial success rate is 1.
+      events_.push_back(make_shared<NewModelEvent>(
+        getTimestamp(matches), stoll(matches[4].str()), 1, 1));
+    else if (regex_search(line, matches, setEvidenceCountAndSuccessRateRegex))
+      // Assume the initial success rate is 1.
+      events_.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(
+        getTimestamp(matches), stoll(matches[4].str()), stoll(matches[5].str()), 
+        stof(matches[6].str())));
+  }
+}
+
+Timestamp AeraVisulizerWindow::getTimestamp(const smatch& matches)
+{
+  microseconds us(1000000 * stoll(matches[1].str()) +
+                     1000 * stoll(matches[2].str()) +
+                            stoll(matches[3].str()));
+  return replicodeObjects_.getTimeReference() + us;
 }
 
 Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
@@ -91,9 +111,19 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       setSuccessRateEvent->oldSuccessRate_ = modelItem->getSuccessRate();
 
       modelItem->setEvidenceCount(setSuccessRateEvent->evidenceCount_);
-      modelItem->evidenceCountFlashCountdown_ = 6;
       modelItem->setSuccessRate(setSuccessRateEvent->successRate_);
-      modelItem->successRateFlashCountdown_ = 6;
+      if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
+          setSuccessRateEvent->successRate_ == setSuccessRateEvent->oldSuccessRate_)
+        // Only the evidence count changed.
+        modelItem->evidenceCountFlashCountdown_ = 6;
+      else if (setSuccessRateEvent->evidenceCount_ == setSuccessRateEvent->oldEvidenceCount_ &&
+        setSuccessRateEvent->successRate_ != setSuccessRateEvent->oldSuccessRate_)
+        // Only the success rate changed.
+        modelItem->successRateFlashCountdown_ = 6;
+      else {
+        modelItem->evidenceCountFlashCountdown_ = 6;
+        modelItem->successRateFlashCountdown_ = 6;
+      }
       scene_->establishFlashTimer();
     }
   }
@@ -127,10 +157,21 @@ Timestamp AeraVisulizerWindow::unstepEvent()
     auto setSuccessRateEvent = (SetModelEvidenceCountAndSuccessRateEvent*)event;
     auto modelItem = scene_->getAeraModelItem(setSuccessRateEvent->modelOid_);
     if (modelItem) {
+      if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
+        setSuccessRateEvent->successRate_ == setSuccessRateEvent->oldSuccessRate_)
+        // Only the evidence count changed.
+        modelItem->evidenceCountFlashCountdown_ = 6;
+      else if (setSuccessRateEvent->evidenceCount_ == setSuccessRateEvent->oldEvidenceCount_ &&
+        setSuccessRateEvent->successRate_ != setSuccessRateEvent->oldSuccessRate_)
+        // Only the success rate changed.
+        modelItem->successRateFlashCountdown_ = 6;
+      else {
+        modelItem->evidenceCountFlashCountdown_ = 6;
+        modelItem->successRateFlashCountdown_ = 6;
+      }
+
       modelItem->setEvidenceCount(setSuccessRateEvent->oldEvidenceCount_);
-      modelItem->evidenceCountFlashCountdown_ = 6;
       modelItem->setSuccessRate(setSuccessRateEvent->oldSuccessRate_);
-      modelItem->successRateFlashCountdown_ = 6;
       scene_->establishFlashTimer();
     }
   }
