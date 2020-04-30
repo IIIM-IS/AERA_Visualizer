@@ -9,6 +9,7 @@
 using namespace std;
 using namespace std::chrono;
 using namespace core;
+using namespace r_code;
 using namespace r_comp;
 
 bool ReplicodeObjects::init(const string& userOperatorsFilePath, const string& decompiledFilePath)

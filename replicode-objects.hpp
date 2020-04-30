@@ -32,7 +32,7 @@ public:
 
 private:
   core::Timestamp timeReference_;
-  r_code::list<P<Code> > objects_;
+  r_code::list<P<r_code::Code> > objects_;
 };
 
 #endif

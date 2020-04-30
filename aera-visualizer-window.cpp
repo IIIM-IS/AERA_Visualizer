@@ -9,6 +9,7 @@
 using namespace std;
 using namespace std::chrono;
 using namespace core;
+using namespace r_code;
 
 namespace aera_visualizer {
 
