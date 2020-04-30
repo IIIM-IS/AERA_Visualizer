@@ -12,6 +12,22 @@
 
 namespace aera_visualizer {
 
+// https://wiki.qt.io/Clickable_QLabel
+class ClickableLabel : public QLabel {
+  Q_OBJECT
+
+public:
+  explicit ClickableLabel(
+    const QString& text, QWidget* parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags());
+  ~ClickableLabel();
+
+signals:
+  void clicked();
+
+protected:
+  void mousePressEvent(QMouseEvent* event);
+};
+
 /**
  * AeraVisulizerWindowBase extends QMainWindow and is a base class for
  * visualizer windows like AeraVisulizerWindow which manages the player
@@ -75,6 +91,7 @@ private slots:
   void stepButtonClicked();
   void stepBackButtonClicked();
   void playSliderValueChanged(int value);
+  void playTimeLabelClicked();
 
 private:
   void createPlayerControlPanel();
@@ -106,7 +123,8 @@ private:
   QToolButton* stepBackButton_;
   QToolButton* stepButton_;
   QSlider* playSlider_;
-  QLabel* playTimeLabel_;
+  ClickableLabel* playTimeLabel_;
+  bool showRelativeTime_;
 
   AeraVisulizerWindowBase* parent_;
   std::vector<AeraVisulizerWindowBase*> children_;

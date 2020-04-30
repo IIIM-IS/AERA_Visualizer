@@ -1,3 +1,4 @@
+#include <ctime>
 #include "aera-visualizer-window-base.hpp"
 
 #include <QtWidgets>
@@ -14,6 +15,7 @@ AeraVisulizerWindowBase::AeraVisulizerWindowBase(AeraVisulizerWindowBase* parent
   parent_(parent),
   timeReference_(seconds(0)),
   playTime_(seconds(0)),
+  showRelativeTime_(true),
   playTimerId_(0),
   isPlaying_(false)
 {
@@ -46,8 +48,9 @@ void AeraVisulizerWindowBase::createPlayerControlPanel()
   connect(stepButton_, SIGNAL(clicked()), this, SLOT(stepButtonClicked()));
   playerLayout->addWidget(stepButton_);
 
-  playTimeLabel_ = new QLabel("000s:000ms:000us", this);
+  playTimeLabel_ = new ClickableLabel("000s:000ms:000us", this);
   playTimeLabel_->setFont(QFont("Courier", 10));
+  connect(playTimeLabel_, SIGNAL(clicked()), this, SLOT(playTimeLabelClicked()));
   playerLayout->addWidget(playTimeLabel_);
 
   playerControlPanel_ = new QWidget();
@@ -103,14 +106,27 @@ void AeraVisulizerWindowBase::setPlayTime(Timestamp time)
 
   playTime_ = time;
 
-  uint64 total_us = duration_cast<microseconds>(time - timeReference_).count();
+  uint64 total_us;
+  if (showRelativeTime_)
+    total_us = duration_cast<microseconds>(time - timeReference_).count();
+  else
+    total_us = duration_cast<microseconds>(time.time_since_epoch()).count();
   uint64 us = total_us % 1000;
   uint64 ms = total_us / 1000;
   uint64 s = ms / 1000;
   ms = ms % 1000;
 
-  char buffer[30];
-  sprintf(buffer, "%03us:%03ums:%03uus", (uint)s, (uint)ms, (uint)us);
+  char buffer[100];
+  if (showRelativeTime_)
+    sprintf(buffer, "%03ds:%03dms:%03dus ", (int)s, (int)ms, (int)us);
+  else {
+    // Get the UTC time.
+    time_t gmtTime = s;
+    struct tm* t = gmtime(&gmtTime);
+    sprintf(buffer, "%04d-%02d-%02d\n%02d:%02d:%02d:%03d:%03dZ", 
+      t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, 
+      t->tm_hour, t->tm_min, t->tm_sec, (int)ms, (int)us);
+  }
   playTimeLabel_->setText(buffer);
   for (size_t i = 0; i < children_.size(); ++i)
     children_[i]->playTimeLabel_->setText(buffer);
@@ -193,6 +209,12 @@ void AeraVisulizerWindowBase::playSliderValueChanged(int value)
   // stopPlay, update the play time.
 }
 
+void AeraVisulizerWindowBase::playTimeLabelClicked()
+{
+  showRelativeTime_ = !showRelativeTime_;
+  setPlayTime(playTime_);
+}
+
 void AeraVisulizerWindowBase::timerEvent(QTimerEvent* event)
 {
   // TODO: Make sure we don't re-enter.
@@ -222,6 +244,17 @@ void AeraVisulizerWindowBase::timerEvent(QTimerEvent* event)
 
   setPlayTime(playTime);
   setSliderToPlayTime();
+}
+
+ClickableLabel::ClickableLabel(const QString& text, QWidget* parent, Qt::WindowFlags f)
+  : QLabel(text, parent) {
+
+}
+
+ClickableLabel::~ClickableLabel() {}
+
+void ClickableLabel::mousePressEvent(QMouseEvent* event) {
+  emit clicked();
 }
 
 }
