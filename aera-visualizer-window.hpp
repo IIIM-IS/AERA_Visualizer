@@ -4,6 +4,7 @@
 #include "aera-model-item.hpp"
 #include "aera-event.hpp"
 #include "aera-visualizer-window-base.hpp"
+#include "replicode-objects.hpp"
 
 #include <vector>
 #include <QIcon>
@@ -76,6 +77,8 @@ private:
   QMenu* itemMenu_;
 
   size_t iNextEvent_;
+
+  ReplicodeObjects replicodeObjects_;
 };
 
 }
