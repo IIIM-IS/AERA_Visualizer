@@ -11,7 +11,7 @@ int main(int argv, char *args[])
 
   QApplication app(argv, args);
   AeraVisulizerWindow mainWindow;
-  const int left = 100;
+  const int left = 10;
   const int top = 100;
   const int width = 800;
   const int height = 500;
@@ -20,7 +20,7 @@ int main(int argv, char *args[])
   GraphVisulizerWindow* graphWindow = new GraphVisulizerWindow(&mainWindow);
   // Disable the close button for the child window.
   graphWindow->setWindowFlag(Qt::WindowCloseButtonHint, false);
-  graphWindow->setGeometry(left + width + 15, top, width, height);
+  graphWindow->setGeometry(left + width, top, width, height);
   graphWindow->show();
 
   mainWindow.show();
