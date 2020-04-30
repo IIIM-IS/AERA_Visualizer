@@ -118,12 +118,12 @@ void AeraVisulizerWindowBase::setPlayTime(Timestamp time)
 
   char buffer[100];
   if (showRelativeTime_)
-    sprintf(buffer, "%03ds:%03dms:%03dus ", (int)s, (int)ms, (int)us);
+    sprintf(buffer, "%03ds:%03dms:%03dus", (int)s, (int)ms, (int)us);
   else {
     // Get the UTC time.
     time_t gmtTime = s;
     struct tm* t = gmtime(&gmtTime);
-    sprintf(buffer, "%04d-%02d-%02d\n%02d:%02d:%02d:%03d:%03dZ", 
+    sprintf(buffer, "%04d-%02d-%02d   UTC\n%02d:%02d:%02d:%03d:%03d", 
       t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, 
       t->tm_hour, t->tm_min, t->tm_sec, (int)ms, (int)us);
   }
