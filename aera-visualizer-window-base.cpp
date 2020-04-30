@@ -211,6 +211,12 @@ void AeraVisulizerWindowBase::playSliderValueChanged(int value)
 
 void AeraVisulizerWindowBase::playTimeLabelClicked()
 {
+  if (parent_) {
+    // Only do this from the main window.
+    parent_->playTimeLabelClicked();
+    return;
+  }
+
   showRelativeTime_ = !showRelativeTime_;
   setPlayTime(playTime_);
 }
@@ -247,14 +253,10 @@ void AeraVisulizerWindowBase::timerEvent(QTimerEvent* event)
 }
 
 ClickableLabel::ClickableLabel(const QString& text, QWidget* parent, Qt::WindowFlags f)
-  : QLabel(text, parent) {
-
-}
+  : QLabel(text, parent) {}
 
 ClickableLabel::~ClickableLabel() {}
 
-void ClickableLabel::mousePressEvent(QMouseEvent* event) {
-  emit clicked();
-}
+void ClickableLabel::mousePressEvent(QMouseEvent* event) { emit clicked(); }
 
 }
