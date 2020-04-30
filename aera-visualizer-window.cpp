@@ -14,15 +14,14 @@ namespace aera_visualizer {
 static void
 addExampleEvents(std::vector<shared_ptr<AeraEvent> >& events, Timestamp timeReference)
 {
-  events.push_back(make_shared<NewModelEvent>(timeReference + microseconds(50000), 2400, 1, 0.5));
-  events.push_back(make_shared<NewModelEvent>(timeReference + microseconds(2000044), 2401, 1, 0.51));
-  events.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(timeReference + microseconds(4003044), 2400, 2, 0.8));
-  events.push_back(make_shared<NewModelEvent>(timeReference + microseconds(6000366), 2641, 1, 0.52));
-  events.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(timeReference + microseconds(8070244), 2401, 2, 0.55));
-  events.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(timeReference + microseconds(8603044), 2400, 3, 0.75));
-  events.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(timeReference + microseconds(11060000), 2401, 3, 0.45));
-  events.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(timeReference + microseconds(12030000), 2641, 2, 0.71));
-  events.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(timeReference + microseconds(14080000), 2400, 4, 0.76));
+  events.push_back(make_shared<NewModelEvent>(timeReference + microseconds(50000), 53, 1, 1));
+  events.push_back(make_shared<NewModelEvent>(timeReference + microseconds(2000044), 54, 1, 1));
+  events.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(timeReference + microseconds(4003044), 53, 2, 0.8));
+  events.push_back(make_shared<NewModelEvent>(timeReference + microseconds(6000366), 54, 1, 0.52));
+  events.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(timeReference + microseconds(8070244), 54, 2, 0.55));
+  events.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(timeReference + microseconds(8603044), 53, 3, 0.75));
+  events.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(timeReference + microseconds(11060000), 54, 3, 0.45));
+  events.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(timeReference + microseconds(14080000), 53, 4, 0.76));
 }
 
 AeraVisulizerWindow::AeraVisulizerWindow()
@@ -80,7 +79,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       AeraModelItem* firstModelItem = scene_->getAeraModelItem
       (((NewModelEvent*)events_[0].get())->oid_);
       if (firstModelItem)
-        scene_->addArrow(firstModelItem, newItem);
+        scene_->addArrow(newItem, firstModelItem);
     }
   }
   else if (event->eventType_ == SetModelEvidenceCountAndSuccessRateEvent::EVENT_TYPE) {
