@@ -25,7 +25,7 @@ protected:
   /**
    * Create an AeraVisulizerWindowBase and create the player control panel widget. This is 
    * called by the derived class, which should add getPlayerControlPanel() to its window.
-   * @param parent The main parent window for this window, or 0 if this is already
+   * \param parent The main parent window for this window, or 0 if this is already
    * The main window.
    */
   AeraVisulizerWindowBase(AeraVisulizerWindowBase* parent);
@@ -40,16 +40,16 @@ protected:
 
   /**
    * Perform the event at events_[iNextEvent_] and then increment iNextEvent_.
-   * @param if the time of next event is greater than maximumTime, don't perform the
+   * \param maximumTime if the time of next event is greater than maximumTime, don't perform the
    * event, and return Utils_MaxTime.
-   * @return The time of the next event. If there is no next event,
+   * \return The time of the next event. If there is no next event, then
    * return Utils_MaxTime.
    */
   virtual core::Timestamp stepEvent(core::Timestamp maximumTime) = 0;
 
   /**
    * Decrement iNextEvent_ and undo the event at events_[iNextEvent_].
-   * @return The time of the previous event. If there is no previous event,
+   * \return The time of the previous event. If there is no previous event, then
    * return Utils_MaxTime.
    */
   virtual core::Timestamp unstepEvent() = 0;

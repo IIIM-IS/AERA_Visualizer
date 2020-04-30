@@ -33,7 +33,7 @@ public:
   void addArrow(AeraModelItem* startItem, AeraModelItem* endItem);
   /**
    * Get the AeraModelItem whose NewModelEvent has the given oid.
-   * @return The AeraModelItem, or null if not found.
+   * \return The AeraModelItem, or null if not found.
    */
   AeraModelItem* getAeraModelItem(core::uint32 oid);
   void establishFlashTimer()

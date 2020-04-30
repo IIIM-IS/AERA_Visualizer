@@ -16,7 +16,7 @@ class GraphVisulizerWindow : public AeraVisulizerWindowBase
 public:
   /**
    * Create a GraphVisulizerWindow.
-   * @param parent The main parent window for this window.
+   * \param parent The main parent window for this window.
    */
   GraphVisulizerWindow(AeraVisulizerWindowBase* mainWindow);
 

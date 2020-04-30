@@ -39,16 +39,16 @@ protected:
 
   /**
    * Perform the event at events_[iNextEvent_] and then increment iNextEvent_.
-   * @param if the time of next event is greater than maximumTime, don't perform the
+   * \param maximumTime if the time of next event is greater than maximumTime, don't perform the
    * event, and return Utils_MaxTime.
-   * @return The time of the next event. If there is no next event,
+   * \return The time of the next event. If there is no next event, then
    * return Utils_MaxTime.
    */
   core::Timestamp stepEvent(core::Timestamp maximumTime) override;
 
   /**
    * Decrement iNextEvent_ and undo the event at events_[iNextEvent_].
-   * @return The time of the previous event. If there is no previous event, 
+   * \return The time of the previous event. If there is no previous event, then
    * return Utils_MaxTime.
    */
   core::Timestamp unstepEvent() override;
