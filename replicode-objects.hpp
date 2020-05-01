@@ -19,9 +19,9 @@ public:
    * in "user.classes.replicode".
    * \param decompiledFilePath The decompiled output, usually ending in
    * "decompiled_objects.txt".
-   * \return True for success, false for error compiling.
+   * \return An empty string for success, otherwise an error string.
    */
-  bool init(const std::string& userOperatorsFilePath, const std::string& decompiledFilePath);
+  std::string init(const std::string& userOperatorsFilePath, const std::string& decompiledFilePath);
 
   /**
    * Get the time reference that was loaded from the decompiled output. 

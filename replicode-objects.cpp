@@ -12,7 +12,7 @@ using namespace core;
 using namespace r_code;
 using namespace r_comp;
 
-bool ReplicodeObjects::init(const string& userOperatorsFilePath, const string& decompiledFilePath)
+string ReplicodeObjects::init(const string& userOperatorsFilePath, const string& decompiledFilePath)
 {
   // Run the proprocessor on the user operators (which includes std.replicode) just to
   // get the Metadata. The objects are repeated in the decompiled output.
@@ -38,18 +38,11 @@ bool ReplicodeObjects::init(const string& userOperatorsFilePath, const string& d
   regex timeReferenceRegex("^> DECOMPILATION. TimeReference (\\d+)s:(\\d+)ms:(\\d+)us");
   regex debugOidRegex("^\\((\\d+)\\) ([\\w\\.]+):(.+)$");
   regex oidAndDebugOidRegex("^(\\d+)\\((\\d+)\\) (\\w+):(.+)$");
-  regex wildcardPropSaliencyThreshold("^(.+) \\:\\) \\|\\[\\]$");
 
   ostringstream decompiledOut;
   string line;
   while (getline(rawDecompiledFile, line)) {
     smatch matches;
-
-    if (regex_search(line, matches, wildcardPropSaliencyThreshold))
-      // Some generated facts have a wildcard for the propagation of saliency threshold,
-      // but the compiler gives the "no wildcards allowed outside a pattern skeleton".
-      // Until a fix is found, just replace the wildcard with a 1.
-      line = matches[1].str() + " 1) |[]";
 
     if (regex_search(line, matches, timeReferenceRegex)) {
       microseconds us(1000000 * stoll(matches[1].str()) +
@@ -92,14 +85,14 @@ bool ReplicodeObjects::init(const string& userOperatorsFilePath, const string& d
   ostringstream preprocessedOut;
   if (!preprocessor.process(
       &decompiledIn, decompiledFilePath, &preprocessedOut, error, NULL))
-    return false;
+    return error;
 
   auto preprocessedOutString = preprocessedOut.str();
   istringstream preprocessedIn(preprocessedOutString);
-  Compiler compiler;
+  Compiler compiler(true);
   r_comp::Image image;
   if (!compiler.compile(&preprocessedIn, &image, &metadata, error, false))
-    return false;
+    return error;
 
   // Get the the objects from the compiled image.
   r_code::vector<r_code::Code*> imageObjects;
@@ -179,5 +172,5 @@ bool ReplicodeObjects::init(const string& userOperatorsFilePath, const string& d
   debugOutFile << decompiled_code.str() << endl;
 #endif
 
-  return true;
+  return "";
 }
