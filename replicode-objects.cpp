@@ -95,7 +95,7 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
     return error;
 
   // Get the the objects from the compiled image.
-  r_code::vector<r_code::Code*> imageObjects;
+  r_code::vector<Code*> imageObjects;
   // tempMem is only used for calling build_object.
   r_exec::Mem<r_exec::LObject, r_exec::MemStatic> tempMem;
   image.get_objects(&tempMem, imageObjects);
@@ -141,8 +141,7 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
       break;
     }
 
-    UNORDERED_SET<r_code::View*, r_code::View::Hash, r_code::View::Equal>::const_iterator v;
-    for (v = object->views_.begin(); v != object->views_.end(); ++v) {
+    for (auto v = object->views_.begin(); v != object->views_.end(); ++v) {
 
       // init hosts' member_set.
       r_exec::View* view = (r_exec::View*) * v;
