@@ -58,8 +58,9 @@ private:
   QColor itemColor_;
   QColor lineColor_;
   QPen borderFlashPen_;
-  QColor valueUpFlashColor_;
-  QColor valueDownFlashColor_;
+  QString noFlashColor_;
+  QString valueUpFlashColor_;
+  QString valueDownFlashColor_;
   int flashTimerId_;
 };
 

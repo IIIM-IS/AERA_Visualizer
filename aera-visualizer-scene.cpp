@@ -12,8 +12,9 @@ namespace aera_visualizer {
 AeraVisualizerScene::AeraVisualizerScene(QMenu* itemMenu, QObject* parent)
   : QGraphicsScene(parent),
   borderFlashPen_(Qt::blue, 3),
-  valueUpFlashColor_(Qt::green),
-  valueDownFlashColor_(Qt::red)
+  noFlashColor_("black"),
+  valueUpFlashColor_("green"),
+  valueDownFlashColor_("red")
 {
   itemMenu_ = itemMenu;
   line_ = 0;
@@ -138,10 +139,10 @@ void AeraVisualizerScene::timerEvent(QTimerEvent* event)
 
       --modelItem->evidenceCountFlashCountdown_;
       if (modelItem->evidenceCountFlashCountdown_ % 2 == 1)
-        modelItem->setEvidenceCountBrush
+        modelItem->setEvidenceCountColor
         (modelItem->evidenceCountIncreased_ ? valueUpFlashColor_ : valueDownFlashColor_);
       else
-        modelItem->setEvidenceCountBrush(lineColor_);
+        modelItem->setEvidenceCountColor(noFlashColor_);
     }
 
     if (modelItem->successRateFlashCountdown_ > 0) {
@@ -149,10 +150,10 @@ void AeraVisualizerScene::timerEvent(QTimerEvent* event)
 
       --modelItem->successRateFlashCountdown_;
       if (modelItem->successRateFlashCountdown_ % 2 == 1)
-        modelItem->setSuccessRateBrush
+        modelItem->setSuccessRateColor
         (modelItem->successRateIncreased_ ? valueUpFlashColor_ : valueDownFlashColor_);
       else
-        modelItem->setSuccessRateBrush(lineColor_);
+        modelItem->setSuccessRateColor(noFlashColor_);
     }
   }
 

@@ -39,8 +39,19 @@ public:
   void setSuccessRate(core::float32 successRate);
   core::float32 getEvidenceCount() { return evidenceCount_; }
   core::float32 getSuccessRate() { return successRate_; }
-  void setEvidenceCountBrush(QBrush brush) { evidenceCountLabel_->setBrush(brush); };
-  void setSuccessRateBrush(QBrush brush) { successRateLabel_->setBrush(brush); };
+
+  void setEvidenceCountColor(QString color) 
+  { 
+    evidenceCountColor_ = color;
+    setTextItemHtml();
+  };
+
+  void setSuccessRateColor(QString color)
+  {
+    successRateColor_ = color;
+    setTextItemHtml();
+  };
+
   int borderFlashCountdown_;
   int evidenceCountFlashCountdown_;
   bool evidenceCountIncreased_;
@@ -52,16 +63,20 @@ protected:
   QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
 private:
+  void setTextItemHtml();
   void removeArrow(Arrow* arrow);
+
+  static void textItemLinkActivated(const QString& link);
 
   QPolygonF polygon_;
   QMenu* contextMenu_;
   NewModelEvent* newModelEvent_;
   QList<Arrow*> arrows_;
+  QGraphicsTextItem* textItem_;
   core::float32 evidenceCount_;
-  QGraphicsSimpleTextItem* evidenceCountLabel_;
+  QString evidenceCountColor_;
   core::float32 successRate_;
-  QGraphicsSimpleTextItem* successRateLabel_;
+  QString successRateColor_;
 };
 
 }

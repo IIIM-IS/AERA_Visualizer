@@ -5,22 +5,36 @@
 #include <QGraphicsSceneContextMenuEvent>
 #include <QMenu>
 #include <QPainter>
+#include <QtWidgets>
 
+using namespace std;
 using namespace core;
 
 namespace aera_visualizer {
 
 AeraModelItem::AeraModelItem(QMenu* contextMenu, NewModelEvent* newModelEvent, QGraphicsItem* parent)
   : QGraphicsPolygonItem(parent),
-  newModelEvent_(newModelEvent)
+  newModelEvent_(newModelEvent),
+  evidenceCount_(1), successRate_(1),
+  evidenceCountColor_("black"), successRateColor_("black")
 {
   contextMenu_ = contextMenu;
 
   const qreal left = -100;
-  const qreal right = 90;
   const qreal top = -50;
-  const qreal bottom = 40;
   const qreal diameter = 20;
+
+  // Set up the textItem_ first to get its size.
+  textItem_ = new QGraphicsTextItem(this);
+  textItem_->setPos(left + 5, top + 5);
+  textItem_->setTextInteractionFlags(Qt::TextBrowserInteraction);
+  QObject::connect(textItem_, &QGraphicsTextItem::linkActivated, &AeraModelItem::textItemLinkActivated);
+  setEvidenceCount(newModelEvent->evidenceCount_);
+  setSuccessRate(newModelEvent->successRate_);
+
+  qreal right = textItem_->boundingRect().width();
+  qreal bottom = textItem_->boundingRect().height() - 30;
+
   QPainterPath path;
   path.moveTo(right, diameter / 2);
   path.arcTo(right - diameter, top, diameter, diameter, 0, 90);
@@ -33,18 +47,6 @@ AeraModelItem::AeraModelItem(QMenu* contextMenu, NewModelEvent* newModelEvent, Q
   setFlag(QGraphicsItem::ItemIsMovable, true);
   setFlag(QGraphicsItem::ItemIsSelectable, true);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
-
-  QGraphicsSimpleTextItem* oidLabel = new QGraphicsSimpleTextItem
-  ("OID: " + QString::number(newModelEvent_->oid_), this);
-  oidLabel->setPos(left + 10, top + 10);
-
-  evidenceCountLabel_ = new QGraphicsSimpleTextItem(this);
-  evidenceCountLabel_->setPos(left + 10, top + 25);
-  setEvidenceCount(newModelEvent->evidenceCount_);
-
-  successRateLabel_ = new QGraphicsSimpleTextItem(this);
-  successRateLabel_->setPos(left + 10, top + 40);
-  setSuccessRate(newModelEvent->successRate_);
 
   borderFlashCountdown_ = 6;
   evidenceCountFlashCountdown_ = 0;
@@ -68,6 +70,16 @@ void AeraModelItem::removeArrow(Arrow* arrow)
     arrows_.removeAt(index);
 }
 
+void AeraModelItem::setTextItemHtml()
+{
+  QString html = "OID: " + QString::number(newModelEvent_->oid_) + "<br>";
+  html += "<font color=\"" + evidenceCountColor_ +"\">Evidence Count: " + 
+    QString::number(evidenceCount_) + "</font><br>";
+  html += "<font color=\"" + successRateColor_ + "\">&nbsp;&nbsp;&nbsp;&nbsp;Success Rate: " +
+    QString::number(successRate_) + "</font><br>";
+  textItem_->setHtml(html);
+}
+
 void AeraModelItem::addArrow(Arrow* arrow)
 {
   arrows_.append(arrow);
@@ -77,14 +89,14 @@ void AeraModelItem::setEvidenceCount(float32 evidenceCount)
 {
   evidenceCountIncreased_ = (evidenceCount >= evidenceCount_);
   evidenceCount_ = evidenceCount;
-  evidenceCountLabel_->setText("Evidence Count: " + QString::number(evidenceCount_));
+  setTextItemHtml();
 }
 
 void AeraModelItem::setSuccessRate(float32 successRate)
 {
   successRateIncreased_ = (successRate >= successRate_);
   successRate_ = successRate;
-  successRateLabel_->setText("    Success Rate: " + QString::number(successRate_));
+  setTextItemHtml();
 }
 
 void AeraModelItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
@@ -104,6 +116,10 @@ QVariant AeraModelItem::itemChange(GraphicsItemChange change, const QVariant& va
   }
 
   return value;
+}
+
+void AeraModelItem::textItemLinkActivated(const QString& link)
+{
 }
 
 }
