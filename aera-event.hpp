@@ -2,7 +2,6 @@
 #define AERA_EVENT_HPP
 
 #include <QPointF>
-// TODO: Include this directly from the Replicode source.
 #include "submodules/replicode/submodules/CoreLibrary/CoreLibrary/types.h" 
 
 namespace aera_visualizer {
@@ -36,17 +35,6 @@ public:
   QPointF itemPosition_;
 };
 
-class DeleteModelEvent : public AeraEvent {
-public:
-  DeleteModelEvent(core::Timestamp time, core::uint32 modelOid)
-    : AeraEvent(EVENT_TYPE, time)
-  {
-    // TODO: Implement.
-  }
-
-  static const int EVENT_TYPE = 2;
-};
-
 class SetModelEvidenceCountAndSuccessRateEvent : public AeraEvent {
 public:
   SetModelEvidenceCountAndSuccessRateEvent
@@ -59,7 +47,7 @@ public:
     oldSuccessRate_(qQNaN())
   {}
 
-  static const int EVENT_TYPE = 3;
+  static const int EVENT_TYPE = 2;
 
   core::uint32 modelOid_;
   core::float32 evidenceCount_;
