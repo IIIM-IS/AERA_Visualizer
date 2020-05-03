@@ -30,6 +30,13 @@ public:
    */
   core::Timestamp getTimeReference() const { return timeReference_; }
 
+  /**
+   * Get the object by OID.
+   * \param oid The OID.
+   * \return The object, or NULL if not found.
+   */
+  r_code::Code* getObject(uint32 oid);
+
 private:
   core::Timestamp timeReference_;
   r_code::list<P<r_code::Code> > objects_;

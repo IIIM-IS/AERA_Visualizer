@@ -173,3 +173,13 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
 
   return "";
 }
+
+r_code::Code* ReplicodeObjects::getObject(uint32 oid)
+{
+  for (auto i = objects_.begin(); i != objects_.end(); ++i) {
+    if ((*i)->get_oid() == oid)
+      return *i;
+  }
+
+  return NULL;
+}
