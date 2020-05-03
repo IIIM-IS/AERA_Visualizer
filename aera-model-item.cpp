@@ -9,6 +9,7 @@
 
 using namespace std;
 using namespace core;
+using namespace r_code;
 
 namespace aera_visualizer {
 
@@ -29,8 +30,7 @@ AeraModelItem::AeraModelItem(QMenu* contextMenu, NewModelEvent* newModelEvent, Q
   textItem_->setPos(left + 5, top + 5);
   textItem_->setTextInteractionFlags(Qt::TextBrowserInteraction);
   QObject::connect(textItem_, &QGraphicsTextItem::linkActivated, &AeraModelItem::textItemLinkActivated);
-  setEvidenceCount(newModelEvent->evidenceCount_);
-  setSuccessRate(newModelEvent->successRate_);
+  updateFromModel();
 
   qreal right = textItem_->boundingRect().width();
   qreal bottom = textItem_->boundingRect().height() - 30;
@@ -85,17 +85,13 @@ void AeraModelItem::addArrow(Arrow* arrow)
   arrows_.append(arrow);
 }
 
-void AeraModelItem::setEvidenceCount(float32 evidenceCount)
+void AeraModelItem::updateFromModel()
 {
-  evidenceCountIncreased_ = (evidenceCount >= evidenceCount_);
-  evidenceCount_ = evidenceCount;
-  setTextItemHtml();
-}
+  evidenceCountIncreased_ = (newModelEvent_->model_->code(MDL_CNT).asFloat() >= evidenceCount_);
+  evidenceCount_ = newModelEvent_->model_->code(MDL_CNT).asFloat();
+  successRateIncreased_ = (newModelEvent_->model_->code(MDL_SR).asFloat() >= successRate_);
+  successRate_ = newModelEvent_->model_->code(MDL_SR).asFloat();
 
-void AeraModelItem::setSuccessRate(float32 successRate)
-{
-  successRateIncreased_ = (successRate >= successRate_);
-  successRate_ = successRate;
   setTextItemHtml();
 }
 

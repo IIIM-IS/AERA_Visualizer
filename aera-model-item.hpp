@@ -35,10 +35,7 @@ public:
   void addArrow(Arrow* arrow);
   int type() const override { return Type; }
   NewModelEvent* getNewModelEvent() { return newModelEvent_; }
-  void setEvidenceCount(core::float32 evidenceCount);
-  void setSuccessRate(core::float32 successRate);
-  core::float32 getEvidenceCount() { return evidenceCount_; }
-  core::float32 getSuccessRate() { return successRate_; }
+  void updateFromModel();
 
   void setEvidenceCountColor(QString color) 
   { 

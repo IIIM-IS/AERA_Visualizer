@@ -122,8 +122,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 
     auto modelItem = scene_->getAeraModelItem(setSuccessRateEvent->model_->get_oid());
     if (modelItem) {
-      modelItem->setEvidenceCount(setSuccessRateEvent->evidenceCount_);
-      modelItem->setSuccessRate(setSuccessRateEvent->successRate_);
+      modelItem->updateFromModel();
       if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
           setSuccessRateEvent->successRate_ == setSuccessRateEvent->oldSuccessRate_)
         // Only the evidence count changed.
@@ -168,14 +167,17 @@ Timestamp AeraVisulizerWindow::unstepEvent()
     // Find the AeraModelItem for this event and set to the old evidence count and success rate.
     auto setSuccessRateEvent = (SetModelEvidenceCountAndSuccessRateEvent*)event;
 
+    setSuccessRateEvent->model_->code(MDL_CNT) = Atom::Float(setSuccessRateEvent->oldEvidenceCount_);
+    setSuccessRateEvent->model_->code(MDL_SR) = Atom::Float(setSuccessRateEvent->oldSuccessRate_);
+
     auto modelItem = scene_->getAeraModelItem(setSuccessRateEvent->model_->get_oid());
     if (modelItem) {
       if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
-        setSuccessRateEvent->successRate_ == setSuccessRateEvent->oldSuccessRate_)
+          setSuccessRateEvent->successRate_ == setSuccessRateEvent->oldSuccessRate_)
         // Only the evidence count changed.
         modelItem->evidenceCountFlashCountdown_ = 6;
       else if (setSuccessRateEvent->evidenceCount_ == setSuccessRateEvent->oldEvidenceCount_ &&
-        setSuccessRateEvent->successRate_ != setSuccessRateEvent->oldSuccessRate_)
+               setSuccessRateEvent->successRate_ != setSuccessRateEvent->oldSuccessRate_)
         // Only the success rate changed.
         modelItem->successRateFlashCountdown_ = 6;
       else {
@@ -183,8 +185,7 @@ Timestamp AeraVisulizerWindow::unstepEvent()
         modelItem->successRateFlashCountdown_ = 6;
       }
 
-      modelItem->setEvidenceCount(setSuccessRateEvent->oldEvidenceCount_);
-      modelItem->setSuccessRate(setSuccessRateEvent->oldSuccessRate_);
+      modelItem->updateFromModel();
       scene_->establishFlashTimer();
     }
   }
