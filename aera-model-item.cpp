@@ -72,7 +72,7 @@ void AeraModelItem::removeArrow(Arrow* arrow)
 
 void AeraModelItem::setTextItemHtml()
 {
-  QString html = "OID: " + QString::number(newModelEvent_->oid_) + "<br>";
+  QString html = "OID: " + QString::number(newModelEvent_->model_->get_oid()) + "<br>";
   html += "<font color=\"" + evidenceCountColor_ +"\">Evidence Count: " + 
     QString::number(evidenceCount_) + "</font><br>";
   html += "<font color=\"" + successRateColor_ + "\">&nbsp;&nbsp;&nbsp;&nbsp;Success Rate: " +

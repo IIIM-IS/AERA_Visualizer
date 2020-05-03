@@ -24,7 +24,7 @@ AeraVisulizerWindow::AeraVisulizerWindow()
   string decompiledFilePath = "C:\\Users\\Jeff\\AERA\\replicode\\Test\\decompiled_objects.txt";
   string consoleOutputFilePath = "C:\\Users\\Jeff\\temp\\Test.out.txt";
 
-  replicodeObjects_.init(userOperatorsFilePath, decompiledFilePath);
+  string error = replicodeObjects_.init(userOperatorsFilePath, decompiledFilePath);
   setTimeReference(replicodeObjects_.getTimeReference());
 
   scene_ = new AeraVisualizerScene(itemMenu_, this);
@@ -63,11 +63,11 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
     if (regex_search(line, matches, newModelRegex))
       // Assume the initial success rate is 1.
       events_.push_back(make_shared<NewModelEvent>(
-        getTimestamp(matches), stoll(matches[4].str()), 1, 1));
+        getTimestamp(matches), replicodeObjects_.getObject(stol(matches[4].str())), 1, 1));
     else if (regex_search(line, matches, setEvidenceCountAndSuccessRateRegex))
       // Assume the initial success rate is 1.
       events_.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(
-        getTimestamp(matches), stoll(matches[4].str()), stoll(matches[5].str()), 
+        getTimestamp(matches), replicodeObjects_.getObject(stol(matches[4].str())), stol(matches[5].str()),
         stof(matches[6].str())));
   }
 }
@@ -91,26 +91,37 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     return Utils_MaxTime;
 
   if (event->eventType_ == NewModelEvent::EVENT_TYPE) {
+    auto newModelEvent = (NewModelEvent*)event;
+
+    // Restore the evidence count and success rate in case we did a rewind.
+    newModelEvent->model_->code(MDL_CNT) = Atom::Float(newModelEvent->evidenceCount_);
+    newModelEvent->model_->code(MDL_SR) = Atom::Float(newModelEvent->successRate_);
+
     // Add the new model.
-    AeraModelItem* newItem = scene_->addAeraModelItem((NewModelEvent*)event);
+    AeraModelItem* newItem = scene_->addAeraModelItem(newModelEvent);
     scene_->establishFlashTimer();
 
     // Debug: testing arrows.
     if (iNextEvent_ > 0 && events_[0]->eventType_ == NewModelEvent::EVENT_TYPE) {
       AeraModelItem* firstModelItem = scene_->getAeraModelItem
-      (((NewModelEvent*)events_[0].get())->oid_);
+      (((NewModelEvent*)events_[0].get())->model_->get_oid());
       if (firstModelItem)
         scene_->addArrow(newItem, firstModelItem);
     }
   }
   else if (event->eventType_ == SetModelEvidenceCountAndSuccessRateEvent::EVENT_TYPE) {
     auto setSuccessRateEvent = (SetModelEvidenceCountAndSuccessRateEvent*)event;
-    auto modelItem = scene_->getAeraModelItem(setSuccessRateEvent->modelOid_);
-    if (modelItem) {
-      // Save the current values for a later undo.
-      setSuccessRateEvent->oldEvidenceCount_ = modelItem->getEvidenceCount();
-      setSuccessRateEvent->oldSuccessRate_ = modelItem->getSuccessRate();
 
+    // Save the current values for a later undo.
+    setSuccessRateEvent->oldEvidenceCount_ = setSuccessRateEvent->model_->code(MDL_CNT).asFloat();
+    setSuccessRateEvent->oldSuccessRate_ = setSuccessRateEvent->model_->code(MDL_SR).asFloat();
+
+    // Update the model.
+    setSuccessRateEvent->model_->code(MDL_CNT) = Atom::Float(setSuccessRateEvent->evidenceCount_);
+    setSuccessRateEvent->model_->code(MDL_SR) = Atom::Float(setSuccessRateEvent->successRate_);
+
+    auto modelItem = scene_->getAeraModelItem(setSuccessRateEvent->model_->get_oid());
+    if (modelItem) {
       modelItem->setEvidenceCount(setSuccessRateEvent->evidenceCount_);
       modelItem->setSuccessRate(setSuccessRateEvent->successRate_);
       if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
@@ -146,7 +157,7 @@ Timestamp AeraVisulizerWindow::unstepEvent()
   if (event->eventType_ == NewModelEvent::EVENT_TYPE) {
     // Find the AeraModelItem for this event and remove it.
     // Note that the event saves the updated item position and will use it when recreating the item.
-    auto modelItem = scene_->getAeraModelItem(((NewModelEvent*)event)->oid_);
+    auto modelItem = scene_->getAeraModelItem(((NewModelEvent*)event)->model_->get_oid());
     if (modelItem) {
       modelItem->removeArrows();
       scene_->removeItem(modelItem);
@@ -156,7 +167,8 @@ Timestamp AeraVisulizerWindow::unstepEvent()
   else if (event->eventType_ == SetModelEvidenceCountAndSuccessRateEvent::EVENT_TYPE) {
     // Find the AeraModelItem for this event and set to the old evidence count and success rate.
     auto setSuccessRateEvent = (SetModelEvidenceCountAndSuccessRateEvent*)event;
-    auto modelItem = scene_->getAeraModelItem(setSuccessRateEvent->modelOid_);
+
+    auto modelItem = scene_->getAeraModelItem(setSuccessRateEvent->model_->get_oid());
     if (modelItem) {
       if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
         setSuccessRateEvent->successRate_ == setSuccessRateEvent->oldSuccessRate_)

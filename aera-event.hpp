@@ -2,7 +2,7 @@
 #define AERA_EVENT_HPP
 
 #include <QPointF>
-#include "submodules/replicode/submodules/CoreLibrary/CoreLibrary/types.h" 
+#include "submodules/replicode/r_code/object.h"
 
 namespace aera_visualizer {
 
@@ -19,9 +19,9 @@ public:
 
 class NewModelEvent : public AeraEvent {
 public:
-  NewModelEvent(core::Timestamp time, core::uint32 oid, core::float32 evidenceCount, core::float32 successRate)
+  NewModelEvent(core::Timestamp time, r_code::Code* model, core::float32 evidenceCount, core::float32 successRate)
     : AeraEvent(EVENT_TYPE, time),
-    oid_(oid),
+    model_(model),
     evidenceCount_(evidenceCount),
     successRate_(successRate),
     itemPosition_(qQNaN(), qQNaN())
@@ -29,7 +29,7 @@ public:
 
   static const int EVENT_TYPE = 1;
 
-  core::uint32 oid_;
+  r_code::Code* model_;
   core::float32 evidenceCount_;
   core::float32 successRate_;
   QPointF itemPosition_;
@@ -38,9 +38,9 @@ public:
 class SetModelEvidenceCountAndSuccessRateEvent : public AeraEvent {
 public:
   SetModelEvidenceCountAndSuccessRateEvent
-  (core::Timestamp time, core::uint32 modelOid, core::float32 evidenceCount, core::float32 successRate)
+  (core::Timestamp time, r_code::Code* model, core::float32 evidenceCount, core::float32 successRate)
     : AeraEvent(EVENT_TYPE, time),
-    modelOid_(modelOid),
+    model_(model),
     evidenceCount_(evidenceCount),
     successRate_(successRate),
     oldEvidenceCount_(qQNaN()),
@@ -49,7 +49,7 @@ public:
 
   static const int EVENT_TYPE = 2;
 
-  core::uint32 modelOid_;
+  r_code::Code* model_;
   core::float32 evidenceCount_;
   core::float32 successRate_;
   core::float32 oldEvidenceCount_;
