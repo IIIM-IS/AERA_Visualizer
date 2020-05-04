@@ -35,6 +35,7 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
   map<string, uint32> objectOids;
   map<string, uint32> objectDebugOids;
   ifstream rawDecompiledFile(decompiledFilePath);
+  regex blankLineRegex("^\\s*$");
   regex timeReferenceRegex("^> DECOMPILATION. TimeReference (\\d+)s:(\\d+)ms:(\\d+)us");
   regex debugOidRegex("^\\((\\d+)\\) ([\\w\\.]+):(.+)$");
   regex oidAndDebugOidRegex("^(\\d+)\\((\\d+)\\) (\\w+):(.+)$");
@@ -44,6 +45,9 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
   while (getline(rawDecompiledFile, line)) {
     smatch matches;
 
+    if (regex_search(line, matches, blankLineRegex))
+      // Skip blank lines.
+      decompiledOut << endl;
     if (regex_search(line, matches, timeReferenceRegex)) {
       microseconds us(1000000 * stoll(matches[1].str()) +
                          1000 * stoll(matches[2].str()) +
