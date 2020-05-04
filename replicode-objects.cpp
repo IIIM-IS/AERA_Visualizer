@@ -33,7 +33,7 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
 
   // Preprocess the decompiler output to remove extra info and get the OIDs.
   map<string, uint32> objectOids;
-  map<string, uint32> objectDebugOids;
+  map<string, uint64> objectDebugOids;
   ifstream rawDecompiledFile(decompiledFilePath);
   regex blankLineRegex("^\\s*$");
   regex timeReferenceRegex("^> DECOMPILATION. TimeReference (\\d+)s:(\\d+)ms:(\\d+)us");
@@ -61,7 +61,7 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
       // Skip other decompiler messages starting with '>'.
       decompiledOut << endl;
     else if (regex_search(line, matches, debugOidRegex)) {
-      auto debugOid = stoul(matches[1].str());
+      auto debugOid = stoull(matches[1].str());
       auto name = matches[2].str();
       objectOids[name] = UNDEFINED_OID;
       objectDebugOids[name] = debugOid;
