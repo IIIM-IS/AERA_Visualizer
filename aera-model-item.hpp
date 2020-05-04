@@ -4,6 +4,7 @@
 #include <QGraphicsPixmapItem>
 #include <QList>
 #include <QPen>
+#include "replicode-objects.hpp"
 #include "aera-event.hpp"
 
 class QPixmap;
@@ -28,7 +29,9 @@ class AeraModelItem : public QGraphicsPolygonItem
 public:
   enum { Type = UserType + 15 };
 
-  AeraModelItem(QMenu* contextMenu, NewModelEvent* newModelEvent, QGraphicsItem* parent = 0);
+  AeraModelItem(
+    QMenu* contextMenu, NewModelEvent* newModelEvent, ReplicodeObjects& replicodeObjects, 
+    QGraphicsItem* parent = 0);
 
   void removeArrows();
   QPolygonF polygon() const { return polygon_; }
@@ -65,6 +68,7 @@ private:
 
   static void textItemLinkActivated(const QString& link);
 
+  ReplicodeObjects& replicodeObjects_;
   QPolygonF polygon_;
   QMenu* contextMenu_;
   NewModelEvent* newModelEvent_;

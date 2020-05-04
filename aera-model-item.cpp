@@ -13,9 +13,10 @@ using namespace r_code;
 
 namespace aera_visualizer {
 
-AeraModelItem::AeraModelItem(QMenu* contextMenu, NewModelEvent* newModelEvent, QGraphicsItem* parent)
+AeraModelItem::AeraModelItem(
+  QMenu* contextMenu, NewModelEvent* newModelEvent, ReplicodeObjects& replicodeObjects, QGraphicsItem* parent)
   : QGraphicsPolygonItem(parent),
-  newModelEvent_(newModelEvent),
+  newModelEvent_(newModelEvent), replicodeObjects_(replicodeObjects),
   evidenceCount_(1), successRate_(1),
   evidenceCountColor_("black"), successRateColor_("black")
 {
