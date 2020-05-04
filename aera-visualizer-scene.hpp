@@ -21,7 +21,7 @@ class AeraVisualizerScene : public QGraphicsScene
   Q_OBJECT
 
 public:
-  explicit AeraVisualizerScene(QMenu* itemMenu, QObject* parent = 0);
+  explicit AeraVisualizerScene(QMenu* itemMenu, ReplicodeObjects& replicodeObjects, QObject* parent = 0);
 
   /**
    * Scale the first QGraphicsView by the given factor.
@@ -51,6 +51,7 @@ protected:
 #endif
 
 private:
+  ReplicodeObjects& replicodeObjects_;
   QMenu* itemMenu_;
   bool leftButtonDown_;
   QPointF startPoint_;

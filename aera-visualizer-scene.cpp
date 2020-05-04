@@ -9,8 +9,9 @@ using namespace core;
 
 namespace aera_visualizer {
 
-AeraVisualizerScene::AeraVisualizerScene(QMenu* itemMenu, QObject* parent)
+AeraVisualizerScene::AeraVisualizerScene(QMenu* itemMenu, ReplicodeObjects& replicodeObjects, QObject* parent)
   : QGraphicsScene(parent),
+  replicodeObjects_(replicodeObjects),
   borderFlashPen_(Qt::blue, 3),
   noFlashColor_("black"),
   valueUpFlashColor_("green"),
@@ -34,7 +35,7 @@ AeraModelItem* AeraVisualizerScene::addAeraModelItem(NewModelEvent* newModelEven
         (newModelEvent->model_->get_oid() % 2 != 0) ? 2400 : 2520);
   }
 
-  AeraModelItem* item = new AeraModelItem(itemMenu_, newModelEvent);
+  AeraModelItem* item = new AeraModelItem(itemMenu_, newModelEvent, replicodeObjects_);
   item->setBrush(itemColor_);
   addItem(item);
   item->setPos(newModelEvent->itemPosition_);

@@ -27,7 +27,7 @@ AeraVisulizerWindow::AeraVisulizerWindow()
   string error = replicodeObjects_.init(userOperatorsFilePath, decompiledFilePath);
   setTimeReference(replicodeObjects_.getTimeReference());
 
-  scene_ = new AeraVisualizerScene(itemMenu_, this);
+  scene_ = new AeraVisualizerScene(itemMenu_, replicodeObjects_, this);
   scene_->setSceneRect(QRectF(0, 0, 5000, 5000));
   connect(scene_, SIGNAL(itemInserted(AeraModelItem*)),
     this, SLOT(itemInserted(AeraModelItem*)));
