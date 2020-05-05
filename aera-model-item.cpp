@@ -22,7 +22,8 @@ AeraModelItem::AeraModelItem(
   : parent_(parent),
   newModelEvent_(newModelEvent), replicodeObjects_(replicodeObjects),
   evidenceCount_(1), successRate_(1),
-  evidenceCountColor_("black"), successRateColor_("black")
+  evidenceCountColor_("black"), successRateColor_("black"),
+  borderFlashCountdown_(6), evidenceCountFlashCountdown_(0), successRateFlashCountdown_(0)
 {
   contextMenu_ = contextMenu;
 
@@ -73,10 +74,6 @@ AeraModelItem::AeraModelItem(
   setFlag(QGraphicsItem::ItemIsMovable, true);
   setFlag(QGraphicsItem::ItemIsSelectable, true);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
-
-  borderFlashCountdown_ = 6;
-  evidenceCountFlashCountdown_ = 0;
-  successRateFlashCountdown_ = 0;
 }
 
 void AeraModelItem::removeArrows()
