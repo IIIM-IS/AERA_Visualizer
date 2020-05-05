@@ -31,8 +31,7 @@ AeraModelItem* AeraVisualizerScene::addAeraModelItem(NewModelEvent* newModelEven
     // Assign an initial position.
     // TODO: Do this with a grid layout.
     newModelEvent->itemPosition_ =
-      QPointF(newModelEvent->model_->get_oid() + 2400,
-        (newModelEvent->model_->get_oid() % 2 != 0) ? 2400 : 2520);
+      QPointF(newModelEvent->model_->get_oid() * 320 - 14730, 2380);
   }
 
   AeraModelItem* item = new AeraModelItem(itemMenu_, newModelEvent, replicodeObjects_);
