@@ -214,6 +214,15 @@ void AeraVisulizerWindow::zoomHome()
   scene_->zoomViewHome();
 }
 
+void AeraVisulizerWindow::zoomToThis()
+{
+  if (scene_->selectedItems().isEmpty())
+    return;
+
+  if (scene_->selectedItems().size() == 1)
+    scene_->zoomToItem(scene_->selectedItems().first());
+}
+
 void AeraVisulizerWindow::bringToFront()
 {
   if (scene_->selectedItems().isEmpty())
@@ -265,6 +274,10 @@ void AeraVisulizerWindow::createActions()
   zoomHomeAction_->setStatusTip(tr("Zoom to show all"));
   connect(zoomHomeAction_, SIGNAL(triggered()), this, SLOT(zoomHome()));
 
+  zoomToThisAction_ = new QAction(tr("&Zoom to This"), this);
+  zoomToThisAction_->setStatusTip(tr("Zoom to this item"));
+  connect(zoomToThisAction_, SIGNAL(triggered()), this, SLOT(zoomToThis()));
+
   toFrontAction_ = new QAction(tr("Bring to &Front"), this);
   toFrontAction_->setStatusTip(tr("Bring item to front"));
   connect(toFrontAction_, SIGNAL(triggered()), this, SLOT(bringToFront()));
@@ -285,6 +298,7 @@ void AeraVisulizerWindow::createMenus()
   viewMenu->addAction(zoomHomeAction_);
 
   itemMenu_ = menuBar()->addMenu(tr("&Item"));
+  itemMenu_->addAction(zoomToThisAction_);
   itemMenu_->addAction(toFrontAction_);
   itemMenu_->addAction(sendBackAction_);
 }

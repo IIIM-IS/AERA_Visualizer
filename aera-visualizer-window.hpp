@@ -58,6 +58,7 @@ private slots:
   void zoomIn();
   void zoomOut();
   void zoomHome();
+  void zoomToThis();
   void bringToFront();
   void sendToBack();
 
@@ -84,6 +85,7 @@ private:
   AeraVisualizerScene* scene_;
 
   QAction* exitAction_;
+  QAction* zoomToThisAction_;
   QAction* toFrontAction_;
   QAction* sendBackAction_;
   QAction* zoomInAction_;
