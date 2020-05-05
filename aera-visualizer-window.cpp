@@ -99,15 +99,17 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 
     // Add the new model.
     AeraModelItem* newItem = scene_->addAeraModelItem(newModelEvent);
-    scene_->establishFlashTimer();
 
-    // Debug: testing arrows.
-    if (iNextEvent_ > 0 && events_[0]->eventType_ == NewModelEvent::EVENT_TYPE) {
-      AeraModelItem* firstModelItem = scene_->getAeraModelItem
-      (((NewModelEvent*)events_[0].get())->model_->get_oid());
-      if (firstModelItem)
-        scene_->addArrow(newItem, firstModelItem);
+    // Add arrows to all referenced models.
+    for (int i = 0; i < newModelEvent->model_->references_size(); ++i) {
+      // TODO: Make this work for objects other than models.
+      auto referencedObject = scene_->getAeraModelItem(
+        newModelEvent->model_->get_reference(i)->get_oid());
+      if (referencedObject)
+        scene_->addArrow(newItem, referencedObject);
     }
+
+    scene_->establishFlashTimer();
   }
   else if (event->eventType_ == SetModelEvidenceCountAndSuccessRateEvent::EVENT_TYPE) {
     auto setSuccessRateEvent = (SetModelEvidenceCountAndSuccessRateEvent*)event;
