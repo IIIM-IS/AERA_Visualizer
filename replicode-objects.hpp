@@ -38,13 +38,13 @@ public:
   r_code::Code* getObject(uint32 oid);
 
   /**
-   * Get the object source code (from the decompiled objects file) by debug OID.
-   * \param oid The debug OID.
-   * \return The source code, or "" if not found.
+   * Get the object source code (from the decompiled objects file).
+   * \param object The object.
+   * \return The source code, or "" if not found. This does not have the label or view set.
    */
-  std::string getSourceCode(uint64 debugOid)
+  std::string getSourceCode(r_code::Code* object)
   {
-    auto result = objectSourceCode_.find(debugOid);
+    auto result = objectSourceCode_.find(object);
     if (result == objectSourceCode_.end())
       return "";
     return result->second;
@@ -53,21 +53,24 @@ public:
 private:
   /**
    * Process the decompiled objects file to remove OIDs, debug OIDs and info lines starting with ">". 
-   * This sets timeReference_ from the header info line. This fills objectSourceCode_ which maps the
-   * debug OID to the object's source code, where the source code is stripped of the label and view set.
+   * This sets timeReference_ from the header info line. This gets the object's source code, which is 
+   * stripped of the label and view set.
    * The source code does not have an ending newline, even if it is multi-line code.
    * \param decompiledFilePath The path of the decompiled objects file.
-   * \param objectOids Fill this map of label to OID.
-   * \param objectDebugOids Fill this map of label to debug OID.
+   * \param objectOids Fill this map of label to OID. This first clears the map.
+   * \param objectDebugOids Fill this map of label to debug OID. This first clears the map.
+   * \param objectSourceCode Fill this map of debugOID to source code. This will be stored in
+   * objectSourceCode_ once we have the Code* for the object. This first clears the map.
    * \return A string of the decompiled objects file with removed OIDs and debug OIDs.
    */
   std::string processDecompiledObjects(
     std::string decompiledFilePath, std::map<std::string, core::uint32>& objectOids,
-    std::map<std::string, core::uint64>& objectDebugOids);
+    std::map<std::string, core::uint64>& objectDebugOids, std::map<uint64, 
+    std::string>& objectSourceCode);
 
   core::Timestamp timeReference_;
-  // Key is the object debug OID, value is the source code from the decompiled objects.
-  std::map<uint64, std::string> objectSourceCode_;
+  // Key is the Code* object, value is the source code from the decompiled objects.
+  std::map<r_code::Code*, std::string> objectSourceCode_;
   r_code::list<P<r_code::Code> > objects_;
 };
 

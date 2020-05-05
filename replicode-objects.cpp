@@ -34,7 +34,9 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
 
   map<string, uint32> objectOids;
   map<string, uint64> objectDebugOids;
-  auto decompiledOut = processDecompiledObjects(decompiledFilePath, objectOids, objectDebugOids);
+  map<uint64, string> objectSourceCodeByDebugOid;
+  auto decompiledOut = processDecompiledObjects(
+    decompiledFilePath, objectOids, objectDebugOids, objectSourceCodeByDebugOid);
 
   // Preprocess and compile the processed decompiler output, using the metadata we got above.
   istringstream decompiledIn(decompiledOut);
@@ -65,8 +67,12 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
         imageObjects[i]->set_oid(oidEntry->second);
 
       auto debugOidEntry = objectDebugOids.find(name);
-      if (debugOidEntry != objectDebugOids.end())
+      if (debugOidEntry != objectDebugOids.end()) {
         imageObjects[i]->set_debug_oid(debugOidEntry->second);
+
+        // Transfer objectSourceCodeByDebugOid to objectSourceCode_.
+        objectSourceCode_[imageObjects[i]] = objectSourceCodeByDebugOid[debugOidEntry->second];
+      }
     }
   }
   
@@ -100,7 +106,7 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
     for (auto v = object->views_.begin(); v != object->views_.end(); ++v) {
 
       // init hosts' member_set.
-      r_exec::View* view = (r_exec::View*) * v;
+      r_exec::View* view = (r_exec::View*)*v;
       view->set_object(object);
       r_exec::Group* host = view->get_host();
 
@@ -117,8 +123,13 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
 }
 
 string ReplicodeObjects::processDecompiledObjects(
-  string decompiledFilePath, map<string, uint32>& objectOids, map<string, uint64>& objectDebugOids)
+  string decompiledFilePath, map<string, uint32>& objectOids, map<string, uint64>& objectDebugOids,
+  map<uint64, string>& objectSourceCode)
 {
+  objectOids.clear();
+  objectDebugOids.clear();
+  objectSourceCode.clear();
+
   ifstream rawDecompiledFile(decompiledFilePath);
   regex blankLineRegex("^\\s*$");
   regex timeReferenceRegex("^> DECOMPILATION. TimeReference (\\d+)s:(\\d+)ms:(\\d+)us");
@@ -159,7 +170,7 @@ string ReplicodeObjects::processDecompiledObjects(
 
       // We are starting a new object.
       currentDebugOid = debugOid;
-      objectSourceCode_[currentDebugOid] = sourceCodeStart;
+      objectSourceCode[currentDebugOid] = sourceCodeStart;
     }
     else if (regex_search(line, matches, oidAndDebugOidRegex)) {
       auto oid = stoul(matches[1].str());
@@ -174,7 +185,7 @@ string ReplicodeObjects::processDecompiledObjects(
 
       // We are starting a new object.
       currentDebugOid = debugOid;
-      objectSourceCode_[currentDebugOid] = sourceCodeStart;
+      objectSourceCode[currentDebugOid] = sourceCodeStart;
     }
     else {
       // Use the line as-is.
@@ -182,7 +193,7 @@ string ReplicodeObjects::processDecompiledObjects(
 
       // Append to the source code of the current object
       if (line != "" && currentDebugOid != 0)
-        objectSourceCode_[currentDebugOid] += "\n" + line;
+        objectSourceCode[currentDebugOid] += "\n" + line;
     }
   }
 
@@ -193,7 +204,7 @@ string ReplicodeObjects::processDecompiledObjects(
   // (We actually use \x01 as the newline character.)
   regex viewSetTailRegex("^(.+)\\x01   \\[[^\\x01]+\\]$");
   regex viewSetStart("^(.+) \\[\\]$");
-  for (auto entry = objectSourceCode_.begin(); entry != objectSourceCode_.end(); ++entry) {
+  for (auto entry = objectSourceCode.begin(); entry != objectSourceCode.end(); ++entry) {
     smatch matches;
     string sourceCode = entry->second;
     // Temporarily replace \n with \x01 so that we match the entire string, not by line.
@@ -220,7 +231,7 @@ string ReplicodeObjects::processDecompiledObjects(
 
     // Restore \n and update.
     replace(sourceCode.begin(), sourceCode.end(), '\x01', '\n');
-    objectSourceCode_[entry->first] = sourceCode;
+    objectSourceCode[entry->first] = sourceCode;
   }
 
   return decompiledOut.str();
