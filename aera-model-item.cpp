@@ -1,11 +1,12 @@
-#include "aera-model-item.hpp"
-#include "arrow.hpp"
-
+#include <regex>
+#include <algorithm>
 #include <QGraphicsScene>
 #include <QGraphicsSceneContextMenuEvent>
 #include <QMenu>
 #include <QPainter>
 #include <QtWidgets>
+#include "arrow.hpp"
+#include "aera-model-item.hpp"
 
 using namespace std;
 using namespace core;
@@ -73,21 +74,39 @@ void AeraModelItem::removeArrow(Arrow* arrow)
 
 void AeraModelItem::setTextItemHtml()
 {
+  auto model = newModelEvent_->model_;
+
+  // TODO: Cache some of this.
+  string label = replicodeObjects_.getLabel(model);
   QString labelHtml = "";
-  auto label = replicodeObjects_.getLabel(newModelEvent_->model_);
   if (label != "")
     labelHtml = QString("<font color=\"blue\"><b>") + label.c_str() + "</b><font color = \"black\">:";
 
-  QString sourceCode = replicodeObjects_.getSourceCode(newModelEvent_->model_).c_str();
-  sourceCode.replace("\n", "<br>");
-  sourceCode.replace(" ", "&nbsp;");
+  string sourceCode = replicodeObjects_.getSourceCode(model);
+  // Temporarily replace \n with \x01 so that we match the entire string, not by line.
+  replace(sourceCode.begin(), sourceCode.end(), '\n', '\x01');
+  // Strip the parameters. We will add them below. 
+  // "[\\s\\x01]+" is whitespace "[\\d\\.]+" is a float value.
+  // TODO: The original source may have comments, so need to strip these.
+  regex modelRegex("^(.+)([\\s\\x01]+[\\d\\.]+){5}[\\s\\x01]*\\)$");
+  smatch matches;
+  if (regex_search(sourceCode, matches, modelRegex))
+    sourceCode = matches[1].str();
+  // Restore \n.
+  replace(sourceCode.begin(), sourceCode.end(), '\x01', '\n');
 
-  QString html = labelHtml + sourceCode + "<br>";
-  html += "<font color=\"" + evidenceCountColor_ +"\">Evidence Count: " + 
-    QString::number(evidenceCount_) + "</font><br>";
-  html += "<font color=\"" + successRateColor_ + "\">&nbsp;&nbsp;&nbsp;&nbsp;Success Rate: " +
-    QString::number(successRate_) + "</font><br>";
-  textItem_->setHtml(html);
+  QString sourceCodeHtml = sourceCode.c_str();
+  sourceCodeHtml.replace("\n", "<br>");
+  sourceCodeHtml.replace(" ", "&nbsp;");
+
+  sourceCodeHtml += "<br>" + QString::number(model->code(MDL_STRENGTH).asFloat()) + " ; Strength";
+  sourceCodeHtml += "<br><font color=\"" + evidenceCountColor_ +"\">" +
+    QString::number(evidenceCount_) + " ; Evidence Count</font>";
+  sourceCodeHtml += "<br><font color=\"" + successRateColor_ + "\">" + 
+    QString::number(successRate_) + " ; Success Rate</font>";
+  sourceCodeHtml += "<br>" + QString::number(model->code(MDL_DSR).asFloat()) + " ; Derivative of Success Rate";
+  sourceCodeHtml += "<br>1)";
+  textItem_->setHtml(labelHtml + sourceCodeHtml);
 }
 
 void AeraModelItem::addArrow(Arrow* arrow)
@@ -97,10 +116,11 @@ void AeraModelItem::addArrow(Arrow* arrow)
 
 void AeraModelItem::updateFromModel()
 {
-  evidenceCountIncreased_ = (newModelEvent_->model_->code(MDL_CNT).asFloat() >= evidenceCount_);
-  evidenceCount_ = newModelEvent_->model_->code(MDL_CNT).asFloat();
-  successRateIncreased_ = (newModelEvent_->model_->code(MDL_SR).asFloat() >= successRate_);
-  successRate_ = newModelEvent_->model_->code(MDL_SR).asFloat();
+  auto model = newModelEvent_->model_;
+  evidenceCountIncreased_ = (model->code(MDL_CNT).asFloat() >= evidenceCount_);
+  evidenceCount_ = model->code(MDL_CNT).asFloat();
+  successRateIncreased_ = (model->code(MDL_SR).asFloat() >= successRate_);
+  successRate_ = model->code(MDL_SR).asFloat();
 
   setTextItemHtml();
 }
