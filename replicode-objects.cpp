@@ -35,7 +35,7 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
   map<string, uint64> objectDebugOids;
   auto decompiledOut = processDecompiledObjects(decompiledFilePath, objectOids, objectDebugOids);
 
-  // Preprocess and complile the processed decompiler output, using the metadata we got above.
+  // Preprocess and compile the processed decompiler output, using the metadata we got above.
   istringstream decompiledIn(decompiledOut);
   ostringstream preprocessedOut;
   if (!preprocessor.process(
@@ -49,13 +49,13 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
   if (!compiler.compile(&preprocessedIn, &image, &metadata, error, false))
     return error;
 
-  // Get the the objects from the compiled image.
+  // Get the the objects from the compiler image.
   r_code::vector<Code*> imageObjects;
-  // tempMem is only used for calling build_object.
+  // tempMem is only used internally for calling build_object.
   r_exec::Mem<r_exec::LObject, r_exec::MemStatic> tempMem;
   image.get_objects(&tempMem, imageObjects);
 
-  // Set the OIDs based on the decompiled output.
+  // Set the OIDs and debug OIDs based on the decompiled output.
   for (auto i = 0; i < imageObjects.size(); ++i) {
     string name = compiler.getObjectName(i);
     if (name != "") {
@@ -111,20 +111,6 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
   }
 
   r_exec::_Mem::init_timings(timeReference_, objects_);
-
-#if 0 // Test re-decompiling.
-#include "submodules/replicode/r_comp/decompiler.h"
-  Decompiler debugDecompiler;
-  debugDecompiler.init(&metadata);
-  r_comp::Image debugImage;
-  debugImage.timestamp_ = Time::Get();
-  debugImage.add_objects(objects_);
-  debugImage.object_names_ = image.object_names_;
-  std::ostringstream decompiled_code;
-  debugDecompiler.decompile(&debugImage, &decompiled_code, timeReference_.time_since_epoch(), false);
-  ofstream debugOutFile("c:\\temp\\decompiled.txt");
-  debugOutFile << decompiled_code.str() << endl;
-#endif
 
   return "";
 }
