@@ -94,7 +94,7 @@ void AeraModelItem::setTextItemHtml()
 {
   auto model = newModelEvent_->model_;
 
-  QString html = QString("<h3><font color=\"blue\"><b>") + 
+  QString html = QString("<h3><font color=\"darkred\"><b>") + 
     replicodeObjects_.getLabel(model).c_str() + "</b><font color = \"black\"></h3>";
   html += sourceCodeHtml_ + "<br><br>";
   html += "<font color=\"" + evidenceCountColor_ + "\">Evidence Count: " +
