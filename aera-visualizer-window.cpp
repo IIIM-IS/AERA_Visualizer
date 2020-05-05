@@ -259,7 +259,6 @@ void AeraVisulizerWindow::createActions()
 {
   exitAction_ = new QAction(tr("E&xit"), this);
   exitAction_->setShortcuts(QKeySequence::Quit);
-  exitAction_->setStatusTip(tr("Exit"));
   connect(exitAction_, SIGNAL(triggered()), this, SLOT(close()));
 
   zoomInAction_ = new QAction(QIcon(":/images/zoom-in.png"), tr("Zoom In"), this);
@@ -275,15 +274,12 @@ void AeraVisulizerWindow::createActions()
   connect(zoomHomeAction_, SIGNAL(triggered()), this, SLOT(zoomHome()));
 
   zoomToThisAction_ = new QAction(tr("&Zoom to This"), this);
-  zoomToThisAction_->setStatusTip(tr("Zoom to this item"));
   connect(zoomToThisAction_, SIGNAL(triggered()), this, SLOT(zoomToThis()));
 
   toFrontAction_ = new QAction(tr("Bring to &Front"), this);
-  toFrontAction_->setStatusTip(tr("Bring item to front"));
   connect(toFrontAction_, SIGNAL(triggered()), this, SLOT(bringToFront()));
 
   sendBackAction_ = new QAction(tr("Send to &Back"), this);
-  sendBackAction_->setStatusTip(tr("Send item to back"));
   connect(sendBackAction_, SIGNAL(triggered()), this, SLOT(sendToBack()));
 }
 
