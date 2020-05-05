@@ -172,8 +172,13 @@ void AeraModelItem::textItemLinkActivated(const QString& link)
     if (object) {
       // TODO: Make this work for other than models.
       auto item = parent_->getAeraModelItem(object);
-      if (item)
-        parent_->zoomToItem(item);
+      if (item) {
+        auto menu = new QMenu();
+        menu->addAction(QString("Zoom to ") + replicodeObjects_.getLabel(object).c_str(),
+          [=]() { parent_->zoomToItem(item); });
+        menu->exec(parent_->getMouseScreenPosition() - QPoint(10, 10));
+        delete menu;
+      }
     }
   }
 }
