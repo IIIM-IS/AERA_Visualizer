@@ -74,6 +74,7 @@ private:
   NewModelEvent* newModelEvent_;
   QList<Arrow*> arrows_;
   QGraphicsTextItem* textItem_;
+  QString sourceCodeHtml_;
   core::float32 evidenceCount_;
   QString evidenceCountColor_;
   core::float32 successRate_;

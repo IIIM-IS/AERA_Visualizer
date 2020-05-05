@@ -27,6 +27,24 @@ AeraModelItem::AeraModelItem(
   const qreal top = -50;
   const qreal diameter = 20;
 
+  // Set up sourceCodeHtml_
+  string sourceCode = replicodeObjects_.getSourceCode(newModelEvent_->model_);
+  // Temporarily replace \n with \x01 so that we match the entire string, not by line.
+  replace(sourceCode.begin(), sourceCode.end(), '\n', '\x01');
+  // Strip the set of output groups and parameters.
+  // "[\\s\\x01]+" is whitespace "[\\d\\.]+" is a float value.
+  // TODO: The original source may have comments, so need to strip these.
+  regex modelRegex("^(.+)[\\s\\x01]+\\[[\\w\\s]+\\]([\\s\\x01]+[\\d\\.]+){5}[\\s\\x01]*\\)$");
+  smatch matches;
+  if (regex_search(sourceCode, matches, modelRegex))
+    sourceCode = matches[1].str();
+  sourceCode += ")";
+  // Restore \n.
+  replace(sourceCode.begin(), sourceCode.end(), '\x01', '\n');
+  sourceCodeHtml_ = sourceCode.c_str();
+  sourceCodeHtml_.replace("\n", "<br>");
+  sourceCodeHtml_.replace(" ", "&nbsp;");
+
   // Set up the textItem_ first to get its size.
   textItem_ = new QGraphicsTextItem(this);
   textItem_->setPos(left + 5, top + 5);
@@ -76,37 +94,14 @@ void AeraModelItem::setTextItemHtml()
 {
   auto model = newModelEvent_->model_;
 
-  // TODO: Cache some of this.
-  string label = replicodeObjects_.getLabel(model);
-  QString labelHtml = "";
-  if (label != "")
-    labelHtml = QString("<font color=\"blue\"><b>") + label.c_str() + "</b><font color = \"black\">:";
-
-  string sourceCode = replicodeObjects_.getSourceCode(model);
-  // Temporarily replace \n with \x01 so that we match the entire string, not by line.
-  replace(sourceCode.begin(), sourceCode.end(), '\n', '\x01');
-  // Strip the parameters. We will add them below. 
-  // "[\\s\\x01]+" is whitespace "[\\d\\.]+" is a float value.
-  // TODO: The original source may have comments, so need to strip these.
-  regex modelRegex("^(.+)([\\s\\x01]+[\\d\\.]+){5}[\\s\\x01]*\\)$");
-  smatch matches;
-  if (regex_search(sourceCode, matches, modelRegex))
-    sourceCode = matches[1].str();
-  // Restore \n.
-  replace(sourceCode.begin(), sourceCode.end(), '\x01', '\n');
-
-  QString sourceCodeHtml = sourceCode.c_str();
-  sourceCodeHtml.replace("\n", "<br>");
-  sourceCodeHtml.replace(" ", "&nbsp;");
-
-  sourceCodeHtml += "<br>" + QString::number(model->code(MDL_STRENGTH).asFloat()) + " ; Strength";
-  sourceCodeHtml += "<br><font color=\"" + evidenceCountColor_ +"\">" +
-    QString::number(evidenceCount_) + " ; Evidence Count</font>";
-  sourceCodeHtml += "<br><font color=\"" + successRateColor_ + "\">" + 
-    QString::number(successRate_) + " ; Success Rate</font>";
-  sourceCodeHtml += "<br>" + QString::number(model->code(MDL_DSR).asFloat()) + " ; Derivative of Success Rate";
-  sourceCodeHtml += "<br>1)";
-  textItem_->setHtml(labelHtml + sourceCodeHtml);
+  QString html = QString("<h3><font color=\"blue\"><b>") + 
+    replicodeObjects_.getLabel(model).c_str() + "</b><font color = \"black\"></h3>";
+  html += sourceCodeHtml_ + "<br><br>";
+  html += "<font color=\"" + evidenceCountColor_ + "\">Evidence Count: " +
+    QString::number(evidenceCount_) + "</font><br>";
+  html += "<font color=\"" + successRateColor_ + "\">&nbsp;&nbsp;&nbsp;&nbsp;Success Rate: " +
+    QString::number(successRate_) + "</font><br>";
+  textItem_->setHtml(html);
 }
 
 void AeraModelItem::addArrow(Arrow* arrow)
