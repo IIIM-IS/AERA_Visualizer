@@ -29,13 +29,14 @@ public:
    */
   void scaleViewBy(double factor);
   void zoomViewHome();
+  void zoomToItem(QGraphicsItem* item);
   AeraModelItem* addAeraModelItem(NewModelEvent* newModelEvent);
   void addArrow(AeraModelItem* startItem, AeraModelItem* endItem);
   /**
-   * Get the AeraModelItem whose NewModelEvent has the given oid.
+   * Get the AeraModelItem whose NewModelEvent has the given model.
    * \return The AeraModelItem, or null if not found.
    */
-  AeraModelItem* getAeraModelItem(core::uint32 oid);
+  AeraModelItem* getAeraModelItem(r_code::Code* model);
   void establishFlashTimer()
   {
     if (flashTimerId_ == 0)

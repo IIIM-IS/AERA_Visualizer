@@ -23,6 +23,7 @@ class QGraphicsSimpleTextItem;
 namespace aera_visualizer {
 
 class Arrow;
+class AeraVisualizerScene;
 
 class AeraModelItem : public QGraphicsPolygonItem
 {
@@ -31,7 +32,7 @@ public:
 
   AeraModelItem(
     QMenu* contextMenu, NewModelEvent* newModelEvent, ReplicodeObjects& replicodeObjects, 
-    QGraphicsItem* parent = 0);
+    AeraVisualizerScene* parent);
 
   void removeArrows();
   QPolygonF polygon() const { return polygon_; }
@@ -63,11 +64,12 @@ protected:
   QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
 private:
+  void addSourceCodeHtmlLinks(QString& html);
   void setTextItemHtml();
   void removeArrow(Arrow* arrow);
+  void textItemLinkActivated(const QString& link);
 
-  static void textItemLinkActivated(const QString& link);
-
+  AeraVisualizerScene* parent_;
   ReplicodeObjects& replicodeObjects_;
   QPolygonF polygon_;
   QMenu* contextMenu_;

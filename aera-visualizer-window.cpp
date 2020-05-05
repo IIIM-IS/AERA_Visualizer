@@ -104,7 +104,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     for (int i = 0; i < newModelEvent->model_->references_size(); ++i) {
       // TODO: Make this work for objects other than models.
       auto referencedObject = scene_->getAeraModelItem(
-        newModelEvent->model_->get_reference(i)->get_oid());
+        newModelEvent->model_->get_reference(i));
       if (referencedObject)
         scene_->addArrow(newItem, referencedObject);
     }
@@ -122,7 +122,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     setSuccessRateEvent->model_->code(MDL_CNT) = Atom::Float(setSuccessRateEvent->evidenceCount_);
     setSuccessRateEvent->model_->code(MDL_SR) = Atom::Float(setSuccessRateEvent->successRate_);
 
-    auto modelItem = scene_->getAeraModelItem(setSuccessRateEvent->model_->get_oid());
+    auto modelItem = scene_->getAeraModelItem(setSuccessRateEvent->model_);
     if (modelItem) {
       modelItem->updateFromModel();
       if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
@@ -158,7 +158,7 @@ Timestamp AeraVisulizerWindow::unstepEvent()
   if (event->eventType_ == NewModelEvent::EVENT_TYPE) {
     // Find the AeraModelItem for this event and remove it.
     // Note that the event saves the updated item position and will use it when recreating the item.
-    auto modelItem = scene_->getAeraModelItem(((NewModelEvent*)event)->model_->get_oid());
+    auto modelItem = scene_->getAeraModelItem(((NewModelEvent*)event)->model_);
     if (modelItem) {
       modelItem->removeArrows();
       scene_->removeItem(modelItem);
@@ -172,7 +172,7 @@ Timestamp AeraVisulizerWindow::unstepEvent()
     setSuccessRateEvent->model_->code(MDL_CNT) = Atom::Float(setSuccessRateEvent->oldEvidenceCount_);
     setSuccessRateEvent->model_->code(MDL_SR) = Atom::Float(setSuccessRateEvent->oldSuccessRate_);
 
-    auto modelItem = scene_->getAeraModelItem(setSuccessRateEvent->model_->get_oid());
+    auto modelItem = scene_->getAeraModelItem(setSuccessRateEvent->model_);
     if (modelItem) {
       if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
           setSuccessRateEvent->successRate_ == setSuccessRateEvent->oldSuccessRate_)

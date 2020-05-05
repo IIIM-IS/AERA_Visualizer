@@ -5,18 +5,21 @@
 #include <QMenu>
 #include <QPainter>
 #include <QtWidgets>
+#include "submodules/replicode/r_exec/opcodes.h"
 #include "arrow.hpp"
+#include "aera-visualizer-scene.hpp"
 #include "aera-model-item.hpp"
 
 using namespace std;
 using namespace core;
 using namespace r_code;
+using namespace r_exec;
 
 namespace aera_visualizer {
 
 AeraModelItem::AeraModelItem(
-  QMenu* contextMenu, NewModelEvent* newModelEvent, ReplicodeObjects& replicodeObjects, QGraphicsItem* parent)
-  : QGraphicsPolygonItem(parent),
+  QMenu* contextMenu, NewModelEvent* newModelEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
+  : parent_(parent),
   newModelEvent_(newModelEvent), replicodeObjects_(replicodeObjects),
   evidenceCount_(1), successRate_(1),
   evidenceCountColor_("black"), successRateColor_("black")
@@ -41,15 +44,18 @@ AeraModelItem::AeraModelItem(
   sourceCode += ")";
   // Restore \n.
   replace(sourceCode.begin(), sourceCode.end(), '\x01', '\n');
-  sourceCodeHtml_ = sourceCode.c_str();
-  sourceCodeHtml_.replace("\n", "<br>");
-  sourceCodeHtml_.replace(" ", "&nbsp;");
+  QString html = sourceCode.c_str();
+  html.replace("\n", "<br>");
+  html.replace(" ", "&nbsp;");
+  addSourceCodeHtmlLinks(html);
+  sourceCodeHtml_ = html;
 
   // Set up the textItem_ first to get its size.
   textItem_ = new QGraphicsTextItem(this);
   textItem_->setPos(left + 5, top + 5);
   textItem_->setTextInteractionFlags(Qt::TextBrowserInteraction);
-  QObject::connect(textItem_, &QGraphicsTextItem::linkActivated, &AeraModelItem::textItemLinkActivated);
+  QObject::connect(textItem_, &QGraphicsTextItem::linkActivated, 
+    [this](const QString& link) { textItemLinkActivated(link); });
   updateFromModel();
 
   qreal right = textItem_->boundingRect().width() - 50;
@@ -88,6 +94,28 @@ void AeraModelItem::removeArrow(Arrow* arrow)
   int index = arrows_.indexOf(arrow);
   if (index != -1)
     arrows_.removeAt(index);
+}
+
+void AeraModelItem::addSourceCodeHtmlLinks(QString& html)
+{
+  Code* object = newModelEvent_->model_;
+  for (int i = 0; i < object->references_size(); ++i) {
+    auto referencedObject = object->get_reference(i);
+    if (!(referencedObject->code(0).asOpcode() == Opcodes::Mdl ||
+          referencedObject->code(0).asOpcode() == Opcodes::Cst))
+      continue;
+
+    auto referencedLabel = replicodeObjects_.getLabel(referencedObject);
+    if (referencedLabel == "")
+      continue;
+
+    // Spaces are alreay replaced with &nbsp; .
+    // TODO: Handle case when the label is not surrounded by spaces.
+    html.replace(
+      QString("&nbsp;") + referencedLabel.c_str() + "&nbsp;", 
+      QString("&nbsp;<a href=\"#oid-") + QString::number(referencedObject->get_oid()) + "\">" +
+              referencedLabel.c_str() + "</a>&nbsp;");
+  }
 }
 
 void AeraModelItem::setTextItemHtml()
@@ -141,6 +169,16 @@ QVariant AeraModelItem::itemChange(GraphicsItemChange change, const QVariant& va
 
 void AeraModelItem::textItemLinkActivated(const QString& link)
 {
+  if (link.startsWith("#oid-")) {
+    int oid = link.mid(5).toInt();
+    auto object = replicodeObjects_.getObject(oid);
+    if (object) {
+      // TODO: Make this work for other than models.
+      auto item = parent_->getAeraModelItem(object);
+      if (item)
+        parent_->zoomToItem(item);
+    }
+  }
 }
 
 }

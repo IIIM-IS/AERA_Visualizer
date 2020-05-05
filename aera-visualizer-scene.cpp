@@ -6,6 +6,7 @@
 #include <QApplication>
 
 using namespace core;
+using namespace r_code;
 
 namespace aera_visualizer {
 
@@ -34,7 +35,7 @@ AeraModelItem* AeraVisualizerScene::addAeraModelItem(NewModelEvent* newModelEven
       QPointF(newModelEvent->model_->get_oid() * 320 - 14730, 2380);
   }
 
-  AeraModelItem* item = new AeraModelItem(itemMenu_, newModelEvent, replicodeObjects_);
+  AeraModelItem* item = new AeraModelItem(itemMenu_, newModelEvent, replicodeObjects_, this);
   item->setBrush(itemColor_);
   addItem(item);
   item->setPos(newModelEvent->itemPosition_);
@@ -72,12 +73,12 @@ void AeraVisualizerScene::addArrow(AeraModelItem* startItem, AeraModelItem* endI
   arrow->updatePosition();
 }
 
-AeraModelItem* AeraVisualizerScene::getAeraModelItem(uint32 oid)
+AeraModelItem* AeraVisualizerScene::getAeraModelItem(Code* model)
 {
   foreach(QGraphicsItem* item, items()) {
     if (item->type() == AeraModelItem::Type) {
       AeraModelItem* modelItem = qgraphicsitem_cast<AeraModelItem*>(item);
-      if (modelItem->getNewModelEvent()->model_->get_oid() == oid)
+      if (modelItem->getNewModelEvent()->model_ == model)
         return modelItem;
     }
   }
@@ -99,6 +100,11 @@ void AeraVisualizerScene::scaleViewBy(double factor)
 void AeraVisualizerScene::zoomViewHome()
 {
   views().at(0)->fitInView(itemsBoundingRect(), Qt::KeepAspectRatio);
+}
+
+void AeraVisualizerScene::zoomToItem(QGraphicsItem* item)
+{
+  views().at(0)->fitInView(item, Qt::KeepAspectRatio);
 }
 
 #if QT_CONFIG(wheelevent)
