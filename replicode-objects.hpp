@@ -38,6 +38,19 @@ public:
   r_code::Code* getObject(uint32 oid);
 
   /**
+   * Get the object's label (from the decompiled objects file).
+   * \param object The object.
+   * \return The label, or "" if not found.
+   */
+  std::string getLabel(r_code::Code* object)
+  {
+    auto result = objectLabel_.find(object);
+    if (result == objectLabel_.end())
+      return "";
+    return result->second;
+  }
+
+  /**
    * Get the object source code (from the decompiled objects file).
    * \param object The object.
    * \return The source code, or "" if not found. This does not have the label or view set.
@@ -71,6 +84,8 @@ private:
   core::Timestamp timeReference_;
   // Key is the Code* object, value is the source code from the decompiled objects.
   std::map<r_code::Code*, std::string> objectSourceCode_;
+  // Key is the Code* object, value is the label from the decompiled objects.
+  std::map<r_code::Code*, std::string> objectLabel_;
   r_code::list<P<r_code::Code> > objects_;
 };
 

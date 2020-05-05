@@ -60,13 +60,15 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
 
   // Set the OIDs and debug OIDs based on the decompiled output.
   for (auto i = 0; i < imageObjects.size(); ++i) {
-    string name = compiler.getObjectName(i);
-    if (name != "") {
-      auto oidEntry = objectOids.find(name);
+    string label = compiler.getObjectName(i);
+    if (label != "") {
+      objectLabel_[imageObjects[i]] = label;
+
+      auto oidEntry = objectOids.find(label);
       if (oidEntry != objectOids.end())
         imageObjects[i]->set_oid(oidEntry->second);
 
-      auto debugOidEntry = objectDebugOids.find(name);
+      auto debugOidEntry = objectDebugOids.find(label);
       if (debugOidEntry != objectDebugOids.end()) {
         imageObjects[i]->set_debug_oid(debugOidEntry->second);
 

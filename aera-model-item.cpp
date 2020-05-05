@@ -33,7 +33,7 @@ AeraModelItem::AeraModelItem(
   QObject::connect(textItem_, &QGraphicsTextItem::linkActivated, &AeraModelItem::textItemLinkActivated);
   updateFromModel();
 
-  qreal right = textItem_->boundingRect().width();
+  qreal right = textItem_->boundingRect().width() - 50;
   qreal bottom = textItem_->boundingRect().height() - 30;
 
   QPainterPath path;
@@ -73,7 +73,16 @@ void AeraModelItem::removeArrow(Arrow* arrow)
 
 void AeraModelItem::setTextItemHtml()
 {
-  QString html = "OID: " + QString::number(newModelEvent_->model_->get_oid()) + "<br>";
+  QString labelHtml = "";
+  auto label = replicodeObjects_.getLabel(newModelEvent_->model_);
+  if (label != "")
+    labelHtml = QString("<font color=\"blue\"><b>") + label.c_str() + "</b><font color = \"black\">:";
+
+  QString sourceCode = replicodeObjects_.getSourceCode(newModelEvent_->model_).c_str();
+  sourceCode.replace("\n", "<br>");
+  sourceCode.replace(" ", "&nbsp;");
+
+  QString html = labelHtml + sourceCode + "<br>";
   html += "<font color=\"" + evidenceCountColor_ +"\">Evidence Count: " + 
     QString::number(evidenceCount_) + "</font><br>";
   html += "<font color=\"" + successRateColor_ + "\">&nbsp;&nbsp;&nbsp;&nbsp;Success Rate: " +
