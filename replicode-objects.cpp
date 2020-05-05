@@ -31,61 +31,12 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
   // Now() is called when construcing model controllers.
   r_exec::Now = Time::Get;
 
-  // Preprocess the decompiler output to remove extra info and get the OIDs.
   map<string, uint32> objectOids;
   map<string, uint64> objectDebugOids;
-  ifstream rawDecompiledFile(decompiledFilePath);
-  regex blankLineRegex("^\\s*$");
-  regex timeReferenceRegex("^> DECOMPILATION. TimeReference (\\d+)s:(\\d+)ms:(\\d+)us");
-  regex debugOidRegex("^\\((\\d+)\\) ([\\w\\.]+):(.+)$");
-  regex oidAndDebugOidRegex("^(\\d+)\\((\\d+)\\) (\\w+):(.+)$");
-
-  ostringstream decompiledOut;
-  string line;
-  while (getline(rawDecompiledFile, line)) {
-    smatch matches;
-
-    if (regex_search(line, matches, blankLineRegex))
-      // Skip blank lines.
-      decompiledOut << endl;
-    if (regex_search(line, matches, timeReferenceRegex)) {
-      microseconds us(1000000 * stoll(matches[1].str()) +
-                         1000 * stoll(matches[2].str()) +
-                                stoll(matches[3].str()));
-      timeReference_ = Timestamp(us);
-
-      // Make the line blank.
-      decompiledOut << endl;
-    }
-    else if (line.size() > 0 && line[0] == '>')
-      // Skip other decompiler messages starting with '>'.
-      decompiledOut << endl;
-    else if (regex_search(line, matches, debugOidRegex)) {
-      auto debugOid = stoull(matches[1].str());
-      auto name = matches[2].str();
-      objectOids[name] = UNDEFINED_OID;
-      objectDebugOids[name] = debugOid;
-
-      // Use the line without the OID.
-      decompiledOut << name << ':' << matches[3].str() << endl;
-    }
-    else if (regex_search(line, matches, oidAndDebugOidRegex)) {
-      auto oid = stoul(matches[1].str());
-      auto debugOid = stoul(matches[2].str());
-      auto name = matches[3].str();
-      objectOids[name] = oid;
-      objectDebugOids[name] = debugOid;
-
-      // Use the line without the OID.
-      decompiledOut << name << ':' << matches[4].str() << endl;
-    }
-    else
-      // Use the line as-is.
-      decompiledOut << line << endl;
-  }
+  auto decompiledOut = processDecompiledObjects(decompiledFilePath, objectOids, objectDebugOids);
 
   // Preprocess and complile the processed decompiler output, using the metadata we got above.
-  istringstream decompiledIn(decompiledOut.str());
+  istringstream decompiledIn(decompiledOut);
   ostringstream preprocessedOut;
   if (!preprocessor.process(
       &decompiledIn, decompiledFilePath, &preprocessedOut, error, NULL))
@@ -176,6 +127,62 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
 #endif
 
   return "";
+}
+
+string ReplicodeObjects::processDecompiledObjects(
+  string decompiledFilePath, map<string, uint32>& objectOids, map<string, uint64>& objectDebugOids)
+{
+  ifstream rawDecompiledFile(decompiledFilePath);
+  regex blankLineRegex("^\\s*$");
+  regex timeReferenceRegex("^> DECOMPILATION. TimeReference (\\d+)s:(\\d+)ms:(\\d+)us");
+  regex debugOidRegex("^\\((\\d+)\\) ([\\w\\.]+)(:)(.+)$");
+  regex oidAndDebugOidRegex("^(\\d+)\\((\\d+)\\) (\\w+)(:)(.+)$");
+
+  ostringstream decompiledOut;
+  string line;
+  while (getline(rawDecompiledFile, line)) {
+    smatch matches;
+
+    if (regex_search(line, matches, blankLineRegex))
+      // Skip blank lines.
+      decompiledOut << endl;
+    if (regex_search(line, matches, timeReferenceRegex)) {
+      microseconds us(1000000 * stoll(matches[1].str()) +
+        1000 * stoll(matches[2].str()) +
+        stoll(matches[3].str()));
+      timeReference_ = Timestamp(us);
+
+      // Make the line blank.
+      decompiledOut << endl;
+    }
+    else if (line.size() > 0 && line[0] == '>')
+      // Skip other decompiler messages starting with '>'.
+      decompiledOut << endl;
+    else if (regex_search(line, matches, debugOidRegex)) {
+      auto debugOid = stoull(matches[1].str());
+      auto name = matches[2].str();
+      objectOids[name] = UNDEFINED_OID;
+      objectDebugOids[name] = debugOid;
+
+      // Use the line without the OID.
+      decompiledOut << name << ':' << matches[4].str() << endl;
+    }
+    else if (regex_search(line, matches, oidAndDebugOidRegex)) {
+      auto oid = stoul(matches[1].str());
+      auto debugOid = stoul(matches[2].str());
+      auto name = matches[3].str();
+      objectOids[name] = oid;
+      objectDebugOids[name] = debugOid;
+
+      // Use the line without the OID.
+      decompiledOut << name << ':' << matches[5].str() << endl;
+    }
+    else
+      // Use the line as-is.
+      decompiledOut << line << endl;
+  }
+
+  return decompiledOut.str();
 }
 
 r_code::Code* ReplicodeObjects::getObject(uint32 oid)

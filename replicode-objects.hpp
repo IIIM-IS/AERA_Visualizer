@@ -38,6 +38,18 @@ public:
   r_code::Code* getObject(uint32 oid);
 
 private:
+  /**
+   * Process the decompiled objects file to remove OIDs, debug OIDs and info lines starting with ">". 
+   * This sets timeReference_ from the header info line.
+   * \param decompiledFilePath The path of the decompiled objects file.
+   * \param objectOids Fill this map of label to OID.
+   * \param objectDebugOids Fill this map of label to debug OID.
+   * \return A string of the decompiled objects file with removed OIDs and debug OIDs.
+   */
+  std::string processDecompiledObjects(
+    std::string decompiledFilePath, std::map<std::string, core::uint32>& objectOids,
+    std::map<std::string, core::uint64>& objectDebugOids);
+
   core::Timestamp timeReference_;
   r_code::list<P<r_code::Code> > objects_;
 };
