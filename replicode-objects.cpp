@@ -200,6 +200,7 @@ string ReplicodeObjects::processDecompiledObjects(
   }
 
   // Strip the view from the end of each source code.
+  // TODO: The source may have comments, so need to skip these.
   // This matches anything (including newlines) ending in " |[]".
   regex emptyViewRegex("^(.+) \\|\\[\\]$");
   // This matches anything ending in "\n   [view]".
