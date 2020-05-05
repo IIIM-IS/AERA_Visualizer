@@ -1,6 +1,7 @@
 #include <fstream>
 #include <sstream>
 #include <regex>
+#include <algorithm>
 #include "submodules/replicode/r_comp/preprocessor.h"
 #include "submodules/replicode/r_comp/compiler.h"
 #include "submodules/replicode/r_exec/model_base.h"
@@ -124,6 +125,8 @@ string ReplicodeObjects::processDecompiledObjects(
   regex debugOidRegex("^\\((\\d+)\\) ([\\w\\.]+)(:)(.+)$");
   regex oidAndDebugOidRegex("^(\\d+)\\((\\d+)\\) (\\w+)(:)(.+)$");
 
+  // Scan the input and fill decompiledOut.
+  uint64 currentDebugOid = 0;
   ostringstream decompiledOut;
   string line;
   while (getline(rawDecompiledFile, line)) {
@@ -147,25 +150,77 @@ string ReplicodeObjects::processDecompiledObjects(
     else if (regex_search(line, matches, debugOidRegex)) {
       auto debugOid = stoull(matches[1].str());
       auto name = matches[2].str();
+      auto sourceCodeStart = matches[4].str();
       objectOids[name] = UNDEFINED_OID;
       objectDebugOids[name] = debugOid;
 
       // Use the line without the OID.
-      decompiledOut << name << ':' << matches[4].str() << endl;
+      decompiledOut << name << ':' << sourceCodeStart << endl;
+
+      // We are starting a new object.
+      currentDebugOid = debugOid;
+      objectSourceCode_[currentDebugOid] = sourceCodeStart;
     }
     else if (regex_search(line, matches, oidAndDebugOidRegex)) {
       auto oid = stoul(matches[1].str());
       auto debugOid = stoul(matches[2].str());
       auto name = matches[3].str();
+      auto sourceCodeStart = matches[5].str();
       objectOids[name] = oid;
       objectDebugOids[name] = debugOid;
 
       // Use the line without the OID.
-      decompiledOut << name << ':' << matches[5].str() << endl;
+      decompiledOut << name << ':' << sourceCodeStart << endl;
+
+      // We are starting a new object.
+      currentDebugOid = debugOid;
+      objectSourceCode_[currentDebugOid] = sourceCodeStart;
     }
-    else
+    else {
       // Use the line as-is.
       decompiledOut << line << endl;
+
+      // Append to the source code of the current object
+      if (line != "" && currentDebugOid != 0)
+        objectSourceCode_[currentDebugOid] += "\n" + line;
+    }
+  }
+
+  // Strip the view from the end of each source code.
+  // This matches anything (including newlines) ending in " |[]".
+  regex emptyViewRegex("^(.+) \\|\\[\\]$");
+  // This matches anything ending in "\n   [view]".
+  // (We actually use \x01 as the newline character.)
+  regex viewSetTailRegex("^(.+)\\x01   \\[[^\\x01]+\\]$");
+  regex viewSetStart("^(.+) \\[\\]$");
+  for (auto entry = objectSourceCode_.begin(); entry != objectSourceCode_.end(); ++entry) {
+    smatch matches;
+    string sourceCode = entry->second;
+    // Temporarily replace \n with \x01 so that we match the entire string, not by line.
+    replace(sourceCode.begin(), sourceCode.end(), '\n', '\x01');
+
+    if (regex_search(sourceCode, matches, emptyViewRegex))
+      sourceCode = matches[1].str();
+    else if (regex_search(sourceCode, matches, viewSetTailRegex)) {
+      // Strip the view set element.
+      sourceCode = matches[1].str();
+
+      // Look for the start of the view set, or more elements.
+      while (true) {
+        if (regex_search(sourceCode, matches, viewSetStart)) {
+          sourceCode = matches[1].str();
+          break;
+        }
+
+        // This should match.
+        if (regex_search(sourceCode, matches, viewSetTailRegex))
+          sourceCode = matches[1].str();
+      }
+    }
+
+    // Restore \n and update.
+    replace(sourceCode.begin(), sourceCode.end(), '\x01', '\n');
+    objectSourceCode_[entry->first] = sourceCode;
   }
 
   return decompiledOut.str();

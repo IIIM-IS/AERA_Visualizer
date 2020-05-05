@@ -37,10 +37,25 @@ public:
    */
   r_code::Code* getObject(uint32 oid);
 
+  /**
+   * Get the object source code (from the decompiled objects file) by debug OID.
+   * \param oid The debug OID.
+   * \return The source code, or "" if not found.
+   */
+  std::string getSourceCode(uint64 debugOid)
+  {
+    auto result = objectSourceCode_.find(debugOid);
+    if (result == objectSourceCode_.end())
+      return "";
+    return result->second;
+  }
+
 private:
   /**
    * Process the decompiled objects file to remove OIDs, debug OIDs and info lines starting with ">". 
-   * This sets timeReference_ from the header info line.
+   * This sets timeReference_ from the header info line. This fills objectSourceCode_ which maps the
+   * debug OID to the object's source code, where the source code is stripped of the label and view set.
+   * The source code does not have an ending newline, even if it is multi-line code.
    * \param decompiledFilePath The path of the decompiled objects file.
    * \param objectOids Fill this map of label to OID.
    * \param objectDebugOids Fill this map of label to debug OID.
@@ -51,6 +66,8 @@ private:
     std::map<std::string, core::uint64>& objectDebugOids);
 
   core::Timestamp timeReference_;
+  // Key is the object debug OID, value is the source code from the decompiled objects.
+  std::map<uint64, std::string> objectSourceCode_;
   r_code::list<P<r_code::Code> > objects_;
 };
 
