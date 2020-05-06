@@ -29,8 +29,8 @@ AeraVisulizerWindow::AeraVisulizerWindow()
 
   scene_ = new AeraVisualizerScene(itemMenu_, replicodeObjects_, this);
   scene_->setSceneRect(QRectF(0, 0, 5000, 5000));
-  connect(scene_, SIGNAL(itemInserted(AeraModelItem*)),
-    this, SLOT(itemInserted(AeraModelItem*)));
+  connect(scene_, SIGNAL(itemInserted(AeraGraphicsItem*)),
+    this, SLOT(itemInserted(AeraGraphicsItem*)));
   createToolbars();
 
   QVBoxLayout* centralLayout = new QVBoxLayout();
