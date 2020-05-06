@@ -19,14 +19,12 @@ namespace aera_visualizer {
 
 AeraModelItem::AeraModelItem(
   QMenu* contextMenu, NewModelEvent* newModelEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
-  : parent_(parent),
-  newModelEvent_(newModelEvent), replicodeObjects_(replicodeObjects),
+  : AeraGraphicsItem(contextMenu, newModelEvent, replicodeObjects, parent),
+  newModelEvent_(newModelEvent),
   evidenceCount_(1), successRate_(1),
   evidenceCountColor_("black"), successRateColor_("black"),
-  borderFlashCountdown_(6), evidenceCountFlashCountdown_(0), successRateFlashCountdown_(0)
+  evidenceCountFlashCountdown_(0), successRateFlashCountdown_(0)
 {
-  contextMenu_ = contextMenu;
-
   const qreal left = -100;
   const qreal top = -50;
   const qreal diameter = 20;
@@ -71,26 +69,6 @@ AeraModelItem::AeraModelItem(
   polygon_ = path.toFillPolygon();
 
   setPolygon(polygon_);
-  setFlag(QGraphicsItem::ItemIsMovable, true);
-  setFlag(QGraphicsItem::ItemIsSelectable, true);
-  setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
-}
-
-void AeraModelItem::removeArrows()
-{
-  foreach(Arrow* arrow, arrows_) {
-    qgraphicsitem_cast<AeraModelItem*>(arrow->startItem())->removeArrow(arrow);
-    qgraphicsitem_cast<AeraModelItem*>(arrow->endItem())->removeArrow(arrow);
-    scene()->removeItem(arrow);
-    delete arrow;
-  }
-}
-
-void AeraModelItem::removeArrow(Arrow* arrow)
-{
-  int index = arrows_.indexOf(arrow);
-  if (index != -1)
-    arrows_.removeAt(index);
 }
 
 void AeraModelItem::addSourceCodeHtmlLinks(QString& html)
@@ -129,11 +107,6 @@ void AeraModelItem::setTextItemHtml()
   textItem_->setHtml(html);
 }
 
-void AeraModelItem::addArrow(Arrow* arrow)
-{
-  arrows_.append(arrow);
-}
-
 void AeraModelItem::updateFromModel()
 {
   auto model = newModelEvent_->object_;
@@ -143,25 +116,6 @@ void AeraModelItem::updateFromModel()
   successRate_ = model->code(MDL_SR).asFloat();
 
   setTextItemHtml();
-}
-
-void AeraModelItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
-{
-  scene()->clearSelection();
-  setSelected(true);
-  contextMenu_->exec(event->screenPos());
-}
-
-QVariant AeraModelItem::itemChange(GraphicsItemChange change, const QVariant& value)
-{
-  if (change == QGraphicsItem::ItemPositionChange) {
-    newModelEvent_->itemPosition_ = value.toPointF();
-
-    foreach(Arrow* arrow, arrows_)
-      arrow->updatePosition();
-  }
-
-  return value;
 }
 
 void AeraModelItem::textItemLinkActivated(const QString& link)
