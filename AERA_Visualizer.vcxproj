@@ -207,6 +207,8 @@
     </QtRcc>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="aera-composite-state-item.cpp" />
+    <ClCompile Include="aera-graphics-item.cpp" />
     <ClCompile Include="explanation-log-window.cpp" />
     <ClCompile Include="aera-visualizer-window-base.cpp" />
     <ClCompile Include="arrow.cpp" />
@@ -297,7 +299,9 @@
     <QtRcc Include="aera_visualizer.qrc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="aera-composite-state-item.hpp" />
     <ClInclude Include="aera-event.hpp" />
+    <ClInclude Include="aera-graphics-item.hpp" />
     <ClInclude Include="aera-model-item.hpp" />
     <ClInclude Include="arrow.hpp" />
     <ClInclude Include="replicode-objects.hpp" />
