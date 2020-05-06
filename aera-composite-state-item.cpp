@@ -68,7 +68,7 @@ AeraCompositeStateItem::AeraCompositeStateItem(
 
 void AeraCompositeStateItem::setTextItemHtml()
 {
-  QString html = QString("<h3><a href=\"#oid-") + 
+  QString html = QString("<h3><font color=\"darkred\">Composite State</font> <a href=\"#oid-") + 
     QString::number(newCompositeStateEvent_->object_->get_oid()) + "\">" +
     replicodeObjects_.getLabel(newCompositeStateEvent_->object_).c_str() + "</h3>";
   html += sourceCodeHtml_;
