@@ -66,7 +66,7 @@ void AeraVisualizerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* mouseEvent
   QGraphicsScene::mouseReleaseEvent(mouseEvent);
 }
 
-void AeraVisualizerScene::addArrow(AeraModelItem* startItem, AeraModelItem* endItem)
+void AeraVisualizerScene::addArrow(AeraGraphicsItem* startItem, AeraGraphicsItem* endItem)
 {
   if (startItem == endItem)
     return;
@@ -80,13 +80,13 @@ void AeraVisualizerScene::addArrow(AeraModelItem* startItem, AeraModelItem* endI
   arrow->updatePosition();
 }
 
-AeraModelItem* AeraVisualizerScene::getAeraModelItem(Code* model)
+AeraGraphicsItem* AeraVisualizerScene::getAeraGraphicsItem(Code* object)
 {
   foreach(QGraphicsItem* item, items()) {
-    if (item->type() == AeraModelItem::Type) {
-      AeraModelItem* modelItem = qgraphicsitem_cast<AeraModelItem*>(item);
-      if (modelItem->getNewModelEvent()->object_ == model)
-        return modelItem;
+    auto graphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
+    if (graphicsItem) {
+      if (graphicsItem->getNewObjectEvent()->object_ == object)
+        return graphicsItem;
     }
   }
 
@@ -133,9 +133,9 @@ void AeraVisualizerScene::timerEvent(QTimerEvent* event)
 
   bool isFlashing = false;
   foreach(QGraphicsItem* item, items()) {
-    if (item->type() != AeraModelItem::Type)
+    AeraModelItem* modelItem = dynamic_cast<AeraModelItem*>(item);
+    if (!modelItem)
       continue;
-    AeraModelItem* modelItem = qgraphicsitem_cast<AeraModelItem*>(item);
 
     if (modelItem->borderFlashCountdown_ > 0) {
       isFlashing = true;

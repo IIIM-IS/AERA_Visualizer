@@ -102,8 +102,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 
     // Add arrows to all referenced models.
     for (int i = 0; i < newModelEvent->object_->references_size(); ++i) {
-      // TODO: Make this work for objects other than models.
-      auto referencedItem = scene_->getAeraModelItem(
+      auto referencedItem = scene_->getAeraGraphicsItem(
         newModelEvent->object_->get_reference(i));
       if (referencedItem)
         scene_->addArrow(newItem, referencedItem);
@@ -122,7 +121,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     setSuccessRateEvent->object_->code(MDL_CNT) = Atom::Float(setSuccessRateEvent->evidenceCount_);
     setSuccessRateEvent->object_->code(MDL_SR) = Atom::Float(setSuccessRateEvent->successRate_);
 
-    auto modelItem = scene_->getAeraModelItem(setSuccessRateEvent->object_);
+    auto modelItem = dynamic_cast<AeraModelItem*>(scene_->getAeraGraphicsItem(setSuccessRateEvent->object_));
     if (modelItem) {
       modelItem->updateFromModel();
       if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
@@ -158,7 +157,7 @@ Timestamp AeraVisulizerWindow::unstepEvent()
   if (event->eventType_ == NewModelEvent::EVENT_TYPE) {
     // Find the AeraModelItem for this event and remove it.
     // Note that the event saves the updated item position and will use it when recreating the item.
-    auto modelItem = scene_->getAeraModelItem(((NewModelEvent*)event)->object_);
+    auto modelItem = dynamic_cast<AeraModelItem*>(scene_->getAeraGraphicsItem(((NewModelEvent*)event)->object_));
     if (modelItem) {
       modelItem->removeArrows();
       scene_->removeItem(modelItem);
@@ -172,7 +171,7 @@ Timestamp AeraVisulizerWindow::unstepEvent()
     setSuccessRateEvent->object_->code(MDL_CNT) = Atom::Float(setSuccessRateEvent->oldEvidenceCount_);
     setSuccessRateEvent->object_->code(MDL_SR) = Atom::Float(setSuccessRateEvent->oldSuccessRate_);
 
-    auto modelItem = scene_->getAeraModelItem(setSuccessRateEvent->object_);
+    auto modelItem = dynamic_cast<AeraModelItem*>(scene_->getAeraGraphicsItem(setSuccessRateEvent->object_));
     if (modelItem) {
       if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
           setSuccessRateEvent->successRate_ == setSuccessRateEvent->oldSuccessRate_)

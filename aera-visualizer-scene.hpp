@@ -31,12 +31,13 @@ public:
   void zoomViewHome();
   void zoomToItem(QGraphicsItem* item);
   AeraModelItem* addAeraModelItem(NewModelEvent* newModelEvent);
-  void addArrow(AeraModelItem* startItem, AeraModelItem* endItem);
+  void addArrow(AeraGraphicsItem* startItem, AeraGraphicsItem* endItem);
   /**
-   * Get the AeraModelItem whose NewModelEvent has the given model.
-   * \return The AeraModelItem, or null if not found.
+   * Get the getAeraGraphicsItem whose getNewObjectEvent() has the given object.
+   * \param object The Code* object to search for.
+   * \return The AeraGraphicsItem, or null if not found.
    */
-  AeraModelItem* getAeraModelItem(r_code::Code* model);
+  AeraGraphicsItem* getAeraGraphicsItem(r_code::Code* object);
   void establishFlashTimer()
   {
     if (flashTimerId_ == 0)
