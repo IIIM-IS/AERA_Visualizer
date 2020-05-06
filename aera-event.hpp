@@ -64,6 +64,20 @@ public:
   static const int EVENT_TYPE = 3;
 };
 
+class AutoFocusNewObjectEvent : public AeraEvent {
+public:
+  AutoFocusNewObjectEvent(core::Timestamp time, r_code::Code* fromObject, 
+    r_code::Code* toObject, const std::string& syncMode)
+    : AeraEvent(EVENT_TYPE, time, toObject),
+    fromObject_(fromObject), syncMode_(syncMode)
+  {}
+
+  static const int EVENT_TYPE = 4;
+
+  r_code::Code* fromObject_;
+  std::string syncMode_;
+};
+
 }
 
 #endif

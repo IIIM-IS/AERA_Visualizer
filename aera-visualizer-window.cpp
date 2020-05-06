@@ -57,6 +57,7 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
   regex newModelRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> mdl (\\d+)$");
   regex newCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> cst (\\d+)$");
   regex setEvidenceCountAndSuccessRateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl (\\d+) cnt:(\\d+) sr:([\\d\\.]+)$");
+  regex autofocusNewObjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us A/F -> (\\d+)\\|(\\d+) \\((\\w+)\\)$");
 
   string line;
   while (getline(consoleOutputFile, line)) {
@@ -74,6 +75,13 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
       events_.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(
         getTimestamp(matches), replicodeObjects_.getObject(stol(matches[4].str())), stol(matches[5].str()),
         stof(matches[6].str())));
+    else if (regex_search(line, matches, autofocusNewObjectRegex)) {
+      auto fromObject = replicodeObjects_.getObject(stol(matches[4].str()));
+      auto toObject = replicodeObjects_.getObject(stol(matches[5].str()));
+      if (fromObject && toObject)
+        events_.push_back(make_shared<AutoFocusNewObjectEvent>(
+          getTimestamp(matches), fromObject, toObject, matches[6].str()));
+    }
   }
 }
 
@@ -153,6 +161,11 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       scene_->establishFlashTimer();
     }
   }
+  else {
+    // Skip this event.
+    ++iNextEvent_;
+    return stepEvent(maximumTime);
+  }
 
   ++iNextEvent_;
 
@@ -205,6 +218,9 @@ Timestamp AeraVisulizerWindow::unstepEvent()
       scene_->establishFlashTimer();
     }
   }
+  else
+    // Skip this event.
+    return unstepEvent();
 
   if (iNextEvent_ > 0)
     return events_[iNextEvent_ - 1]->time_;
