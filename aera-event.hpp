@@ -18,7 +18,7 @@ public:
   int eventType_;
   core::Timestamp time_;
   r_code::Code* object_;
-  // itemPosition_ is used by NewModelEvent.
+  // itemPosition_ is used by "New" events to remember the screen position after undoing.
   QPointF itemPosition_;
 };
 
@@ -76,6 +76,20 @@ public:
 
   r_code::Code* fromObject_;
   std::string syncMode_;
+};
+
+class NewMkValPredictionEvent : public AeraEvent {
+public:
+  NewMkValPredictionEvent(core::Timestamp time, r_code::Code* factPrediction,
+    r_code::Code* factImdl, r_code::Code* cause)
+    : AeraEvent(EVENT_TYPE, time, factPrediction),
+    factImdl_(factImdl), cause_(cause)
+  {}
+
+  static const int EVENT_TYPE = 5;
+
+  r_code::Code* factImdl_;
+  r_code::Code* cause_;
 };
 
 }

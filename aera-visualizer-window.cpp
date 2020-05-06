@@ -58,6 +58,7 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
   regex newCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> cst (\\d+)$");
   regex setEvidenceCountAndSuccessRateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl (\\d+) cnt:(\\d+) sr:([\\d\\.]+)$");
   regex autofocusNewObjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us A/F -> (\\d+)\\|(\\d+) \\((\\w+)\\)$");
+  regex newMkValPredictionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+)\\(\\d+\\) imdl mdl \\d+: (\\d+) -> fact (\\d+) pred fact mk.val VALUE .+$");
 
   string line;
   while (getline(consoleOutputFile, line)) {
@@ -81,6 +82,14 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
       if (fromObject && toObject)
         events_.push_back(make_shared<AutoFocusNewObjectEvent>(
           getTimestamp(matches), fromObject, toObject, matches[6].str()));
+    }
+    else if (regex_search(line, matches, newMkValPredictionRegex)) {
+      auto factImdl = replicodeObjects_.getObject(stol(matches[4].str()));
+      auto cause = replicodeObjects_.getObject(stol(matches[5].str()));
+      auto factPrediction = replicodeObjects_.getObject(stol(matches[6].str()));
+      if (factImdl && cause && factPrediction)
+        events_.push_back(make_shared<NewMkValPredictionEvent>(
+          getTimestamp(matches), factPrediction, factImdl, cause));
     }
   }
 }
