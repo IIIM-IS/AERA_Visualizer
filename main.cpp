@@ -11,16 +11,17 @@ int main(int argv, char *args[])
 
   QApplication app(argv, args);
   AeraVisulizerWindow mainWindow;
+  // TODO: Use the actual screen resolution.
   const int left = 10;
-  const int top = 100;
-  const int width = 800;
-  const int height = 500;
+  const int top = 40;
+  const int width = 1200;
+  const int height = 810;
   mainWindow.setGeometry(left, top, width, height);
 
   auto explanationLogWindow = new ExplanationLogWindow(&mainWindow);
   // Disable the close button for the child window.
   explanationLogWindow->setWindowFlag(Qt::WindowCloseButtonHint, false);
-  explanationLogWindow->setGeometry(left + width, top, width, height);
+  explanationLogWindow->setGeometry(left + width, top, 380, height);
   explanationLogWindow->show();
 
   mainWindow.show();
