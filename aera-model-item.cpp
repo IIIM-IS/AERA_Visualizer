@@ -32,7 +32,7 @@ AeraModelItem::AeraModelItem(
   const qreal diameter = 20;
 
   // Set up sourceCodeHtml_
-  string sourceCode = replicodeObjects_.getSourceCode(newModelEvent_->model_);
+  string sourceCode = replicodeObjects_.getSourceCode(newModelEvent_->object_);
   // Temporarily replace \n with \x01 so that we match the entire string, not by line.
   replace(sourceCode.begin(), sourceCode.end(), '\n', '\x01');
   // Strip the set of output groups and parameters.
@@ -95,7 +95,7 @@ void AeraModelItem::removeArrow(Arrow* arrow)
 
 void AeraModelItem::addSourceCodeHtmlLinks(QString& html)
 {
-  Code* object = newModelEvent_->model_;
+  Code* object = newModelEvent_->object_;
   for (int i = 0; i < object->references_size(); ++i) {
     auto referencedObject = object->get_reference(i);
     if (!(referencedObject->code(0).asOpcode() == Opcodes::Mdl ||
@@ -117,7 +117,7 @@ void AeraModelItem::addSourceCodeHtmlLinks(QString& html)
 
 void AeraModelItem::setTextItemHtml()
 {
-  auto model = newModelEvent_->model_;
+  auto model = newModelEvent_->object_;
 
   QString html = QString("<h3><font color=\"darkred\"><b>") + 
     replicodeObjects_.getLabel(model).c_str() + "</b><font color = \"black\"></h3>";
@@ -136,7 +136,7 @@ void AeraModelItem::addArrow(Arrow* arrow)
 
 void AeraModelItem::updateFromModel()
 {
-  auto model = newModelEvent_->model_;
+  auto model = newModelEvent_->object_;
   evidenceCountIncreased_ = (model->code(MDL_CNT).asFloat() >= evidenceCount_);
   evidenceCount_ = model->code(MDL_CNT).asFloat();
   successRateIncreased_ = (model->code(MDL_SR).asFloat() >= successRate_);

@@ -8,20 +8,21 @@ namespace aera_visualizer {
 
 class AeraEvent {
 public:
-  AeraEvent(int eventType, core::Timestamp time)
-    : eventType_(eventType),
-    time_(time)
+  AeraEvent(int eventType, core::Timestamp time, r_code::Code* object)
+  : eventType_(eventType),
+    time_(time),
+    object_(object)
   {}
 
   int eventType_;
   core::Timestamp time_;
+  r_code::Code* object_;
 };
 
 class NewModelEvent : public AeraEvent {
 public:
-  NewModelEvent(core::Timestamp time, r_code::Code* model, core::float32 evidenceCount, core::float32 successRate)
-    : AeraEvent(EVENT_TYPE, time),
-    model_(model),
+  NewModelEvent(core::Timestamp time, r_code::Code* object, core::float32 evidenceCount, core::float32 successRate)
+    : AeraEvent(EVENT_TYPE, time, object),
     evidenceCount_(evidenceCount),
     successRate_(successRate),
     itemPosition_(qQNaN(), qQNaN())
@@ -29,7 +30,6 @@ public:
 
   static const int EVENT_TYPE = 1;
 
-  r_code::Code* model_;
   core::float32 evidenceCount_;
   core::float32 successRate_;
   QPointF itemPosition_;
@@ -38,9 +38,8 @@ public:
 class SetModelEvidenceCountAndSuccessRateEvent : public AeraEvent {
 public:
   SetModelEvidenceCountAndSuccessRateEvent
-  (core::Timestamp time, r_code::Code* model, core::float32 evidenceCount, core::float32 successRate)
-    : AeraEvent(EVENT_TYPE, time),
-    model_(model),
+  (core::Timestamp time, r_code::Code* object, core::float32 evidenceCount, core::float32 successRate)
+    : AeraEvent(EVENT_TYPE, time, object),
     evidenceCount_(evidenceCount),
     successRate_(successRate),
     oldEvidenceCount_(qQNaN()),
@@ -49,7 +48,6 @@ public:
 
   static const int EVENT_TYPE = 2;
 
-  r_code::Code* model_;
   core::float32 evidenceCount_;
   core::float32 successRate_;
   core::float32 oldEvidenceCount_;

@@ -94,19 +94,19 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     auto newModelEvent = (NewModelEvent*)event;
 
     // Restore the evidence count and success rate in case we did a rewind.
-    newModelEvent->model_->code(MDL_CNT) = Atom::Float(newModelEvent->evidenceCount_);
-    newModelEvent->model_->code(MDL_SR) = Atom::Float(newModelEvent->successRate_);
+    newModelEvent->object_->code(MDL_CNT) = Atom::Float(newModelEvent->evidenceCount_);
+    newModelEvent->object_->code(MDL_SR) = Atom::Float(newModelEvent->successRate_);
 
     // Add the new model.
     AeraModelItem* newItem = scene_->addAeraModelItem(newModelEvent);
 
     // Add arrows to all referenced models.
-    for (int i = 0; i < newModelEvent->model_->references_size(); ++i) {
+    for (int i = 0; i < newModelEvent->object_->references_size(); ++i) {
       // TODO: Make this work for objects other than models.
-      auto referencedObject = scene_->getAeraModelItem(
-        newModelEvent->model_->get_reference(i));
-      if (referencedObject)
-        scene_->addArrow(newItem, referencedObject);
+      auto referencedItem = scene_->getAeraModelItem(
+        newModelEvent->object_->get_reference(i));
+      if (referencedItem)
+        scene_->addArrow(newItem, referencedItem);
     }
 
     scene_->establishFlashTimer();
@@ -115,14 +115,14 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     auto setSuccessRateEvent = (SetModelEvidenceCountAndSuccessRateEvent*)event;
 
     // Save the current values for a later undo.
-    setSuccessRateEvent->oldEvidenceCount_ = setSuccessRateEvent->model_->code(MDL_CNT).asFloat();
-    setSuccessRateEvent->oldSuccessRate_ = setSuccessRateEvent->model_->code(MDL_SR).asFloat();
+    setSuccessRateEvent->oldEvidenceCount_ = setSuccessRateEvent->object_->code(MDL_CNT).asFloat();
+    setSuccessRateEvent->oldSuccessRate_ = setSuccessRateEvent->object_->code(MDL_SR).asFloat();
 
     // Update the model.
-    setSuccessRateEvent->model_->code(MDL_CNT) = Atom::Float(setSuccessRateEvent->evidenceCount_);
-    setSuccessRateEvent->model_->code(MDL_SR) = Atom::Float(setSuccessRateEvent->successRate_);
+    setSuccessRateEvent->object_->code(MDL_CNT) = Atom::Float(setSuccessRateEvent->evidenceCount_);
+    setSuccessRateEvent->object_->code(MDL_SR) = Atom::Float(setSuccessRateEvent->successRate_);
 
-    auto modelItem = scene_->getAeraModelItem(setSuccessRateEvent->model_);
+    auto modelItem = scene_->getAeraModelItem(setSuccessRateEvent->object_);
     if (modelItem) {
       modelItem->updateFromModel();
       if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
@@ -158,7 +158,7 @@ Timestamp AeraVisulizerWindow::unstepEvent()
   if (event->eventType_ == NewModelEvent::EVENT_TYPE) {
     // Find the AeraModelItem for this event and remove it.
     // Note that the event saves the updated item position and will use it when recreating the item.
-    auto modelItem = scene_->getAeraModelItem(((NewModelEvent*)event)->model_);
+    auto modelItem = scene_->getAeraModelItem(((NewModelEvent*)event)->object_);
     if (modelItem) {
       modelItem->removeArrows();
       scene_->removeItem(modelItem);
@@ -169,10 +169,10 @@ Timestamp AeraVisulizerWindow::unstepEvent()
     // Find the AeraModelItem for this event and set to the old evidence count and success rate.
     auto setSuccessRateEvent = (SetModelEvidenceCountAndSuccessRateEvent*)event;
 
-    setSuccessRateEvent->model_->code(MDL_CNT) = Atom::Float(setSuccessRateEvent->oldEvidenceCount_);
-    setSuccessRateEvent->model_->code(MDL_SR) = Atom::Float(setSuccessRateEvent->oldSuccessRate_);
+    setSuccessRateEvent->object_->code(MDL_CNT) = Atom::Float(setSuccessRateEvent->oldEvidenceCount_);
+    setSuccessRateEvent->object_->code(MDL_SR) = Atom::Float(setSuccessRateEvent->oldSuccessRate_);
 
-    auto modelItem = scene_->getAeraModelItem(setSuccessRateEvent->model_);
+    auto modelItem = scene_->getAeraModelItem(setSuccessRateEvent->object_);
     if (modelItem) {
       if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
           setSuccessRateEvent->successRate_ == setSuccessRateEvent->oldSuccessRate_)
