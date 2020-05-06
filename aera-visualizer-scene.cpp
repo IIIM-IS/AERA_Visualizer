@@ -26,22 +26,20 @@ AeraVisualizerScene::AeraVisualizerScene(QMenu* itemMenu, ReplicodeObjects& repl
   flashTimerId_ = 0;
 }
 
-AeraModelItem* AeraVisualizerScene::addAeraModelItem(NewModelEvent* newModelEvent)
+void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 {
-  AeraModelItem* item = new AeraModelItem(itemMenu_, newModelEvent, replicodeObjects_, this);
   item->setBrush(itemColor_);
 
-  if (qIsNaN(newModelEvent->itemPosition_.x())) {
+  auto newObjectEvent = item->getNewObjectEvent();
+  if (qIsNaN(newObjectEvent->itemPosition_.x())) {
     // Assign an initial position.
     // TODO: Do this with a grid layout.
-    newModelEvent->itemPosition_ =
-      QPointF(newModelEvent->object_->get_oid() * 320 - 14730, 2380);
+    newObjectEvent->itemPosition_ =
+      QPointF(newObjectEvent->object_->get_oid() * 320 - 14730, 2380);
   }
 
   addItem(item);
-  item->setPos(newModelEvent->itemPosition_);
-
-  return item;
+  item->setPos(newObjectEvent->itemPosition_);
 }
 
 void AeraVisualizerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)

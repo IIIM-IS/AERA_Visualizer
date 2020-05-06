@@ -30,7 +30,7 @@ public:
   void scaleViewBy(double factor);
   void zoomViewHome();
   void zoomToItem(QGraphicsItem* item);
-  AeraModelItem* addAeraModelItem(NewModelEvent* newModelEvent);
+  void addAeraGraphicsItem(AeraGraphicsItem* item);
   void addArrow(AeraGraphicsItem* startItem, AeraGraphicsItem* endItem);
   /**
    * Get the getAeraGraphicsItem whose getNewObjectEvent() has the given object.

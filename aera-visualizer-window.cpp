@@ -102,7 +102,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     newModelEvent->object_->code(MDL_SR) = Atom::Float(newModelEvent->successRate_);
 
     // Add the new model.
-    AeraModelItem* newItem = scene_->addAeraModelItem(newModelEvent);
+    auto newItem = new AeraModelItem(itemMenu_, newModelEvent, replicodeObjects_, scene_);
+    scene_->addAeraGraphicsItem(newItem);
 
     // Add arrows to all referenced models.
     for (int i = 0; i < newModelEvent->object_->references_size(); ++i) {
