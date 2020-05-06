@@ -64,4 +64,23 @@ QVariant AeraGraphicsItem::itemChange(GraphicsItemChange change, const QVariant&
   return value;
 }
 
+void AeraGraphicsItem::textItemLinkActivated(const QString& link)
+{
+  if (link.startsWith("#oid-")) {
+    int oid = link.mid(5).toInt();
+    auto object = replicodeObjects_.getObject(oid);
+    if (object) {
+      // TODO: Make this work for other than models.
+      auto item = parent_->getAeraGraphicsItem(object);
+      if (item) {
+        auto menu = new QMenu();
+        menu->addAction(QString("Zoom to ") + replicodeObjects_.getLabel(object).c_str(),
+          [=]() { parent_->zoomToItem(item); });
+        menu->exec(parent_->getMouseScreenPosition() - QPoint(10, 10));
+        delete menu;
+      }
+    }
+  }
+}
+
 }

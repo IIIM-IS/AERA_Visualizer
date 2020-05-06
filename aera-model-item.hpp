@@ -41,7 +41,6 @@ public:
 private:
   void addSourceCodeHtmlLinks(QString& html);
   void setTextItemHtml();
-  void textItemLinkActivated(const QString& link);
 
   QPolygonF polygon_;
   NewModelEvent* newModelEvent_;

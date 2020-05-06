@@ -41,6 +41,7 @@ public:
 protected:
   void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
   QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
+  void textItemLinkActivated(const QString& link);
 
   AeraVisualizerScene* parent_;
   ReplicodeObjects& replicodeObjects_;
