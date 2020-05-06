@@ -1,6 +1,7 @@
 #include <fstream>
 #include "arrow.hpp"
 #include "aera-model-item.hpp"
+#include "aera-composite-state-item.hpp"
 #include "aera-visualizer-scene.hpp"
 #include "aera-visualizer-window.hpp"
 
@@ -94,21 +95,29 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
   if (event->time_ > maximumTime)
     return Utils_MaxTime;
 
-  if (event->eventType_ == NewModelEvent::EVENT_TYPE) {
-    auto newModelEvent = (NewModelEvent*)event;
+  if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
+      event->eventType_ == NewCompositeStateEvent::EVENT_TYPE) {
+    AeraGraphicsItem* newItem;
 
-    // Restore the evidence count and success rate in case we did a rewind.
-    newModelEvent->object_->code(MDL_CNT) = Atom::Float(newModelEvent->evidenceCount_);
-    newModelEvent->object_->code(MDL_SR) = Atom::Float(newModelEvent->successRate_);
+    if (event->eventType_ == NewModelEvent::EVENT_TYPE) {
+      auto newModelEvent = (NewModelEvent*)event;
 
-    // Add the new model.
-    auto newItem = new AeraModelItem(itemMenu_, newModelEvent, replicodeObjects_, scene_);
+      // Restore the evidence count and success rate in case we did a rewind.
+      newModelEvent->object_->code(MDL_CNT) = Atom::Float(newModelEvent->evidenceCount_);
+      newModelEvent->object_->code(MDL_SR) = Atom::Float(newModelEvent->successRate_);
+
+      newItem = new AeraModelItem(itemMenu_, newModelEvent, replicodeObjects_, scene_);
+    }
+    else
+      newItem = new AeraCompositeStateItem(itemMenu_, (NewCompositeStateEvent*)event, replicodeObjects_, scene_);
+
+    // Add the new item.
     scene_->addAeraGraphicsItem(newItem);
 
-    // Add arrows to all referenced models.
-    for (int i = 0; i < newModelEvent->object_->references_size(); ++i) {
+    // Add arrows to all referenced objects.
+    for (int i = 0; i < event->object_->references_size(); ++i) {
       auto referencedItem = scene_->getAeraGraphicsItem(
-        newModelEvent->object_->get_reference(i));
+        event->object_->get_reference(i));
       if (referencedItem)
         scene_->addArrow(newItem, referencedItem);
     }
@@ -159,14 +168,15 @@ Timestamp AeraVisulizerWindow::unstepEvent()
   --iNextEvent_;
 
   AeraEvent* event = events_[iNextEvent_].get();
-  if (event->eventType_ == NewModelEvent::EVENT_TYPE) {
-    // Find the AeraModelItem for this event and remove it.
+  if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
+      event->eventType_ == NewCompositeStateEvent::EVENT_TYPE) {
+    // Find the AeraGraphicsItem for this event and remove it.
     // Note that the event saves the updated item position and will use it when recreating the item.
-    auto modelItem = dynamic_cast<AeraModelItem*>(scene_->getAeraGraphicsItem(((NewModelEvent*)event)->object_));
-    if (modelItem) {
-      modelItem->removeArrows();
-      scene_->removeItem(modelItem);
-      delete modelItem;
+    auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(scene_->getAeraGraphicsItem(event->object_));
+    if (aeraGraphicsItem) {
+      aeraGraphicsItem->removeArrows();
+      scene_->removeItem(aeraGraphicsItem);
+      delete aeraGraphicsItem;
     }
   }
   else if (event->eventType_ == SetModelEvidenceCountAndSuccessRateEvent::EVENT_TYPE) {
