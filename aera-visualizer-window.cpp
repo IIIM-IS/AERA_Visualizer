@@ -2,6 +2,7 @@
 #include "arrow.hpp"
 #include "aera-model-item.hpp"
 #include "aera-composite-state-item.hpp"
+#include "aera-prediction-item.hpp"
 #include "aera-visualizer-scene.hpp"
 #include "aera-visualizer-window.hpp"
 
@@ -113,7 +114,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     return Utils_MaxTime;
 
   if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
-      event->eventType_ == NewCompositeStateEvent::EVENT_TYPE) {
+      event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
+      event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE) {
     AeraGraphicsItem* newItem;
 
     if (event->eventType_ == NewModelEvent::EVENT_TYPE) {
@@ -125,8 +127,10 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 
       newItem = new AeraModelItem(itemMenu_, newModelEvent, replicodeObjects_, scene_);
     }
-    else
+    else if (event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
       newItem = new AeraCompositeStateItem(itemMenu_, (NewCompositeStateEvent*)event, replicodeObjects_, scene_);
+    else
+      newItem = new AeraPredictionItem(itemMenu_, (NewMkValPredictionEvent*)event, replicodeObjects_, scene_);
 
     // Add the new item.
     scene_->addAeraGraphicsItem(newItem);
@@ -191,7 +195,8 @@ Timestamp AeraVisulizerWindow::unstepEvent()
 
   AeraEvent* event = events_[iNextEvent_].get();
   if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
-      event->eventType_ == NewCompositeStateEvent::EVENT_TYPE) {
+      event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
+      event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE) {
     // Find the AeraGraphicsItem for this event and remove it.
     // Note that the event saves the updated item position and will use it when recreating the item.
     auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(scene_->getAeraGraphicsItem(event->object_));
