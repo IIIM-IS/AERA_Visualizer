@@ -55,8 +55,8 @@ AeraVisulizerWindow::AeraVisulizerWindow()
 void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
 {
   ifstream consoleOutputFile(consoleOutputFilePath);
-  regex newModelRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> mdl (\\d+)$");
-  regex newCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> cst (\\d+)$");
+  regex newModelRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> mdl (\\d+), MDLController\\((\\d+)\\)$");
+  regex newCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> cst (\\d+), CSTController\\((\\d+)\\)$");
   regex setEvidenceCountAndSuccessRateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl (\\d+) cnt:(\\d+) sr:([\\d\\.]+)$");
   regex autofocusNewObjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us A/F -> (\\d+)\\|(\\d+) \\((\\w+)\\)$");
   regex newMkValPredictionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+)\\(\\d+\\) imdl mdl \\d+: (\\d+) -> fact (\\d+) pred fact mk.val VALUE .+$");
@@ -68,10 +68,12 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
     if (regex_search(line, matches, newModelRegex))
       // Assume the initial success rate is 1.
       events_.push_back(make_shared<NewModelEvent>(
-        getTimestamp(matches), replicodeObjects_.getObject(stol(matches[4].str())), 1, 1));
+        getTimestamp(matches), replicodeObjects_.getObject(stol(matches[4].str())), 1, 1,
+        stoll(matches[5].str())));
     else if (regex_search(line, matches, newCompositeStateRegex))
       events_.push_back(make_shared<NewCompositeStateEvent>(
-        getTimestamp(matches), replicodeObjects_.getObject(stol(matches[4].str()))));
+        getTimestamp(matches), replicodeObjects_.getObject(stol(matches[4].str())),
+        stoll(matches[5].str())));
     else if (regex_search(line, matches, setEvidenceCountAndSuccessRateRegex))
       // Assume the initial success rate is 1.
       events_.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(

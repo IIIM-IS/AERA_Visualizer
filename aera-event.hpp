@@ -24,16 +24,19 @@ public:
 
 class NewModelEvent : public AeraEvent {
 public:
-  NewModelEvent(core::Timestamp time, r_code::Code* object, core::float32 evidenceCount, core::float32 successRate)
+  NewModelEvent(core::Timestamp time, r_code::Code* object, core::float32 evidenceCount, 
+    core::float32 successRate, uint64 controllerDegugOid)
     : AeraEvent(EVENT_TYPE, time, object),
     evidenceCount_(evidenceCount),
-    successRate_(successRate)
+    successRate_(successRate),
+    controllerDegugOid_(controllerDegugOid)
   {}
 
   static const int EVENT_TYPE = 1;
 
   core::float32 evidenceCount_;
   core::float32 successRate_;
+  uint64 controllerDegugOid_;
 };
 
 class SetModelEvidenceCountAndSuccessRateEvent : public AeraEvent {
@@ -57,11 +60,14 @@ public:
 
 class NewCompositeStateEvent : public AeraEvent {
 public:
-  NewCompositeStateEvent(core::Timestamp time, r_code::Code* object)
-    : AeraEvent(EVENT_TYPE, time, object)
+  NewCompositeStateEvent(core::Timestamp time, r_code::Code* object, uint64 controllerDegugOid)
+    : AeraEvent(EVENT_TYPE, time, object),
+    controllerDegugOid_(controllerDegugOid)
   {}
 
   static const int EVENT_TYPE = 3;
+
+  uint64 controllerDegugOid_;
 };
 
 class AutoFocusNewObjectEvent : public AeraEvent {
