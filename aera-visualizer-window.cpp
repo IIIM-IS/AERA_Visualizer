@@ -88,7 +88,7 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
       auto factImdl = replicodeObjects_.getObject(stol(matches[4].str()));
       auto cause = replicodeObjects_.getObject(stol(matches[5].str()));
       auto factPrediction = replicodeObjects_.getObject(stol(matches[6].str()));
-      if (factImdl && cause && factPrediction)
+      if (factImdl && cause && factPrediction && /* Debug: Ignore others */ factPrediction->get_oid() == 60)
         events_.push_back(make_shared<NewMkValPredictionEvent>(
           getTimestamp(matches), factPrediction, factImdl, cause));
     }
