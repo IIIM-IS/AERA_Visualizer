@@ -5,14 +5,12 @@
 #include <QMenu>
 #include <QPainter>
 #include <QtWidgets>
-#include "submodules/replicode/r_exec/opcodes.h"
 #include "aera-visualizer-scene.hpp"
 #include "aera-model-item.hpp"
 
 using namespace std;
 using namespace core;
 using namespace r_code;
-using namespace r_exec;
 
 namespace aera_visualizer {
 
@@ -45,7 +43,7 @@ AeraModelItem::AeraModelItem(
   QString html = sourceCode.c_str();
   html.replace("\n", "<br>");
   html.replace(" ", "&nbsp;");
-  addSourceCodeHtmlLinks(html);
+  addSourceCodeHtmlLinks(newModelEvent_->object_, html);
   sourceCodeHtml_ = html;
 
   // Set up the textItem_ first to get its size.
@@ -68,28 +66,6 @@ AeraModelItem::AeraModelItem(
   polygon_ = path.toFillPolygon();
 
   setPolygon(polygon_);
-}
-
-void AeraModelItem::addSourceCodeHtmlLinks(QString& html)
-{
-  Code* object = newModelEvent_->object_;
-  for (int i = 0; i < object->references_size(); ++i) {
-    auto referencedObject = object->get_reference(i);
-    if (!(referencedObject->code(0).asOpcode() == Opcodes::Mdl ||
-          referencedObject->code(0).asOpcode() == Opcodes::Cst))
-      continue;
-
-    auto referencedLabel = replicodeObjects_.getLabel(referencedObject);
-    if (referencedLabel == "")
-      continue;
-
-    // Spaces are alreay replaced with &nbsp; .
-    // TODO: Handle case when the label is not surrounded by spaces.
-    html.replace(
-      QString("&nbsp;") + referencedLabel.c_str() + "&nbsp;", 
-      QString("&nbsp;<a href=\"#oid-") + QString::number(referencedObject->get_oid()) + "\">" +
-              referencedLabel.c_str() + "</a>&nbsp;");
-  }
 }
 
 void AeraModelItem::setTextItemHtml()

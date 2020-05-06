@@ -41,6 +41,16 @@ public:
 protected:
   void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
   QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
+
+  /**
+   * Go through object's references and modify html with <a href="#oid-XXX"></a>
+   * around the label of each referenced object. When clicked, this link is handled
+   * by textItemLinkActivated().
+   * \param object The object with the references.
+   * \param html The HTML string to modify.
+   */
+  void addSourceCodeHtmlLinks(r_code::Code* object, QString& html);
+  
   void textItemLinkActivated(const QString& link);
 
   AeraVisualizerScene* parent_;

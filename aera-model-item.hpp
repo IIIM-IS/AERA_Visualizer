@@ -39,7 +39,6 @@ public:
   bool successRateIncreased_;
 
 private:
-  void addSourceCodeHtmlLinks(QString& html);
   void setTextItemHtml();
 
   QPolygonF polygon_;

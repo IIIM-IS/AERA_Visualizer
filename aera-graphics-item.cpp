@@ -5,6 +5,7 @@
 #include <QMenu>
 #include <QPainter>
 #include <QtWidgets>
+#include "submodules/replicode/r_exec/opcodes.h"
 #include "arrow.hpp"
 #include "aera-visualizer-scene.hpp"
 #include "aera-graphics-item.hpp"
@@ -12,6 +13,7 @@
 using namespace std;
 using namespace core;
 using namespace r_code;
+using namespace r_exec;
 
 namespace aera_visualizer {
 
@@ -62,6 +64,27 @@ QVariant AeraGraphicsItem::itemChange(GraphicsItemChange change, const QVariant&
   }
 
   return value;
+}
+
+void AeraGraphicsItem::addSourceCodeHtmlLinks(Code* object, QString& html)
+{
+  for (int i = 0; i < object->references_size(); ++i) {
+    auto referencedObject = object->get_reference(i);
+    if (!(referencedObject->code(0).asOpcode() == Opcodes::Mdl ||
+      referencedObject->code(0).asOpcode() == Opcodes::Cst))
+      continue;
+
+    auto referencedLabel = replicodeObjects_.getLabel(referencedObject);
+    if (referencedLabel == "")
+      continue;
+
+    // Spaces are alreay replaced with &nbsp; .
+    // TODO: Handle case when the label is not surrounded by spaces.
+    html.replace(
+      QString("&nbsp;") + referencedLabel.c_str() + "&nbsp;",
+      QString("&nbsp;<a href=\"#oid-") + QString::number(referencedObject->get_oid()) + "\">" +
+      referencedLabel.c_str() + "</a>&nbsp;");
+  }
 }
 
 void AeraGraphicsItem::textItemLinkActivated(const QString& link)

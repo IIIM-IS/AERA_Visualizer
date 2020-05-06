@@ -21,7 +21,6 @@ public:
   NewCompositeStateEvent* getNewCompositeStateEvent() { return newCompositeStateEvent_; }
 
 private:
-  void addSourceCodeHtmlLinks(QString& html);
   void setTextItemHtml();
 
   QPolygonF polygon_;
