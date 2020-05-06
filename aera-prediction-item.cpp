@@ -54,13 +54,28 @@ QString AeraPredictionItem::getPredictionSourceCodeHtml(Code* factPred)
   Code* factMkVal = pred->get_reference(0);
   Code* mkVal = factMkVal->get_reference(0);
 
-  QString html = replicodeObjects_.getSourceCode(factPred).c_str();
-  html += QString("\n  ") + replicodeObjects_.getSourceCode(pred).c_str();
-  html += QString("\n    ") + replicodeObjects_.getSourceCode(factMkVal).c_str();
-  html += QString("\n      ") + replicodeObjects_.getSourceCode(mkVal).c_str();
+  QString factPredCode(replicodeObjects_.getSourceCode(factPred).c_str());
+  QString predCode(replicodeObjects_.getSourceCode(pred).c_str());
+  QString factMkValCode(replicodeObjects_.getSourceCode(factMkVal).c_str());
+
+  QString predLabel(replicodeObjects_.getLabel(pred).c_str());
+  QString factMkValLabel(replicodeObjects_.getLabel(factMkVal).c_str());
+  QString mkValLabel(replicodeObjects_.getLabel(mkVal).c_str());
+
+  QString factPredHtml = factPredCode.replace(predLabel, "!down");
+  QString predHtml = predCode.replace(factMkValLabel, "!down");
+  QString factMkValHtml = factMkValCode.replace(mkValLabel, "!down");
+  QString mkValHtml(replicodeObjects_.getSourceCode(mkVal).c_str());
+
+  // Temporarily use "!down" which doesn't have spaces.
+  QString html = factPredHtml;
+  html += QString("\n      ") + predHtml;
+  html += QString("\n            ") + factMkValHtml;
+  html += QString("\n                ") + mkValHtml;
 
   html.replace("\n", "<br>");
   html.replace(" ", "&nbsp;");
+  html = html.replace("!down", "<sub><font size=\"+2\"><b>&#129047;</b></font></sub>");
   addSourceCodeHtmlLinks(newPredictionEvent_->object_, html);
   return html;
 }
