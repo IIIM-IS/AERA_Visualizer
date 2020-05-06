@@ -131,40 +131,43 @@ void AeraVisualizerScene::timerEvent(QTimerEvent* event)
 
   bool isFlashing = false;
   foreach(QGraphicsItem* item, items()) {
-    AeraModelItem* modelItem = dynamic_cast<AeraModelItem*>(item);
-    if (!modelItem)
+    auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
+    if (!aeraGraphicsItem)
       continue;
 
-    if (modelItem->borderFlashCountdown_ > 0) {
+    if (aeraGraphicsItem->borderFlashCountdown_ > 0) {
       isFlashing = true;
 
-      --modelItem->borderFlashCountdown_;
-      if (modelItem->borderFlashCountdown_ % 2 == 1)
-        modelItem->setPen(borderFlashPen_);
+      --aeraGraphicsItem->borderFlashCountdown_;
+      if (aeraGraphicsItem->borderFlashCountdown_ % 2 == 1)
+        aeraGraphicsItem->setPen(borderFlashPen_);
       else
-        modelItem->setPen(lineColor_);
+        aeraGraphicsItem->setPen(lineColor_);
     }
 
-    if (modelItem->evidenceCountFlashCountdown_ > 0) {
-      isFlashing = true;
+    auto modelItem = dynamic_cast<AeraModelItem*>(item);
+    if (modelItem) {
+      if (modelItem->evidenceCountFlashCountdown_ > 0) {
+        isFlashing = true;
 
-      --modelItem->evidenceCountFlashCountdown_;
-      if (modelItem->evidenceCountFlashCountdown_ % 2 == 1)
-        modelItem->setEvidenceCountColor
-        (modelItem->evidenceCountIncreased_ ? valueUpFlashColor_ : valueDownFlashColor_);
-      else
-        modelItem->setEvidenceCountColor(noFlashColor_);
-    }
+        --modelItem->evidenceCountFlashCountdown_;
+        if (modelItem->evidenceCountFlashCountdown_ % 2 == 1)
+          modelItem->setEvidenceCountColor
+          (modelItem->evidenceCountIncreased_ ? valueUpFlashColor_ : valueDownFlashColor_);
+        else
+          modelItem->setEvidenceCountColor(noFlashColor_);
+      }
 
-    if (modelItem->successRateFlashCountdown_ > 0) {
-      isFlashing = true;
+      if (modelItem->successRateFlashCountdown_ > 0) {
+        isFlashing = true;
 
-      --modelItem->successRateFlashCountdown_;
-      if (modelItem->successRateFlashCountdown_ % 2 == 1)
-        modelItem->setSuccessRateColor
-        (modelItem->successRateIncreased_ ? valueUpFlashColor_ : valueDownFlashColor_);
-      else
-        modelItem->setSuccessRateColor(noFlashColor_);
+        --modelItem->successRateFlashCountdown_;
+        if (modelItem->successRateFlashCountdown_ % 2 == 1)
+          modelItem->setSuccessRateColor
+          (modelItem->successRateIncreased_ ? valueUpFlashColor_ : valueDownFlashColor_);
+        else
+          modelItem->setSuccessRateColor(noFlashColor_);
+      }
     }
   }
 
