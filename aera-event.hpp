@@ -55,6 +55,15 @@ public:
   core::float32 oldSuccessRate_;
 };
 
+class NewCompositeStateEvent : public AeraEvent {
+public:
+  NewCompositeStateEvent(core::Timestamp time, r_code::Code* object)
+    : AeraEvent(EVENT_TYPE, time, object)
+  {}
+
+  static const int EVENT_TYPE = 3;
+};
+
 }
 
 #endif

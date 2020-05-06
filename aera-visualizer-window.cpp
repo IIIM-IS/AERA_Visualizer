@@ -54,6 +54,7 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
 {
   ifstream consoleOutputFile(consoleOutputFilePath);
   regex newModelRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> mdl (\\d+)$");
+  regex newCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> cst (\\d+)$");
   regex setEvidenceCountAndSuccessRateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl (\\d+) cnt:(\\d+) sr:([\\d\\.]+)$");
 
   string line;
@@ -64,6 +65,9 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
       // Assume the initial success rate is 1.
       events_.push_back(make_shared<NewModelEvent>(
         getTimestamp(matches), replicodeObjects_.getObject(stol(matches[4].str())), 1, 1));
+    else if (regex_search(line, matches, newCompositeStateRegex))
+      events_.push_back(make_shared<NewCompositeStateEvent>(
+        getTimestamp(matches), replicodeObjects_.getObject(stol(matches[4].str()))));
     else if (regex_search(line, matches, setEvidenceCountAndSuccessRateRegex))
       // Assume the initial success rate is 1.
       events_.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(
