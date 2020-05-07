@@ -57,7 +57,7 @@ protected:
    */
   void addSourceCodeHtmlLinks(r_code::Code* object, QString& html);
   
-  void textItemLinkActivated(const QString& link);
+  virtual void textItemLinkActivated(const QString& link);
 
   AeraVisualizerScene* parent_;
   ReplicodeObjects& replicodeObjects_;
