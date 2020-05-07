@@ -1,15 +1,17 @@
 #include <QtWidgets>
 #include "explanation-log-window.hpp"
 
+using namespace std;
+
 namespace aera_visualizer {
 
-ExplanationLogWindow::ExplanationLogWindow(AeraVisulizerWindowBase* mainWindow)
+ExplanationLogWindow::ExplanationLogWindow(AeraVisulizerWindow* mainWindow)
   : AeraVisulizerWindowBase(mainWindow)
 {
   auto centralLayout = new QVBoxLayout();
-  auto textEdit = new QTextEdit(this);
-  textEdit->setReadOnly(true);
-  centralLayout->addWidget(textEdit);
+  textBrowser_ = new QTextBrowser(this);
+  connect(textBrowser_, SIGNAL(anchorClicked(const QUrl&)), this, SLOT(textBrowserAnchorClicked(const QUrl&)));
+  centralLayout->addWidget(textBrowser_);
   centralLayout->addWidget(getPlayerControlPanel());
 
   QWidget* centralWidget = new QWidget();
@@ -18,6 +20,10 @@ ExplanationLogWindow::ExplanationLogWindow(AeraVisulizerWindowBase* mainWindow)
 
   setWindowTitle(tr("Explanation Log"));
   setUnifiedTitleAndToolBarOnMac(true);
+}
+
+void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
+{
 }
 
 }

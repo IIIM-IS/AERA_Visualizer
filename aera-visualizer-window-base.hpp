@@ -12,6 +12,8 @@
 
 namespace aera_visualizer {
 
+class AeraVisulizerWindow;
+
 // https://wiki.qt.io/Clickable_QLabel
 class ClickableLabel : public QLabel {
   Q_OBJECT
@@ -41,10 +43,10 @@ protected:
   /**
    * Create an AeraVisulizerWindowBase and create the player control panel widget. This is 
    * called by the derived class, which should add getPlayerControlPanel() to its window.
-   * \param parent The main parent window for this window, or 0 if this is already
+   * \param mainWindow The main parent window for this window, or 0 if this is already
    * The main window.
    */
-  AeraVisulizerWindowBase(AeraVisulizerWindowBase* parent);
+  AeraVisulizerWindowBase(AeraVisulizerWindow* mainWindow);
 
   /**
    * Get the player control panel widget which has a play button, slider bar and time label.
@@ -83,6 +85,7 @@ protected:
 
   void timerEvent(QTimerEvent* event) override;
 
+  AeraVisulizerWindow* mainWindow_;
   // Debug: This should be in the derived class.
   std::vector<std::shared_ptr<AeraEvent> > events_;
 
@@ -126,7 +129,6 @@ private:
   ClickableLabel* playTimeLabel_;
   bool showRelativeTime_;
 
-  AeraVisulizerWindowBase* parent_;
   std::vector<AeraVisulizerWindowBase*> children_;
   QWidget* playerControlPanel_;
 

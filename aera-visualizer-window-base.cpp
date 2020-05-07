@@ -1,5 +1,5 @@
 #include <ctime>
-#include "aera-visualizer-window-base.hpp"
+#include "aera-visualizer-window.hpp"
 
 #include <QtWidgets>
 
@@ -10,9 +10,9 @@ using namespace r_code;
 
 namespace aera_visualizer {
 
-AeraVisulizerWindowBase::AeraVisulizerWindowBase(AeraVisulizerWindowBase* parent)
-: QMainWindow(parent),
-  parent_(parent),
+AeraVisulizerWindowBase::AeraVisulizerWindowBase(AeraVisulizerWindow* mainWindow)
+: QMainWindow(mainWindow),
+  mainWindow_(mainWindow),
   timeReference_(seconds(0)),
   playTime_(seconds(0)),
   showRelativeTime_(true),
@@ -21,8 +21,8 @@ AeraVisulizerWindowBase::AeraVisulizerWindowBase(AeraVisulizerWindowBase* parent
 {
   createPlayerControlPanel();
 
-  if (parent_)
-    parent_->children_.push_back(this);
+  if (mainWindow_)
+    mainWindow_->children_.push_back(this);
 }
 
 void AeraVisulizerWindowBase::createPlayerControlPanel()
@@ -59,9 +59,9 @@ void AeraVisulizerWindowBase::createPlayerControlPanel()
 
 void AeraVisulizerWindowBase::startPlay()
 {
-  if (parent_) {
+  if (mainWindow_) {
     // Only do this from the main window.
-    parent_->startPlay();
+    mainWindow_->startPlay();
     return;
   }
 
@@ -79,9 +79,9 @@ void AeraVisulizerWindowBase::startPlay()
 
 void AeraVisulizerWindowBase::stopPlay()
 {
-  if (parent_) {
+  if (mainWindow_) {
     // Only do this from the main window.
-    parent_->stopPlay();
+    mainWindow_->stopPlay();
     return;
   }
 
@@ -98,9 +98,9 @@ void AeraVisulizerWindowBase::stopPlay()
 
 void AeraVisulizerWindowBase::setPlayTime(Timestamp time)
 {
-  if (parent_) {
+  if (mainWindow_) {
     // Only do this from the main window.
-    parent_->setPlayTime(time);
+    mainWindow_->setPlayTime(time);
     return;
   }
 
@@ -134,9 +134,9 @@ void AeraVisulizerWindowBase::setPlayTime(Timestamp time)
 
 void AeraVisulizerWindowBase::setSliderToPlayTime()
 {
-  if (parent_) {
+  if (mainWindow_) {
     // Only do this from the main window.
-    parent_->setSliderToPlayTime();
+    mainWindow_->setSliderToPlayTime();
     return;
   }
 
@@ -157,9 +157,9 @@ void AeraVisulizerWindowBase::setSliderToPlayTime()
 
 void AeraVisulizerWindowBase::playPauseButtonClicked()
 {
-  if (parent_) {
+  if (mainWindow_) {
     // Only do this from the main window.
-    parent_->playPauseButtonClicked();
+    mainWindow_->playPauseButtonClicked();
     return;
   }
 
@@ -171,9 +171,9 @@ void AeraVisulizerWindowBase::playPauseButtonClicked()
 
 void AeraVisulizerWindowBase::stepButtonClicked()
 {
-  if (parent_) {
+  if (mainWindow_) {
     // Only do this from the main window.
-    parent_->stepButtonClicked();
+    mainWindow_->stepButtonClicked();
     return;
   }
 
@@ -188,9 +188,9 @@ void AeraVisulizerWindowBase::stepButtonClicked()
 
 void AeraVisulizerWindowBase::stepBackButtonClicked()
 {
-  if (parent_) {
+  if (mainWindow_) {
     // Only do this from the main window.
-    parent_->stepBackButtonClicked();
+    mainWindow_->stepBackButtonClicked();
     return;
   }
 
@@ -211,9 +211,9 @@ void AeraVisulizerWindowBase::playSliderValueChanged(int value)
 
 void AeraVisulizerWindowBase::playTimeLabelClicked()
 {
-  if (parent_) {
+  if (mainWindow_) {
     // Only do this from the main window.
-    parent_->playTimeLabelClicked();
+    mainWindow_->playTimeLabelClicked();
     return;
   }
 
