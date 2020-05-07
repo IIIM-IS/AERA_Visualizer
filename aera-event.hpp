@@ -36,6 +36,7 @@ public:
 
   core::float32 evidenceCount_;
   core::float32 successRate_;
+  // TODO: Should the model's controller be recorded globally?
   uint64 controllerDegugOid_;
 };
 
@@ -67,6 +68,21 @@ public:
 
   static const int EVENT_TYPE = 3;
 
+  // TODO: Should the composite state's controller be recorded globally?
+  uint64 controllerDegugOid_;
+};
+
+class ProgramReductionEvent : public AeraEvent {
+public:
+  // TODO: Get the reduction time from the mk.rdx view's injection time?
+  ProgramReductionEvent(core::Timestamp time, r_code::Code* object, uint64 controllerDegugOid)
+    : AeraEvent(EVENT_TYPE, time, object),
+    controllerDegugOid_(controllerDegugOid)
+  {}
+
+  static const int EVENT_TYPE = 4;
+
+  // TODO: Should the program's controller be recorded globally?
   uint64 controllerDegugOid_;
 };
 
@@ -78,7 +94,7 @@ public:
     fromObject_(fromObject), syncMode_(syncMode)
   {}
 
-  static const int EVENT_TYPE = 4;
+  static const int EVENT_TYPE = 5;
 
   r_code::Code* fromObject_;
   std::string syncMode_;
@@ -92,7 +108,7 @@ public:
     factImdl_(factImdl), cause_(cause)
   {}
 
-  static const int EVENT_TYPE = 5;
+  static const int EVENT_TYPE = 6;
 
   r_code::Code* factImdl_;
   r_code::Code* cause_;

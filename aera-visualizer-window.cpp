@@ -2,6 +2,7 @@
 #include "arrow.hpp"
 #include "aera-model-item.hpp"
 #include "aera-composite-state-item.hpp"
+#include "aera-program-reduction-item.hpp"
 #include "aera-prediction-item.hpp"
 #include "aera-visualizer-scene.hpp"
 #include "aera-visualizer-window.hpp"
@@ -56,8 +57,9 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
 {
   ifstream consoleOutputFile(consoleOutputFilePath);
   regex newModelRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> mdl (\\d+), MDLController\\((\\d+)\\)$");
-  regex newCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> cst (\\d+), CSTController\\((\\d+)\\)$");
   regex setEvidenceCountAndSuccessRateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl (\\d+) cnt:(\\d+) sr:([\\d\\.]+)$");
+  regex newCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> cst (\\d+), CSTController\\((\\d+)\\)$");
+  regex programReductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us PGMController\\((\\d+)\\) -> mk.rdx (\\d+)$");
   regex autofocusNewObjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us A/F -> (\\d+)\\|(\\d+) \\((\\w+)\\)$");
   regex newMkValPredictionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+)\\(\\d+\\) imdl mdl \\d+: (\\d+) -> fact (\\d+) pred fact mk.val VALUE .+$");
 
@@ -65,20 +67,31 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
   while (getline(consoleOutputFile, line)) {
     smatch matches;
 
-    if (regex_search(line, matches, newModelRegex))
-      // Assume the initial success rate is 1.
-      events_.push_back(make_shared<NewModelEvent>(
-        getTimestamp(matches), replicodeObjects_.getObject(stol(matches[4].str())), 1, 1,
-        stoll(matches[5].str())));
-    else if (regex_search(line, matches, newCompositeStateRegex))
-      events_.push_back(make_shared<NewCompositeStateEvent>(
-        getTimestamp(matches), replicodeObjects_.getObject(stol(matches[4].str())),
-        stoll(matches[5].str())));
-    else if (regex_search(line, matches, setEvidenceCountAndSuccessRateRegex))
-      // Assume the initial success rate is 1.
-      events_.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(
-        getTimestamp(matches), replicodeObjects_.getObject(stol(matches[4].str())), stol(matches[5].str()),
-        stof(matches[6].str())));
+    if (regex_search(line, matches, newModelRegex)) {
+      auto object = replicodeObjects_.getObject(stol(matches[4].str()));
+      if (object)
+        // Assume the initial success rate is 1.
+        events_.push_back(make_shared<NewModelEvent>(
+          getTimestamp(matches), object, 1, 1, stoll(matches[5].str())));
+    }
+    else if (regex_search(line, matches, setEvidenceCountAndSuccessRateRegex)) {
+      auto object = replicodeObjects_.getObject(stol(matches[4].str()));
+      if (object)
+        events_.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(
+          getTimestamp(matches), object, stol(matches[5].str()), stof(matches[6].str())));
+    }
+    else if (regex_search(line, matches, newCompositeStateRegex)) {
+      auto object = replicodeObjects_.getObject(stol(matches[4].str()));
+      if (object)
+        events_.push_back(make_shared<NewCompositeStateEvent>(
+          getTimestamp(matches), object, stoll(matches[5].str())));
+    }
+    else if (regex_search(line, matches, programReductionRegex)) {
+      auto object = replicodeObjects_.getObject(stol(matches[5].str()));
+      if (object)
+        events_.push_back(make_shared<ProgramReductionEvent>(
+          getTimestamp(matches), object, stoll(matches[4].str())));
+    }
     else if (regex_search(line, matches, autofocusNewObjectRegex)) {
       auto fromObject = replicodeObjects_.getObject(stol(matches[4].str()));
       auto toObject = replicodeObjects_.getObject(stol(matches[5].str()));
@@ -87,6 +100,7 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
           getTimestamp(matches), fromObject, toObject, matches[6].str()));
     }
     else if (regex_search(line, matches, newMkValPredictionRegex)) {
+      // TODO: Use the mk.rdx for the prediction.
       auto factImdl = replicodeObjects_.getObject(stol(matches[4].str()));
       auto cause = replicodeObjects_.getObject(stol(matches[5].str()));
       auto factPrediction = replicodeObjects_.getObject(stol(matches[6].str()));
@@ -117,6 +131,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 
   if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
+      event->eventType_ == ProgramReductionEvent::EVENT_TYPE ||
       event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE) {
     AeraGraphicsItem* newItem;
 
@@ -131,6 +146,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     }
     else if (event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
       newItem = new AeraCompositeStateItem(itemMenu_, (NewCompositeStateEvent*)event, replicodeObjects_, scene_);
+    else if (event->eventType_ == ProgramReductionEvent::EVENT_TYPE)
+      newItem = new AeraProgramReductionItem(itemMenu_, (ProgramReductionEvent*)event, replicodeObjects_, scene_);
     else
       newItem = new AeraPredictionItem(itemMenu_, (NewMkValPredictionEvent*)event, replicodeObjects_, scene_);
 
@@ -198,6 +215,7 @@ Timestamp AeraVisulizerWindow::unstepEvent()
   AeraEvent* event = events_[iNextEvent_].get();
   if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
+      event->eventType_ == ProgramReductionEvent::EVENT_TYPE ||
       event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE) {
     // Find the AeraGraphicsItem for this event and remove it.
     // Note that the event saves the updated item position and will use it when recreating the item.

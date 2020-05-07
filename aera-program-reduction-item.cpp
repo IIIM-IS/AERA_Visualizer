@@ -1,0 +1,50 @@
+#include <regex>
+#include <algorithm>
+#include <QGraphicsScene>
+#include <QGraphicsSceneContextMenuEvent>
+#include <QMenu>
+#include <QPainter>
+#include <QtWidgets>
+#include "aera-program-reduction-item.hpp"
+
+using namespace std;
+using namespace core;
+using namespace r_code;
+
+namespace aera_visualizer {
+
+AeraProgramReductionItem::AeraProgramReductionItem(
+  QMenu* contextMenu, ProgramReductionEvent* programReductionEvent, ReplicodeObjects& replicodeObjects,
+  AeraVisualizerScene* parent)
+  : AeraGraphicsItem(contextMenu, programReductionEvent, replicodeObjects, parent),
+  programReductionEvent_(programReductionEvent)
+{
+  // Set up sourceCodeHtml_
+  string sourceCode = replicodeObjects_.getSourceCode(programReductionEvent->object_);
+  // Temporarily replace \n with \x01 so that we match the entire string, not by line.
+  replace(sourceCode.begin(), sourceCode.end(), '\n', '\x01');
+  // Strip the propagation of saliency threshold.
+  // "[\\s\\x01]+" is whitespace "[\\d\\.]+" is a float value.
+  // TODO: The original source may have comments, so need to strip these.
+  sourceCode = regex_replace(sourceCode, regex("[\\s\\x01]+[\\d\\.]+[\\s\\x01]*\\)$"), ")");
+  // Restore \n.
+  replace(sourceCode.begin(), sourceCode.end(), '\x01', '\n');
+  QString html = sourceCode.c_str();
+  html.replace("\n", "<br>");
+  html.replace(" ", "&nbsp;");
+  addSourceCodeHtmlLinks(programReductionEvent_->object_, html);
+  sourceCodeHtml_ = html;
+
+  setTextItemAndPolygon(makeHtml());
+}
+
+QString AeraProgramReductionItem::makeHtml()
+{
+  QString html = QString("<h3><font color=\"darkred\">Program Reduction</font> <a href=\"#oid-") +
+    QString::number(programReductionEvent_->object_->get_oid()) + "\">" +
+    replicodeObjects_.getLabel(programReductionEvent_->object_).c_str() + "</h3>";
+  html += sourceCodeHtml_;
+  return html;
+}
+
+}
