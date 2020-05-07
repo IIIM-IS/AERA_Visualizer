@@ -99,7 +99,9 @@ void AeraGraphicsItem::addSourceCodeHtmlLinks(Code* object, QString& html)
   for (int i = 0; i < object->references_size(); ++i) {
     auto referencedObject = object->get_reference(i);
     if (!(referencedObject->code(0).asOpcode() == Opcodes::Mdl ||
-      referencedObject->code(0).asOpcode() == Opcodes::Cst))
+          referencedObject->code(0).asOpcode() == Opcodes::Cst ||
+          referencedObject->code(0).asOpcode() == Opcodes::Fact ||
+          referencedObject->code(0).asOpcode() == Opcodes::AntiFact))
       continue;
 
     auto referencedLabel = replicodeObjects_.getLabel(referencedObject);
@@ -112,6 +114,11 @@ void AeraGraphicsItem::addSourceCodeHtmlLinks(Code* object, QString& html)
       QString("&nbsp;") + referencedLabel.c_str() + "&nbsp;",
       QString("&nbsp;<a href=\"#oid-") + QString::number(referencedObject->get_oid()) + "\">" +
       referencedLabel.c_str() + "</a>&nbsp;");
+    // The same for at the end of a line.
+    html.replace(
+      QString("&nbsp;") + referencedLabel.c_str() + "<br>",
+      QString("&nbsp;<a href=\"#oid-") + QString::number(referencedObject->get_oid()) + "\">" +
+      referencedLabel.c_str() + "</a><br>");
   }
 }
 
