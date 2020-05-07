@@ -50,22 +50,26 @@ AeraPredictionItem::AeraPredictionItem(
 
 QString AeraPredictionItem::getPredictionSourceCodeHtml(Code* factPred)
 {
-  Code* pred = factPred->get_reference(0);
-  Code* factMkVal = pred->get_reference(0);
-  Code* mkVal = factMkVal->get_reference(0);
+  auto pred = factPred->get_reference(0);
+  auto factMkVal = pred->get_reference(0);
+  auto mkVal = factMkVal->get_reference(0);
 
-  QString factPredCode(replicodeObjects_.getSourceCode(factPred).c_str());
-  QString predCode(replicodeObjects_.getSourceCode(pred).c_str());
-  QString factMkValCode(replicodeObjects_.getSourceCode(factMkVal).c_str());
+  // Strip the ending confidence value and propagation of saliency threshold.
+  regex saliencyRegex("\\s+[\\w\\:]+\\)$");
+  regex confidenceAndSaliencyRegex("\\s+\\w+\\s+[\\w\\:]+\\)$");
+  string factPredSource = regex_replace(replicodeObjects_.getSourceCode(factPred), confidenceAndSaliencyRegex, ")");
+  string predSource = regex_replace(replicodeObjects_.getSourceCode(pred), saliencyRegex, ")");
+  string factMkValSource = regex_replace(replicodeObjects_.getSourceCode(factMkVal), confidenceAndSaliencyRegex, ")");
+  string mkValSource = regex_replace(replicodeObjects_.getSourceCode(mkVal), saliencyRegex, ")");
 
   QString predLabel(replicodeObjects_.getLabel(pred).c_str());
   QString factMkValLabel(replicodeObjects_.getLabel(factMkVal).c_str());
   QString mkValLabel(replicodeObjects_.getLabel(mkVal).c_str());
 
-  QString factPredHtml = factPredCode.replace(predLabel, "!down");
-  QString predHtml = predCode.replace(factMkValLabel, "!down");
-  QString factMkValHtml = factMkValCode.replace(mkValLabel, "!down");
-  QString mkValHtml(replicodeObjects_.getSourceCode(mkVal).c_str());
+  QString factPredHtml = QString(factPredSource.c_str()).replace(predLabel, "!down");
+  QString predHtml = QString(predSource.c_str()).replace(factMkValLabel, "!down");
+  QString factMkValHtml = QString(factMkValSource.c_str()).replace(mkValLabel, "!down");
+  QString mkValHtml(mkValSource.c_str());
 
   // Temporarily use "!down" which doesn't have spaces.
   QString html = factPredHtml;
