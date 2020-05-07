@@ -128,7 +128,6 @@ void AeraGraphicsItem::textItemLinkActivated(const QString& link)
     int oid = link.mid(5).toInt();
     auto object = replicodeObjects_.getObject(oid);
     if (object) {
-      // TODO: Make this work for other than models.
       auto item = parent_->getAeraGraphicsItem(object);
       if (item) {
         auto menu = new QMenu();
