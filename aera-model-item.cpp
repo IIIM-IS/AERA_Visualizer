@@ -22,10 +22,6 @@ AeraModelItem::AeraModelItem(
   evidenceCountColor_("black"), successRateColor_("black"),
   evidenceCountFlashCountdown_(0), successRateFlashCountdown_(0)
 {
-  const qreal left = -100;
-  const qreal top = -50;
-  const qreal diameter = 20;
-
   // Set up sourceCodeHtml_
   string sourceCode = replicodeObjects_.getSourceCode(newModelEvent_->object_);
   // Temporarily replace \n with \x01 so that we match the entire string, not by line.
@@ -46,6 +42,9 @@ AeraModelItem::AeraModelItem(
   addSourceCodeHtmlLinks(newModelEvent_->object_, html);
   sourceCodeHtml_ = html;
 
+  const qreal left = -100;
+  const qreal top = -50;
+
   // Set up the textItem_ first to get its size.
   textItem_ = new QGraphicsTextItem(this);
   textItem_->setPos(left + 5, top + 5);
@@ -56,6 +55,7 @@ AeraModelItem::AeraModelItem(
 
   qreal right = textItem_->boundingRect().width() - 50;
   qreal bottom = textItem_->boundingRect().height() - 30;
+  const qreal diameter = 20;
 
   QPainterPath path;
   path.moveTo(right, diameter / 2);
@@ -63,12 +63,10 @@ AeraModelItem::AeraModelItem(
   path.arcTo(left, top, diameter, diameter, 90, 90);
   path.arcTo(left, bottom - diameter, diameter, diameter, 180, 90);
   path.arcTo(right - diameter, bottom - diameter, diameter, diameter, 270, 90);
-  polygon_ = path.toFillPolygon();
-
-  setPolygon(polygon_);
+  setPolygon(path.toFillPolygon());
 }
 
-void AeraModelItem::setTextItemHtml()
+QString AeraModelItem::makeHtml()
 {
   auto model = newModelEvent_->object_;
 
@@ -80,7 +78,7 @@ void AeraModelItem::setTextItemHtml()
     QString::number(evidenceCount_) + "</font><br>";
   html += "<font color=\"" + successRateColor_ + "\">&nbsp;&nbsp;&nbsp;&nbsp;Success Rate: " +
     QString::number(successRate_) + "</font><br>";
-  textItem_->setHtml(html);
+  return html;
 }
 
 void AeraModelItem::updateFromModel()
@@ -91,7 +89,7 @@ void AeraModelItem::updateFromModel()
   successRateIncreased_ = (model->code(MDL_SR).asFloat() >= successRate_);
   successRate_ = model->code(MDL_SR).asFloat();
 
-  setTextItemHtml();
+  textItem_->setHtml(makeHtml());
 }
 
 }

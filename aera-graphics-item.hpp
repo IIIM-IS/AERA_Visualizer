@@ -55,6 +55,7 @@ protected:
 
   AeraVisualizerScene* parent_;
   ReplicodeObjects& replicodeObjects_;
+  QGraphicsTextItem* textItem_;
 
 private:
   void removeArrow(Arrow* arrow);

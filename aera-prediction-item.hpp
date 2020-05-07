@@ -17,16 +17,13 @@ public:
     QMenu* contextMenu, NewMkValPredictionEvent* newPredictionEvent,
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 
-  QPolygonF polygon() const { return polygon_; }
   NewMkValPredictionEvent* getPredictionEvent() { return newPredictionEvent_; }
 
 private:
   QString getPredictionSourceCodeHtml(r_code::Code* factPred);
-  void setTextItemHtml();
+  QString makeHtml();
 
-  QPolygonF polygon_;
   NewMkValPredictionEvent* newPredictionEvent_;
-  QGraphicsTextItem* textItem_;
   QString sourceCodeHtml_;
 };
 

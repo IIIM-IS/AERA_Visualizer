@@ -20,11 +20,10 @@ AeraPredictionItem::AeraPredictionItem(
   : AeraGraphicsItem(contextMenu, newPredictionEvent, replicodeObjects, parent),
   newPredictionEvent_(newPredictionEvent)
 {
+  sourceCodeHtml_ = getPredictionSourceCodeHtml(newPredictionEvent_->object_);
+
   const qreal left = -100;
   const qreal top = -50;
-  const qreal diameter = 20;
-
-  sourceCodeHtml_ = getPredictionSourceCodeHtml(newPredictionEvent_->object_);
 
   // Set up the textItem_ first to get its size.
   textItem_ = new QGraphicsTextItem(this);
@@ -32,10 +31,11 @@ AeraPredictionItem::AeraPredictionItem(
   textItem_->setTextInteractionFlags(Qt::TextBrowserInteraction);
   QObject::connect(textItem_, &QGraphicsTextItem::linkActivated,
     [this](const QString& link) { textItemLinkActivated(link); });
-  setTextItemHtml();
+  textItem_->setHtml(makeHtml());
 
   qreal right = textItem_->boundingRect().width() - 50;
   qreal bottom = textItem_->boundingRect().height() - 30;
+  const qreal diameter = 20;
 
   QPainterPath path;
   path.moveTo(right, diameter / 2);
@@ -43,9 +43,7 @@ AeraPredictionItem::AeraPredictionItem(
   path.arcTo(left, top, diameter, diameter, 90, 90);
   path.arcTo(left, bottom - diameter, diameter, diameter, 180, 90);
   path.arcTo(right - diameter, bottom - diameter, diameter, diameter, 270, 90);
-  polygon_ = path.toFillPolygon();
-
-  setPolygon(polygon_);
+  setPolygon(path.toFillPolygon());
 }
 
 QString AeraPredictionItem::getPredictionSourceCodeHtml(Code* factPred)
@@ -84,13 +82,13 @@ QString AeraPredictionItem::getPredictionSourceCodeHtml(Code* factPred)
   return html;
 }
 
-void AeraPredictionItem::setTextItemHtml()
+QString AeraPredictionItem::makeHtml()
 {
   QString html = QString("<h3><font color=\"darkred\">Prediction</font> <a href=\"#oid-") +
     QString::number(newPredictionEvent_->object_->get_oid()) + "\">" +
     replicodeObjects_.getLabel(newPredictionEvent_->object_).c_str() + "</h3>";
   html += sourceCodeHtml_;
-  textItem_->setHtml(html);
+  return html;
 }
 
 }

@@ -17,20 +17,19 @@ public:
     QMenu* contextMenu, NewModelEvent* newModelEvent, ReplicodeObjects& replicodeObjects, 
     AeraVisualizerScene* parent);
 
-  QPolygonF polygon() const { return polygon_; }
   NewModelEvent* getNewModelEvent() { return newModelEvent_; }
   void updateFromModel();
 
   void setEvidenceCountColor(QString color) 
   { 
     evidenceCountColor_ = color;
-    setTextItemHtml();
+    textItem_->setHtml(makeHtml());
   };
 
   void setSuccessRateColor(QString color)
   {
     successRateColor_ = color;
-    setTextItemHtml();
+    textItem_->setHtml(makeHtml());
   };
 
   int evidenceCountFlashCountdown_;
@@ -39,11 +38,9 @@ public:
   bool successRateIncreased_;
 
 private:
-  void setTextItemHtml();
+  QString makeHtml();
 
-  QPolygonF polygon_;
   NewModelEvent* newModelEvent_;
-  QGraphicsTextItem* textItem_;
   QString sourceCodeHtml_;
   core::float32 evidenceCount_;
   QString evidenceCountColor_;

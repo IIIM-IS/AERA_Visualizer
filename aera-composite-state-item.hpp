@@ -17,15 +17,12 @@ public:
     QMenu* contextMenu, NewCompositeStateEvent* newCompositeStateEvent, 
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 
-  QPolygonF polygon() const { return polygon_; }
   NewCompositeStateEvent* getNewCompositeStateEvent() { return newCompositeStateEvent_; }
 
 private:
-  void setTextItemHtml();
+  QString makeHtml();
 
-  QPolygonF polygon_;
   NewCompositeStateEvent* newCompositeStateEvent_;
-  QGraphicsTextItem* textItem_;
   QString sourceCodeHtml_;
 };
 

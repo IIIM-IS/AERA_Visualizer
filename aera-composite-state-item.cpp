@@ -20,10 +20,6 @@ AeraCompositeStateItem::AeraCompositeStateItem(
   : AeraGraphicsItem(contextMenu, newCompositeStateEvent, replicodeObjects, parent),
   newCompositeStateEvent_(newCompositeStateEvent)
 {
-  const qreal left = -100;
-  const qreal top = -50;
-  const qreal diameter = 20;
-
   // Set up sourceCodeHtml_
   string sourceCode = replicodeObjects_.getSourceCode(newCompositeStateEvent->object_);
   // Temporarily replace \n with \x01 so that we match the entire string, not by line.
@@ -44,16 +40,20 @@ AeraCompositeStateItem::AeraCompositeStateItem(
   addSourceCodeHtmlLinks(newCompositeStateEvent_->object_, html);
   sourceCodeHtml_ = html;
 
+  const qreal left = -100;
+  const qreal top = -50;
+
   // Set up the textItem_ first to get its size.
   textItem_ = new QGraphicsTextItem(this);
   textItem_->setPos(left + 5, top + 5);
   textItem_->setTextInteractionFlags(Qt::TextBrowserInteraction);
   QObject::connect(textItem_, &QGraphicsTextItem::linkActivated,
     [this](const QString& link) { textItemLinkActivated(link); });
-  setTextItemHtml();
+  textItem_->setHtml(makeHtml());
 
   qreal right = textItem_->boundingRect().width() - 50;
   qreal bottom = textItem_->boundingRect().height() - 30;
+  const qreal diameter = 20;
 
   QPainterPath path;
   path.moveTo(right, diameter / 2);
@@ -61,18 +61,16 @@ AeraCompositeStateItem::AeraCompositeStateItem(
   path.arcTo(left, top, diameter, diameter, 90, 90);
   path.arcTo(left, bottom - diameter, diameter, diameter, 180, 90);
   path.arcTo(right - diameter, bottom - diameter, diameter, diameter, 270, 90);
-  polygon_ = path.toFillPolygon();
-
-  setPolygon(polygon_);
+  setPolygon(path.toFillPolygon());
 }
 
-void AeraCompositeStateItem::setTextItemHtml()
+QString AeraCompositeStateItem::makeHtml()
 {
   QString html = QString("<h3><font color=\"darkred\">Composite State</font> <a href=\"#oid-") + 
     QString::number(newCompositeStateEvent_->object_->get_oid()) + "\">" +
     replicodeObjects_.getLabel(newCompositeStateEvent_->object_).c_str() + "</h3>";
   html += sourceCodeHtml_;
-  textItem_->setHtml(html);
+  return html;
 }
 
 }
