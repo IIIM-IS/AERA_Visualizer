@@ -43,6 +43,12 @@ protected:
   QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
   /**
+   * Set the textItem_ to the given html and create the border polygon.
+   * \param html The HTML for the textItem_.
+   */
+  void setTextItemAndPolygon(QString html);
+
+  /**
    * Go through object's references and modify html with <a href="#oid-XXX"></a>
    * around the label of each referenced object. When clicked, this link is handled
    * by textItemLinkActivated().

@@ -21,29 +21,7 @@ AeraPredictionItem::AeraPredictionItem(
   newPredictionEvent_(newPredictionEvent)
 {
   sourceCodeHtml_ = getPredictionSourceCodeHtml(newPredictionEvent_->object_);
-
-  const qreal left = -100;
-  const qreal top = -50;
-
-  // Set up the textItem_ first to get its size.
-  textItem_ = new QGraphicsTextItem(this);
-  textItem_->setPos(left + 5, top + 5);
-  textItem_->setTextInteractionFlags(Qt::TextBrowserInteraction);
-  QObject::connect(textItem_, &QGraphicsTextItem::linkActivated,
-    [this](const QString& link) { textItemLinkActivated(link); });
-  textItem_->setHtml(makeHtml());
-
-  qreal right = textItem_->boundingRect().width() - 50;
-  qreal bottom = textItem_->boundingRect().height() - 30;
-  const qreal diameter = 20;
-
-  QPainterPath path;
-  path.moveTo(right, diameter / 2);
-  path.arcTo(right - diameter, top, diameter, diameter, 0, 90);
-  path.arcTo(left, top, diameter, diameter, 90, 90);
-  path.arcTo(left, bottom - diameter, diameter, diameter, 180, 90);
-  path.arcTo(right - diameter, bottom - diameter, diameter, diameter, 270, 90);
-  setPolygon(path.toFillPolygon());
+  setTextItemAndPolygon(makeHtml());
 }
 
 QString AeraPredictionItem::getPredictionSourceCodeHtml(Code* factPred)

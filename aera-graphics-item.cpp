@@ -21,13 +21,41 @@ AeraGraphicsItem::AeraGraphicsItem(
   QMenu* contextMenu, AeraEvent* newObjectEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
   : parent_(parent),
   newObjectEvent_(newObjectEvent), replicodeObjects_(replicodeObjects),
-  borderFlashCountdown_(6)
+  borderFlashCountdown_(6),
+  // The base class should call setTextItemAndPolygon()
+  textItem_(0)
 {
   contextMenu_ = contextMenu;
 
   setFlag(QGraphicsItem::ItemIsMovable, true);
   setFlag(QGraphicsItem::ItemIsSelectable, true);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+}
+
+void AeraGraphicsItem::setTextItemAndPolygon(QString html)
+{
+  const qreal left = -100;
+  const qreal top = -50;
+
+  // Set up the textItem_ first to get its size.
+  textItem_ = new QGraphicsTextItem(this);
+  textItem_->setPos(left + 5, top + 5);
+  textItem_->setTextInteractionFlags(Qt::TextBrowserInteraction);
+  QObject::connect(textItem_, &QGraphicsTextItem::linkActivated,
+    [this](const QString& link) { textItemLinkActivated(link); });
+  textItem_->setHtml(html);
+
+  qreal right = textItem_->boundingRect().width() - 50;
+  qreal bottom = textItem_->boundingRect().height() - 30;
+  const qreal diameter = 20;
+
+  QPainterPath path;
+  path.moveTo(right, diameter / 2);
+  path.arcTo(right - diameter, top, diameter, diameter, 0, 90);
+  path.arcTo(left, top, diameter, diameter, 90, 90);
+  path.arcTo(left, bottom - diameter, diameter, diameter, 180, 90);
+  path.arcTo(right - diameter, bottom - diameter, diameter, diameter, 270, 90);
+  setPolygon(path.toFillPolygon());
 }
 
 void AeraGraphicsItem::removeArrows()
