@@ -5,6 +5,8 @@
 #include <map>
 #include "submodules/replicode/r_exec/mem.h"
 
+namespace aera_visualizer {
+
 /**
  * ReplicodeObjects holds a list of Replicode objects that are compiled from the
  * decompiler output.
@@ -24,18 +26,25 @@ public:
   std::string init(const std::string& userOperatorsFilePath, const std::string& decompiledFilePath);
 
   /**
-   * Get the time reference that was loaded from the decompiled output. 
+   * Get the time reference that was loaded from the decompiled output.
    * This can be used to show times relative to the beginning of the Replicode session.
    * \return The time reference.
    */
   core::Timestamp getTimeReference() const { return timeReference_; }
 
   /**
-   * Get the object by OID.
+   * Get the object by the OID.
    * \param oid The OID.
    * \return The object, or NULL if not found.
    */
   r_code::Code* getObject(uint32 oid);
+
+  /**
+   * Get the object by the debug OID.
+   * \param debugOid The debug OID.
+   * \return The object, or NULL if not found.
+   */
+  r_code::Code* getObjectByDebugOid(uint64 debugOid);
 
   /**
    * Get the object's label (from the decompiled objects file).
@@ -65,8 +74,8 @@ public:
 
 private:
   /**
-   * Process the decompiled objects file to remove OIDs, debug OIDs and info lines starting with ">". 
-   * This sets timeReference_ from the header info line. This gets the object's source code, which is 
+   * Process the decompiled objects file to remove OIDs, debug OIDs and info lines starting with ">".
+   * This sets timeReference_ from the header info line. This gets the object's source code, which is
    * stripped of the label and view set.
    * The source code does not have an ending newline, even if it is multi-line code.
    * \param decompiledFilePath The path of the decompiled objects file.
@@ -78,7 +87,7 @@ private:
    */
   std::string processDecompiledObjects(
     std::string decompiledFilePath, std::map<std::string, core::uint32>& objectOids,
-    std::map<std::string, core::uint64>& objectDebugOids, std::map<uint64, 
+    std::map<std::string, core::uint64>& objectDebugOids, std::map<uint64,
     std::string>& objectSourceCode);
 
   core::Timestamp timeReference_;
@@ -88,5 +97,7 @@ private:
   std::map<r_code::Code*, std::string> objectLabel_;
   r_code::list<P<r_code::Code> > objects_;
 };
+
+}
 
 #endif

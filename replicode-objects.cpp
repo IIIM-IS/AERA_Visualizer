@@ -13,6 +13,8 @@ using namespace core;
 using namespace r_code;
 using namespace r_comp;
 
+namespace aera_visualizer {
+
 string ReplicodeObjects::init(const string& userOperatorsFilePath, const string& decompiledFilePath)
 {
   // Run the proprocessor on the user operators (which includes std.replicode) just to
@@ -77,7 +79,7 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
       }
     }
   }
-  
+
   // Transfer imageObjects to objects_, processing as needed.
   // Imitate _Mem::load.
   for (uint32 i = 0; i < imageObjects.size(); ++i) {
@@ -248,4 +250,16 @@ r_code::Code* ReplicodeObjects::getObject(uint32 oid)
   }
 
   return NULL;
+}
+
+r_code::Code* ReplicodeObjects::getObjectByDebugOid(uint64 debugOid)
+{
+  for (auto i = objects_.begin(); i != objects_.end(); ++i) {
+    if ((*i)->get_debug_oid() == debugOid)
+      return *i;
+  }
+
+  return NULL;
+}
+
 }
