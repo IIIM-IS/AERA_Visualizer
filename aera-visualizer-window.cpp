@@ -3,6 +3,7 @@
 #include "aera-model-item.hpp"
 #include "aera-composite-state-item.hpp"
 #include "aera-program-reduction-item.hpp"
+#include "aera-program-output-fact-item.hpp"
 #include "aera-prediction-item.hpp"
 #include "aera-visualizer-scene.hpp"
 #include "aera-visualizer-window.hpp"
@@ -68,29 +69,43 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
     smatch matches;
 
     if (regex_search(line, matches, newModelRegex)) {
-      auto object = replicodeObjects_.getObject(stol(matches[4].str()));
-      if (object)
+      auto model = replicodeObjects_.getObject(stol(matches[4].str()));
+      if (model)
         // Assume the initial success rate is 1.
         events_.push_back(make_shared<NewModelEvent>(
-          getTimestamp(matches), object, 1, 1, stoll(matches[5].str())));
+          getTimestamp(matches), model, 1, 1, stoll(matches[5].str())));
     }
     else if (regex_search(line, matches, setEvidenceCountAndSuccessRateRegex)) {
-      auto object = replicodeObjects_.getObject(stol(matches[4].str()));
-      if (object)
+      auto model = replicodeObjects_.getObject(stol(matches[4].str()));
+      if (model)
         events_.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(
-          getTimestamp(matches), object, stol(matches[5].str()), stof(matches[6].str())));
+          getTimestamp(matches), model, stol(matches[5].str()), stof(matches[6].str())));
     }
     else if (regex_search(line, matches, newCompositeStateRegex)) {
-      auto object = replicodeObjects_.getObject(stol(matches[4].str()));
-      if (object)
+      auto compositeState = replicodeObjects_.getObject(stol(matches[4].str()));
+      if (compositeState)
         events_.push_back(make_shared<NewCompositeStateEvent>(
-          getTimestamp(matches), object, stoll(matches[5].str())));
+          getTimestamp(matches), compositeState, stoll(matches[5].str())));
     }
     else if (regex_search(line, matches, programReductionRegex)) {
-      auto object = replicodeObjects_.getObject(stol(matches[5].str()));
-      if (object)
+      auto programReduction = replicodeObjects_.getObject(stol(matches[5].str()));
+      if (programReduction) {
+        // First add events for the output objects.
+        // TODO: Get this from the actual object.
+        Code* outputObject = 0;
+        if (programReduction->get_oid() == 47)
+          outputObject = replicodeObjects_.getObject(49);
+        else if (programReduction->get_oid() == 58)
+          outputObject = replicodeObjects_.getObject(68);
+        else if (programReduction->get_oid() == 77)
+          outputObject = replicodeObjects_.getObjectByDebugOid(2061);
+        if (outputObject)
+          events_.push_back(make_shared<ProgramReductionNewObjectEvent>(
+            getTimestamp(matches), outputObject, programReduction));
+
         events_.push_back(make_shared<ProgramReductionEvent>(
-          getTimestamp(matches), object, stoll(matches[4].str())));
+          getTimestamp(matches), programReduction, stoll(matches[4].str())));
+      }
     }
     else if (regex_search(line, matches, autofocusNewObjectRegex)) {
       auto fromObject = replicodeObjects_.getObject(stol(matches[4].str()));
@@ -132,6 +147,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
   if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == ProgramReductionEvent::EVENT_TYPE ||
+      event->eventType_ == ProgramReductionNewObjectEvent::EVENT_TYPE ||
       event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE) {
     AeraGraphicsItem* newItem;
 
@@ -148,6 +164,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       newItem = new AeraCompositeStateItem(itemMenu_, (NewCompositeStateEvent*)event, replicodeObjects_, scene_);
     else if (event->eventType_ == ProgramReductionEvent::EVENT_TYPE)
       newItem = new AeraProgramReductionItem(itemMenu_, (ProgramReductionEvent*)event, replicodeObjects_, scene_);
+    else if (event->eventType_ == ProgramReductionNewObjectEvent::EVENT_TYPE)
+      newItem = new AeraProgramOutputFactItem(itemMenu_, (ProgramReductionNewObjectEvent*)event, replicodeObjects_, scene_);
     else
       newItem = new AeraPredictionItem(itemMenu_, (NewMkValPredictionEvent*)event, replicodeObjects_, scene_);
 
@@ -216,6 +234,7 @@ Timestamp AeraVisulizerWindow::unstepEvent()
   if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == ProgramReductionEvent::EVENT_TYPE ||
+      event->eventType_ == ProgramReductionNewObjectEvent::EVENT_TYPE ||
       event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE) {
     // Find the AeraGraphicsItem for this event and remove it.
     // Note that the event saves the updated item position and will use it when recreating the item.

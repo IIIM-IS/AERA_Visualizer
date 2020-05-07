@@ -35,7 +35,12 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     // Assign an initial position.
     // TODO: Do this with a grid layout.
     if (newObjectEvent->object_->get_oid() == 60)
-      newObjectEvent->itemPosition_ = QPointF(2040, 2550);
+      newObjectEvent->itemPosition_ = QPointF(2290, 2540);
+    else if (newObjectEvent->object_->get_debug_oid() == 2061)
+      newObjectEvent->itemPosition_ = QPointF(2900, 2560);
+    else if (newObjectEvent->eventType_ == ProgramReductionNewObjectEvent::EVENT_TYPE)
+      newObjectEvent->itemPosition_ = QPointF(
+        2040 + (newObjectEvent->object_->get_oid() - 49) * 29, 2560);
     else if (newObjectEvent->eventType_ == ProgramReductionEvent::EVENT_TYPE)
       newObjectEvent->itemPosition_ = QPointF(
         2040 + (newObjectEvent->object_->get_oid() - 47) * 25, 2720);
