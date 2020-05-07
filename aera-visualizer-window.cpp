@@ -19,7 +19,7 @@ namespace aera_visualizer {
 
 AeraVisulizerWindow::AeraVisulizerWindow()
 : AeraVisulizerWindowBase(0),
-  iNextEvent_(0)
+  iNextEvent_(0), explanationLogWindow_(0)
 {
   createActions();
   createMenus();

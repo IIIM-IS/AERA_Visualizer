@@ -1,5 +1,6 @@
-#include "aera-visualizer-scene.hpp"
+#include "aera-visualizer-window.hpp"
 #include "arrow.hpp"
+#include "aera-visualizer-scene.hpp"
 
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
@@ -10,8 +11,10 @@ using namespace r_code;
 
 namespace aera_visualizer {
 
-AeraVisualizerScene::AeraVisualizerScene(QMenu* itemMenu, ReplicodeObjects& replicodeObjects, QObject* parent)
+AeraVisualizerScene::AeraVisualizerScene(
+    QMenu* itemMenu, ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent)
   : QGraphicsScene(parent),
+  parent_(parent),
   replicodeObjects_(replicodeObjects),
   borderFlashPen_(Qt::blue, 3),
   noFlashColor_("black"),
@@ -186,6 +189,11 @@ void AeraVisualizerScene::timerEvent(QTimerEvent* event)
     killTimer(flashTimerId_);
     flashTimerId_ = 0;
   }
+}
+
+ExplanationLogWindow* AeraVisualizerScene::getExplanationLogWindow()
+{
+  return parent_->getExplanationLogWindow();
 }
 
 }

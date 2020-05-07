@@ -19,6 +19,7 @@ int main(int argv, char *args[])
   mainWindow.setGeometry(left, top, width, height);
 
   auto explanationLogWindow = new ExplanationLogWindow(&mainWindow);
+  mainWindow.setExplanationLogWindow(explanationLogWindow);
   // Disable the close button for the child window.
   explanationLogWindow->setWindowFlag(Qt::WindowCloseButtonHint, false);
   explanationLogWindow->setGeometry(left + width, top, 380, height);

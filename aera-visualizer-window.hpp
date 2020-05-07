@@ -21,6 +21,8 @@ class QGraphicsView;
 
 namespace aera_visualizer {
 
+class ExplanationLogWindow;
+
 /**
  * AeraVisulizerWindow extends AeraVisulizerWindowBase to present the player
  * control panel and a window for visualizing the processing of AERA models.
@@ -34,6 +36,13 @@ public:
    * Create an AeraVisulizerWindow.
    */
   AeraVisulizerWindow();
+
+  void setExplanationLogWindow(ExplanationLogWindow* explanationLogWindow)
+  {
+    explanationLogWindow_ = explanationLogWindow;
+  }
+
+  ExplanationLogWindow* getExplanationLogWindow() { return explanationLogWindow_;  }
 
 protected:
   bool haveMoreEvents() override { return iNextEvent_ >= events_.size(); }
@@ -53,6 +62,8 @@ protected:
    * return Utils_MaxTime.
    */
   core::Timestamp unstepEvent() override;
+
+  ExplanationLogWindow* explanationLogWindow_;
 
 private slots:
   void zoomIn();

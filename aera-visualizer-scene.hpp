@@ -16,12 +16,16 @@ class QColor;
 
 namespace aera_visualizer {
 
+class AeraVisulizerWindow;
+class ExplanationLogWindow;
+
 class AeraVisualizerScene : public QGraphicsScene
 {
   Q_OBJECT
 
 public:
-  explicit AeraVisualizerScene(QMenu* itemMenu, ReplicodeObjects& replicodeObjects, QObject* parent = 0);
+  explicit AeraVisualizerScene(
+    QMenu* itemMenu, ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent = 0);
 
   /**
    * Scale the first QGraphicsView by the given factor.
@@ -43,7 +47,9 @@ public:
     if (flashTimerId_ == 0)
       flashTimerId_ = startTimer(200);
   }
-  QPoint getMouseScreenPosition() { return mouseScreenPosition_;  }
+  QPoint getMouseScreenPosition() { return mouseScreenPosition_; }
+
+  ExplanationLogWindow* getExplanationLogWindow();
 
 protected:
   void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
@@ -53,6 +59,8 @@ protected:
 #if QT_CONFIG(wheelevent)
   void wheelEvent(QGraphicsSceneWheelEvent* event) override;
 #endif
+
+  AeraVisulizerWindow* parent_;
 
 private:
   ReplicodeObjects& replicodeObjects_;
