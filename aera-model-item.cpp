@@ -5,7 +5,6 @@
 #include <QMenu>
 #include <QPainter>
 #include <QtWidgets>
-#include "aera-visualizer-scene.hpp"
 #include "aera-model-item.hpp"
 
 using namespace std;
@@ -30,11 +29,8 @@ AeraModelItem::AeraModelItem(
   // Strip the set of output groups and parameters.
   // "[\\s\\x01]+" is whitespace "[\\d\\.]+" is a float value.
   // TODO: The original source may have comments, so need to strip these.
-  regex modelRegex("^(.+)[\\s\\x01]+\\[[\\w\\s]+\\]([\\s\\x01]+[\\d\\.]+){5}[\\s\\x01]*\\)$");
-  smatch matches;
-  if (regex_search(sourceCode, matches, modelRegex))
-    sourceCode = matches[1].str();
-  sourceCode += ")";
+  sourceCode = regex_replace(sourceCode, 
+    regex("[\\s\\x01]+\\[[\\w\\s]+\\]([\\s\\x01]+[\\d\\.]+){5}[\\s\\x01]*\\)$"), ")");
   // Restore \n.
   replace(sourceCode.begin(), sourceCode.end(), '\x01', '\n');
   QString html = sourceCode.c_str();

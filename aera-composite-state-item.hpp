@@ -17,8 +17,6 @@ public:
     QMenu* contextMenu, NewCompositeStateEvent* newCompositeStateEvent, 
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 
-  NewCompositeStateEvent* getNewCompositeStateEvent() { return newCompositeStateEvent_; }
-
 private:
   QString makeHtml();
 

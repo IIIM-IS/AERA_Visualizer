@@ -17,7 +17,6 @@ public:
     QMenu* contextMenu, NewModelEvent* newModelEvent, ReplicodeObjects& replicodeObjects, 
     AeraVisualizerScene* parent);
 
-  NewModelEvent* getNewModelEvent() { return newModelEvent_; }
   void updateFromModel();
 
   void setEvidenceCountColor(QString color) 
