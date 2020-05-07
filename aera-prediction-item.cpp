@@ -5,7 +5,6 @@
 #include <QMenu>
 #include <QPainter>
 #include <QtWidgets>
-#include "aera-visualizer-scene.hpp"
 #include "aera-prediction-item.hpp"
 
 using namespace std;

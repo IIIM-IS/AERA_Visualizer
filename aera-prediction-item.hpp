@@ -17,8 +17,6 @@ public:
     QMenu* contextMenu, NewMkValPredictionEvent* newPredictionEvent,
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 
-  NewMkValPredictionEvent* getPredictionEvent() { return newPredictionEvent_; }
-
 private:
   QString getPredictionSourceCodeHtml(r_code::Code* factPred);
   QString makeHtml();
