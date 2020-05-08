@@ -2,7 +2,7 @@
 #define AERA_VISUALIZER_WINDOW_HPP
 
 #include <regex>
-#include "aera-graphics-item.hpp"
+#include "graphics-items/aera-graphics-item.hpp"
 #include "aera-event.hpp"
 #include "aera-visualizer-window-base.hpp"
 #include "replicode-objects.hpp"

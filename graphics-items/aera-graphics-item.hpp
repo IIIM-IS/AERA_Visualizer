@@ -4,7 +4,7 @@
 #include <QGraphicsPixmapItem>
 #include <QList>
 #include <QPen>
-#include "replicode-objects.hpp"
+#include "../replicode-objects.hpp"
 #include "aera-event.hpp"
 
 class QPixmap;

@@ -207,16 +207,16 @@
     </QtRcc>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="composite-state-item.cpp" />
-    <ClCompile Include="aera-graphics-item.cpp" />
-    <ClCompile Include="prediction-item.cpp" />
-    <ClCompile Include="program-output-fact-item.cpp" />
-    <ClCompile Include="program-reduction-item.cpp" />
     <ClCompile Include="explanation-log-window.cpp" />
     <ClCompile Include="aera-visualizer-window-base.cpp" />
-    <ClCompile Include="arrow.cpp" />
-    <ClCompile Include="model-item.cpp" />
-    <ClCompile Include="aera-visualizer-scene.cpp" />
+    <ClCompile Include="graphics-items\aera-graphics-item.cpp" />
+    <ClCompile Include="graphics-items\aera-visualizer-scene.cpp" />
+    <ClCompile Include="graphics-items\arrow.cpp" />
+    <ClCompile Include="graphics-items\composite-state-item.cpp" />
+    <ClCompile Include="graphics-items\model-item.cpp" />
+    <ClCompile Include="graphics-items\prediction-item.cpp" />
+    <ClCompile Include="graphics-items\program-output-fact-item.cpp" />
+    <ClCompile Include="graphics-items\program-reduction-item.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="aera-visualizer-window.cpp" />
     <ClCompile Include="replicode-objects.cpp" />
@@ -302,14 +302,15 @@
     <QtRcc Include="aera_visualizer.qrc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="composite-state-item.hpp" />
     <ClInclude Include="aera-event.hpp" />
-    <ClInclude Include="aera-graphics-item.hpp" />
-    <ClInclude Include="model-item.hpp" />
-    <ClInclude Include="prediction-item.hpp" />
-    <ClInclude Include="program-output-fact-item.hpp" />
-    <ClInclude Include="program-reduction-item.hpp" />
-    <ClInclude Include="arrow.hpp" />
+    <ClInclude Include="graphics-items\aera-graphics-item.hpp" />
+    <ClInclude Include="graphics-items\aera-visualizer-scene.hpp" />
+    <ClInclude Include="graphics-items\arrow.hpp" />
+    <ClInclude Include="graphics-items\composite-state-item.hpp" />
+    <ClInclude Include="graphics-items\model-item.hpp" />
+    <ClInclude Include="graphics-items\prediction-item.hpp" />
+    <ClInclude Include="graphics-items\program-output-fact-item.hpp" />
+    <ClInclude Include="graphics-items\program-reduction-item.hpp" />
     <ClInclude Include="replicode-objects.hpp" />
     <ClInclude Include="submodules\replicode\r_code\atom.h" />
     <ClInclude Include="submodules\replicode\r_code\image.h" />
@@ -371,7 +372,6 @@
     <QtMoc Include="explanation-log-window.hpp" />
     <QtMoc Include="aera-visualizer-window-base.hpp" />
     <QtMoc Include="aera-visualizer-window.hpp" />
-    <QtMoc Include="aera-visualizer-scene.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="images\pause.png">

@@ -1,11 +1,11 @@
 #include <fstream>
-#include "arrow.hpp"
-#include "model-item.hpp"
-#include "composite-state-item.hpp"
-#include "program-reduction-item.hpp"
-#include "program-output-fact-item.hpp"
-#include "prediction-item.hpp"
-#include "aera-visualizer-scene.hpp"
+#include "graphics-items/arrow.hpp"
+#include "graphics-items/model-item.hpp"
+#include "graphics-items/composite-state-item.hpp"
+#include "graphics-items/program-reduction-item.hpp"
+#include "graphics-items/program-output-fact-item.hpp"
+#include "graphics-items/prediction-item.hpp"
+#include "graphics-items/aera-visualizer-scene.hpp"
 #include "aera-visualizer-window.hpp"
 
 #include <QtWidgets>

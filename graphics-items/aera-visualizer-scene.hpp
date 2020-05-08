@@ -2,9 +2,9 @@
 #define AERA_VISUALIZER_SCENE_HPP
 
 #include <map>
-#include "aera-event.hpp"
+#include "../aera-event.hpp"
 #include "aera-graphics-item.hpp"
-#include "replicode-objects.hpp"
+#include "../replicode-objects.hpp"
 
 #include <QGraphicsScene>
 
@@ -22,8 +22,6 @@ class ExplanationLogWindow;
 
 class AeraVisualizerScene : public QGraphicsScene
 {
-  Q_OBJECT
-
 public:
   explicit AeraVisualizerScene(
     QMenu* itemMenu, ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent = 0);
