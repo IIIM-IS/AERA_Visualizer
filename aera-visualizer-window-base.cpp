@@ -242,7 +242,7 @@ void AeraVisulizerWindowBase::timerEvent(QTimerEvent* event)
   // Debug: How to step the children also?
   while (stepEvent(playTime) != Utils_MaxTime);
 
-  if (haveMoreEvents()) {
+  if (!haveMoreEvents()) {
     // We have played all events.
     playTime = maximumEventTime;
     stopPlay();

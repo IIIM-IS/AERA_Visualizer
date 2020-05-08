@@ -45,7 +45,7 @@ public:
   ExplanationLogWindow* getExplanationLogWindow() { return explanationLogWindow_;  }
 
 protected:
-  bool haveMoreEvents() override { return iNextEvent_ >= events_.size(); }
+  bool haveMoreEvents() override { return iNextEvent_ < events_.size(); }
 
   /**
    * Perform the event at events_[iNextEvent_] and then increment iNextEvent_.
