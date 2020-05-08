@@ -179,11 +179,15 @@ void AeraVisulizerWindowBase::stepButtonClicked()
 
   stopPlay();
   auto newTime = stepEvent(Utils_MaxTime);
+  if (newTime == Utils_MaxTime)
+    return;
   // Debug: How to step the children also?
-  if (newTime != Utils_MaxTime) {
-    setPlayTime(newTime);
-    setSliderToPlayTime();
-  }
+
+  // Keep stepping remaining events at this same time.
+  while (stepEvent(newTime) != Utils_MaxTime);
+
+  setPlayTime(newTime);
+  setSliderToPlayTime();
 }
 
 void AeraVisulizerWindowBase::stepBackButtonClicked()
@@ -196,11 +200,15 @@ void AeraVisulizerWindowBase::stepBackButtonClicked()
 
   stopPlay();
   auto newTime = max(unstepEvent(Timestamp(seconds(0))), timeReference_);
+  if (newTime == Utils_MaxTime)
+    return;
   // Debug: How to step the children also?
-  if (newTime != Utils_MaxTime) {
-    setPlayTime(newTime);
-    setSliderToPlayTime();
-  }
+
+  // Keep unstepping remaining events at this same time.
+  while (unstepEvent(newTime) != Utils_MaxTime);
+
+  setPlayTime(max(newTime, timeReference_));
+  setSliderToPlayTime();
 }
 
 void AeraVisulizerWindowBase::playSliderValueChanged(int value)
