@@ -17,6 +17,10 @@ public:
     QMenu* contextMenu, ProgramReductionNewObjectEvent* programReductionNewObjectEvent,
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 
+
+protected:
+  void textItemLinkActivated(const QString& link) override;
+
 private:
   QString getSourceCodeHtml(r_code::Code* factMkVal);
   QString makeHtml();
