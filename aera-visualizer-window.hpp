@@ -58,10 +58,12 @@ protected:
 
   /**
    * Decrement iNextEvent_ and undo the event at events_[iNextEvent_].
+   * \param minimumTime if the time of previous event is less than minimumTime, don't
+   * decrement iNextEvent_ and don't undo, and return Utils_MaxTime.
    * \return The time of the previous event. If there is no previous event, then
    * return Utils_MaxTime.
    */
-  core::Timestamp unstepEvent() override;
+  core::Timestamp unstepEvent(core::Timestamp minimumTime) override;
 
   ExplanationLogWindow* explanationLogWindow_;
 

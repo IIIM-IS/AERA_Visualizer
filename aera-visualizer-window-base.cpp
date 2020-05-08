@@ -195,7 +195,7 @@ void AeraVisulizerWindowBase::stepBackButtonClicked()
   }
 
   stopPlay();
-  auto newTime = max(unstepEvent(), timeReference_);
+  auto newTime = max(unstepEvent(Timestamp(seconds(0))), timeReference_);
   // Debug: How to step the children also?
   if (newTime != Utils_MaxTime) {
     setPlayTime(newTime);

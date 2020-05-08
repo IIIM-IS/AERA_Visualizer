@@ -222,10 +222,14 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
   return event->time_;
 }
 
-Timestamp AeraVisulizerWindow::unstepEvent()
+Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
 {
   if (iNextEvent_ == 0)
     // Return the value meaning no change.
+    return Utils_MaxTime;
+
+  if (events_[iNextEvent_ - 1]->time_ < minimumTime)
+    // Don't decrement iNextEvent_.
     return Utils_MaxTime;
 
   --iNextEvent_;
@@ -273,7 +277,7 @@ Timestamp AeraVisulizerWindow::unstepEvent()
   }
   else
     // Skip this event.
-    return unstepEvent();
+    return unstepEvent(minimumTime);
 
   if (iNextEvent_ > 0)
     return events_[iNextEvent_ - 1]->time_;
