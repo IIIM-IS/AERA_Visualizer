@@ -1,10 +1,10 @@
 #include <fstream>
 #include "arrow.hpp"
-#include "aera-model-item.hpp"
-#include "aera-composite-state-item.hpp"
-#include "aera-program-reduction-item.hpp"
-#include "aera-program-output-fact-item.hpp"
-#include "aera-prediction-item.hpp"
+#include "model-item.hpp"
+#include "composite-state-item.hpp"
+#include "program-reduction-item.hpp"
+#include "program-output-fact-item.hpp"
+#include "prediction-item.hpp"
 #include "aera-visualizer-scene.hpp"
 #include "aera-visualizer-window.hpp"
 
@@ -158,16 +158,16 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       newModelEvent->object_->code(MDL_CNT) = Atom::Float(newModelEvent->evidenceCount_);
       newModelEvent->object_->code(MDL_SR) = Atom::Float(newModelEvent->successRate_);
 
-      newItem = new AeraModelItem(itemMenu_, newModelEvent, replicodeObjects_, scene_);
+      newItem = new ModelItem(itemMenu_, newModelEvent, replicodeObjects_, scene_);
     }
     else if (event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
-      newItem = new AeraCompositeStateItem(itemMenu_, (NewCompositeStateEvent*)event, replicodeObjects_, scene_);
+      newItem = new CompositeStateItem(itemMenu_, (NewCompositeStateEvent*)event, replicodeObjects_, scene_);
     else if (event->eventType_ == ProgramReductionEvent::EVENT_TYPE)
-      newItem = new AeraProgramReductionItem(itemMenu_, (ProgramReductionEvent*)event, replicodeObjects_, scene_);
+      newItem = new ProgramReductionItem(itemMenu_, (ProgramReductionEvent*)event, replicodeObjects_, scene_);
     else if (event->eventType_ == ProgramReductionNewObjectEvent::EVENT_TYPE)
-      newItem = new AeraProgramOutputFactItem(itemMenu_, (ProgramReductionNewObjectEvent*)event, replicodeObjects_, scene_);
+      newItem = new ProgramOutputFactItem(itemMenu_, (ProgramReductionNewObjectEvent*)event, replicodeObjects_, scene_);
     else
-      newItem = new AeraPredictionItem(itemMenu_, (NewMkValPredictionEvent*)event, replicodeObjects_, scene_);
+      newItem = new PredictionItem(itemMenu_, (NewMkValPredictionEvent*)event, replicodeObjects_, scene_);
 
     // Add the new item.
     scene_->addAeraGraphicsItem(newItem);
@@ -193,7 +193,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     setSuccessRateEvent->object_->code(MDL_CNT) = Atom::Float(setSuccessRateEvent->evidenceCount_);
     setSuccessRateEvent->object_->code(MDL_SR) = Atom::Float(setSuccessRateEvent->successRate_);
 
-    auto modelItem = dynamic_cast<AeraModelItem*>(scene_->getAeraGraphicsItem(setSuccessRateEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(scene_->getAeraGraphicsItem(setSuccessRateEvent->object_));
     if (modelItem) {
       modelItem->updateFromModel();
       if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
@@ -246,13 +246,13 @@ Timestamp AeraVisulizerWindow::unstepEvent()
     }
   }
   else if (event->eventType_ == SetModelEvidenceCountAndSuccessRateEvent::EVENT_TYPE) {
-    // Find the AeraModelItem for this event and set to the old evidence count and success rate.
+    // Find the ModelItem for this event and set to the old evidence count and success rate.
     auto setSuccessRateEvent = (SetModelEvidenceCountAndSuccessRateEvent*)event;
 
     setSuccessRateEvent->object_->code(MDL_CNT) = Atom::Float(setSuccessRateEvent->oldEvidenceCount_);
     setSuccessRateEvent->object_->code(MDL_SR) = Atom::Float(setSuccessRateEvent->oldSuccessRate_);
 
-    auto modelItem = dynamic_cast<AeraModelItem*>(scene_->getAeraGraphicsItem(setSuccessRateEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(scene_->getAeraGraphicsItem(setSuccessRateEvent->object_));
     if (modelItem) {
       if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
           setSuccessRateEvent->successRate_ == setSuccessRateEvent->oldSuccessRate_)
@@ -316,7 +316,7 @@ void AeraVisulizerWindow::bringToFront()
 
   qreal zValue = 0;
   foreach(QGraphicsItem* item, overlapItems) {
-    if (item->zValue() >= zValue && item->type() == AeraModelItem::Type)
+    if (item->zValue() >= zValue && item->type() == ModelItem::Type)
       zValue = item->zValue() + 0.1;
   }
   selectedItem->setZValue(zValue);
@@ -332,7 +332,7 @@ void AeraVisulizerWindow::sendToBack()
 
   qreal zValue = 0;
   foreach(QGraphicsItem* item, overlapItems) {
-    if (item->zValue() <= zValue && item->type() == AeraModelItem::Type)
+    if (item->zValue() <= zValue && item->type() == ModelItem::Type)
       zValue = item->zValue() - 0.1;
   }
   selectedItem->setZValue(zValue);

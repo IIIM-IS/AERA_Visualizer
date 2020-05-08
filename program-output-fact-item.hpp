@@ -1,5 +1,5 @@
-#ifndef AERA_PROGRAM_OUTPUT_ITEM_HPP
-#define AERA_PROGRAM_OUTPUT_ITEM_HPP
+#ifndef PROGRAM_OUTPUT_ITEM_HPP
+#define PROGRAM_OUTPUT_ITEM_HPP
 
 #include <QGraphicsPixmapItem>
 #include <QList>
@@ -10,10 +10,10 @@ namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
-class AeraProgramOutputFactItem : public AeraGraphicsItem
+class ProgramOutputFactItem : public AeraGraphicsItem
 {
 public:
-  AeraProgramOutputFactItem(
+  ProgramOutputFactItem(
     QMenu* contextMenu, ProgramReductionNewObjectEvent* programReductionNewObjectEvent,
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 

@@ -1,5 +1,6 @@
 #include "aera-visualizer-window.hpp"
 #include "arrow.hpp"
+#include "model-item.hpp"
 #include "aera-visualizer-scene.hpp"
 
 #include <QGraphicsSceneMouseEvent>
@@ -159,7 +160,7 @@ void AeraVisualizerScene::timerEvent(QTimerEvent* event)
         aeraGraphicsItem->setPen(lineColor_);
     }
 
-    auto modelItem = dynamic_cast<AeraModelItem*>(item);
+    auto modelItem = dynamic_cast<ModelItem*>(item);
     if (modelItem) {
       if (modelItem->evidenceCountFlashCountdown_ > 0) {
         isFlashing = true;

@@ -7,7 +7,7 @@
 #include <QtWidgets>
 #include "explanation-log-window.hpp"
 #include "aera-visualizer-scene.hpp"
-#include "aera-program-output-fact-item.hpp"
+#include "program-output-fact-item.hpp"
 
 using namespace std;
 using namespace core;
@@ -15,7 +15,7 @@ using namespace r_code;
 
 namespace aera_visualizer {
 
-AeraProgramOutputFactItem::AeraProgramOutputFactItem(
+ProgramOutputFactItem::ProgramOutputFactItem(
   QMenu* contextMenu, ProgramReductionNewObjectEvent* programReductionNewObjectEvent,
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
   : AeraGraphicsItem(contextMenu, programReductionNewObjectEvent, replicodeObjects, parent),
@@ -25,7 +25,7 @@ AeraProgramOutputFactItem::AeraProgramOutputFactItem(
   setTextItemAndPolygon(makeHtml());
 }
 
-QString AeraProgramOutputFactItem::getSourceCodeHtml(Code* factMkVal)
+QString ProgramOutputFactItem::getSourceCodeHtml(Code* factMkVal)
 {
   auto mkVal = factMkVal->get_reference(0);
 
@@ -51,7 +51,7 @@ QString AeraProgramOutputFactItem::getSourceCodeHtml(Code* factMkVal)
   return html;
 }
 
-QString AeraProgramOutputFactItem::makeHtml()
+QString ProgramOutputFactItem::makeHtml()
 {
   QString html = QString("<h3><font color=\"darkred\">Program Output</font> <a href=\"#this""\">") +
     replicodeObjects_.getLabel(programReductionNewObjectEvent_->object_).c_str() + "</a></h3>";
@@ -60,7 +60,7 @@ QString AeraProgramOutputFactItem::makeHtml()
 }
 
 
-void AeraProgramOutputFactItem::textItemLinkActivated(const QString& link)
+void ProgramOutputFactItem::textItemLinkActivated(const QString& link)
 {
   if (link == "#this") {
     string whatMadeExplanation = "<u>Q: What made <a href=\"#debug_oid-" +

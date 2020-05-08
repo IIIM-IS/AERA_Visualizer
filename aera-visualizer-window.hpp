@@ -2,7 +2,7 @@
 #define AERA_VISUALIZER_WINDOW_HPP
 
 #include <regex>
-#include "aera-model-item.hpp"
+#include "aera-graphics-item.hpp"
 #include "aera-event.hpp"
 #include "aera-visualizer-window-base.hpp"
 #include "replicode-objects.hpp"
@@ -25,7 +25,7 @@ class ExplanationLogWindow;
 
 /**
  * AeraVisulizerWindow extends AeraVisulizerWindowBase to present the player
- * control panel and a window for visualizing the processing of AERA models.
+ * control panel and a window for visualizing the processing of AERA objects.
  */
 class AeraVisulizerWindow : public AeraVisulizerWindowBase
 {

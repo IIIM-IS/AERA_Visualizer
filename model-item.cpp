@@ -5,7 +5,7 @@
 #include <QMenu>
 #include <QPainter>
 #include <QtWidgets>
-#include "aera-model-item.hpp"
+#include "model-item.hpp"
 
 using namespace std;
 using namespace core;
@@ -13,7 +13,7 @@ using namespace r_code;
 
 namespace aera_visualizer {
 
-AeraModelItem::AeraModelItem(
+ModelItem::ModelItem(
   QMenu* contextMenu, NewModelEvent* newModelEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
   : AeraGraphicsItem(contextMenu, newModelEvent, replicodeObjects, parent),
   newModelEvent_(newModelEvent),
@@ -42,7 +42,7 @@ AeraModelItem::AeraModelItem(
   setTextItemAndPolygon(makeHtml());
 }
 
-QString AeraModelItem::makeHtml()
+QString ModelItem::makeHtml()
 {
   auto model = newModelEvent_->object_;
 
@@ -56,7 +56,7 @@ QString AeraModelItem::makeHtml()
   return html;
 }
 
-void AeraModelItem::updateFromModel()
+void ModelItem::updateFromModel()
 {
   auto model = newModelEvent_->object_;
   evidenceCountIncreased_ = (model->code(MDL_CNT).asFloat() >= evidenceCount_);

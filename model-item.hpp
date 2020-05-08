@@ -1,5 +1,5 @@
-#ifndef AERA_MODEL_ITEM_HPP
-#define AERA_MODEL_ITEM_HPP
+#ifndef MODEL_ITEM_HPP
+#define MODEL_ITEM_HPP
 
 #include <QGraphicsPixmapItem>
 #include <QList>
@@ -10,10 +10,10 @@ namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
-class AeraModelItem : public AeraGraphicsItem
+class ModelItem : public AeraGraphicsItem
 {
 public:
-  AeraModelItem(
+  ModelItem(
     QMenu* contextMenu, NewModelEvent* newModelEvent, ReplicodeObjects& replicodeObjects, 
     AeraVisualizerScene* parent);
 

@@ -5,7 +5,7 @@
 #include <QMenu>
 #include <QPainter>
 #include <QtWidgets>
-#include "aera-prediction-item.hpp"
+#include "prediction-item.hpp"
 
 using namespace std;
 using namespace core;
@@ -13,7 +13,7 @@ using namespace r_code;
 
 namespace aera_visualizer {
 
-AeraPredictionItem::AeraPredictionItem(
+PredictionItem::PredictionItem(
   QMenu* contextMenu, NewMkValPredictionEvent* newPredictionEvent, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
   : AeraGraphicsItem(contextMenu, newPredictionEvent, replicodeObjects, parent),
@@ -23,7 +23,7 @@ AeraPredictionItem::AeraPredictionItem(
   setTextItemAndPolygon(makeHtml());
 }
 
-QString AeraPredictionItem::getPredictionSourceCodeHtml(Code* factPred)
+QString PredictionItem::getPredictionSourceCodeHtml(Code* factPred)
 {
   auto pred = factPred->get_reference(0);
   auto factMkVal = pred->get_reference(0);
@@ -59,7 +59,7 @@ QString AeraPredictionItem::getPredictionSourceCodeHtml(Code* factPred)
   return html;
 }
 
-QString AeraPredictionItem::makeHtml()
+QString PredictionItem::makeHtml()
 {
   QString html = QString("<h3><font color=\"darkred\">Prediction</font> <a href=\"#this\">") +
     replicodeObjects_.getLabel(newPredictionEvent_->object_).c_str() + "</a></h3>";

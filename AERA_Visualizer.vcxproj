@@ -207,15 +207,15 @@
     </QtRcc>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="aera-composite-state-item.cpp" />
+    <ClCompile Include="composite-state-item.cpp" />
     <ClCompile Include="aera-graphics-item.cpp" />
-    <ClCompile Include="aera-prediction-item.cpp" />
-    <ClCompile Include="aera-program-output-fact-item.cpp" />
-    <ClCompile Include="aera-program-reduction-item.cpp" />
+    <ClCompile Include="prediction-item.cpp" />
+    <ClCompile Include="program-output-fact-item.cpp" />
+    <ClCompile Include="program-reduction-item.cpp" />
     <ClCompile Include="explanation-log-window.cpp" />
     <ClCompile Include="aera-visualizer-window-base.cpp" />
     <ClCompile Include="arrow.cpp" />
-    <ClCompile Include="aera-model-item.cpp" />
+    <ClCompile Include="model-item.cpp" />
     <ClCompile Include="aera-visualizer-scene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="aera-visualizer-window.cpp" />
@@ -302,13 +302,13 @@
     <QtRcc Include="aera_visualizer.qrc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="aera-composite-state-item.hpp" />
+    <ClInclude Include="composite-state-item.hpp" />
     <ClInclude Include="aera-event.hpp" />
     <ClInclude Include="aera-graphics-item.hpp" />
-    <ClInclude Include="aera-model-item.hpp" />
-    <ClInclude Include="aera-prediction-item.hpp" />
-    <ClInclude Include="aera-program-output-fact-item.hpp" />
-    <ClInclude Include="aera-program-reduction-item.hpp" />
+    <ClInclude Include="model-item.hpp" />
+    <ClInclude Include="prediction-item.hpp" />
+    <ClInclude Include="program-output-fact-item.hpp" />
+    <ClInclude Include="program-reduction-item.hpp" />
     <ClInclude Include="arrow.hpp" />
     <ClInclude Include="replicode-objects.hpp" />
     <ClInclude Include="submodules\replicode\r_code\atom.h" />

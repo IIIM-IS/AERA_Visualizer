@@ -1,5 +1,5 @@
-#ifndef AERA_PREDICTION_ITEM_HPP
-#define AERA_PREDICTION_ITEM_HPP
+#ifndef PREDICTION_ITEM_HPP
+#define PREDICTION_ITEM_HPP
 
 #include <QGraphicsPixmapItem>
 #include <QList>
@@ -10,10 +10,10 @@ namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
-class AeraPredictionItem : public AeraGraphicsItem
+class PredictionItem : public AeraGraphicsItem
 {
 public:
-  AeraPredictionItem(
+  PredictionItem(
     QMenu* contextMenu, NewMkValPredictionEvent* newPredictionEvent,
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 

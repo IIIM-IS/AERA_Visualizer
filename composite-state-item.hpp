@@ -1,5 +1,5 @@
-#ifndef AERA_PROGRAM_REDUCTION_ITEM_HPP
-#define AERA_PROGRAM_REDUCTION_ITEM_HPP
+#ifndef COMPOSITE_STATE_ITEM_HPP
+#define COMPOSITE_STATE_ITEM_HPP
 
 #include <QGraphicsPixmapItem>
 #include <QList>
@@ -10,17 +10,17 @@ namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
-class AeraProgramReductionItem : public AeraGraphicsItem
+class CompositeStateItem : public AeraGraphicsItem
 {
 public:
-  AeraProgramReductionItem(
-    QMenu* contextMenu, ProgramReductionEvent* programReductionEvent,
+  CompositeStateItem(
+    QMenu* contextMenu, NewCompositeStateEvent* newCompositeStateEvent, 
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 
 private:
   QString makeHtml();
 
-  ProgramReductionEvent* programReductionEvent_;
+  NewCompositeStateEvent* newCompositeStateEvent_;
   QString sourceCodeHtml_;
 };
 

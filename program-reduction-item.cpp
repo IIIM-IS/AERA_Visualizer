@@ -5,7 +5,7 @@
 #include <QMenu>
 #include <QPainter>
 #include <QtWidgets>
-#include "aera-composite-state-item.hpp"
+#include "program-reduction-item.hpp"
 
 using namespace std;
 using namespace core;
@@ -13,36 +13,35 @@ using namespace r_code;
 
 namespace aera_visualizer {
 
-AeraCompositeStateItem::AeraCompositeStateItem(
-  QMenu* contextMenu, NewCompositeStateEvent* newCompositeStateEvent, ReplicodeObjects& replicodeObjects,
+ProgramReductionItem::ProgramReductionItem(
+  QMenu* contextMenu, ProgramReductionEvent* programReductionEvent, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-  : AeraGraphicsItem(contextMenu, newCompositeStateEvent, replicodeObjects, parent),
-  newCompositeStateEvent_(newCompositeStateEvent)
+  : AeraGraphicsItem(contextMenu, programReductionEvent, replicodeObjects, parent),
+  programReductionEvent_(programReductionEvent)
 {
   // Set up sourceCodeHtml_
-  string sourceCode = replicodeObjects_.getSourceCode(newCompositeStateEvent->object_);
+  string sourceCode = replicodeObjects_.getSourceCode(programReductionEvent->object_);
   // Temporarily replace \n with \x01 so that we match the entire string, not by line.
   replace(sourceCode.begin(), sourceCode.end(), '\n', '\x01');
-  // Strip the set of output groups and parameters.
+  // Strip the propagation of saliency threshold.
   // "[\\s\\x01]+" is whitespace "[\\d\\.]+" is a float value.
   // TODO: The original source may have comments, so need to strip these.
-  sourceCode = regex_replace(sourceCode,
-    regex("[\\s\\x01]+\\[[\\w\\s]+\\][\\s\\x01]+[\\d\\.]+[\\s\\x01]*\\)$"), ")");
+  sourceCode = regex_replace(sourceCode, regex("[\\s\\x01]+[\\d\\.]+[\\s\\x01]*\\)$"), ")");
   // Restore \n.
   replace(sourceCode.begin(), sourceCode.end(), '\x01', '\n');
   QString html = sourceCode.c_str();
   html.replace("\n", "<br>");
   html.replace(" ", "&nbsp;");
-  addSourceCodeHtmlLinks(newCompositeStateEvent_->object_, html);
+  addSourceCodeHtmlLinks(programReductionEvent_->object_, html);
   sourceCodeHtml_ = html;
 
   setTextItemAndPolygon(makeHtml());
 }
 
-QString AeraCompositeStateItem::makeHtml()
+QString ProgramReductionItem::makeHtml()
 {
-  QString html = QString("<h3><font color=\"darkred\">Composite State</font> <a href=\"#this\">") +
-    replicodeObjects_.getLabel(newCompositeStateEvent_->object_).c_str() + "</a></h3>";
+  QString html = QString("<h3><font color=\"darkred\">Program Reduction</font> <a href=\"#this\">") +
+    replicodeObjects_.getLabel(programReductionEvent_->object_).c_str() + "</a></h3>";
   html += sourceCodeHtml_;
   return html;
 }
