@@ -21,6 +21,15 @@ public:
    */
   ExplanationLogWindow(AeraVisulizerWindow* mainWindow);
 
+  void appendHtml(const QString& html)
+  {
+    // TODO: Does QTextBrowser have an actual append operation?
+    html_ += html;
+    textBrowser_->setText(html_);
+  }
+
+  void appendHtml(const std::string& html) { appendHtml(QString(html.c_str())); }
+
 protected:
   // TODO: Implement.
   bool haveMoreEvents() override { return false; }
@@ -33,6 +42,8 @@ private slots:
   void textBrowserAnchorClicked(const QUrl& url);
 
 private:
+  // TODO: We should be able to use textBrowser_.
+  QString html_;
   QTextBrowser* textBrowser_;
 };
 
