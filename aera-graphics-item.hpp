@@ -49,7 +49,7 @@ protected:
   void setTextItemAndPolygon(QString html);
 
   /**
-   * Go through object's references and modify html with <a href="#oid-XXX"></a>
+   * Go through object's references and modify html with <a href="#debug_oid-XXX"></a>
    * around the label of each referenced object. When clicked, this link is handled
    * by textItemLinkActivated().
    * \param object The object with the references.

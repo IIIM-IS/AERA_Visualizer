@@ -40,8 +40,8 @@ AeraProgramReductionItem::AeraProgramReductionItem(
 
 QString AeraProgramReductionItem::makeHtml()
 {
-  QString html = QString("<h3><font color=\"darkred\">Program Reduction</font> <a href=\"#oid-") +
-    QString::number(programReductionEvent_->object_->get_oid()) + "\">" +
+  QString html = QString("<h3><font color=\"darkred\">Program Reduction</font> <a href=\"#debug_oid-") +
+    QString::number(programReductionEvent_->object_->get_debug_oid()) + "\">" +
     replicodeObjects_.getLabel(programReductionEvent_->object_).c_str() + "</h3>";
   html += sourceCodeHtml_;
   return html;

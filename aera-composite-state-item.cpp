@@ -41,8 +41,8 @@ AeraCompositeStateItem::AeraCompositeStateItem(
 
 QString AeraCompositeStateItem::makeHtml()
 {
-  QString html = QString("<h3><font color=\"darkred\">Composite State</font> <a href=\"#oid-") + 
-    QString::number(newCompositeStateEvent_->object_->get_oid()) + "\">" +
+  QString html = QString("<h3><font color=\"darkred\">Composite State</font> <a href=\"#debug_oid-") + 
+    QString::number(newCompositeStateEvent_->object_->get_debug_oid()) + "\">" +
     replicodeObjects_.getLabel(newCompositeStateEvent_->object_).c_str() + "</h3>";
   html += sourceCodeHtml_;
   return html;

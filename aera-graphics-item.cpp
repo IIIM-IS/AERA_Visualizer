@@ -112,21 +112,21 @@ void AeraGraphicsItem::addSourceCodeHtmlLinks(Code* object, QString& html)
     // TODO: Handle case when the label is not surrounded by spaces.
     html.replace(
       QString("&nbsp;") + referencedLabel.c_str() + "&nbsp;",
-      QString("&nbsp;<a href=\"#oid-") + QString::number(referencedObject->get_oid()) + "\">" +
+      QString("&nbsp;<a href=\"#debug_oid-") + QString::number(referencedObject->get_debug_oid()) + "\">" +
       referencedLabel.c_str() + "</a>&nbsp;");
     // The same for at the end of a line.
     html.replace(
       QString("&nbsp;") + referencedLabel.c_str() + "<br>",
-      QString("&nbsp;<a href=\"#oid-") + QString::number(referencedObject->get_oid()) + "\">" +
+      QString("&nbsp;<a href=\"#debug_oid-") + QString::number(referencedObject->get_debug_oid()) + "\">" +
       referencedLabel.c_str() + "</a><br>");
   }
 }
 
 void AeraGraphicsItem::textItemLinkActivated(const QString& link)
 {
-  if (link.startsWith("#oid-")) {
-    int oid = link.mid(5).toInt();
-    auto object = replicodeObjects_.getObject(oid);
+  if (link.startsWith("#debug_oid-")) {
+    uint64 debug_oid = link.mid(11).toULongLong();
+    auto object = replicodeObjects_.getObjectByDebugOid(debug_oid);
     if (object) {
       auto item = parent_->getAeraGraphicsItem(object);
       if (item) {
