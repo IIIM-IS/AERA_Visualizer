@@ -61,9 +61,8 @@ QString AeraPredictionItem::getPredictionSourceCodeHtml(Code* factPred)
 
 QString AeraPredictionItem::makeHtml()
 {
-  QString html = QString("<h3><font color=\"darkred\">Prediction</font> <a href=\"#debug_oid-") +
-    QString::number(newPredictionEvent_->object_->get_debug_oid()) + "\">" +
-    replicodeObjects_.getLabel(newPredictionEvent_->object_).c_str() + "</h3>";
+  QString html = QString("<h3><font color=\"darkred\">Prediction</font> <a href=\"#this\">") +
+    replicodeObjects_.getLabel(newPredictionEvent_->object_).c_str() + "</a></h3>";
   html += sourceCodeHtml_;
   return html;
 }

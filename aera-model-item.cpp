@@ -46,9 +46,8 @@ QString AeraModelItem::makeHtml()
 {
   auto model = newModelEvent_->object_;
 
-  QString html = QString("<h3><font color=\"darkred\">Model</font> <a href=\"#debug_oid-") + 
-    QString::number(newModelEvent_->object_->get_debug_oid()) + "\">" + 
-    replicodeObjects_.getLabel(model).c_str() + "</h3>";
+  QString html = QString("<h3><font color=\"darkred\">Model</font> <a href=\"#this\">") + 
+    replicodeObjects_.getLabel(model).c_str() + "</a></h3>";
   html += sourceCodeHtml_ + "<br><br>";
   html += "<font color=\"" + evidenceCountColor_ + "\">Evidence Count: " +
     QString::number(evidenceCount_) + "</font><br>";

@@ -124,7 +124,13 @@ void AeraGraphicsItem::addSourceCodeHtmlLinks(Code* object, QString& html)
 
 void AeraGraphicsItem::textItemLinkActivated(const QString& link)
 {
-  if (link.startsWith("#debug_oid-")) {
+  if (link == "#this") {
+    auto menu = new QMenu();
+    menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
+    menu->exec(parent_->getMouseScreenPosition() - QPoint(10, 10));
+    delete menu;
+  }
+  else if (link.startsWith("#debug_oid-")) {
     uint64 debug_oid = link.mid(11).toULongLong();
     auto object = replicodeObjects_.getObjectByDebugOid(debug_oid);
     if (object) {

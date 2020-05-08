@@ -53,9 +53,8 @@ QString AeraProgramOutputFactItem::getSourceCodeHtml(Code* factMkVal)
 
 QString AeraProgramOutputFactItem::makeHtml()
 {
-  QString html = QString("<h3><font color=\"darkred\">Program Output</font> <a href=\"#debug_oid-") +
-    QString::number(programReductionNewObjectEvent_->object_->get_debug_oid()) + "\">" +
-    replicodeObjects_.getLabel(programReductionNewObjectEvent_->object_).c_str() + "</h3>";
+  QString html = QString("<h3><font color=\"darkred\">Program Output</font> <a href=\"#this""\">") +
+    replicodeObjects_.getLabel(programReductionNewObjectEvent_->object_).c_str() + "</a></h3>";
   html += sourceCodeHtml_;
   return html;
 }
@@ -63,33 +62,30 @@ QString AeraProgramOutputFactItem::makeHtml()
 
 void AeraProgramOutputFactItem::textItemLinkActivated(const QString& link)
 {
-  if (link.startsWith("#debug_oid-")) {
+  if (link == "#this") {
+    string whatMadeExplanation = "<u>Q: What made <a href=\"#debug_oid-" +
+      to_string(programReductionNewObjectEvent_->object_->get_debug_oid()) + "\">" + 
+      replicodeObjects_.getLabel(programReductionNewObjectEvent_->object_) +
+      "</a> ?</u><br>" + "Program reduction <a href=\"#debug_oid-" +
+      to_string(programReductionNewObjectEvent_->programReduction_->get_debug_oid()) + "\">" +
+      replicodeObjects_.getLabel(programReductionNewObjectEvent_->programReduction_) + "</a><br><br>";
+
+    auto menu = new QMenu();
+    menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
+    menu->addAction("What Made This?",
+      [=]() { parent_->getExplanationLogWindow()->appendHtml(whatMadeExplanation); });
+    menu->exec(parent_->getMouseScreenPosition() - QPoint(10, 10));
+    delete menu;
+  }
+  else if (link.startsWith("#debug_oid-")) {
     uint64 debug_oid = link.mid(11).toULongLong();
     auto object = replicodeObjects_.getObjectByDebugOid(debug_oid);
     if (object) {
       auto item = parent_->getAeraGraphicsItem(object);
       if (item) {
-        string whatMadeExplanation;
-        Code* programReduction = 0;
-        if (object->get_oid() == 49)
-          programReduction = replicodeObjects_.getObject(47);
-        else if (object->get_oid() == 68)
-          programReduction = replicodeObjects_.getObject(58);
-        else if (object->get_debug_oid() == 2061)
-          programReduction = replicodeObjects_.getObject(77);
-        if (programReduction)
-          whatMadeExplanation = "Q: What made " + replicodeObjects_.getLabel(object) + " ?<br>" +
-            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Program reduction <a href=\"#debug_oid-" +
-            to_string(programReduction->get_debug_oid()) + "\">" +
-            replicodeObjects_.getLabel(programReduction) + "</a><br>";
-
         auto menu = new QMenu();
         menu->addAction(QString("Zoom to ") + replicodeObjects_.getLabel(object).c_str(),
           [=]() { parent_->zoomToItem(item); });
-        if (whatMadeExplanation != "")
-        menu->addAction(QString("What made ") + replicodeObjects_.getLabel(object).c_str() + "?",
-          [=]() { parent_->getExplanationLogWindow()->appendHtml(whatMadeExplanation); });
-
         menu->exec(parent_->getMouseScreenPosition() - QPoint(10, 10));
         delete menu;
       }
