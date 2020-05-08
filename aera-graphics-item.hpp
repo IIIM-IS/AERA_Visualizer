@@ -29,12 +29,12 @@ class AeraGraphicsItem : public QGraphicsPolygonItem
 {
 public:
   AeraGraphicsItem(
-    QMenu* contextMenu, AeraEvent* newObjectEvent, ReplicodeObjects& replicodeObjects,
+    QMenu* contextMenu, AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects,
     AeraVisualizerScene* parent);
 
   void removeArrows();
   void addArrow(Arrow* arrow) { arrows_.append(arrow); }
-  AeraEvent* getNewObjectEvent() { return newObjectEvent_; }
+  AeraEvent* getAeraEvent() { return aeraEvent_; }
 
   int borderFlashCountdown_;
 
@@ -67,7 +67,7 @@ private:
   void removeArrow(Arrow* arrow);
 
   QMenu* contextMenu_;
-  AeraEvent* newObjectEvent_;
+  AeraEvent* aeraEvent_;
   QList<Arrow*> arrows_;
 };
 

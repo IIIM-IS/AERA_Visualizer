@@ -33,7 +33,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 {
   item->setBrush(itemColor_);
 
-  auto newObjectEvent = item->getNewObjectEvent();
+  auto newObjectEvent = item->getAeraEvent();
   if (qIsNaN(newObjectEvent->itemPosition_.x())) {
     // Assign an initial position.
     // TODO: Do this with a grid layout.
@@ -97,7 +97,7 @@ AeraGraphicsItem* AeraVisualizerScene::getAeraGraphicsItem(Code* object)
   foreach(QGraphicsItem* item, items()) {
     auto graphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
     if (graphicsItem) {
-      if (graphicsItem->getNewObjectEvent()->object_ == object)
+      if (graphicsItem->getAeraEvent()->object_ == object)
         return graphicsItem;
     }
   }

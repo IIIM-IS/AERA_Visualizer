@@ -18,9 +18,9 @@ using namespace r_exec;
 namespace aera_visualizer {
 
 AeraGraphicsItem::AeraGraphicsItem(
-  QMenu* contextMenu, AeraEvent* newObjectEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
+  QMenu* contextMenu, AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
   : parent_(parent),
-  newObjectEvent_(newObjectEvent), replicodeObjects_(replicodeObjects),
+  aeraEvent_(aeraEvent), replicodeObjects_(replicodeObjects),
   borderFlashCountdown_(6),
   // The base class should call setTextItemAndPolygon()
   textItem_(0)
@@ -85,7 +85,7 @@ void AeraGraphicsItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 QVariant AeraGraphicsItem::itemChange(GraphicsItemChange change, const QVariant& value)
 {
   if (change == QGraphicsItem::ItemPositionChange) {
-    newObjectEvent_->itemPosition_ = value.toPointF();
+    aeraEvent_->itemPosition_ = value.toPointF();
 
     foreach(Arrow * arrow, arrows_)
       arrow->updatePosition();
