@@ -48,11 +48,11 @@ QString ModelItem::makeHtml()
 
   QString html = QString("<h3><font color=\"darkred\">Model</font> <a href=\"#this\">") + 
     replicodeObjects_.getLabel(model).c_str() + "</a></h3>";
-  html += sourceCodeHtml_ + "<br><br>";
   html += "<font color=\"" + evidenceCountColor_ + "\">Evidence Count: " +
     QString::number(evidenceCount_) + "</font><br>";
   html += "<font color=\"" + successRateColor_ + "\">&nbsp;&nbsp;&nbsp;&nbsp;Success Rate: " +
-    QString::number(successRate_) + "</font>";
+    QString::number(successRate_) + "</font><br>";
+  html += sourceCodeHtml_;
   return html;
 }
 
