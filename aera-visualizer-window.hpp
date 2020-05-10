@@ -44,6 +44,8 @@ public:
 
   ExplanationLogWindow* getExplanationLogWindow() { return explanationLogWindow_;  }
 
+  AeraVisualizerScene* getScene() { return scene_; }
+
 protected:
   bool haveMoreEvents() override { return iNextEvent_ < events_.size(); }
 
