@@ -26,7 +26,7 @@ int main(int argv, char *args[])
   const int height = 810;
   mainWindow.setGeometry(left, top, width, height);
 
-  auto explanationLogWindow = new ExplanationLogWindow(&mainWindow);
+  auto explanationLogWindow = new ExplanationLogWindow(&mainWindow, replicodeObjects);
   mainWindow.setExplanationLogWindow(explanationLogWindow);
   // Disable the close button for the child window.
   explanationLogWindow->setWindowFlag(Qt::WindowCloseButtonHint, false);

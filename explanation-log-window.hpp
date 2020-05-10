@@ -5,7 +5,6 @@
 #include "aera-visualizer-window.hpp"
 
 namespace aera_visualizer {
-
 /**
  * ExplanationLogWindow extends AeraVisulizerWindowBase to present the player
  * control panel and the explanation log.
@@ -18,8 +17,9 @@ public:
   /**
    * Create an ExplanationLogWindow.
    * \param parent The main parent window for this window.
+   * \param replicodeObjects The ReplicodeObjects used to find objects.
    */
-  ExplanationLogWindow(AeraVisulizerWindow* mainWindow);
+  ExplanationLogWindow(AeraVisulizerWindow* mainWindow, ReplicodeObjects& replicodeObjects);
 
   void appendHtml(const QString& html)
   {
@@ -42,6 +42,27 @@ private slots:
   void textBrowserAnchorClicked(const QUrl& url);
 
 private:
+  /**
+   * ExplanationLogWindow::TextBrowser extends QTextBrowser so that we can override its
+   * mouseMoveEvent.
+   */
+  class TextBrowser : public QTextBrowser {
+  public:
+    TextBrowser(ExplanationLogWindow* parent)
+      : QTextBrowser(parent), parent_(parent)
+    {}
+
+  protected:
+    void mouseMoveEvent(QMouseEvent* event) override;
+
+  private:
+    ExplanationLogWindow* parent_;
+    QString previousUrl_;
+  };
+  friend TextBrowser;
+
+  AeraVisulizerWindow* parent_;
+  ReplicodeObjects& replicodeObjects_;
   // TODO: We should be able to use textBrowser_.
   QString html_;
   QTextBrowser* textBrowser_;
