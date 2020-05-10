@@ -47,8 +47,8 @@ void AeraGraphicsItem::setTextItemAndPolygon(QString html)
     [this](const QString& link) { textItemLinkActivated(link); });
   textItem_->setHtml(html);
 
-  qreal right = textItem_->boundingRect().width() - 50;
-  qreal bottom = textItem_->boundingRect().height() - 30;
+  qreal right = textItem_->boundingRect().width() - 85;
+  qreal bottom = textItem_->boundingRect().height() - 35;
   const qreal diameter = 20;
 
   QPainterPath path;
