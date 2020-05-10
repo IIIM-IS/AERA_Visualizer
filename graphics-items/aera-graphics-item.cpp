@@ -34,21 +34,21 @@ AeraGraphicsItem::AeraGraphicsItem(
 
 void AeraGraphicsItem::setTextItemAndPolygon(QString html)
 {
-  const qreal left = -100;
-  const qreal top = -50;
 
   // Set up the textItem_ first to get its size.
   textItem_ = new QGraphicsTextItem(this);
+  textItem_->setHtml(html);
+  const qreal left = -textItem_->boundingRect().width() / 2 - 5;
+  const qreal top = -textItem_->boundingRect().height() / 2 - 5;
   textItem_->setPos(left + 5, top + 5);
   textItem_->setTextInteractionFlags(Qt::TextBrowserInteraction);
   QObject::connect(textItem_, &QGraphicsTextItem::linkHovered,
     [this](const QString& link) { textItemLinkHovered(link); });
   QObject::connect(textItem_, &QGraphicsTextItem::linkActivated,
     [this](const QString& link) { textItemLinkActivated(link); });
-  textItem_->setHtml(html);
 
-  qreal right = textItem_->boundingRect().width() - 85;
-  qreal bottom = textItem_->boundingRect().height() - 35;
+  qreal right = textItem_->boundingRect().width() / 2 + 15;
+  qreal bottom = textItem_->boundingRect().height() / 2 + 5;
   const qreal diameter = 20;
 
   QPainterPath path;
