@@ -43,7 +43,9 @@ protected:
   QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
   /**
-   * Set the textItem_ to the given html and create the border polygon.
+   * Set the textItem_ to the given html and create the border polygon. Connect
+   * the textItem_ to textItemLinkHovered and textItemLinkActivated, with default
+   * behavior which a derived class can override.
    * \param html The HTML for the textItem_.
    */
   void setTextItemAndPolygon(QString html);
@@ -57,6 +59,8 @@ protected:
    */
   void addSourceCodeHtmlLinks(r_code::Code* object, QString& html);
   
+  virtual void textItemLinkHovered(const QString& link);
+
   virtual void textItemLinkActivated(const QString& link);
 
   AeraVisualizerScene* parent_;

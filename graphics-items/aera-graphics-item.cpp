@@ -41,6 +41,8 @@ void AeraGraphicsItem::setTextItemAndPolygon(QString html)
   textItem_ = new QGraphicsTextItem(this);
   textItem_->setPos(left + 5, top + 5);
   textItem_->setTextInteractionFlags(Qt::TextBrowserInteraction);
+  QObject::connect(textItem_, &QGraphicsTextItem::linkHovered,
+    [this](const QString& link) { textItemLinkHovered(link); });
   QObject::connect(textItem_, &QGraphicsTextItem::linkActivated,
     [this](const QString& link) { textItemLinkActivated(link); });
   textItem_->setHtml(html);
@@ -122,6 +124,22 @@ void AeraGraphicsItem::addSourceCodeHtmlLinks(Code* object, QString& html)
   }
 }
 
+void AeraGraphicsItem::textItemLinkHovered(const QString& link)
+{
+  if (link.startsWith("#debug_oid-")) {
+    uint64 debug_oid = link.mid(11).toULongLong();
+    auto object = replicodeObjects_.getObjectByDebugOid(debug_oid);
+    if (object) {
+      auto item = parent_->getAeraGraphicsItem(object);
+      if (item) {
+        // Flash the corresponding item.
+        item->borderFlashCountdown_ = 6;
+        parent_->establishFlashTimer();
+      }
+    }
+  }
+}
+
 void AeraGraphicsItem::textItemLinkActivated(const QString& link)
 {
   if (link == "#this") {
@@ -136,6 +154,7 @@ void AeraGraphicsItem::textItemLinkActivated(const QString& link)
     if (object) {
       auto item = parent_->getAeraGraphicsItem(object);
       if (item) {
+        // Show the menu.
         auto menu = new QMenu();
         menu->addAction(QString("Zoom to ") + replicodeObjects_.getLabel(object).c_str(),
           [=]() { parent_->zoomToItem(item); });
