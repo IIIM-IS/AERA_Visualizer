@@ -52,7 +52,7 @@ QString ModelItem::makeHtml()
   html += "<font color=\"" + evidenceCountColor_ + "\">Evidence Count: " +
     QString::number(evidenceCount_) + "</font><br>";
   html += "<font color=\"" + successRateColor_ + "\">&nbsp;&nbsp;&nbsp;&nbsp;Success Rate: " +
-    QString::number(successRate_) + "</font><br>";
+    QString::number(successRate_) + "</font>";
   return html;
 }
 
