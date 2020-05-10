@@ -50,6 +50,9 @@ public:
 
   ExplanationLogWindow* getExplanationLogWindow();
 
+  // The initial value for the flash countdown;
+  static const int FLASH_COUNT = 6;
+
 protected:
   void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
   void mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent) override;

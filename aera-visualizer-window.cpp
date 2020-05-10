@@ -196,14 +196,14 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
           setSuccessRateEvent->successRate_ == setSuccessRateEvent->oldSuccessRate_)
         // Only the evidence count changed.
-        modelItem->evidenceCountFlashCountdown_ = 6;
+        modelItem->evidenceCountFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
       else if (setSuccessRateEvent->evidenceCount_ == setSuccessRateEvent->oldEvidenceCount_ &&
         setSuccessRateEvent->successRate_ != setSuccessRateEvent->oldSuccessRate_)
         // Only the success rate changed.
-        modelItem->successRateFlashCountdown_ = 6;
+        modelItem->successRateFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
       else {
-        modelItem->evidenceCountFlashCountdown_ = 6;
-        modelItem->successRateFlashCountdown_ = 6;
+        modelItem->evidenceCountFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
+        modelItem->successRateFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
       }
       scene_->establishFlashTimer();
     }
@@ -258,14 +258,14 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
       if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
           setSuccessRateEvent->successRate_ == setSuccessRateEvent->oldSuccessRate_)
         // Only the evidence count changed.
-        modelItem->evidenceCountFlashCountdown_ = 6;
+        modelItem->evidenceCountFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
       else if (setSuccessRateEvent->evidenceCount_ == setSuccessRateEvent->oldEvidenceCount_ &&
                setSuccessRateEvent->successRate_ != setSuccessRateEvent->oldSuccessRate_)
         // Only the success rate changed.
-        modelItem->successRateFlashCountdown_ = 6;
+        modelItem->successRateFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
       else {
-        modelItem->evidenceCountFlashCountdown_ = 6;
-        modelItem->successRateFlashCountdown_ = 6;
+        modelItem->evidenceCountFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
+        modelItem->successRateFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
       }
 
       modelItem->updateFromModel();

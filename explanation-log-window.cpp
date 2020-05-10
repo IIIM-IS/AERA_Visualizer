@@ -47,8 +47,8 @@ void ExplanationLogWindow::TextBrowser::mouseMoveEvent(QMouseEvent* event)
     if (object) {
       auto item = parent_->parent_->getScene()->getAeraGraphicsItem(object);
       if (item) {
-        // Flash the corresponding item.
-        item->borderFlashCountdown_ = 6;
+        // Flash the linked item.
+        item->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
         parent_->parent_->getScene()->establishFlashTimer();
       }
     }

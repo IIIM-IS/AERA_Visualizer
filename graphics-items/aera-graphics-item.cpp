@@ -21,7 +21,7 @@ AeraGraphicsItem::AeraGraphicsItem(
   QMenu* contextMenu, AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
   : parent_(parent),
   aeraEvent_(aeraEvent), replicodeObjects_(replicodeObjects),
-  borderFlashCountdown_(6),
+  borderFlashCountdown_(AeraVisualizerScene::FLASH_COUNT),
   // The base class should call setTextItemAndPolygon()
   textItem_(0)
 {
@@ -133,7 +133,7 @@ void AeraGraphicsItem::textItemLinkHovered(const QString& link)
       auto item = parent_->getAeraGraphicsItem(object);
       if (item) {
         // Flash the corresponding item.
-        item->borderFlashCountdown_ = 6;
+        item->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
         parent_->establishFlashTimer();
       }
     }
