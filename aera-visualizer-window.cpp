@@ -17,18 +17,15 @@ using namespace r_code;
 
 namespace aera_visualizer {
 
-AeraVisulizerWindow::AeraVisulizerWindow()
+AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 : AeraVisulizerWindowBase(0),
-  iNextEvent_(0), explanationLogWindow_(0)
+replicodeObjects_(replicodeObjects), iNextEvent_(0), explanationLogWindow_(0)
 {
   createActions();
   createMenus();
 
-  string userOperatorsFilePath = "C:\\Users\\Jeff\\AERA\\replicode\\Test\\V1.2\\user.classes.replicode";
-  string decompiledFilePath = "C:\\Users\\Jeff\\AERA\\replicode\\Test\\decompiled_objects.txt";
   string consoleOutputFilePath = "C:\\Users\\Jeff\\temp\\Test.out.txt";
 
-  string error = replicodeObjects_.init(userOperatorsFilePath, decompiledFilePath);
   setTimeReference(replicodeObjects_.getTimeReference());
 
   scene_ = new AeraVisualizerScene(itemMenu_, replicodeObjects_, this);

@@ -35,7 +35,7 @@ public:
   /**
    * Create an AeraVisulizerWindow.
    */
-  AeraVisulizerWindow();
+  AeraVisulizerWindow(ReplicodeObjects& replicodeObjects);
 
   void setExplanationLogWindow(ExplanationLogWindow* explanationLogWindow)
   {
@@ -108,8 +108,7 @@ private:
   QMenu* itemMenu_;
 
   size_t iNextEvent_;
-
-  ReplicodeObjects replicodeObjects_;
+  ReplicodeObjects& replicodeObjects_;
 };
 
 }
