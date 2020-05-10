@@ -53,7 +53,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     else
       newObjectEvent->itemPosition_ = QPointF(
         2050 + (newObjectEvent->object_->get_oid() - 52) * 320, 
-        2810 + item->boundingRect().height() / 2);
+        2780 + item->boundingRect().height() / 2);
   }
 
   addItem(item);
