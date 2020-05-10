@@ -26,10 +26,27 @@ ExplanationLogWindow::ExplanationLogWindow(AeraVisulizerWindow* mainWindow, Repl
 
 void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
 {
+  if (url.url().startsWith("#debug_oid-")) {
+    uint64 debug_oid = url.url().mid(11).toULongLong();
+    auto object = replicodeObjects_.getObjectByDebugOid(debug_oid);
+    if (object) {
+      auto item = parent_->getScene()->getAeraGraphicsItem(object);
+      if (item) {
+        // Show the menu.
+        auto menu = new QMenu();
+        menu->addAction(QString("Zoom to ") + replicodeObjects_.getLabel(object).c_str(),
+          [=]() { parent_->getScene()->zoomToItem(item); });
+        menu->exec(textBrowser_->mouseScreenPosition_ - QPoint(10, 10));
+        delete menu;
+      }
+    }
+  }
 }
 
 void ExplanationLogWindow::TextBrowser::mouseMoveEvent(QMouseEvent* event)
 {
+  mouseScreenPosition_ = event->globalPos();
+
   auto url = anchorAt(event->pos());
   if (url == "") {
     // The mouse cursor exited the link.

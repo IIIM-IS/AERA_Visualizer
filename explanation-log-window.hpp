@@ -52,12 +52,12 @@ private:
       : QTextBrowser(parent), parent_(parent)
     {}
 
-  protected:
-    void mouseMoveEvent(QMouseEvent* event) override;
-
-  private:
     ExplanationLogWindow* parent_;
     QString previousUrl_;
+    QPoint mouseScreenPosition_;
+
+  protected:
+    void mouseMoveEvent(QMouseEvent* event) override;
   };
   friend TextBrowser;
 
@@ -65,7 +65,7 @@ private:
   ReplicodeObjects& replicodeObjects_;
   // TODO: We should be able to use textBrowser_.
   QString html_;
-  QTextBrowser* textBrowser_;
+  TextBrowser* textBrowser_;
 };
 
 }
