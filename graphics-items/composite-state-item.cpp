@@ -20,17 +20,20 @@ CompositeStateItem::CompositeStateItem(
   newCompositeStateEvent_(newCompositeStateEvent)
 {
   // Set up sourceCodeHtml_
-  string sourceCode = replicodeObjects_.getSourceCode(newCompositeStateEvent->object_);
+  string cstSource = replicodeObjects_.getSourceCode(newCompositeStateEvent->object_);
   // Temporarily replace \n with \x01 so that we match the entire string, not by line.
-  replace(sourceCode.begin(), sourceCode.end(), '\n', '\x01');
+  replace(cstSource.begin(), cstSource.end(), '\n', '\x01');
   // Strip the set of output groups and parameters.
   // "[\\s\\x01]+" is whitespace "[\\d\\.]+" is a float value.
   // TODO: The original source may have comments, so need to strip these.
-  sourceCode = regex_replace(sourceCode,
+  cstSource = regex_replace(cstSource,
     regex("[\\s\\x01]+\\[[\\w\\s]+\\][\\s\\x01]+[\\d\\.]+[\\s\\x01]*\\)$"), ")");
+  // TODO: Correctly remove wildcards.
+  cstSource = regex_replace(cstSource, regex(" : :\\)"), ")");
+  cstSource = regex_replace(cstSource, regex(" :\\)"), ")");
   // Restore \n.
-  replace(sourceCode.begin(), sourceCode.end(), '\x01', '\n');
-  QString html = sourceCode.c_str();
+  replace(cstSource.begin(), cstSource.end(), '\x01', '\n');
+  QString html = cstSource.c_str();
   html.replace("\n", "<br>");
   html.replace(" ", "&nbsp;");
   addSourceCodeHtmlLinks(newCompositeStateEvent_->object_, html);
