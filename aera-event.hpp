@@ -130,6 +130,20 @@ public:
   r_code::Code* cause_;
 };
 
+class NewInstantiatedCompositeStateEvent : public AeraEvent {
+public:
+  NewInstantiatedCompositeStateEvent(
+      core::Timestamp time, r_code::Code* instantiatedCompositeState,
+      const std::vector<r_code::Code*>& inputs)
+    : AeraEvent(EVENT_TYPE, time, instantiatedCompositeState),
+    inputs_(inputs)
+  {}
+
+  static const int EVENT_TYPE = 8;
+
+  std::vector<r_code::Code*> inputs_;
+};
+
 }
 
 #endif
