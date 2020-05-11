@@ -84,9 +84,9 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
   // Imitate _Mem::load.
   for (uint32 i = 0; i < imageObjects.size(); ++i) {
     Code* object = imageObjects[i];
-    int32 location;
-    objects_.push_back(object, location);
-    object->set_strorage_index(location);
+    int32 dummyLocation;
+    objects_.push_back(object, dummyLocation);
+    // We don't need to delete, so don't set the storage index.
 
     switch (object->code(0).getDescriptor()) {
     case Atom::MODEL:
