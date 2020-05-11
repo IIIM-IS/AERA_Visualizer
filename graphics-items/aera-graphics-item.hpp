@@ -38,6 +38,8 @@ public:
 
   int borderFlashCountdown_;
 
+  static const char* DownArrowHtml = "<sub><font size=\"+2\"><b>&#129047;</b></font></sub>";
+
 protected:
   void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
   QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
