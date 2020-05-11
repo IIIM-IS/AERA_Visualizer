@@ -18,11 +18,20 @@ public:
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 
 private:
-  QString getPredictionSourceCodeHtml(r_code::Code* factPred);
+  /**
+   * Set factPredFactMkValHtml_ to the HTML source code for the fact, pred, fact and mk.val
+   * from newPredictionEvent_->object_.
+   * \return The HTML string.
+   */
+  void setFactPredFactMkValHtml();
+  /**
+   * Make the full HTML for the textItem_ from factPredFactMkValHtml_ and the object label.
+   * \return The HTML.
+   */
   QString makeHtml();
 
   NewMkValPredictionEvent* newPredictionEvent_;
-  QString sourceCodeHtml_;
+  QString factPredFactMkValHtml_;
 };
 
 }
