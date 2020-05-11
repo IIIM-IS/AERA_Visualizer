@@ -17,6 +17,8 @@ using namespace r_exec;
 
 namespace aera_visualizer {
 
+const char* AeraGraphicsItem::DownArrowHtml = "<sub><font size=\"+2\"><b>&#129047;</b></font></sub>";
+
 AeraGraphicsItem::AeraGraphicsItem(
   QMenu* contextMenu, AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
   : parent_(parent),
