@@ -72,6 +72,18 @@ public:
     return result->second;
   }
 
+  /**
+   * Similar to r_code::Utils::RelativeTime, use Time::ToString_seconds to show the
+   * relative time from the time reference (but use getTimeReference() from this object, not
+   * the global value in r_exec).
+   * \param timestamp The timestamp.
+   * \return A string representing the relative time.
+   */
+  std::string relativeTime(Timestamp timestamp)
+  {
+    return core::Time::ToString_seconds(timestamp - timeReference_);
+  }
+
 private:
   /**
    * Process the decompiled objects file to remove OIDs, debug OIDs and info lines starting with ">".
