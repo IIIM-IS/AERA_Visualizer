@@ -5,6 +5,7 @@
 #include "graphics-items/program-reduction-item.hpp"
 #include "graphics-items/program-output-fact-item.hpp"
 #include "graphics-items/prediction-item.hpp"
+#include "graphics-items/instantiated-composite-state-item.hpp"
 #include "graphics-items/aera-visualizer-scene.hpp"
 #include "aera-visualizer-window.hpp"
 
@@ -54,12 +55,20 @@ replicodeObjects_(replicodeObjects), iNextEvent_(0), explanationLogWindow_(0)
 void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
 {
   ifstream consoleOutputFile(consoleOutputFilePath);
+  // 0s:200ms:0us -> mdl 53, MDLController(389)
   regex newModelRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> mdl (\\d+), MDLController\\((\\d+)\\)$");
+  // 0s:300ms:0us mdl 53 cnt:2 sr:1
   regex setEvidenceCountAndSuccessRateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl (\\d+) cnt:(\\d+) sr:([\\d\\.]+)$");
+  // 0s:200ms:0us -> cst 52, CSTController(375)
   regex newCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> cst (\\d+), CSTController\\((\\d+)\\)$");
+  // 0s:100ms:0us PGMController(92) -> mk.rdx 47
   regex programReductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us PGMController\\((\\d+)\\) -> mk.rdx (\\d+)$");
+  // 0s:0ms:0us A/F -> 35|40 (AXIOM)
   regex autofocusNewObjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us A/F -> (\\d+)\\|(\\d+) \\((\\w+)\\)$");
+  // 0s:200ms:0us fact 61(1084) imdl mdl 53: 56 -> fact 60 pred fact mk.val VALUE nb: 2.000000e+01
   regex newMkValPredictionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+)\\(\\d+\\) imdl mdl \\d+: (\\d+) -> fact (\\d+) pred fact mk.val VALUE .+$");
+  // 0s:200ms:0us fact 59 icst[52][ 50 55]
+  regex newInstantiatedCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+) icst\\[\\d+\\]\\[([ \\d]+)\\]$");
 
   string line;
   while (getline(consoleOutputFile, line)) {
@@ -120,6 +129,29 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
         events_.push_back(make_shared<NewMkValPredictionEvent>(
           getTimestamp(matches), factPrediction, factImdl, cause));
     }
+    else if (regex_search(line, matches, newInstantiatedCompositeStateRegex)) {
+      auto timestamp = getTimestamp(matches);
+      auto instantiatedCompositeState = replicodeObjects_.getObject(stol(matches[4].str()));
+
+      // Get the matching inputs.
+      string inputOids = matches[5].str();
+      std::vector<Code*> inputs;
+      bool gotAllInputs = true;
+      while (regex_search(inputOids, matches, regex("( \\d+)"))) {
+        auto input = replicodeObjects_.getObject(stol(matches[1].str()));
+        if (!input) {
+          gotAllInputs = false;
+          break;
+        }
+        inputs.push_back(input);
+
+        inputOids = matches.suffix();
+      }
+
+      if (instantiatedCompositeState && gotAllInputs)
+        events_.push_back(make_shared<NewInstantiatedCompositeStateEvent>(
+          timestamp, instantiatedCompositeState, inputs));
+    }
   }
 }
 
@@ -145,7 +177,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == ProgramReductionEvent::EVENT_TYPE ||
       event->eventType_ == ProgramReductionNewObjectEvent::EVENT_TYPE ||
-      event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE) {
+      event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE ||
+      event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
     AeraGraphicsItem* newItem;
 
     if (event->eventType_ == NewModelEvent::EVENT_TYPE) {
@@ -163,8 +196,10 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       newItem = new ProgramReductionItem(itemMenu_, (ProgramReductionEvent*)event, replicodeObjects_, scene_);
     else if (event->eventType_ == ProgramReductionNewObjectEvent::EVENT_TYPE)
       newItem = new ProgramOutputFactItem(itemMenu_, (ProgramReductionNewObjectEvent*)event, replicodeObjects_, scene_);
-    else
+    else if (event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE)
       newItem = new PredictionItem(itemMenu_, (NewMkValPredictionEvent*)event, replicodeObjects_, scene_);
+    else
+      newItem = new InstantiatedCompositeStateItem(itemMenu_, (NewInstantiatedCompositeStateEvent*)event, replicodeObjects_, scene_);
 
     // Add the new item.
     scene_->addAeraGraphicsItem(newItem);
@@ -236,7 +271,8 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == ProgramReductionEvent::EVENT_TYPE ||
       event->eventType_ == ProgramReductionNewObjectEvent::EVENT_TYPE ||
-      event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE) {
+      event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE ||
+      event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
     // Find the AeraGraphicsItem for this event and remove it.
     // Note that the event saves the updated item position and will use it when recreating the item.
     auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(scene_->getAeraGraphicsItem(event->object_));
