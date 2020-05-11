@@ -24,13 +24,20 @@ private:
    */
   void setFactIcstHtml();
   /**
-   * Make the full HTML for the textItem_ from factIcstHtml_ and the object label.
+   * Set boundCstHtml_ to the HTML source code for the cst from newInstantiatedCompositeStateEvent_->object_
+   * with variables bound to the template parameters.
+   * \return The HTML string.
+   */
+  void setBoundCstHtml();
+  /**
+   * Make the full HTML for the textItem_ from factIcstHtml_, boundCstHtml_ and the object label.
    * \return The HTML.
    */
   QString makeHtml();
 
   NewInstantiatedCompositeStateEvent* newInstantiatedCompositeStateEvent_;
   QString factIcstHtml_;
+  QString boundCstHtml_;
 };
 
 }

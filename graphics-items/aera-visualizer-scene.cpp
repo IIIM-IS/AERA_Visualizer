@@ -52,7 +52,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
         2060 + (newObjectEvent->object_->get_oid() - 47) * 25, 2400);
     else if (newObjectEvent->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE)
       newObjectEvent->itemPosition_ = QPointF(
-        2060 + (newObjectEvent->object_->get_oid() - 59) * 25, 2530);
+        2090 + (newObjectEvent->object_->get_oid() - 59) * 21, 2570);
     else
       newObjectEvent->itemPosition_ = QPointF(
         2050 + (newObjectEvent->object_->get_oid() - 52) * 320, 
