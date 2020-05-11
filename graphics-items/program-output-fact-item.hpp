@@ -17,16 +17,23 @@ public:
     QMenu* contextMenu, ProgramReductionNewObjectEvent* programReductionNewObjectEvent,
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 
-
 protected:
   void textItemLinkActivated(const QString& link) override;
 
 private:
-  QString getSourceCodeHtml(r_code::Code* factMkVal);
+  /**
+   * Set factMkValHtml_ to the HTML source code for the fact and mk.val from 
+   * programReductionNewObjectEvent_->object_.
+   */
+  void setFactMkValHtml();
+  /**
+   * Make the full HTML for the textItem_ from factMkValHtml_ and the object label.
+   * \return The HTML.
+   */
   QString makeHtml();
 
   ProgramReductionNewObjectEvent* programReductionNewObjectEvent_;
-  QString sourceCodeHtml_;
+  QString factMkValHtml_;
 };
 
 }

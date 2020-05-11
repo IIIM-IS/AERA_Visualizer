@@ -21,18 +21,19 @@ ProgramOutputFactItem::ProgramOutputFactItem(
   : AeraGraphicsItem(contextMenu, programReductionNewObjectEvent, replicodeObjects, parent),
   programReductionNewObjectEvent_(programReductionNewObjectEvent)
 {
-  sourceCodeHtml_ = getSourceCodeHtml(programReductionNewObjectEvent_->object_);
+  setFactMkValHtml();
   setTextItemAndPolygon(makeHtml());
 }
 
-QString ProgramOutputFactItem::getSourceCodeHtml(Code* factMkVal)
+void ProgramOutputFactItem::setFactMkValHtml()
 {
-  auto mkVal = factMkVal->get_reference(0);
+  auto mkVal = programReductionNewObjectEvent_->object_->get_reference(0);
 
   // Strip the ending confidence value and propagation of saliency threshold.
   regex saliencyRegex("\\s+[\\w\\:]+\\)$");
   regex confidenceAndSaliencyRegex("\\s+\\w+\\s+[\\w\\:]+\\)$");
-  string factMkValSource = regex_replace(replicodeObjects_.getSourceCode(factMkVal), confidenceAndSaliencyRegex, ")");
+  string factMkValSource = regex_replace(replicodeObjects_.getSourceCode(
+    programReductionNewObjectEvent_->object_), confidenceAndSaliencyRegex, ")");
   string mkValSource = regex_replace(replicodeObjects_.getSourceCode(mkVal), saliencyRegex, ")");
 
   QString mkValLabel(replicodeObjects_.getLabel(mkVal).c_str());
@@ -48,17 +49,16 @@ QString ProgramOutputFactItem::getSourceCodeHtml(Code* factMkVal)
   html.replace(" ", "&nbsp;");
   html = html.replace("!down", "<sub><font size=\"+2\"><b>&#129047;</b></font></sub>");
   addSourceCodeHtmlLinks(programReductionNewObjectEvent_->object_, html);
-  return html;
+  factMkValHtml_ = html;
 }
 
 QString ProgramOutputFactItem::makeHtml()
 {
   QString html = QString("<h3><font color=\"darkred\">Program Output</font> <a href=\"#this""\">") +
     replicodeObjects_.getLabel(programReductionNewObjectEvent_->object_).c_str() + "</a></h3>";
-  html += sourceCodeHtml_;
+  html += factMkValHtml_;
   return html;
 }
-
 
 void ProgramOutputFactItem::textItemLinkActivated(const QString& link)
 {
