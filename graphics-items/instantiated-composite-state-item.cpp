@@ -70,7 +70,7 @@ void InstantiatedCompositeStateItem::setFactIcstHtml()
 
   factIcstHtml_ = htmlify(factIcstHtml_);
   factIcstHtml_.replace("!down", DownArrowHtml);
-  addSourceCodeHtmlLinks(newInstantiatedCompositeStateEvent_->object_->get_reference(0), factIcstHtml_);
+  addSourceCodeHtmlLinks(icst, factIcstHtml_);
 }
 
 void InstantiatedCompositeStateItem::setBoundCstHtml()
@@ -96,7 +96,7 @@ void InstantiatedCompositeStateItem::setBoundCstHtml()
       templateValues[iTemplateValues] : otherValues[iOutputValues]);
 
     string variable = "v" + to_string(iVariable) + ":";
-    cstSource = regex_replace(cstSource, regex(variable), boundValue);
+    cstSource = regex_replace(cstSource, regex(variable), variable + boundValue);
 
     if (iTemplateValues < templateValues.size())
       // Still looking at templateValues.
