@@ -36,6 +36,21 @@ public:
   void addArrow(Arrow* arrow) { arrows_.append(arrow); }
   AeraEvent* getAeraEvent() { return aeraEvent_; }
 
+  /**
+   * Replace all "\n" with "<br>" and " " with "&nbsp;".
+   * \param input The input string to htmlify.
+   * \return The HTML string.
+   */
+  QString htmlify(const QString& input)
+  {
+    QString result = input;
+    result.replace("\n", "<br>");
+    result.replace(" ", "&nbsp;");
+    return result;
+  }
+
+  QString htmlify(const std::string& input) { return htmlify(QString(input.c_str())); }
+
   int borderFlashCountdown_;
 
   static const char* DownArrowHtml;

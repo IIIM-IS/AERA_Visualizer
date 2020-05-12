@@ -59,9 +59,8 @@ void InstantiatedCompositeStateItem::setFactIcstHtml()
   factIcstHtml_ = QString(factIcstSource.c_str()).replace(icstLabel, "!down");
   factIcstHtml_ += QString("\n      ") + icstSource.c_str();
 
-  factIcstHtml_.replace("\n", "<br>");
-  factIcstHtml_.replace(" ", "&nbsp;");
-  factIcstHtml_ = factIcstHtml_.replace("!down", DownArrowHtml);
+  factIcstHtml_ = htmlify(factIcstHtml_);
+  factIcstHtml_.replace("!down", DownArrowHtml);
   addSourceCodeHtmlLinks(newInstantiatedCompositeStateEvent_->object_->get_reference(0), factIcstHtml_);
 }
 
@@ -103,9 +102,7 @@ void InstantiatedCompositeStateItem::setBoundCstHtml()
   cstSource = regex_replace(cstSource, regex(afterVariable), replicodeObjects_.relativeTime(factIcst->get_after()));
   cstSource = regex_replace(cstSource, regex(beforeVariable), replicodeObjects_.relativeTime(factIcst->get_before()));
 
-  boundCstHtml_ = cstSource.c_str();
-  boundCstHtml_.replace("\n", "<br>");
-  boundCstHtml_.replace(" ", "&nbsp;");
+  boundCstHtml_ = htmlify(cstSource);
   addSourceCodeHtmlLinks(cst, boundCstHtml_);
 }
 

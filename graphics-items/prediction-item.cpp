@@ -52,8 +52,7 @@ void PredictionItem::setFactPredFactMkValHtml()
   factPredFactMkValHtml_ += QString("\n            ") + factMkValHtml;
   factPredFactMkValHtml_ += QString("\n                ") + mkValHtml;
 
-  factPredFactMkValHtml_.replace("\n", "<br>");
-  factPredFactMkValHtml_.replace(" ", "&nbsp;");
+  factPredFactMkValHtml_ = htmlify(factPredFactMkValHtml_);
   factPredFactMkValHtml_.replace("!down", DownArrowHtml);
   addSourceCodeHtmlLinks(newPredictionEvent_->object_, factPredFactMkValHtml_);
 }

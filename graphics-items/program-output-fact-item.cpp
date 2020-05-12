@@ -42,8 +42,7 @@ void ProgramOutputFactItem::setFactMkValHtml()
   factMkValHtml_ = QString(factMkValSource.c_str()).replace(mkValLabel, "!down");
   factMkValHtml_ += QString("\n      ") + mkValSource.c_str();
 
-  factMkValHtml_.replace("\n", "<br>");
-  factMkValHtml_.replace(" ", "&nbsp;");
+  factMkValHtml_ = htmlify(factMkValHtml_);
   factMkValHtml_.replace("!down", DownArrowHtml);
   addSourceCodeHtmlLinks(programReductionNewObjectEvent_->object_, factMkValHtml_);
 }

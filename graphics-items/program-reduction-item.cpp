@@ -29,9 +29,7 @@ ProgramReductionItem::ProgramReductionItem(
   sourceCode = regex_replace(sourceCode, regex("[\\s\\x01]+[\\d\\.]+[\\s\\x01]*\\)$"), ")");
   // Restore \n.
   replace(sourceCode.begin(), sourceCode.end(), '\x01', '\n');
-  QString html = sourceCode.c_str();
-  html.replace("\n", "<br>");
-  html.replace(" ", "&nbsp;");
+  QString html = htmlify(sourceCode);
   addSourceCodeHtmlLinks(programReductionEvent_->object_, html);
   sourceCodeHtml_ = html;
 

@@ -23,10 +23,8 @@ ModelItem::ModelItem(
   evidenceCountFlashCountdown_(0), successRateFlashCountdown_(0)
 {
   // Set up sourceCodeHtml_
-  sourceCodeHtml_ = simplifyModelSource(
-    replicodeObjects_.getSourceCode(newModelEvent_->object_)).c_str();
-  sourceCodeHtml_.replace("\n", "<br>");
-  sourceCodeHtml_.replace(" ", "&nbsp;");
+  sourceCodeHtml_ = htmlify(simplifyModelSource(
+    replicodeObjects_.getSourceCode(newModelEvent_->object_)));
   addSourceCodeHtmlLinks(newModelEvent_->object_, sourceCodeHtml_);
 
   setTextItemAndPolygon(makeHtml());

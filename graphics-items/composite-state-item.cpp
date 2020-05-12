@@ -20,10 +20,8 @@ CompositeStateItem::CompositeStateItem(
   newCompositeStateEvent_(newCompositeStateEvent)
 {
   // Set up sourceCodeHtml_
-  sourceCodeHtml_ = simplifyCstSource(
-    replicodeObjects_.getSourceCode(newCompositeStateEvent->object_)).c_str();
-  sourceCodeHtml_.replace("\n", "<br>");
-  sourceCodeHtml_.replace(" ", "&nbsp;");
+  sourceCodeHtml_ = htmlify(simplifyCstSource(
+    replicodeObjects_.getSourceCode(newCompositeStateEvent->object_)));
   addSourceCodeHtmlLinks(newCompositeStateEvent_->object_, sourceCodeHtml_);
 
   setTextItemAndPolygon(makeHtml());
