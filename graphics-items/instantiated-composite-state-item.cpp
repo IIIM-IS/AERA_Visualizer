@@ -28,6 +28,20 @@ InstantiatedCompositeStateItem::InstantiatedCompositeStateItem(
   setTextItemAndPolygon(makeHtml());
 }
 
+void InstantiatedCompositeStateItem::getIcstOrImdlValues(
+  string source, std::vector<string> templateValues, std::vector<string> otherValues)
+{
+  templateValues.clear();
+  otherValues.clear();
+
+  // Debug: Generalize from the format of cst_52.
+  smatch matches;
+  if (regex_search(source, matches, regex("^\\(icst \\w+ \\|\\[\\] \\[(\\w+) (\\w+)\\] \\w+ \\w+\\)$"))) {
+    otherValues.push_back(matches[1].str());
+    otherValues.push_back(matches[2].str());
+  }
+}
+
 void InstantiatedCompositeStateItem::setFactIcstHtml()
 {
   auto icst = newInstantiatedCompositeStateEvent_->object_->get_reference(0);
@@ -57,26 +71,21 @@ void InstantiatedCompositeStateItem::setBoundCstHtml()
   auto icst = factIcst->get_reference(0);
   auto cst = icst->get_reference(0);
 
-  std::vector<string> templateValues;
-  std::vector<string> outputValues;
   string icstSource = replicodeObjects_.getSourceCode(icst);
-  // Debug: Generalize from the format of cst_52.
-  smatch matches;
-  if (regex_search(icstSource, matches, regex("^\\(icst \\w+ \\|\\[\\] \\[(\\w+) (\\w+)\\] \\w+ \\w+\\)$"))) {
-    outputValues.push_back(matches[1].str());
-    outputValues.push_back(matches[2].str());
-  }
+  std::vector<string> templateValues;
+  std::vector<string> otherValues;
+  getIcstOrImdlValues(icstSource, templateValues, otherValues);
 
   string cstSource = CompositeStateItem::simplifyCstSource(replicodeObjects_.getSourceCode(cst));
   // Substitute variables.
   int iVariable = -1;
   size_t iTemplateValues = 0;
   size_t iOutputValues = 0;
-  while (iTemplateValues < templateValues.size() || iOutputValues < outputValues.size()) {
+  while (iTemplateValues < templateValues.size() || iOutputValues < otherValues.size()) {
     ++iVariable;
-    // v0, v1, v2, etc. are split between templateValues and outputValues.
+    // v0, v1, v2, etc. are split between templateValues and otherValues.
     string boundValue = (iTemplateValues < templateValues.size() ? 
-      templateValues[iTemplateValues] : outputValues[iOutputValues]);
+      templateValues[iTemplateValues] : otherValues[iOutputValues]);
 
     string variable = "v" + to_string(iVariable) + ":";
     cstSource = regex_replace(cstSource, regex(variable), boundValue);

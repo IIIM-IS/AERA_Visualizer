@@ -20,7 +20,7 @@ public:
   /**
    * Start with the source from replicodeObjects_.getSourceCode for a cst, and
    * remove the set of output groups and parameters, and remove trailing wildcards.
-   * \param cstSource The source  from replicodeObjects_.getSourceCode.
+   * \param cstSource The source from replicodeObjects_.getSourceCode.
    * \return The simplified source code
    */
   static std::string simplifyCstSource(const std::string& cstSource);
