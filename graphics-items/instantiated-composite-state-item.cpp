@@ -29,16 +29,25 @@ InstantiatedCompositeStateItem::InstantiatedCompositeStateItem(
 }
 
 void InstantiatedCompositeStateItem::getIcstOrImdlValues(
-  string source, std::vector<string> templateValues, std::vector<string> otherValues)
+  string source, std::vector<string>& templateValues, std::vector<string>& otherValues)
 {
   templateValues.clear();
   otherValues.clear();
 
-  // Debug: Generalize from the format of cst_52.
+  // Debug: Generalize from these formats.
   smatch matches;
-  if (regex_search(source, matches, regex("^\\(icst \\w+ \\|\\[\\] \\[(\\w+) (\\w+)\\] \\w+ \\w+\\)$"))) {
+  if (regex_search(source, matches, regex("^\\(i\\w+ \\w+ \\|\\[\\] \\[([:\\.\\w]+) ([:\\.\\w]+)\\] \\w+ \\w+\\)$"))) {
     otherValues.push_back(matches[1].str());
     otherValues.push_back(matches[2].str());
+  }
+  else if (regex_search(source, matches, regex("^\\(i\\w+ \\w+ \\[([:\\.\\w]+) ([:\\.\\w]+) ([:\\.\\w]+)\\] \\[([:\\.\\w]+) ([:\\.\\w]+) ([:\\.\\w]+) ([:\\.\\w]+)\\] \\w+ \\w+\\)$"))) {
+    templateValues.push_back(matches[1].str());
+    templateValues.push_back(matches[2].str());
+    templateValues.push_back(matches[3].str());
+    otherValues.push_back(matches[4].str());
+    otherValues.push_back(matches[5].str());
+    otherValues.push_back(matches[6].str());
+    otherValues.push_back(matches[7].str());
   }
 }
 

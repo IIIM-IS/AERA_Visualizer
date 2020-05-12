@@ -24,7 +24,7 @@ public:
    * \param otherValues Set this to the list of other values. This first clears the list.
    */
   static void getIcstOrImdlValues(
-    std::string source, std::vector<std::string> templateValues, std::vector<std::string> otherValues);
+    std::string source, std::vector<std::string>& templateValues, std::vector<std::string>& otherValues);
 
 private:
   /**
