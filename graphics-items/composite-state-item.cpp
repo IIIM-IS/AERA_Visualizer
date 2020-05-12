@@ -20,26 +20,31 @@ CompositeStateItem::CompositeStateItem(
   newCompositeStateEvent_(newCompositeStateEvent)
 {
   // Set up sourceCodeHtml_
-  string cstSource = replicodeObjects_.getSourceCode(newCompositeStateEvent->object_);
+  sourceCodeHtml_ = simplifyCstSource(
+    replicodeObjects_.getSourceCode(newCompositeStateEvent->object_)).c_str();
+  sourceCodeHtml_.replace("\n", "<br>");
+  sourceCodeHtml_.replace(" ", "&nbsp;");
+  addSourceCodeHtmlLinks(newCompositeStateEvent_->object_, sourceCodeHtml_);
+
+  setTextItemAndPolygon(makeHtml());
+}
+
+string CompositeStateItem::simplifyCstSource(const string& cstSource)
+{
+  string result = cstSource;
   // Temporarily replace \n with \x01 so that we match the entire string, not by line.
-  replace(cstSource.begin(), cstSource.end(), '\n', '\x01');
+  replace(result.begin(), result.end(), '\n', '\x01');
   // Strip the set of output groups and parameters.
   // "[\\s\\x01]+" is whitespace "[\\d\\.]+" is a float value.
   // TODO: The original source may have comments, so need to strip these.
-  cstSource = regex_replace(cstSource,
+  result = regex_replace(result,
     regex("[\\s\\x01]+\\[[\\w\\s]+\\][\\s\\x01]+[\\d\\.]+[\\s\\x01]*\\)$"), ")");
   // TODO: Correctly remove wildcards.
-  cstSource = regex_replace(cstSource, regex(" : :\\)"), ")");
-  cstSource = regex_replace(cstSource, regex(" :\\)"), ")");
+  result = regex_replace(result, regex(" : :\\)"), ")");
+  result = regex_replace(result, regex(" :\\)"), ")");
   // Restore \n.
-  replace(cstSource.begin(), cstSource.end(), '\x01', '\n');
-  QString html = cstSource.c_str();
-  html.replace("\n", "<br>");
-  html.replace(" ", "&nbsp;");
-  addSourceCodeHtmlLinks(newCompositeStateEvent_->object_, html);
-  sourceCodeHtml_ = html;
-
-  setTextItemAndPolygon(makeHtml());
+  replace(result.begin(), result.end(), '\x01', '\n');
+  return result;
 }
 
 QString CompositeStateItem::makeHtml()

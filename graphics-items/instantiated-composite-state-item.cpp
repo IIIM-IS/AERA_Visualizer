@@ -7,6 +7,7 @@
 #include <QtWidgets>
 #include "explanation-log-window.hpp"
 #include "aera-visualizer-scene.hpp"
+#include "composite-state-item.hpp"
 #include "instantiated-composite-state-item.hpp"
 
 using namespace std;
@@ -58,26 +59,15 @@ void InstantiatedCompositeStateItem::setBoundCstHtml()
 
   std::vector<string> templateValues;
   std::vector<string> outputValues;
-  // Debug: Generalize from cst_52.
   string icstSource = replicodeObjects_.getSourceCode(icst);
+  // Debug: Generalize from the format of cst_52.
   smatch matches;
-  if (regex_search(icstSource, matches, regex("^\\(icst cst_52 \\|\\[\\] \\[(\\w+) (\\w+)\\] \\w+ \\w+\\)$"))) {
+  if (regex_search(icstSource, matches, regex("^\\(icst \\w+ \\|\\[\\] \\[(\\w+) (\\w+)\\] \\w+ \\w+\\)$"))) {
     outputValues.push_back(matches[1].str());
     outputValues.push_back(matches[2].str());
   }
 
-  string cstSource = replicodeObjects_.getSourceCode(cst);
-  // Temporarily replace \n with \x01 so that we match the entire string, not by line.
-  replace(cstSource.begin(), cstSource.end(), '\n', '\x01');
-  // Strip the set of output groups and parameters.
-  // "[\\s\\x01]+" is whitespace "[\\d\\.]+" is a float value.
-  // TODO: The original source may have comments, so need to strip these.
-  cstSource = regex_replace(cstSource,
-    regex("[\\s\\x01]+\\[[\\w\\s]+\\][\\s\\x01]+[\\d\\.]+[\\s\\x01]*\\)$"), ")");
-  // TODO: Correctly remove wildcards.
-  cstSource = regex_replace(cstSource, regex(" : :\\)"), ")");
-  cstSource = regex_replace(cstSource, regex(" :\\)"), ")");
-
+  string cstSource = CompositeStateItem::simplifyCstSource(replicodeObjects_.getSourceCode(cst));
   // Substitute variables.
   int iVariable = -1;
   size_t iTemplateValues = 0;
@@ -103,9 +93,6 @@ void InstantiatedCompositeStateItem::setBoundCstHtml()
   auto beforeVariable = "v" + to_string(++iVariable) + ":";
   cstSource = regex_replace(cstSource, regex(afterVariable), replicodeObjects_.relativeTime(factIcst->get_after()));
   cstSource = regex_replace(cstSource, regex(beforeVariable), replicodeObjects_.relativeTime(factIcst->get_before()));
-
-  // Restore \n.
-  replace(cstSource.begin(), cstSource.end(), '\x01', '\n');
 
   boundCstHtml_ = cstSource.c_str();
   boundCstHtml_.replace("\n", "<br>");

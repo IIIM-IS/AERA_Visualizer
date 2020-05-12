@@ -17,6 +17,14 @@ public:
     QMenu* contextMenu, NewCompositeStateEvent* newCompositeStateEvent, 
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 
+  /**
+   * Start with the source from replicodeObjects_.getSourceCode for a cst, and
+   * remove the set of output groups and parameters, and remove trailing wildcards.
+   * \param cstSource The source  from replicodeObjects_.getSourceCode.
+   * \return The simplified source code
+   */
+  static std::string simplifyCstSource(const std::string& cstSource);
+
 private:
   QString makeHtml();
 
