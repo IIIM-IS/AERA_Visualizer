@@ -31,6 +31,14 @@ public:
     textItem_->setHtml(makeHtml());
   };
 
+  /**
+   * Start with the source from replicodeObjects_.getSourceCode for a mdl, and
+   * remove the set of output groups and parameters, and remove trailing wildcards.
+   * \param cstSource The source from replicodeObjects_.getSourceCode.
+   * \return The simplified source code
+   */
+  static std::string simplifyModelSource(const std::string& modelSource);
+
   int evidenceCountFlashCountdown_;
   bool evidenceCountIncreased_;
   int successRateFlashCountdown_;
