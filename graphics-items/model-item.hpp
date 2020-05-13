@@ -35,7 +35,7 @@ public:
    * Start with the source from replicodeObjects_.getSourceCode for a mdl, and
    * remove the set of output groups and parameters, and remove trailing wildcards, and
    * replace a template variables with a wildcard if it is also assigned.
-   * \param cstSource The source from replicodeObjects_.getSourceCode.
+   * \param modelSource The source from replicodeObjects_.getSourceCode.
    * \return The simplified source code
    */
   static std::string simplifyModelSource(const std::string& modelSource);
