@@ -40,9 +40,27 @@ string ModelItem::simplifyModelSource(const string& modelSource)
   // TODO: The original source may have comments, so need to strip these.
   result = regex_replace(result,
     regex("[\\s\\x01]+\\[[\\w\\s]+\\]([\\s\\x01]+[\\d\\.]+){5}[\\s\\x01]*\\)$"), ")");
+
   // TODO: Correctly remove wildcards.
   result = regex_replace(result, regex(" : :\\)"), ")");
   result = regex_replace(result, regex(" :\\)"), ")");
+
+  // Get the list of template variables and replace with wildcard as needed.
+  // TODO: Correctly get the set of template variables that are assigned.
+  set<string> assignedTemplateVariables;
+  assignedTemplateVariables.insert("v2:");
+  smatch matches;
+  if (regex_search(result, matches, regex("^(\\(mdl )(\\[[ :\\w]+\\])"))) {
+    // matches[1] is "(mdl ". matches[2] is, e.g., "[vo: v1:]".
+    string args = matches[2].str();
+    for (auto i = assignedTemplateVariables.begin(); i != assignedTemplateVariables.end(); ++i)
+      // A varibale like "v0:" can be used as-is in a regex.
+      args = regex_replace(args, regex(*i), ":");
+
+    result = matches[1].str() + args + result.substr(matches[0].str().size());
+  }
+
+
   // Restore \n.
   replace(result.begin(), result.end(), '\x01', '\n');
   return result;
