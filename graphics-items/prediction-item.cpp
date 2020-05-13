@@ -5,11 +5,14 @@
 #include <QMenu>
 #include <QPainter>
 #include <QtWidgets>
+#include "instantiated-composite-state-item.hpp"
+#include "model-item.hpp"
 #include "prediction-item.hpp"
 
 using namespace std;
 using namespace core;
 using namespace r_code;
+using namespace r_exec;
 
 namespace aera_visualizer {
 
@@ -20,6 +23,8 @@ PredictionItem::PredictionItem(
   newPredictionEvent_(newPredictionEvent)
 {
   setFactPredFactMkValHtml();
+  setFactImdlHtml();
+  setBoundModelHtml();
   setTextItemAndPolygon(makeHtml());
 }
 
@@ -57,11 +62,97 @@ void PredictionItem::setFactPredFactMkValHtml()
   addSourceCodeHtmlLinks(newPredictionEvent_->object_, factPredFactMkValHtml_);
 }
 
+void PredictionItem::setFactImdlHtml()
+{
+  // TODO: Share with InstantiatedCompositeStateItem::setFactIcstHtml().
+  auto imdl = newPredictionEvent_->factImdl_->get_reference(0);
+
+  // Strip the ending confidence value and propagation of saliency threshold.
+  regex saliencyRegex("\\s+[\\w\\:]+\\)$");
+  regex confidenceAndSaliencyRegex("\\s+\\w+\\s+[\\w\\:]+\\)$");
+  string factImdlSource = regex_replace(
+    replicodeObjects_.getSourceCode(newPredictionEvent_->factImdl_), confidenceAndSaliencyRegex, ")");
+  string imdlSource = regex_replace(replicodeObjects_.getSourceCode(imdl), saliencyRegex, ")");
+
+  QString imdlLabel(replicodeObjects_.getLabel(imdl).c_str());
+
+  // Temporarily use "!down" which doesn't have spaces.
+  factImdlHtml_ = QString(factImdlSource.c_str()).replace(imdlLabel, "!down");
+  factImdlHtml_ += QString("\n      ") + imdlSource.c_str();
+
+  factImdlHtml_ = htmlify(factImdlHtml_);
+  factImdlHtml_.replace("!down", DownArrowHtml);
+  addSourceCodeHtmlLinks(imdl, factImdlHtml_);
+}
+
+void PredictionItem::setBoundModelHtml()
+{
+  auto factImdl = (_Fact*)newPredictionEvent_->factImdl_;
+  auto imdl = factImdl->get_reference(0);
+  auto mdl = imdl->get_reference(0);
+
+  string imdlSource = replicodeObjects_.getSourceCode(imdl);
+  std::vector<string> templateValues;
+  std::vector<string> exposedValues;
+  InstantiatedCompositeStateItem::getIcstOrImdlValues(imdlSource, templateValues, exposedValues);
+  // Debug: How to correctly get the timestamp variables.
+  int iAfterVariable = 5;
+  int iBeforeVariable = 6;
+
+  string modelSource = ModelItem::simplifyModelSource(replicodeObjects_.getSourceCode(mdl));
+  // Temporarily replace \n with \x01 so that we match the entire string, not by line.
+  replace(modelSource.begin(), modelSource.end(), '\n', '\x01');
+
+  // Temporarily change the assignment variables so that they are not substituted.
+  modelSource = regex_replace(modelSource, regex("\\x01   v"), "\x01   !");
+
+  // Strip the backward guards.
+  modelSource = regex_replace(modelSource, regex("\\x01\\[\\](\\x01   [^\\x01]+)+$"), ")");
+
+  // Substitute variables.
+  // TODO: Share code with InstantiatedCompositeStateItem::setBoundCstHtml()?
+  int iVariable = -1;
+  size_t iTemplateValues = 0;
+  size_t iExposedValues = 0;
+  while (iTemplateValues < templateValues.size() || iExposedValues < exposedValues.size()) {
+    // v0, v1, v2, etc. are split between templateValues and exposedValues.
+    string boundValue = (iTemplateValues < templateValues.size() ?
+      templateValues[iTemplateValues] : exposedValues[iExposedValues]);
+
+    ++iVariable;
+    if (iVariable == iAfterVariable)
+      ++iVariable;
+    if (iVariable == iBeforeVariable)
+      ++iVariable;
+
+    string variable = "v" + to_string(iVariable) + ":";
+    modelSource = regex_replace(modelSource, regex(variable), variable + boundValue);
+
+    if (iTemplateValues < templateValues.size())
+      // Still looking at templateValues.
+      ++iTemplateValues;
+    else
+      ++iExposedValues;
+  }
+
+  // Restore assignment variables.
+  modelSource = regex_replace(modelSource, regex("\\x01   !"), "\x01   v");
+
+  // Restore \n.
+  replace(modelSource.begin(), modelSource.end(), '\x01', '\n');
+  boundModelHtml_ = htmlify(modelSource);
+  addSourceCodeHtmlLinks(mdl, boundModelHtml_);
+}
+
 QString PredictionItem::makeHtml()
 {
   QString html = QString("<h3><font color=\"darkred\">Prediction</font> <a href=\"#this\">") +
     replicodeObjects_.getLabel(newPredictionEvent_->object_).c_str() + "</a></h3>";
   html += factPredFactMkValHtml_;
+  html += QString("<h3><font color=\"darkred\">Instantiated model</font> ") +
+    replicodeObjects_.getLabel(newPredictionEvent_->factImdl_).c_str() + "</h3>";
+  html += factImdlHtml_;
+  html += "<br><br>" + boundModelHtml_;
   return html;
 }
 
