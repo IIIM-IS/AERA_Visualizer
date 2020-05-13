@@ -29,25 +29,25 @@ InstantiatedCompositeStateItem::InstantiatedCompositeStateItem(
 }
 
 void InstantiatedCompositeStateItem::getIcstOrImdlValues(
-  string source, std::vector<string>& templateValues, std::vector<string>& otherValues)
+  string source, std::vector<string>& templateValues, std::vector<string>& exposedValues)
 {
   templateValues.clear();
-  otherValues.clear();
+  exposedValues.clear();
 
   // Debug: Generalize from these formats.
   smatch matches;
   if (regex_search(source, matches, regex("^\\(i\\w+ \\w+ \\|\\[\\] \\[([:\\.\\w]+) ([:\\.\\w]+)\\] \\w+ \\w+\\)$"))) {
-    otherValues.push_back(matches[1].str());
-    otherValues.push_back(matches[2].str());
+    exposedValues.push_back(matches[1].str());
+    exposedValues.push_back(matches[2].str());
   }
   else if (regex_search(source, matches, regex("^\\(i\\w+ \\w+ \\[([:\\.\\w]+) ([:\\.\\w]+) ([:\\.\\w]+)\\] \\[([:\\.\\w]+) ([:\\.\\w]+) ([:\\.\\w]+) ([:\\.\\w]+)\\] \\w+ \\w+\\)$"))) {
     templateValues.push_back(matches[1].str());
     templateValues.push_back(matches[2].str());
     templateValues.push_back(matches[3].str());
-    otherValues.push_back(matches[4].str());
-    otherValues.push_back(matches[5].str());
-    otherValues.push_back(matches[6].str());
-    otherValues.push_back(matches[7].str());
+    exposedValues.push_back(matches[4].str());
+    exposedValues.push_back(matches[5].str());
+    exposedValues.push_back(matches[6].str());
+    exposedValues.push_back(matches[7].str());
   }
 }
 
@@ -81,19 +81,19 @@ void InstantiatedCompositeStateItem::setBoundCstHtml()
 
   string icstSource = replicodeObjects_.getSourceCode(icst);
   std::vector<string> templateValues;
-  std::vector<string> otherValues;
-  getIcstOrImdlValues(icstSource, templateValues, otherValues);
+  std::vector<string> exposedValues;
+  getIcstOrImdlValues(icstSource, templateValues, exposedValues);
 
   string cstSource = CompositeStateItem::simplifyCstSource(replicodeObjects_.getSourceCode(cst));
   // Substitute variables.
   int iVariable = -1;
   size_t iTemplateValues = 0;
-  size_t iOutputValues = 0;
-  while (iTemplateValues < templateValues.size() || iOutputValues < otherValues.size()) {
+  size_t iExposedValues = 0;
+  while (iTemplateValues < templateValues.size() || iExposedValues < exposedValues.size()) {
     ++iVariable;
-    // v0, v1, v2, etc. are split between templateValues and otherValues.
+    // v0, v1, v2, etc. are split between templateValues and exposedValues.
     string boundValue = (iTemplateValues < templateValues.size() ? 
-      templateValues[iTemplateValues] : otherValues[iOutputValues]);
+      templateValues[iTemplateValues] : exposedValues[iExposedValues]);
 
     string variable = "v" + to_string(iVariable) + ":";
     cstSource = regex_replace(cstSource, regex(variable), variable + boundValue);
@@ -102,7 +102,7 @@ void InstantiatedCompositeStateItem::setBoundCstHtml()
       // Still looking at templateValues.
       ++iTemplateValues;
     else
-      ++iOutputValues;
+      ++iExposedValues;
   }
 
   // Debug: How to correctly get the timestamp variables.

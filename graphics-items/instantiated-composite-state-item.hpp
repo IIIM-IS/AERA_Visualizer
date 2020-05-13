@@ -21,10 +21,10 @@ public:
    * Get the values from the set of template values and other values in the icst or imdl.
    * \param source The source from replicodeObjects_.getSourceCode.
    * \param templateValues Set this to the list of template values. This first clears the list.
-   * \param otherValues Set this to the list of other values. This first clears the list.
+   * \param exposedValues Set this to the list of exposed values. This first clears the list.
    */
   static void getIcstOrImdlValues(
-    std::string source, std::vector<std::string>& templateValues, std::vector<std::string>& otherValues);
+    std::string source, std::vector<std::string>& templateValues, std::vector<std::string>& exposedValues);
 
 private:
   /**
