@@ -175,7 +175,6 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 
   if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
-      event->eventType_ == ProgramReductionEvent::EVENT_TYPE ||
       event->eventType_ == ProgramReductionNewObjectEvent::EVENT_TYPE ||
       event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
@@ -192,8 +191,6 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     }
     else if (event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
       newItem = new CompositeStateItem(itemMenu_, (NewCompositeStateEvent*)event, replicodeObjects_, scene_);
-    else if (event->eventType_ == ProgramReductionEvent::EVENT_TYPE)
-      newItem = new ProgramReductionItem(itemMenu_, (ProgramReductionEvent*)event, replicodeObjects_, scene_);
     else if (event->eventType_ == ProgramReductionNewObjectEvent::EVENT_TYPE)
       newItem = new ProgramOutputFactItem(itemMenu_, (ProgramReductionNewObjectEvent*)event, replicodeObjects_, scene_);
     else if (event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE)
@@ -269,7 +266,6 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
   AeraEvent* event = events_[iNextEvent_].get();
   if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
-      event->eventType_ == ProgramReductionEvent::EVENT_TYPE ||
       event->eventType_ == ProgramReductionNewObjectEvent::EVENT_TYPE ||
       event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {

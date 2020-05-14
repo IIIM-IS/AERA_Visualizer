@@ -41,18 +41,13 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     if (newObjectEvent->object_->get_oid() == 60)
       newObjectEvent->itemPosition_ = QPointF(2620, 2170 + item->boundingRect().height() / 2);
     else if (newObjectEvent->object_->get_debug_oid() == 2061)
-      newObjectEvent->itemPosition_ = QPointF(2830, 2170 + item->boundingRect().height() / 2);
+      newObjectEvent->itemPosition_ = QPointF(2950, 2170 + item->boundingRect().height() / 2);
     else if (newObjectEvent->eventType_ == ProgramReductionNewObjectEvent::EVENT_TYPE)
       newObjectEvent->itemPosition_ = QPointF(
         2050 + (newObjectEvent->object_->get_oid() - 49) * 12, 2170 + item->boundingRect().height() / 2);
-    else if (newObjectEvent->object_->get_oid() == 77)
-      newObjectEvent->itemPosition_ = QPointF(2810, 2400);
-    else if (newObjectEvent->eventType_ == ProgramReductionEvent::EVENT_TYPE)
-      newObjectEvent->itemPosition_ = QPointF(
-        2060 + (newObjectEvent->object_->get_oid() - 47) * 25, 2400);
     else if (newObjectEvent->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE)
       newObjectEvent->itemPosition_ = QPointF(
-        2090 + (newObjectEvent->object_->get_oid() - 59) * 21, 2570);
+        2090 + (newObjectEvent->object_->get_oid() - 59) * 21, 2590);
     else
       newObjectEvent->itemPosition_ = QPointF(
         2050 + (newObjectEvent->object_->get_oid() - 52) * 320, 
