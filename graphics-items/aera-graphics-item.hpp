@@ -41,7 +41,7 @@ public:
    * \param input The input string to htmlify.
    * \return The HTML string.
    */
-  QString htmlify(const QString& input)
+  static QString htmlify(const QString& input)
   {
     QString result = input;
     result.replace("\n", "<br>");
@@ -51,7 +51,7 @@ public:
     return result;
   }
 
-  QString htmlify(const std::string& input) { return htmlify(QString(input.c_str())); }
+  static QString htmlify(const std::string& input) { return htmlify(QString(input.c_str())); }
 
   int borderFlashCountdown_;
 
