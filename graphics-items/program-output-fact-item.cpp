@@ -7,6 +7,7 @@
 #include <QtWidgets>
 #include "explanation-log-window.hpp"
 #include "aera-visualizer-scene.hpp"
+#include "program-reduction-item.hpp"
 #include "program-output-fact-item.hpp"
 
 using namespace std;
@@ -22,6 +23,7 @@ ProgramOutputFactItem::ProgramOutputFactItem(
   programReductionNewObjectEvent_(programReductionNewObjectEvent)
 {
   setFactMkValHtml();
+  setExplanationMkRdxHtml();
   setTextItemAndPolygon(makeHtml());
 }
 
@@ -47,6 +49,16 @@ void ProgramOutputFactItem::setFactMkValHtml()
   addSourceCodeHtmlLinks(programReductionNewObjectEvent_->object_, factMkValHtml_);
 }
 
+void ProgramOutputFactItem::setExplanationMkRdxHtml()
+{
+  auto mkRdx = programReductionNewObjectEvent_->programReduction_;
+
+  string mkRdxSource = ProgramReductionItem::simplifyMkRdxSource(replicodeObjects_.getSourceCode(mkRdx));
+  QString html = htmlify(mkRdxSource);
+  addSourceCodeHtmlLinks(mkRdx, html);
+  explanationMkRdxHtml_ = html.toStdString();
+}
+
 QString ProgramOutputFactItem::makeHtml()
 {
   QString html = QString("<h3><font color=\"darkred\">Program Output</font> <a href=\"#this""\">") +
@@ -58,34 +70,25 @@ QString ProgramOutputFactItem::makeHtml()
 void ProgramOutputFactItem::textItemLinkActivated(const QString& link)
 {
   if (link == "#this") {
-    string whatMadeExplanation = "<u>Q: What made <a href=\"#debug_oid-" +
-      to_string(programReductionNewObjectEvent_->object_->get_debug_oid()) + "\">" + 
-      replicodeObjects_.getLabel(programReductionNewObjectEvent_->object_) +
-      "</a> ?</u><br>" + "Program reduction <a href=\"#debug_oid-" +
-      to_string(programReductionNewObjectEvent_->programReduction_->get_debug_oid()) + "\">" +
-      replicodeObjects_.getLabel(programReductionNewObjectEvent_->programReduction_) + "</a><br><br>";
-
     auto menu = new QMenu();
     menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
-    menu->addAction("What Made This?",
-      [=]() { parent_->getExplanationLogWindow()->appendHtml(whatMadeExplanation); });
+    menu->addAction("What Made This?", [=]() {
+      auto mkRdx = programReductionNewObjectEvent_->programReduction_;
+
+      string explanation = "<u>Q: What made <a href=\"#debug_oid-" +
+        to_string(programReductionNewObjectEvent_->object_->get_debug_oid()) + "\">" +
+        replicodeObjects_.getLabel(programReductionNewObjectEvent_->object_) + "</a> ?</u><br>" + 
+        "This an output of instantiated program <b>" + replicodeObjects_.getLabel(mkRdx->get_reference(0)) +
+        "</b>, according to<br>program reduction <b>" + replicodeObjects_.getLabel(mkRdx) + "</b><br>" +
+        explanationMkRdxHtml_ + "<br><br>";
+      parent_->getExplanationLogWindow()->appendHtml(explanation);
+    });
     menu->exec(parent_->getMouseScreenPosition() - QPoint(10, 10));
     delete menu;
   }
-  else if (link.startsWith("#debug_oid-")) {
-    uint64 debug_oid = link.mid(11).toULongLong();
-    auto object = replicodeObjects_.getObjectByDebugOid(debug_oid);
-    if (object) {
-      auto item = parent_->getAeraGraphicsItem(object);
-      if (item) {
-        auto menu = new QMenu();
-        menu->addAction(QString("Zoom to ") + replicodeObjects_.getLabel(object).c_str(),
-          [=]() { parent_->zoomToItem(item); });
-        menu->exec(parent_->getMouseScreenPosition() - QPoint(10, 10));
-        delete menu;
-      }
-    }
-  }
+  else
+    // For #debug_oid- and others, defer to the base class.
+    AeraGraphicsItem::textItemLinkActivated(link);
 }
 
 }
