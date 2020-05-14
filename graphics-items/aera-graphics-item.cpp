@@ -98,7 +98,8 @@ QVariant AeraGraphicsItem::itemChange(GraphicsItemChange change, const QVariant&
   return value;
 }
 
-void AeraGraphicsItem::addSourceCodeHtmlLinks(Code* object, QString& html)
+void AeraGraphicsItem::addSourceCodeHtmlLinks(
+  Code* object, QString& html, ReplicodeObjects& replicodeObjects)
 {
   for (int i = 0; i < object->references_size(); ++i) {
     auto referencedObject = object->get_reference(i);
@@ -108,7 +109,7 @@ void AeraGraphicsItem::addSourceCodeHtmlLinks(Code* object, QString& html)
           referencedObject->code(0).asOpcode() == Opcodes::AntiFact))
       continue;
 
-    auto referencedLabel = replicodeObjects_.getLabel(referencedObject);
+    auto referencedLabel = replicodeObjects.getLabel(referencedObject);
     if (referencedLabel == "")
       continue;
 

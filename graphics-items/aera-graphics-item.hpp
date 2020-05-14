@@ -53,6 +53,24 @@ public:
 
   static QString htmlify(const std::string& input) { return htmlify(QString(input.c_str())); }
 
+  /**
+   * Go through object's references and modify html with <a href="#debug_oid-XXX"></a>
+   * around the label of each referenced object. When clicked, this link is handled
+   * by textItemLinkActivated().
+   * \param object The object with the references.
+   * \param html The HTML string to modify.
+   * \param replicodeObjects the ReplicodeObjects for looking up labels. This is passed
+   * as a param so that this can be a static method. If you have an AeraGraphicsItem object,
+   * you can call the addSourceCodeHtmlLinks member method.
+   */
+  static void addSourceCodeHtmlLinks(
+    r_code::Code* object, QString& html, ReplicodeObjects& replicodeObjects);
+
+  void addSourceCodeHtmlLinks(r_code::Code* object, QString& html)
+  {
+    addSourceCodeHtmlLinks(object, html, replicodeObjects_);
+  }
+
   int borderFlashCountdown_;
 
   static const char* DownArrowHtml;
@@ -69,15 +87,6 @@ protected:
    */
   void setTextItemAndPolygon(QString html);
 
-  /**
-   * Go through object's references and modify html with <a href="#debug_oid-XXX"></a>
-   * around the label of each referenced object. When clicked, this link is handled
-   * by textItemLinkActivated().
-   * \param object The object with the references.
-   * \param html The HTML string to modify.
-   */
-  void addSourceCodeHtmlLinks(r_code::Code* object, QString& html);
-  
   virtual void textItemLinkHovered(const QString& link);
 
   virtual void textItemLinkActivated(const QString& link);
