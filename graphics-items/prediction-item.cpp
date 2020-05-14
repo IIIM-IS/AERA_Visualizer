@@ -55,11 +55,19 @@ void PredictionItem::setFactPredFactMkValHtml()
   factPredFactMkValHtml_ = factPredHtml;
   factPredFactMkValHtml_ += QString("\n      ") + predHtml;
   factPredFactMkValHtml_ += QString("\n            ") + factMkValHtml;
-  factPredFactMkValHtml_ += QString("\n                ") + mkValHtml;
+  // We will replace !mkVal-start and !mkVal-end below, after highlighting.
+  factPredFactMkValHtml_ += QString("\n                !mkVal-start") + mkValHtml + "!mkVal-end";
 
   factPredFactMkValHtml_ = htmlify(factPredFactMkValHtml_);
   factPredFactMkValHtml_.replace("!down", DownArrowHtml);
   addSourceCodeHtmlLinks(newPredictionEvent_->object_, factPredFactMkValHtml_);
+
+  highlightedFactPredFactMkValHtml_ = factPredFactMkValHtml_;
+  factPredFactMkValHtml_.replace("!mkVal-start", "");
+  factPredFactMkValHtml_.replace("!mkVal-end", "");
+  // Highlight this the same as the RHS in the instantiated model.
+  highlightedFactPredFactMkValHtml_.replace("!mkVal-start", "<font color=\"green\">");
+  highlightedFactPredFactMkValHtml_.replace("!mkVal-end", "</font>");
 }
 
 void PredictionItem::setFactImdlHtml()
@@ -145,13 +153,16 @@ void PredictionItem::setBoundAndUnboundModelHtml()
   addSourceCodeHtmlLinks(mdl, unboundModelHtml_);
   boundModelHtml_ = htmlify(modelSource);
   addSourceCodeHtmlLinks(mdl, boundModelHtml_);
+  // Debug: Correctly find the RHS.
+  QString rhs = "(mk.val&nbsp;v3:b&nbsp;position_y&nbsp;v7:20)";
+  boundModelHtml_.replace(rhs, "<font color=\"green\">" + rhs + "</font>");
 }
 
 QString PredictionItem::makeHtml()
 {
   QString html = QString("<h3><font color=\"darkred\">Prediction</font> <a href=\"#this\">") +
     replicodeObjects_.getLabel(newPredictionEvent_->object_).c_str() + "</a></h3>";
-  html += factPredFactMkValHtml_;
+  html += (showState_ == SHOW_INSTANTIATED_MODEL ? highlightedFactPredFactMkValHtml_ : factPredFactMkValHtml_);
 
   if (showState_ == SHOW_INSTANTIATED_MODEL ||
       showState_ == SHOW_ORIGINAL_MODEL) {
@@ -164,8 +175,8 @@ QString PredictionItem::makeHtml()
         " <a href=\"#show-instantiated-model\">" + UnselectedRadioButtonHtml + " What Made This?</a>" +
         " " + SelectedRadioButtonHtml + " Original Model";
 
-    html += QString("<h3><font color=\"darkred\">Instantiated model</font> ") +
-      replicodeObjects_.getLabel(newPredictionEvent_->factImdl_).c_str() + "</h3>";
+    html += QString("<br>This prediction was made from instantiated model <b>") +
+      replicodeObjects_.getLabel(newPredictionEvent_->factImdl_).c_str() + "</b><br>";
     html += factImdlHtml_;
     html += "<br><br>" + (showState_ == SHOW_INSTANTIATED_MODEL ? boundModelHtml_ : unboundModelHtml_);
   }

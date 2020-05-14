@@ -25,7 +25,8 @@ private:
 
   /**
    * Set factPredFactMkValHtml_ to the HTML source code for the fact, pred, fact and mk.val
-   * from newPredictionEvent_->object_.
+   * from newPredictionEvent_->object_. Also set highlightedFactPredFactMkValHtml_ to 
+   * factPredFactMkValHtml_ with text highlighted in conjunction with boundModelHtml_.
    */
   void setFactPredFactMkValHtml();
 
@@ -51,6 +52,7 @@ private:
   NewMkValPredictionEvent* newPredictionEvent_;
   ShowState showState_;
   QString factPredFactMkValHtml_;
+  QString highlightedFactPredFactMkValHtml_;
   QString factImdlHtml_;
   QString boundModelHtml_;
   QString unboundModelHtml_;
