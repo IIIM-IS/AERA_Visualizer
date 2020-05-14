@@ -38,12 +38,13 @@ AeraGraphicsItem::AeraGraphicsItem(
 
 void AeraGraphicsItem::setTextItemAndPolygon(QString html)
 {
-
   // Set up the textItem_ first to get its size.
+  if (textItem_)
+    delete textItem_;
   textItem_ = new QGraphicsTextItem(this);
   textItem_->setHtml(html);
-  const qreal left = -textItem_->boundingRect().width() / 2 - 5;
-  const qreal top = -textItem_->boundingRect().height() / 2 - 5;
+  qreal left = -textItem_->boundingRect().width() / 2 - 5;
+  qreal top = -textItem_->boundingRect().height() / 2 - 5;
   textItem_->setPos(left + 5, top + 5);
   textItem_->setTextInteractionFlags(Qt::TextBrowserInteraction);
   QObject::connect(textItem_, &QGraphicsTextItem::linkHovered,
@@ -61,7 +62,14 @@ void AeraGraphicsItem::setTextItemAndPolygon(QString html)
   path.arcTo(left, top, diameter, diameter, 90, 90);
   path.arcTo(left, bottom - diameter, diameter, diameter, 180, 90);
   path.arcTo(right - diameter, bottom - diameter, diameter, diameter, 270, 90);
+
+  auto saveRect = boundingRect();
   setPolygon(path.toFillPolygon());
+  if (saveRect.width() > 0) {
+    // We are resizing. Preserve the location of the top-left.
+    auto delta = boundingRect().topLeft() - saveRect.topLeft();
+    setPos(pos() - delta);
+  }
 }
 
 void AeraGraphicsItem::removeArrows()
