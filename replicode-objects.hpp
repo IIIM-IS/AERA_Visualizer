@@ -37,21 +37,21 @@ public:
    * \param oid The OID.
    * \return The object, or NULL if not found.
    */
-  r_code::Code* getObject(uint32 oid);
+  r_code::Code* getObject(uint32 oid) const;
 
   /**
    * Get the object by the debug OID.
    * \param debugOid The debug OID.
    * \return The object, or NULL if not found.
    */
-  r_code::Code* getObjectByDebugOid(uint64 debugOid);
+  r_code::Code* getObjectByDebugOid(uint64 debugOid) const;
 
   /**
    * Get the object's label (from the decompiled objects file).
    * \param object The object.
    * \return The label, or "" if not found.
    */
-  std::string getLabel(r_code::Code* object)
+  std::string getLabel(r_code::Code* object) const
   {
     auto result = objectLabel_.find(object);
     if (result == objectLabel_.end())
@@ -64,7 +64,7 @@ public:
    * \param object The object.
    * \return The source code, or "" if not found. This does not have the label or view set.
    */
-  std::string getSourceCode(r_code::Code* object)
+  std::string getSourceCode(r_code::Code* object) const
   {
     auto result = objectSourceCode_.find(object);
     if (result == objectSourceCode_.end())
@@ -79,7 +79,7 @@ public:
    * \param timestamp The timestamp.
    * \return A string representing the relative time.
    */
-  std::string relativeTime(Timestamp timestamp)
+  std::string relativeTime(Timestamp timestamp) const
   {
     return core::Time::ToString_seconds(timestamp - timeReference_);
   }

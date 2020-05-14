@@ -99,7 +99,7 @@ QVariant AeraGraphicsItem::itemChange(GraphicsItemChange change, const QVariant&
 }
 
 void AeraGraphicsItem::addSourceCodeHtmlLinks(
-  Code* object, QString& html, ReplicodeObjects& replicodeObjects)
+  Code* object, QString& html, const ReplicodeObjects& replicodeObjects)
 {
   for (int i = 0; i < object->references_size(); ++i) {
     auto referencedObject = object->get_reference(i);

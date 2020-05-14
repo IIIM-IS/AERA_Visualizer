@@ -64,7 +64,7 @@ public:
    * you can call the addSourceCodeHtmlLinks member method.
    */
   static void addSourceCodeHtmlLinks(
-    r_code::Code* object, QString& html, ReplicodeObjects& replicodeObjects);
+    r_code::Code* object, QString& html, const ReplicodeObjects& replicodeObjects);
 
   void addSourceCodeHtmlLinks(r_code::Code* object, QString& html)
   {

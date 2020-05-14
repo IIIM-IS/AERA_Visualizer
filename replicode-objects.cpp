@@ -242,7 +242,7 @@ string ReplicodeObjects::processDecompiledObjects(
   return decompiledOut.str();
 }
 
-r_code::Code* ReplicodeObjects::getObject(uint32 oid)
+r_code::Code* ReplicodeObjects::getObject(uint32 oid) const
 {
   for (auto i = objects_.begin(); i != objects_.end(); ++i) {
     if ((*i)->get_oid() == oid)
@@ -252,7 +252,7 @@ r_code::Code* ReplicodeObjects::getObject(uint32 oid)
   return NULL;
 }
 
-r_code::Code* ReplicodeObjects::getObjectByDebugOid(uint64 debugOid)
+r_code::Code* ReplicodeObjects::getObjectByDebugOid(uint64 debugOid) const
 {
   for (auto i = objects_.begin(); i != objects_.end(); ++i) {
     if ((*i)->get_debug_oid() == debugOid)
