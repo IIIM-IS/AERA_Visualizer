@@ -20,11 +20,11 @@ PredictionItem::PredictionItem(
   QMenu* contextMenu, NewMkValPredictionEvent* newPredictionEvent, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
   : AeraGraphicsItem(contextMenu, newPredictionEvent, replicodeObjects, parent),
-  newPredictionEvent_(newPredictionEvent)
+  newPredictionEvent_(newPredictionEvent), showState_(HIDE_MODEL)
 {
   setFactPredFactMkValHtml();
   setFactImdlHtml();
-  setBoundModelHtml();
+  setBoundAndUnboundModelHtml();
   setTextItemAndPolygon(makeHtml());
 }
 
@@ -85,7 +85,7 @@ void PredictionItem::setFactImdlHtml()
   addSourceCodeHtmlLinks(imdl, factImdlHtml_);
 }
 
-void PredictionItem::setBoundModelHtml()
+void PredictionItem::setBoundAndUnboundModelHtml()
 {
   auto factImdl = (_Fact*)newPredictionEvent_->factImdl_;
   auto imdl = factImdl->get_reference(0);
@@ -99,15 +99,16 @@ void PredictionItem::setBoundModelHtml()
   int iAfterVariable = 5;
   int iBeforeVariable = 6;
 
-  string modelSource = ModelItem::simplifyModelSource(replicodeObjects_.getSourceCode(mdl));
+  string unboundModelSource = ModelItem::simplifyModelSource(replicodeObjects_.getSourceCode(mdl));
+  string modelSource = unboundModelSource;
   // Temporarily replace \n with \x01 so that we match the entire string, not by line.
   replace(modelSource.begin(), modelSource.end(), '\n', '\x01');
 
   // Temporarily change the assignment variables so that they are not substituted.
   modelSource = regex_replace(modelSource, regex("\\x01   v"), "\x01   !");
 
-  // Strip the backward guards.
-  modelSource = regex_replace(modelSource, regex("\\x01\\[\\](\\x01   [^\\x01]+)+$"), ")");
+  // Replace backward guards with an empty set.
+  modelSource = regex_replace(modelSource, regex("\\x01\\[\\](\\x01   [^\\x01]+)+$"), "\x01|[])");
 
   // Substitute variables.
   // TODO: Share code with InstantiatedCompositeStateItem::setBoundCstHtml()?
@@ -137,9 +138,11 @@ void PredictionItem::setBoundModelHtml()
 
   // Restore assignment variables.
   modelSource = regex_replace(modelSource, regex("\\x01   !"), "\x01   v");
-
   // Restore \n.
   replace(modelSource.begin(), modelSource.end(), '\x01', '\n');
+
+  unboundModelHtml_ = htmlify(unboundModelSource);
+  addSourceCodeHtmlLinks(mdl, unboundModelHtml_);
   boundModelHtml_ = htmlify(modelSource);
   addSourceCodeHtmlLinks(mdl, boundModelHtml_);
 }
@@ -149,11 +152,49 @@ QString PredictionItem::makeHtml()
   QString html = QString("<h3><font color=\"darkred\">Prediction</font> <a href=\"#this\">") +
     replicodeObjects_.getLabel(newPredictionEvent_->object_).c_str() + "</a></h3>";
   html += factPredFactMkValHtml_;
-  html += QString("<h3><font color=\"darkred\">Instantiated model</font> ") +
-    replicodeObjects_.getLabel(newPredictionEvent_->factImdl_).c_str() + "</h3>";
-  html += factImdlHtml_;
-  html += "<br><br>" + boundModelHtml_;
+
+  if (showState_ == SHOW_INSTANTIATED_MODEL ||
+      showState_ == SHOW_ORIGINAL_MODEL) {
+    if (showState_ == SHOW_INSTANTIATED_MODEL)
+      html += "<br><a href=\"#hide-model\">" + UnselectedRadioButtonHtml + " Hide Model</a>" +
+        " " + SelectedRadioButtonHtml + " What Made This?" +
+        " <a href=\"#show-original-model\">" + UnselectedRadioButtonHtml + " Original Model</a>";
+    else
+      html += "<br><a href=\"#hide-model\">" + UnselectedRadioButtonHtml + " Hide Model</a> " +
+        " <a href=\"#show-instantiated-model\">" + UnselectedRadioButtonHtml + " What Made This?</a>" +
+        " " + SelectedRadioButtonHtml + " Original Model";
+
+    html += QString("<h3><font color=\"darkred\">Instantiated model</font> ") +
+      replicodeObjects_.getLabel(newPredictionEvent_->factImdl_).c_str() + "</h3>";
+    html += factImdlHtml_;
+    html += "<br><br>" + (showState_ == SHOW_INSTANTIATED_MODEL ? boundModelHtml_ : unboundModelHtml_);
+  }
+  else {
+    html += "<br>" + SelectedRadioButtonHtml + " Hide Model" +
+      " <a href=\"#show-instantiated-model\">" + UnselectedRadioButtonHtml + " What Made This?</a>" +
+      " <a href=\"#show-original-model\">" + UnselectedRadioButtonHtml + " Original Model</a>";
+  }
+
   return html;
+}
+
+void PredictionItem::textItemLinkActivated(const QString& link)
+{
+  if (link == "#hide-model") {
+    showState_ = HIDE_MODEL;
+    setTextItemAndPolygon(makeHtml());
+  }
+  else if (link == "#show-instantiated-model") {
+    showState_ = SHOW_INSTANTIATED_MODEL;
+    setTextItemAndPolygon(makeHtml());
+  }
+  else if (link == "#show-original-model") {
+    showState_ = SHOW_ORIGINAL_MODEL;
+    setTextItemAndPolygon(makeHtml());
+  }
+  else
+    // For #debug_oid- and others, defer to the base class.
+    AeraGraphicsItem::textItemLinkActivated(link);
 }
 
 }
