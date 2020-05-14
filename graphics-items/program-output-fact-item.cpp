@@ -23,7 +23,6 @@ ProgramOutputFactItem::ProgramOutputFactItem(
   programReductionNewObjectEvent_(programReductionNewObjectEvent)
 {
   setFactMkValHtml();
-  setExplanationMkRdxHtml();
   setTextItemAndPolygon(makeHtml());
 }
 
@@ -49,16 +48,6 @@ void ProgramOutputFactItem::setFactMkValHtml()
   addSourceCodeHtmlLinks(programReductionNewObjectEvent_->object_, factMkValHtml_);
 }
 
-void ProgramOutputFactItem::setExplanationMkRdxHtml()
-{
-  auto mkRdx = programReductionNewObjectEvent_->programReduction_;
-
-  string mkRdxSource = ProgramReductionItem::simplifyMkRdxSource(replicodeObjects_.getSourceCode(mkRdx));
-  QString html = htmlify(mkRdxSource);
-  addSourceCodeHtmlLinks(mkRdx, html);
-  explanationMkRdxHtml_ = html.toStdString();
-}
-
 QString ProgramOutputFactItem::makeHtml()
 {
   QString html = QString("<h3><font color=\"darkred\">Program Output</font> <a href=\"#this""\">") +
@@ -79,8 +68,8 @@ void ProgramOutputFactItem::textItemLinkActivated(const QString& link)
         to_string(programReductionNewObjectEvent_->object_->get_debug_oid()) + "\">" +
         replicodeObjects_.getLabel(programReductionNewObjectEvent_->object_) + "</a> ?</u><br>" + 
         "This an output of instantiated program <b>" + replicodeObjects_.getLabel(mkRdx->get_reference(0)) +
-        "</b>, according to<br>program reduction <b>" + replicodeObjects_.getLabel(mkRdx) + "</b><br>" +
-        explanationMkRdxHtml_ + "<br><br>";
+        "</b>, according to<br>program reduction <a href=\"#debug_oid-" + 
+        to_string(mkRdx->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(mkRdx) + "</a><br><br>";
       parent_->getExplanationLogWindow()->appendHtml(explanation);
     });
     menu->exec(parent_->getMouseScreenPosition() - QPoint(10, 10));

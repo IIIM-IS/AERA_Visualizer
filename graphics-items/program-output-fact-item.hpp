@@ -28,12 +28,6 @@ private:
   void setFactMkValHtml();
 
   /**
-   * Set explanationMkRdxHtml_ to the HTML source code for the mk.rdx from
-   * programReductionNewObjectEvent_->programReduction_, meant for the explanation log.
-   */
-  void setExplanationMkRdxHtml();
-
-  /**
    * Make the full HTML for the textItem_ from factMkValHtml_ and the object label.
    * \return The HTML.
    */
@@ -41,7 +35,6 @@ private:
 
   ProgramReductionNewObjectEvent* programReductionNewObjectEvent_;
   QString factMkValHtml_;
-  std::string explanationMkRdxHtml_;
 };
 
 }
