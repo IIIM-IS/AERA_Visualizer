@@ -29,15 +29,15 @@ public:
 private:
   /**
    * Set factIcstHtml_ to the HTML source code for the fact and icst from newInstantiatedCompositeStateEvent_->object_.
-   * \return The HTML string.
    */
   void setFactIcstHtml();
+
   /**
    * Set boundCstHtml_ to the HTML source code for the cst from newInstantiatedCompositeStateEvent_->object_
    * with variables bound to the template parameters.
-   * \return The HTML string.
    */
   void setBoundCstHtml();
+
   /**
    * Make the full HTML for the textItem_ from factIcstHtml_, boundCstHtml_ and the object label.
    * \return The HTML.
