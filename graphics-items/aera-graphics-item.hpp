@@ -73,7 +73,9 @@ public:
 
   int borderFlashCountdown_;
 
-  static const char* DownArrowHtml;
+  static const QString DownArrowHtml;
+  static const QString SelectedRadioButtonHtml;
+  static const QString UnselectedRadioButtonHtml;
 
 protected:
   void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
