@@ -7,6 +7,7 @@
 #include <QtWidgets>
 #include "explanation-log-window.hpp"
 #include "aera-visualizer-scene.hpp"
+#include "model-item.hpp"
 #include "composite-state-item.hpp"
 #include "instantiated-composite-state-item.hpp"
 
@@ -113,6 +114,7 @@ void InstantiatedCompositeStateItem::setBoundCstHtml()
 
   boundCstHtml_ = htmlify(cstSource);
   addSourceCodeHtmlLinks(cst, boundCstHtml_);
+  ModelItem::highlightVariables(boundCstHtml_);
 }
 
 QString InstantiatedCompositeStateItem::makeHtml()

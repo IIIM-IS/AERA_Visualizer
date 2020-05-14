@@ -40,6 +40,8 @@ public:
    */
   static std::string simplifyModelSource(const std::string& modelSource);
 
+  static void highlightVariables(QString& html);
+
   int evidenceCountFlashCountdown_;
   bool evidenceCountIncreased_;
   int successRateFlashCountdown_;

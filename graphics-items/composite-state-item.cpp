@@ -5,6 +5,7 @@
 #include <QMenu>
 #include <QPainter>
 #include <QtWidgets>
+#include "model-item.hpp"
 #include "composite-state-item.hpp"
 
 using namespace std;
@@ -23,6 +24,7 @@ CompositeStateItem::CompositeStateItem(
   sourceCodeHtml_ = htmlify(simplifyCstSource(
     replicodeObjects_.getSourceCode(newCompositeStateEvent->object_)));
   addSourceCodeHtmlLinks(newCompositeStateEvent_->object_, sourceCodeHtml_);
+  ModelItem::highlightVariables(sourceCodeHtml_);
 
   setTextItemAndPolygon(makeHtml());
 }

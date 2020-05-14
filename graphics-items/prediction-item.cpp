@@ -66,7 +66,7 @@ void PredictionItem::setFactPredFactMkValHtml()
   factPredFactMkValHtml_.replace("!mkVal-start", "");
   factPredFactMkValHtml_.replace("!mkVal-end", "");
   // Highlight this the same as the RHS in the instantiated model.
-  highlightedFactPredFactMkValHtml_.replace("!mkVal-start", "<font color=\"green\">");
+  highlightedFactPredFactMkValHtml_.replace("!mkVal-start", "<font color=\"darkorange\">");
   highlightedFactPredFactMkValHtml_.replace("!mkVal-end", "</font>");
 }
 
@@ -155,7 +155,10 @@ void PredictionItem::setBoundAndUnboundModelHtml()
   addSourceCodeHtmlLinks(mdl, boundModelHtml_);
   // Debug: Correctly find the RHS.
   QString rhs = "(mk.val&nbsp;v3:b&nbsp;position_y&nbsp;v7:20)";
-  boundModelHtml_.replace(rhs, "<font color=\"green\">" + rhs + "</font>");
+  boundModelHtml_.replace(rhs, "<font color=\"darkorange\">" + rhs + "</font>");
+
+  ModelItem::highlightVariables(boundModelHtml_);
+  ModelItem::highlightVariables(unboundModelHtml_);
 }
 
 QString PredictionItem::makeHtml()

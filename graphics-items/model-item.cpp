@@ -26,6 +26,7 @@ ModelItem::ModelItem(
   sourceCodeHtml_ = htmlify(simplifyModelSource(
     replicodeObjects_.getSourceCode(newModelEvent_->object_)));
   addSourceCodeHtmlLinks(newModelEvent_->object_, sourceCodeHtml_);
+  highlightVariables(sourceCodeHtml_);
 
   setTextItemAndPolygon(makeHtml());
 }
@@ -65,6 +66,21 @@ string ModelItem::simplifyModelSource(const string& modelSource)
   replace(result.begin(), result.end(), '\x01', '\n');
   return result;
 }
+
+void ModelItem::highlightVariables(QString& html)
+{
+  // Debug: Use regluare expressions in case a label or string has "v1".
+  // First, do variables followed by a colon.
+  for (int i = 0; i <= 9; ++i) {
+    QString variable = "v" + QString::number(i) + ":";
+    html.replace(variable, "<font color=\"green\">" + variable + "</font>");
+  }
+  for (int i = 0; i <= 9; ++i) {
+    QString variable = "v" + QString::number(i);
+    html.replace(variable, "<font color=\"green\">" + variable + "</font>");
+  }
+}
+
 
 QString ModelItem::makeHtml()
 {
