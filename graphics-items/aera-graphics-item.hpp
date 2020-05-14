@@ -37,7 +37,7 @@ public:
   AeraEvent* getAeraEvent() { return aeraEvent_; }
 
   /**
-   * Replace all "\n" with "<br>" and " " with "&nbsp;".
+   * Replace all "\n" or "\x01" with "<br>" and " " or "\x02" with "&nbsp;".
    * \param input The input string to htmlify.
    * \return The HTML string.
    */
@@ -45,7 +45,9 @@ public:
   {
     QString result = input;
     result.replace("\n", "<br>");
+    result.replace("\x01", "<br>");
     result.replace(" ", "&nbsp;");
+    result.replace("\x02", "&nbsp;");
     return result;
   }
 
