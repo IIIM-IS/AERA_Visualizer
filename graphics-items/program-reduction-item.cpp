@@ -20,20 +20,25 @@ ProgramReductionItem::ProgramReductionItem(
   programReductionEvent_(programReductionEvent)
 {
   // Set up sourceCodeHtml_
-  string sourceCode = replicodeObjects_.getSourceCode(programReductionEvent->object_);
+  sourceCodeHtml_ = htmlify(simplifyMkRdxSource(
+    replicodeObjects_.getSourceCode(programReductionEvent->object_)));
+  addSourceCodeHtmlLinks(programReductionEvent_->object_, sourceCodeHtml_);
+
+  setTextItemAndPolygon(makeHtml());
+}
+
+string ProgramReductionItem::simplifyMkRdxSource(const string& mkRdxSource)
+{
+  string result = mkRdxSource;
   // Temporarily replace \n with \x01 so that we match the entire string, not by line.
-  replace(sourceCode.begin(), sourceCode.end(), '\n', '\x01');
+  replace(result.begin(), result.end(), '\n', '\x01');
   // Strip the propagation of saliency threshold.
   // "[\\s\\x01]+" is whitespace "[\\d\\.]+" is a float value.
   // TODO: The original source may have comments, so need to strip these.
-  sourceCode = regex_replace(sourceCode, regex("[\\s\\x01]+[\\d\\.]+[\\s\\x01]*\\)$"), ")");
+  result = regex_replace(result, regex("[\\s\\x01]+[\\d\\.]+[\\s\\x01]*\\)$"), ")");
   // Restore \n.
-  replace(sourceCode.begin(), sourceCode.end(), '\x01', '\n');
-  QString html = htmlify(sourceCode);
-  addSourceCodeHtmlLinks(programReductionEvent_->object_, html);
-  sourceCodeHtml_ = html;
-
-  setTextItemAndPolygon(makeHtml());
+  replace(result.begin(), result.end(), '\x01', '\n');
+  return result;
 }
 
 QString ProgramReductionItem::makeHtml()

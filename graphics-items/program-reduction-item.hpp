@@ -17,6 +17,14 @@ public:
     QMenu* contextMenu, ProgramReductionEvent* programReductionEvent,
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 
+  /**
+   * Start with the source from replicodeObjects_.getSourceCode for a mk.rdx, and
+   * strip the propagation of saliency threshold.
+   * \param mkRdxSource The source from replicodeObjects_.getSourceCode.
+   * \return The simplified source code
+   */
+  static std::string simplifyMkRdxSource(const std::string& mkRdxSource);
+
 private:
   QString makeHtml();
 
