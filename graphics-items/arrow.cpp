@@ -30,6 +30,7 @@ QPainterPath Arrow::shape() const
 {
   QPainterPath path = QGraphicsLineItem::shape();
   path.addPolygon(arrowHead_);
+  path.addPolygon(arrowBase_);
   return path;
 }
 
@@ -47,7 +48,6 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
 
   QPen myPen = pen();
   myPen.setColor(color_);
-  qreal arrowSize = 10;
   painter->setPen(myPen);
   painter->setBrush(color_);
 
@@ -59,9 +59,15 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
 
   double angle = std::atan2(-line().dy(), line().dx());
   setArrowPointer(arrowHead_, line().p1(), angle);
+  // The tip of the pointer is at the base of the line, moved a little toward the head.
+  setArrowPointer(arrowBase_, 
+    QPointF(line().p2() + QPointF(sin(angle + -M_PI / 2) * arrowSize_ * 1.5, 
+                                  cos(angle + -M_PI / 2) * arrowSize_ * 1.5)),
+    angle);
 
   painter->drawLine(line());
   painter->drawPolygon(arrowHead_);
+  painter->drawPolygon(arrowBase_);
   if (isSelected()) {
     painter->setPen(QPen(color_, 1, Qt::DashLine));
     QLineF myLine = line();
@@ -97,12 +103,10 @@ QPointF Arrow::intersectItem(const QLineF& line, const QGraphicsPolygonItem& ite
 
 void Arrow::setArrowPointer(QPolygonF& polygon, const QPointF& point, double angle)
 {
-  const qreal arrowSize = 10;
-
-  QPointF arrowP1 = point + QPointF(sin(angle + M_PI / 3) * arrowSize,
-    cos(angle + M_PI / 3) * arrowSize);
-  QPointF arrowP2 = point + QPointF(sin(angle + M_PI - M_PI / 3) * arrowSize,
-    cos(angle + M_PI - M_PI / 3) * arrowSize);
+  QPointF arrowP1 = point + QPointF(sin(angle + M_PI / 3) * arrowSize_,
+    cos(angle + M_PI / 3) * arrowSize_);
+  QPointF arrowP2 = point + QPointF(sin(angle + M_PI - M_PI / 3) * arrowSize_,
+    cos(angle + M_PI - M_PI / 3) * arrowSize_);
 
   polygon.clear();
   polygon << point << arrowP1 << arrowP2;
