@@ -170,13 +170,13 @@ QString PredictionItem::makeHtml()
   if (showState_ == SHOW_INSTANTIATED_MODEL ||
       showState_ == SHOW_ORIGINAL_MODEL) {
     if (showState_ == SHOW_INSTANTIATED_MODEL)
-      html += "<br><a href=\"#hide-model\">" + UnselectedRadioButtonHtml + " Hide Model</a>" +
+      html += "<br><a href=\"#hide-imodel\">" + UnselectedRadioButtonHtml + " Hide iModel</a>" +
         " " + SelectedRadioButtonHtml + " What Made This?" +
-        " <a href=\"#show-original-model\">" + UnselectedRadioButtonHtml + " Original Model</a>";
+        " <a href=\"#show-model\">" + UnselectedRadioButtonHtml + " Show Model</a>";
     else
-      html += "<br><a href=\"#hide-model\">" + UnselectedRadioButtonHtml + " Hide Model</a> " +
+      html += "<br><a href=\"#hide-imodel\">" + UnselectedRadioButtonHtml + " Hide iModel</a> " +
         " <a href=\"#show-instantiated-model\">" + UnselectedRadioButtonHtml + " What Made This?</a>" +
-        " " + SelectedRadioButtonHtml + " Original Model";
+        " " + SelectedRadioButtonHtml + " Show Model";
 
     html += QString("<br>This prediction was made from instantiated model <b>") +
       replicodeObjects_.getLabel(newPredictionEvent_->factImdl_).c_str() + "</b><br>";
@@ -184,9 +184,9 @@ QString PredictionItem::makeHtml()
     html += "<br><br>" + (showState_ == SHOW_INSTANTIATED_MODEL ? boundModelHtml_ : unboundModelHtml_);
   }
   else {
-    html += "<br>" + SelectedRadioButtonHtml + " Hide Model" +
+    html += "<br>" + SelectedRadioButtonHtml + " Hide iModel" +
       " <a href=\"#show-instantiated-model\">" + UnselectedRadioButtonHtml + " What Made This?</a>" +
-      " <a href=\"#show-original-model\">" + UnselectedRadioButtonHtml + " Original Model</a>";
+      " <a href=\"#show-model\">" + UnselectedRadioButtonHtml + " Show Model</a>";
   }
 
   return html;
@@ -194,7 +194,7 @@ QString PredictionItem::makeHtml()
 
 void PredictionItem::textItemLinkActivated(const QString& link)
 {
-  if (link == "#hide-model") {
+  if (link == "#hide-imodel") {
     showState_ = HIDE_MODEL;
     setTextItemAndPolygon(makeHtml());
   }
@@ -202,7 +202,7 @@ void PredictionItem::textItemLinkActivated(const QString& link)
     showState_ = SHOW_INSTANTIATED_MODEL;
     setTextItemAndPolygon(makeHtml());
   }
-  else if (link == "#show-original-model") {
+  else if (link == "#show-model") {
     showState_ = SHOW_ORIGINAL_MODEL;
     setTextItemAndPolygon(makeHtml());
   }
