@@ -43,6 +43,8 @@ void AeraGraphicsItem::setTextItemAndPolygon(QString html)
     delete textItem_;
   textItem_ = new QGraphicsTextItem(this);
   textItem_->setHtml(html);
+  // adjustSize() is needed for right-aligned text.
+  textItem_->adjustSize();
   qreal left = -textItem_->boundingRect().width() / 2 - 5;
   qreal top = -textItem_->boundingRect().height() / 2 - 5;
   textItem_->setPos(left + 5, top + 5);
