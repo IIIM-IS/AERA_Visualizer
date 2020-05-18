@@ -87,9 +87,9 @@ QString ModelItem::makeHtml()
   auto model = newModelEvent_->object_;
 
   QString html = headerHtml_;
-  html += "<font color=\"" + evidenceCountColor_ + "\">Evidence Count: " +
+  html += "<font style=\"color:" + evidenceCountColor_ + "\">Evidence Count: " +
     QString::number(evidenceCount_) + "</font><br>";
-  html += "<font color=\"" + successRateColor_ + "\">&nbsp;&nbsp;&nbsp;&nbsp;Success Rate: " +
+  html += "<font style=\"color:" + successRateColor_ + "\">&nbsp;&nbsp;&nbsp;&nbsp;Success Rate: " +
     QString::number(successRate_) + "</font><br>";
   html += sourceCodeHtml_;
   return html;
