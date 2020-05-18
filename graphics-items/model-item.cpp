@@ -15,7 +15,7 @@ namespace aera_visualizer {
 
 ModelItem::ModelItem(
   QMenu* contextMenu, NewModelEvent* newModelEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
-  : AeraGraphicsItem(contextMenu, newModelEvent, replicodeObjects, parent),
+  : AeraGraphicsItem(contextMenu, newModelEvent, replicodeObjects, parent, "Model"),
   newModelEvent_(newModelEvent),
   evidenceCount_(newModelEvent_->object_->code(MDL_CNT).asFloat()),
   successRate_(newModelEvent_->object_->code(MDL_SR).asFloat()),
@@ -86,8 +86,7 @@ QString ModelItem::makeHtml()
 {
   auto model = newModelEvent_->object_;
 
-  QString html = QString("<h3><font color=\"darkred\">Model</font> <a href=\"#this\">") + 
-    replicodeObjects_.getLabel(model).c_str() + "</a></h3>";
+  QString html = headerHtml_;
   html += "<font color=\"" + evidenceCountColor_ + "\">Evidence Count: " +
     QString::number(evidenceCount_) + "</font><br>";
   html += "<font color=\"" + successRateColor_ + "\">&nbsp;&nbsp;&nbsp;&nbsp;Success Rate: " +

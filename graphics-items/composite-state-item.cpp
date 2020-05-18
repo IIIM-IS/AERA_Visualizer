@@ -17,7 +17,7 @@ namespace aera_visualizer {
 CompositeStateItem::CompositeStateItem(
   QMenu* contextMenu, NewCompositeStateEvent* newCompositeStateEvent, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-  : AeraGraphicsItem(contextMenu, newCompositeStateEvent, replicodeObjects, parent),
+  : AeraGraphicsItem(contextMenu, newCompositeStateEvent, replicodeObjects, parent, "Composite State"),
   newCompositeStateEvent_(newCompositeStateEvent)
 {
   // Set up sourceCodeHtml_
@@ -49,10 +49,7 @@ string CompositeStateItem::simplifyCstSource(const string& cstSource)
 
 QString CompositeStateItem::makeHtml()
 {
-  QString html = QString("<h3><font color=\"darkred\">Composite State</font> <a href=\"#this\">") +
-    replicodeObjects_.getLabel(newCompositeStateEvent_->object_).c_str() + "</a></h3>";
-  html += sourceCodeHtml_;
-  return html;
+  return headerHtml_ + sourceCodeHtml_;
 }
 
 }

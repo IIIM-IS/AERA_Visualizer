@@ -19,7 +19,7 @@ namespace aera_visualizer {
 ProgramOutputFactItem::ProgramOutputFactItem(
   QMenu* contextMenu, ProgramReductionNewObjectEvent* programReductionNewObjectEvent,
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
-  : AeraGraphicsItem(contextMenu, programReductionNewObjectEvent, replicodeObjects, parent),
+  : AeraGraphicsItem(contextMenu, programReductionNewObjectEvent, replicodeObjects, parent, "Program Output"),
   programReductionNewObjectEvent_(programReductionNewObjectEvent)
 {
   setFactMkValHtml();
@@ -50,10 +50,7 @@ void ProgramOutputFactItem::setFactMkValHtml()
 
 QString ProgramOutputFactItem::makeHtml()
 {
-  QString html = QString("<h3><font color=\"darkred\">Program Output</font> <a href=\"#this""\">") +
-    replicodeObjects_.getLabel(programReductionNewObjectEvent_->object_).c_str() + "</a></h3>";
-  html += factMkValHtml_;
-  return html;
+  return headerHtml_ + factMkValHtml_;
 }
 
 void ProgramOutputFactItem::textItemLinkActivated(const QString& link)

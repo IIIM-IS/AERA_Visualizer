@@ -16,7 +16,7 @@ namespace aera_visualizer {
 ProgramReductionItem::ProgramReductionItem(
   QMenu* contextMenu, ProgramReductionEvent* programReductionEvent, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-  : AeraGraphicsItem(contextMenu, programReductionEvent, replicodeObjects, parent),
+  : AeraGraphicsItem(contextMenu, programReductionEvent, replicodeObjects, parent, "Program Reduction"),
   programReductionEvent_(programReductionEvent)
 {
   // Set up sourceCodeHtml_
@@ -43,10 +43,7 @@ string ProgramReductionItem::simplifyMkRdxSource(const string& mkRdxSource)
 
 QString ProgramReductionItem::makeHtml()
 {
-  QString html = QString("<h3><font color=\"darkred\">Program Reduction</font> <a href=\"#this\">") +
-    replicodeObjects_.getLabel(programReductionEvent_->object_).c_str() + "</a></h3>";
-  html += sourceCodeHtml_;
-  return html;
+  return headerHtml_ + sourceCodeHtml_;
 }
 
 }

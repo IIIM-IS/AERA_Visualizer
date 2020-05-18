@@ -19,7 +19,7 @@ namespace aera_visualizer {
 PredictionItem::PredictionItem(
   QMenu* contextMenu, NewMkValPredictionEvent* newPredictionEvent, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-  : AeraGraphicsItem(contextMenu, newPredictionEvent, replicodeObjects, parent),
+  : AeraGraphicsItem(contextMenu, newPredictionEvent, replicodeObjects, parent, "Prediction"),
   newPredictionEvent_(newPredictionEvent), showState_(HIDE_MODEL)
 {
   setFactPredFactMkValHtml();
@@ -163,8 +163,7 @@ void PredictionItem::setBoundAndUnboundModelHtml()
 
 QString PredictionItem::makeHtml()
 {
-  QString html = QString("<h3><font color=\"darkred\">Prediction</font> <a href=\"#this\">") +
-    replicodeObjects_.getLabel(newPredictionEvent_->object_).c_str() + "</a></h3>";
+  QString html = headerHtml_;
   html += (showState_ == SHOW_INSTANTIATED_MODEL ? highlightedFactPredFactMkValHtml_ : factPredFactMkValHtml_);
 
   if (showState_ == SHOW_INSTANTIATED_MODEL ||

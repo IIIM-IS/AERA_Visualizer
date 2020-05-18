@@ -21,7 +21,8 @@ namespace aera_visualizer {
 InstantiatedCompositeStateItem::InstantiatedCompositeStateItem(
   QMenu* contextMenu, NewInstantiatedCompositeStateEvent* newInstantiatedCompositeStateEvent,
   ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
-  : AeraGraphicsItem(contextMenu, newInstantiatedCompositeStateEvent, replicodeObjects, parent),
+  : AeraGraphicsItem(contextMenu, newInstantiatedCompositeStateEvent, replicodeObjects, parent,
+      "Instantiated Composite State"),
   newInstantiatedCompositeStateEvent_(newInstantiatedCompositeStateEvent)
 {
   setFactIcstHtml();
@@ -119,11 +120,7 @@ void InstantiatedCompositeStateItem::setBoundCstHtml()
 
 QString InstantiatedCompositeStateItem::makeHtml()
 {
-  QString html = QString("<h3><font color=\"darkred\">Instantiated Composite State</font> <a href=\"#this""\">") +
-    replicodeObjects_.getLabel(newInstantiatedCompositeStateEvent_->object_).c_str() + "</a></h3>";
-  html += factIcstHtml_;
-  html += "<br><br>" + boundCstHtml_;
-  return html;
+  return headerHtml_ + factIcstHtml_ + "<br><br>" + boundCstHtml_;
 }
 
 }
