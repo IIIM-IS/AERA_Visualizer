@@ -52,32 +52,14 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
   painter->setBrush(color_);
 
   QLineF centerLine(startItem_->pos(), endItem_->pos());
-  QPolygonF endPolygon = endItem_->polygon();
-  QPointF p1 = endPolygon.first() + endItem_->pos();
-  QPointF p2;
-  QPointF intersectPoint;
-  QLineF polyLine;
-  for (int i = 1; i < endPolygon.count(); ++i) {
-    p2 = endPolygon.at(i) + endItem_->pos();
-    polyLine = QLineF(p1, p2);
-    QLineF::IntersectType intersectType =
-      polyLine.intersect(centerLine, &intersectPoint);
-    if (intersectType == QLineF::BoundedIntersection)
-      break;
-    p1 = p2;
-  }
+  QPointF startIntersectPoint = intersectItem(centerLine, *startItem_);
+  QPointF endIntersectPoint = intersectItem(centerLine, *endItem_);
 
-  setLine(QLineF(intersectPoint, startItem_->pos()));
+  setLine(QLineF(endIntersectPoint, startIntersectPoint));
 
   double angle = std::atan2(-line().dy(), line().dx());
+  setArrowPointer(arrowHead_, line().p1(), angle);
 
-  QPointF arrowP1 = line().p1() + QPointF(sin(angle + M_PI / 3) * arrowSize,
-    cos(angle + M_PI / 3) * arrowSize);
-  QPointF arrowP2 = line().p1() + QPointF(sin(angle + M_PI - M_PI / 3) * arrowSize,
-    cos(angle + M_PI - M_PI / 3) * arrowSize);
-
-  arrowHead_.clear();
-  arrowHead_ << line().p1() << arrowP1 << arrowP2;
   painter->drawLine(line());
   painter->drawPolygon(arrowHead_);
   if (isSelected()) {
@@ -88,6 +70,42 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
     myLine.translate(0, -8.0);
     painter->drawLine(myLine);
   }
+}
+
+QPointF Arrow::intersectItem(const QLineF& line, const QGraphicsPolygonItem& item)
+{
+  QPolygonF polygon(item.polygon());
+  QPointF itemPos(item.pos());
+
+  QPointF p1 = polygon.first() + itemPos;
+  QPointF p2;
+  QPointF intersectPoint;
+  QLineF polyLine;
+  for (int i = 1; i < polygon.count(); ++i) {
+    p2 = polygon.at(i) + itemPos;
+    polyLine = QLineF(p1, p2);
+    QLineF::IntersectType intersectType =
+      polyLine.intersect(line, &intersectPoint);
+    if (intersectType == QLineF::BoundedIntersection)
+      return intersectPoint;
+    p1 = p2;
+  }
+
+  // This shouldn't happen.
+  return QPointF();
+}
+
+void Arrow::setArrowPointer(QPolygonF& polygon, const QPointF& point, double angle)
+{
+  const qreal arrowSize = 10;
+
+  QPointF arrowP1 = point + QPointF(sin(angle + M_PI / 3) * arrowSize,
+    cos(angle + M_PI / 3) * arrowSize);
+  QPointF arrowP2 = point + QPointF(sin(angle + M_PI - M_PI / 3) * arrowSize,
+    cos(angle + M_PI - M_PI / 3) * arrowSize);
+
+  polygon.clear();
+  polygon << point << arrowP1 << arrowP2;
 }
 
 }

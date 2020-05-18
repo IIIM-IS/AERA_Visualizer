@@ -34,6 +34,22 @@ protected:
   void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = 0) override;
 
 private:
+  /**
+   * Return the point where the line intersects the polygon of the item.
+   * \param line The line.
+   * \param item The item to intersect.
+   * \return The intersection point, or QPointF() if the line doesn't intersect the iterm.
+   */
+  static QPointF intersectItem(const QLineF& line, const QGraphicsPolygonItem& item);
+
+  /**
+   * Clear polygon and set it to a polygon with the three points of an arrow pointer. 
+   * \param polygon The QPolygonF to set. This first clears the polygon.
+   * \param point The tip of the arrow pointer.
+   * \param angle The angle of the arrow pointer.
+   */
+  static void setArrowPointer(QPolygonF& polygon, const QPointF& point, double angle);
+
   QGraphicsPolygonItem* startItem_;
   QGraphicsPolygonItem* endItem_;
   QColor color_;
