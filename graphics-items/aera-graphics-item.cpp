@@ -22,8 +22,9 @@ const QString AeraGraphicsItem::SelectedRadioButtonHtml = "<font size=\"+2\">&#x
 const QString AeraGraphicsItem::UnselectedRadioButtonHtml = "<font size=\"+3\">&#x25CB;</font>";
 
 AeraGraphicsItem::AeraGraphicsItem(
-  QMenu* contextMenu, AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
-  : parent_(parent),
+  QMenu* contextMenu, AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent,
+  const QString& headerPrefix)
+: parent_(parent),
   aeraEvent_(aeraEvent), replicodeObjects_(replicodeObjects),
   borderFlashCountdown_(AeraVisualizerScene::FLASH_COUNT),
   // The base class should call setTextItemAndPolygon()
@@ -34,6 +35,11 @@ AeraGraphicsItem::AeraGraphicsItem(
   setFlag(QGraphicsItem::ItemIsMovable, true);
   setFlag(QGraphicsItem::ItemIsSelectable, true);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+
+  headerHtml_ = QString("<p style=\"text-align:right; margin-bottom:0px; color:gray\">") +
+    replicodeObjects_.relativeTime(aeraEvent_->time_).c_str() + "</p>" +
+    "<h3 style=\"margin-top:0px\"><font color=\"darkred\">" + headerPrefix + "</font> <a href=\"#this""\">" +
+    replicodeObjects_.getLabel(aeraEvent_->object_).c_str() + "</a></h3>";
 }
 
 void AeraGraphicsItem::setTextItemAndPolygon(QString html)
