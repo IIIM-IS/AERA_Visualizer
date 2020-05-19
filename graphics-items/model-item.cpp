@@ -73,11 +73,11 @@ void ModelItem::highlightVariables(QString& html)
   // First, do variables followed by a colon.
   for (int i = 0; i <= 9; ++i) {
     QString variable = "v" + QString::number(i) + ":";
-    html.replace(variable, "<font color=\"green\">" + variable + "</font>");
+    html.replace(variable, "<font color=\"#c000c0\">" + variable + "</font>");
   }
   for (int i = 0; i <= 9; ++i) {
     QString variable = "v" + QString::number(i);
-    html.replace(variable, "<font color=\"green\">" + variable + "</font>");
+    html.replace(variable, "<font color=\"#c000c0\">" + variable + "</font>");
   }
 }
 
