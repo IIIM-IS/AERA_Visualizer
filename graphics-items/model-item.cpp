@@ -68,7 +68,7 @@ void ModelItem::highlightLhsAndRhs(QString& html)
   auto match = QRegularExpression("^(.+\\n.+\\n   )(.+)(\\n   )(.+)").match(html);
   if (match.hasMatch()) {
     // match.captured(1) is the first and second line and indentation of the third line.
-    // match.captured(2) is the indentation of the fourth line.
+    // match.captured(3) is the indentation of the fourth line.
     QString lhs = "<font style=\"background-color:#ffe8e8\">" + match.captured(2) + "</font>";
     QString rhs = "<font style=\"background-color:#e0ffe0\">" + match.captured(4) + "</font>";
 
@@ -89,7 +89,6 @@ void ModelItem::highlightVariables(QString& html)
     html.replace(variable, "<font color=\"#c000c0\">" + variable + "</font>");
   }
 }
-
 
 QString ModelItem::makeHtml()
 {
