@@ -38,7 +38,7 @@ public:
    * \param modelSource The source from replicodeObjects_.getSourceCode.
    * \return The simplified source code
    */
-  static std::string simplifyModelSource(const std::string& modelSource);
+  static QString simplifyModelSource(const std::string& modelSource);
 
   static void highlightVariables(QString& html);
 

@@ -1,10 +1,10 @@
-#include <regex>
 #include <algorithm>
 #include <QGraphicsScene>
 #include <QGraphicsSceneContextMenuEvent>
 #include <QMenu>
 #include <QPainter>
 #include <QtWidgets>
+#include <QRegularExpression>
 #include "model-item.hpp"
 
 using namespace std;
@@ -31,39 +31,33 @@ ModelItem::ModelItem(
   setTextItemAndPolygon(makeHtml());
 }
 
-string ModelItem::simplifyModelSource(const string& modelSource)
+QString ModelItem::simplifyModelSource(const string& modelSource)
 {
-  string result = modelSource;
-  // Temporarily replace \n with \x01 so that we match the entire string, not by line.
-  replace(result.begin(), result.end(), '\n', '\x01');
+  QString result = modelSource.c_str();
   // Strip the set of output groups and parameters.
   // "[\\s\\x01]+" is whitespace "[\\d\\.]+" is a float value.
   // TODO: The original source may have comments, so need to strip these.
-  result = regex_replace(result,
-    regex("[\\s\\x01]+\\[[\\w\\s]+\\]([\\s\\x01]+[\\d\\.]+){5}[\\s\\x01]*\\)$"), ")");
+  result.replace(
+    QRegularExpression("[\\s\\n]+\\[[\\w\\s]+\\]([\\s\\n]+[\\d\\.]+){5}[\\s\\n]*\\)$"), ")");
 
   // TODO: Correctly remove wildcards.
-  result = regex_replace(result, regex(" : :\\)"), ")");
-  result = regex_replace(result, regex(" :\\)"), ")");
+  result.replace(QRegularExpression(" : :\\)"), ")");
+  result.replace(QRegularExpression(" :\\)"), ")");
 
   // Get the list of template variables and replace with wildcard as needed.
   // TODO: Correctly get the set of template variables that are assigned.
-  set<string> assignedTemplateVariables;
+  set<QString> assignedTemplateVariables;
   assignedTemplateVariables.insert("v2:");
-  smatch matches;
-  if (regex_search(result, matches, regex("^(\\(mdl )(\\[[ :\\w]+\\])"))) {
-    // matches[1] is "(mdl ". matches[2] is, e.g., "[vo: v1:]".
-    string args = matches[2].str();
+  auto match = QRegularExpression("^(\\(mdl )(\\[[ :\\w]+\\])").match(result);
+  if (match.hasMatch()) {
+    // match.captured(1) is "(mdl ". match.captured(2) is, e.g., "[vo: v1:]".
+    QString args = match.captured(2);
     for (auto i = assignedTemplateVariables.begin(); i != assignedTemplateVariables.end(); ++i)
-      // A varibale like "v0:" can be used as-is in a regex.
-      args = regex_replace(args, regex(*i), ":");
+      args.replace(*i, ":");
 
-    result = matches[1].str() + args + result.substr(matches[0].str().size());
+    result = match.captured(1) + args + result.mid(match.captured(0).size());
   }
 
-
-  // Restore \n.
-  replace(result.begin(), result.end(), '\x01', '\n');
   return result;
 }
 
