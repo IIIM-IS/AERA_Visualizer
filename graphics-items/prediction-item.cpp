@@ -107,8 +107,9 @@ void PredictionItem::setBoundAndUnboundModelHtml()
   int iAfterVariable = 5;
   int iBeforeVariable = 6;
 
-  string unboundModelSource = ModelItem::simplifyModelSource(replicodeObjects_.getSourceCode(mdl)).toStdString();
-  string modelSource = unboundModelSource;
+  QString unboundModelSource = ModelItem::simplifyModelSource(replicodeObjects_.getSourceCode(mdl));
+  ModelItem::highlightLhsAndRhs(unboundModelSource);
+  string modelSource = unboundModelSource.toStdString();
   // Temporarily replace \n with \x01 so that we match the entire string, not by line.
   replace(modelSource.begin(), modelSource.end(), '\n', '\x01');
 

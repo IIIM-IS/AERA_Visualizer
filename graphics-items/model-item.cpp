@@ -23,10 +23,11 @@ ModelItem::ModelItem(
   evidenceCountFlashCountdown_(0), successRateFlashCountdown_(0)
 {
   // Set up sourceCodeHtml_
-  sourceCodeHtml_ = htmlify(simplifyModelSource(
-    replicodeObjects_.getSourceCode(newModelEvent_->object_)));
+  sourceCodeHtml_ = simplifyModelSource(replicodeObjects_.getSourceCode(newModelEvent_->object_));
   addSourceCodeHtmlLinks(newModelEvent_->object_, sourceCodeHtml_);
+  highlightLhsAndRhs(sourceCodeHtml_);
   highlightVariables(sourceCodeHtml_);
+  sourceCodeHtml_ = htmlify(sourceCodeHtml_);
 
   setTextItemAndPolygon(makeHtml());
 }
@@ -50,7 +51,7 @@ QString ModelItem::simplifyModelSource(const string& modelSource)
   assignedTemplateVariables.insert("v2:");
   auto match = QRegularExpression("^(\\(mdl )(\\[[ :\\w]+\\])").match(result);
   if (match.hasMatch()) {
-    // match.captured(1) is "(mdl ". match.captured(2) is, e.g., "[vo: v1:]".
+    // match.captured(1) is "(mdl ". match.captured(2) is, e.g., "[v0: v1:]".
     QString args = match.captured(2);
     for (auto i = assignedTemplateVariables.begin(); i != assignedTemplateVariables.end(); ++i)
       args.replace(*i, ":");
@@ -61,9 +62,23 @@ QString ModelItem::simplifyModelSource(const string& modelSource)
   return result;
 }
 
+void ModelItem::highlightLhsAndRhs(QString& html)
+{
+  // Assume the LHS and RHS are the third and fourth lines, indented by three spaces.
+  auto match = QRegularExpression("^(.+\\n.+\\n   )(.+)(\\n   )(.+)").match(html);
+  if (match.hasMatch()) {
+    // match.captured(1) is the first and second line and indentation of the third line.
+    // match.captured(2) is the indentation of the fourth line.
+    QString lhs = "<font style=\"background-color:#ffe8e8\">" + match.captured(2) + "</font>";
+    QString rhs = "<font style=\"background-color:#e0ffe0\">" + match.captured(4) + "</font>";
+
+    html = match.captured(1) + lhs + match.captured(3) + rhs + html.mid(match.captured(0).size());
+  }
+}
+
 void ModelItem::highlightVariables(QString& html)
 {
-  // Debug: Use regluare expressions in case a label or string has "v1".
+  // Debug: Use regluar expressions in case a label or string has "v1".
   // First, do variables followed by a colon.
   for (int i = 0; i <= 9; ++i) {
     QString variable = "v" + QString::number(i) + ":";

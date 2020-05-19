@@ -32,14 +32,25 @@ public:
   };
 
   /**
-   * Start with the source from replicodeObjects_.getSourceCode for a mdl, and
+   * Start with the source from replicodeObjects_.getSourceCode for a model, and
    * remove the set of output groups and parameters, and remove trailing wildcards, and
-   * replace a template variables with a wildcard if it is also assigned.
+   * replace a template variable with a wildcard if it is also assigned.
    * \param modelSource The source from replicodeObjects_.getSourceCode.
    * \return The simplified source code
    */
   static QString simplifyModelSource(const std::string& modelSource);
 
+  /**
+   * Assume the html is a model with \n line endings, and highlight the left-hand-side
+   * and right-hand-side expressions with red and green background.s
+   * \param html The model HTML string to modify.
+   */
+  static void highlightLhsAndRhs(QString& html);
+
+  /**
+   * Modify the HTML string to change the font color of variables.
+   * \param html The HTML string to modify.
+   */
   static void highlightVariables(QString& html);
 
   int evidenceCountFlashCountdown_;
