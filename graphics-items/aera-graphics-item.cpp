@@ -5,6 +5,7 @@
 #include <QMenu>
 #include <QPainter>
 #include <QtWidgets>
+#include <QRegularExpression>
 #include "submodules/replicode/r_exec/opcodes.h"
 #include "arrow.hpp"
 #include "aera-visualizer-scene.hpp"
@@ -114,6 +115,34 @@ QVariant AeraGraphicsItem::itemChange(GraphicsItemChange change, const QVariant&
   }
 
   return value;
+}
+
+QString AeraGraphicsItem::htmlify(const QString& input)
+{
+  QString result = input;
+
+  int maxExtraSpaces = 0;
+  QRegularExpression extraSpaceRegex(" ( +)");
+  for (auto i = extraSpaceRegex.globalMatch(result); i.hasNext(); ) {
+    auto match = i.next();
+    maxExtraSpaces = max(maxExtraSpaces, match.captured(1).size());
+  }
+
+  // Start with the most extra spaces and work backwards.
+  for (int extraSpaces = maxExtraSpaces; extraSpaces >= 1; --extraSpaces) {
+    QString find = " ";
+    QString replace = " ";
+    for (int i = 0; i <= extraSpaces; ++i) {
+      find += " ";
+      replace += "&nbsp;";
+    }
+    
+    result.replace(find, replace);
+  }
+
+  result.replace("\n", "<br>");
+  result.replace("\x01", "<br>");
+  return result;
 }
 
 void AeraGraphicsItem::addSourceCodeHtmlLinks(

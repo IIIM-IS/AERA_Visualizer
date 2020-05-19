@@ -49,19 +49,11 @@ public:
   AeraEvent* getAeraEvent() { return aeraEvent_; }
 
   /**
-   * Replace all "\n" or "\x01" with "<br>" and " " or "\x02" with "&nbsp;".
+   * Replace all "\n" or "\x01" with "<br>" and extra " " with "&nbsp;".
    * \param input The input string to htmlify.
    * \return The HTML string.
    */
-  static QString htmlify(const QString& input)
-  {
-    QString result = input;
-    result.replace("\n", "<br>");
-    result.replace("\x01", "<br>");
-    result.replace(" ", "&nbsp;");
-    result.replace("\x02", "&nbsp;");
-    return result;
-  }
+  static QString htmlify(const QString& input);
 
   static QString htmlify(const std::string& input) { return htmlify(QString(input.c_str())); }
 
