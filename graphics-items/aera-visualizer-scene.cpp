@@ -17,6 +17,7 @@ AeraVisualizerScene::AeraVisualizerScene(
   : QGraphicsScene(parent),
   parent_(parent),
   replicodeObjects_(replicodeObjects),
+  didInitialFit_(false),
   borderFlashPen_(Qt::blue, 3),
   noFlashColor_("black"),
   valueUpFlashColor_("green"),
@@ -31,6 +32,11 @@ AeraVisualizerScene::AeraVisualizerScene(
 
 void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 {
+  if (!didInitialFit_) {
+    didInitialFit_ = true;
+    views().at(0)->fitInView(QRectF(0, 0, 1180, 690));
+  }
+
   item->setBrush(itemColor_);
 
   auto newObjectEvent = item->getAeraEvent();
@@ -38,19 +44,19 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     // Assign an initial position.
     // TODO: Do this with a grid layout.
     if (newObjectEvent->object_->get_oid() == 60)
-      newObjectEvent->itemPosition_ = QPointF(2520, 2170 + item->boundingRect().height() / 2);
+      newObjectEvent->itemPosition_ = QPointF(620, 20 + item->boundingRect().height() / 2);
     else if (newObjectEvent->object_->get_debug_oid() == 2061)
-      newObjectEvent->itemPosition_ = QPointF(2950, 2170 + item->boundingRect().height() / 2);
+      newObjectEvent->itemPosition_ = QPointF(1050, 20 + item->boundingRect().height() / 2);
     else if (newObjectEvent->eventType_ == ProgramReductionNewObjectEvent::EVENT_TYPE)
       newObjectEvent->itemPosition_ = QPointF(
-        2040 + (newObjectEvent->object_->get_oid() - 49) * 12, 2170 + item->boundingRect().height() / 2);
+        140 + (newObjectEvent->object_->get_oid() - 49) * 12, 20 + item->boundingRect().height() / 2);
     else if (newObjectEvent->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE)
       newObjectEvent->itemPosition_ = QPointF(
-        2090 + (newObjectEvent->object_->get_oid() - 59) * 21, 2420);
+        190 + (newObjectEvent->object_->get_oid() - 59) * 21, 270);
     else
       newObjectEvent->itemPosition_ = QPointF(
-        2050 + (newObjectEvent->object_->get_oid() - 52) * 320, 
-        2780 + item->boundingRect().height() / 2);
+        150 + (newObjectEvent->object_->get_oid() - 52) * 320, 
+        640 + item->boundingRect().height() / 2);
   }
 
   addItem(item);

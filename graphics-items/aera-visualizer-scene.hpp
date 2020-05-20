@@ -67,6 +67,7 @@ protected:
 private:
   ReplicodeObjects& replicodeObjects_;
   QMenu* itemMenu_;
+  bool didInitialFit_;
   QColor itemColor_;
   QColor lineColor_;
   QPen borderFlashPen_;
