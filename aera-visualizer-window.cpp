@@ -191,8 +191,15 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     }
     else if (event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
       newItem = new CompositeStateItem(itemMenu_, (NewCompositeStateEvent*)event, replicodeObjects_, scene_);
-    else if (event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE)
+    else if (event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE) {
+      if (event->time_ == replicodeObjects_.getTimeReference()) {
+        // Debug: For now, skip auto focus events at startup.
+        ++iNextEvent_;
+        return stepEvent(maximumTime);
+      }
+
       newItem = new AutoFocusFactItem(itemMenu_, (AutoFocusNewObjectEvent*)event, replicodeObjects_, scene_);
+    }
     else if (event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE)
       newItem = new PredictionItem(itemMenu_, (NewMkValPredictionEvent*)event, replicodeObjects_, scene_);
     else if (event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
