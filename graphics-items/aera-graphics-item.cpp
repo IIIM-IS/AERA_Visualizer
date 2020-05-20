@@ -39,7 +39,7 @@ AeraGraphicsItem::AeraGraphicsItem(
 
   headerHtml_ = QString("<p style=\"text-align:right; margin-bottom:0px; color:gray\">") +
     replicodeObjects_.relativeTime(aeraEvent_->time_).c_str() + "</p>" +
-    "<h3 style=\"margin-top:0px\"><font color=\"darkred\">" + headerPrefix + "</font> <a href=\"#this""\">" +
+    "<h3 style=\"margin-top:0px; margin-bottom:0px\"><font color=\"darkred\">" + headerPrefix + "</font> <a href=\"#this""\">" +
     replicodeObjects_.getLabel(aeraEvent_->object_).c_str() + "</a></h3>";
 }
 
