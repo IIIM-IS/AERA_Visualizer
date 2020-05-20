@@ -3,7 +3,7 @@
 #include "graphics-items/model-item.hpp"
 #include "graphics-items/composite-state-item.hpp"
 #include "graphics-items/program-reduction-item.hpp"
-#include "graphics-items/program-output-fact-item.hpp"
+#include "graphics-items/auto-focus-fact-item.hpp"
 #include "graphics-items/prediction-item.hpp"
 #include "graphics-items/instantiated-composite-state-item.hpp"
 #include "graphics-items/aera-visualizer-scene.hpp"
@@ -175,7 +175,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 
   if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
-      event->eventType_ == ProgramReductionNewObjectEvent::EVENT_TYPE ||
+      event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
       event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
     AeraGraphicsItem* newItem;
@@ -191,20 +191,28 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     }
     else if (event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
       newItem = new CompositeStateItem(itemMenu_, (NewCompositeStateEvent*)event, replicodeObjects_, scene_);
-    else if (event->eventType_ == ProgramReductionNewObjectEvent::EVENT_TYPE)
-      newItem = new ProgramOutputFactItem(itemMenu_, (ProgramReductionNewObjectEvent*)event, replicodeObjects_, scene_);
+    else if (event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE)
+      newItem = new AutoFocusFactItem(itemMenu_, (AutoFocusNewObjectEvent*)event, replicodeObjects_, scene_);
     else if (event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE)
       newItem = new PredictionItem(itemMenu_, (NewMkValPredictionEvent*)event, replicodeObjects_, scene_);
-    else
-      newItem = new InstantiatedCompositeStateItem(itemMenu_, (NewInstantiatedCompositeStateEvent*)event, replicodeObjects_, scene_);
+    else if (event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
+      auto newIcstEvent = (NewInstantiatedCompositeStateEvent*)event;
+      newItem = new InstantiatedCompositeStateItem(itemMenu_, newIcstEvent, replicodeObjects_, scene_);
+
+      // Add arrows to inputs.
+      for (int i = 0; i < newIcstEvent->inputs_.size(); ++i) {
+        auto referencedItem = scene_->getAeraGraphicsItem(newIcstEvent->inputs_[i]);
+        if (referencedItem)
+          scene_->addArrow(newItem, referencedItem);
+      }
+    }
 
     // Add the new item.
     scene_->addAeraGraphicsItem(newItem);
 
     // Add arrows to all referenced objects.
     for (int i = 0; i < event->object_->references_size(); ++i) {
-      auto referencedItem = scene_->getAeraGraphicsItem(
-        event->object_->get_reference(i));
+      auto referencedItem = scene_->getAeraGraphicsItem(event->object_->get_reference(i));
       if (referencedItem)
         scene_->addArrow(newItem, referencedItem);
     }
@@ -266,7 +274,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
   AeraEvent* event = events_[iNextEvent_].get();
   if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
-      event->eventType_ == ProgramReductionNewObjectEvent::EVENT_TYPE ||
+      event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
       event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
     // Find the AeraGraphicsItem for this event and remove it.
