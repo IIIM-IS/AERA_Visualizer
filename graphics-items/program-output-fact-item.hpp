@@ -1,5 +1,5 @@
-#ifndef PROGRAM_OUTPUT_ITEM_HPP
-#define PROGRAM_OUTPUT_ITEM_HPP
+#ifndef PROGRAM_OUTPUT_FACT_ITEM_HPP
+#define PROGRAM_OUTPUT_FACT_ITEM_HPP
 
 #include <QGraphicsPixmapItem>
 #include <QList>
