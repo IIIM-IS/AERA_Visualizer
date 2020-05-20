@@ -67,9 +67,6 @@ protected:
 private:
   ReplicodeObjects& replicodeObjects_;
   QMenu* itemMenu_;
-  bool leftButtonDown_;
-  QPointF startPoint_;
-  QGraphicsLineItem* line_;
   QColor itemColor_;
   QColor lineColor_;
   QPen borderFlashPen_;

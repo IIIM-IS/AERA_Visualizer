@@ -23,7 +23,6 @@ AeraVisualizerScene::AeraVisualizerScene(
   valueDownFlashColor_("red")
 {
   itemMenu_ = itemMenu;
-  line_ = 0;
   itemColor_ = Qt::white;
   lineColor_ = Qt::black;
   setBackgroundBrush(QColor(230, 230, 230));
