@@ -37,10 +37,11 @@ AeraGraphicsItem::AeraGraphicsItem(
   setFlag(QGraphicsItem::ItemIsSelectable, true);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
 
-  headerHtml_ = QString("<p style=\"text-align:right; margin-bottom:0px; color:gray\">") +
-    replicodeObjects_.relativeTime(aeraEvent_->time_).c_str() + "</p>" +
-    "<h3 style=\"margin-top:0px; margin-bottom:0px\"><font color=\"darkred\">" + headerPrefix + "</font> <a href=\"#this""\">" +
-    replicodeObjects_.getLabel(aeraEvent_->object_).c_str() + "</a></h3>";
+  headerHtml_ = QString("<table width=\"100%\"><tr>") + 
+    "<td><font size=\"+1\"><b><font color=\"darkred\">" + headerPrefix +
+    "</font> <a href=\"#this""\">" + replicodeObjects_.getLabel(aeraEvent_->object_).c_str() + "</a></b></font></td>" +
+    "<td align=\"right\"><font style=\"color:gray\">" + replicodeObjects_.relativeTime(aeraEvent_->time_).c_str() + "</font></td>" +
+    "</tr></table><br/>";
 }
 
 void AeraGraphicsItem::setTextItemAndPolygon(QString html)
