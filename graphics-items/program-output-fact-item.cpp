@@ -61,7 +61,7 @@ void ProgramOutputFactItem::textItemLinkActivated(const QString& link)
     menu->addAction("What Made This?", [=]() {
       auto mkRdx = programReductionNewObjectEvent_->programReduction_;
 
-      string explanation = "<u>Q: What made <a href=\"#debug_oid-" +
+      string explanation = "<u>Q: What made program output <a href=\"#debug_oid-" +
         to_string(programReductionNewObjectEvent_->object_->get_debug_oid()) + "\">" +
         replicodeObjects_.getLabel(programReductionNewObjectEvent_->object_) + "</a> ?</u><br>" + 
         "This an output of instantiated program <b>" + replicodeObjects_.getLabel(mkRdx->get_reference(0)) +
