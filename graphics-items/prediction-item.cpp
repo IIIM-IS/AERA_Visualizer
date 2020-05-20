@@ -54,7 +54,7 @@ void PredictionItem::setFactPredFactMkValHtml()
 
   factPredFactMkValHtml_ = factPredHtml;
   factPredFactMkValHtml_ += QString("\n      ") + predHtml;
-  factPredFactMkValHtml_ += QString("\n            ") + factMkValHtml;
+  factPredFactMkValHtml_ += QString("\n            !factMkVal-start") + factMkValHtml + "!factMkVal-end";
   // We will replace !mkVal-start and !mkVal-end below, after highlighting.
   factPredFactMkValHtml_ += QString("\n                !mkVal-start") + mkValHtml + "!mkVal-end";
 
@@ -63,10 +63,14 @@ void PredictionItem::setFactPredFactMkValHtml()
   addSourceCodeHtmlLinks(newPredictionEvent_->object_, factPredFactMkValHtml_);
 
   highlightedFactPredFactMkValHtml_ = factPredFactMkValHtml_;
+  factPredFactMkValHtml_.replace("!factMkVal-start", "");
+  factPredFactMkValHtml_.replace("!factMkVal-end", "");
   factPredFactMkValHtml_.replace("!mkVal-start", "");
   factPredFactMkValHtml_.replace("!mkVal-end", "");
   // Highlight this the same as the RHS in the instantiated model.
-  highlightedFactPredFactMkValHtml_.replace("!mkVal-start", "<font color=\"darkorange\">");
+  highlightedFactPredFactMkValHtml_.replace("!factMkVal-start", "<font style=\"background-color:#e0ffe0\">");
+  highlightedFactPredFactMkValHtml_.replace("!factMkVal-end", "</font>");
+  highlightedFactPredFactMkValHtml_.replace("!mkVal-start", "<font style=\"background-color:#e0ffe0\">");
   highlightedFactPredFactMkValHtml_.replace("!mkVal-end", "</font>");
 }
 
