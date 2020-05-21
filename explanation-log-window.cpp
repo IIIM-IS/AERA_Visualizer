@@ -2,6 +2,7 @@
 #include "submodules/replicode/r_exec/opcodes.h"
 #include "graphics-items/program-reduction-item.hpp"
 #include "graphics-items/aera-visualizer-scene.hpp"
+#include "aera-visualizer-window.hpp"
 #include "explanation-log-window.hpp"
 
 using namespace std;
@@ -87,14 +88,8 @@ void ExplanationLogWindow::TextBrowser::mouseMoveEvent(QMouseEvent* event)
   if (url.startsWith("#debug_oid-")) {
     uint64 debug_oid = url.mid(11).toULongLong();
     auto object = parent_->replicodeObjects_.getObjectByDebugOid(debug_oid);
-    if (object) {
-      auto item = parent_->parent_->getScene()->getAeraGraphicsItem(object);
-      if (item) {
-        // Flash the linked item.
-        item->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
-        parent_->parent_->getScene()->establishFlashTimer();
-      }
-    }
+    if (object)
+      parent_->parent_->flashItem(object);
   }
 }
 

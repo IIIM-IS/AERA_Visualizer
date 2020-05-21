@@ -44,6 +44,12 @@ public:
 
   ExplanationLogWindow* getExplanationLogWindow() { return explanationLogWindow_;  }
 
+  /**
+   * Get the scene AeraGraphicsItem whose getAeraEvent() has the given object, and flash it.
+   * \param object The Code* object to search for.
+   */
+  void flashItem(r_code::Code* object);
+
   AeraVisualizerScene* getScene() { return scene_; }
 
 protected:

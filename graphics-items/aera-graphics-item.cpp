@@ -9,6 +9,7 @@
 #include "submodules/replicode/r_exec/opcodes.h"
 #include "arrow.hpp"
 #include "aera-visualizer-scene.hpp"
+#include "../aera-visualizer-window.hpp"
 #include "aera-graphics-item.hpp"
 
 using namespace std;
@@ -180,14 +181,8 @@ void AeraGraphicsItem::textItemLinkHovered(const QString& link)
   if (link.startsWith("#debug_oid-")) {
     uint64 debug_oid = link.mid(11).toULongLong();
     auto object = replicodeObjects_.getObjectByDebugOid(debug_oid);
-    if (object) {
-      auto item = parent_->getAeraGraphicsItem(object);
-      if (item) {
-        // Flash the corresponding item.
-        item->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
-        parent_->establishFlashTimer();
-      }
-    }
+    if (object)
+      parent_->getParent()->flashItem(object);
   }
 }
 

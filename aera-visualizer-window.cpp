@@ -172,6 +172,16 @@ Timestamp AeraVisulizerWindow::getTimestamp(const smatch& matches)
   return replicodeObjects_.getTimeReference() + us;
 }
 
+void AeraVisulizerWindow::flashItem(r_code::Code* object)
+{
+  auto item = scene_->getAeraGraphicsItem(object);
+  if (item) {
+    // Flash the corresponding item.
+    item->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
+    scene_->establishFlashTimer();
+  }
+}
+
 Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 {
   if (iNextEvent_ >= events_.size())
