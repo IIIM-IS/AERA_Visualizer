@@ -158,9 +158,6 @@ void PredictionItem::setBoundAndUnboundModelHtml()
   addSourceCodeHtmlLinks(mdl, unboundModelHtml_);
   boundModelHtml_ = htmlify(modelSource);
   addSourceCodeHtmlLinks(mdl, boundModelHtml_);
-  // Debug: Correctly find the RHS.
-  QString rhs = "(mk.val&nbsp;v3:b&nbsp;position_y&nbsp;v7:20)";
-  boundModelHtml_.replace(rhs, "<font color=\"darkorange\">" + rhs + "</font>");
 
   ModelItem::highlightVariables(boundModelHtml_);
   ModelItem::highlightVariables(unboundModelHtml_);
