@@ -68,6 +68,13 @@ private:
   ReplicodeObjects& replicodeObjects_;
   QMenu* itemMenu_;
   bool didInitialFit_;
+  // key: The AeraEvent eventType_, or 0 for "other". value: The top of the first item for that event type.
+  std::map<int, qreal> eventTypeFirstTop_;
+  // key: The AeraEvent eventType_, or 0 for "other". value: The top to use for the next item added for that event type.
+  std::map<int, qreal> eventTypeNextTop_;
+  Timestamp thisFrameTime_;
+  qreal thisFrameLeft_;
+  qreal nextFrameLeft_;
   QColor itemColor_;
   QColor lineColor_;
   QPen borderFlashPen_;

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "aera-visualizer-window.hpp"
 #include "arrow.hpp"
 #include "model-item.hpp"
@@ -7,17 +8,21 @@
 #include <QGraphicsView>
 #include <QApplication>
 
+using namespace std;
+using namespace std::chrono;
 using namespace core;
 using namespace r_code;
 
 namespace aera_visualizer {
 
 AeraVisualizerScene::AeraVisualizerScene(
-    QMenu* itemMenu, ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent)
+  QMenu* itemMenu, ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent)
   : QGraphicsScene(parent),
   parent_(parent),
   replicodeObjects_(replicodeObjects),
   didInitialFit_(false),
+  thisFrameTime_(seconds(0)),
+  nextFrameLeft_(10),
   borderFlashPen_(Qt::blue, 3),
   noFlashColor_("black"),
   valueUpFlashColor_("green"),
@@ -28,6 +33,11 @@ AeraVisualizerScene::AeraVisualizerScene(
   lineColor_ = Qt::black;
   setBackgroundBrush(QColor(230, 230, 230));
   flashTimerId_ = 0;
+
+  eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] = 10;
+  eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 275;
+  eventTypeFirstTop_[NewMkValPredictionEvent::EVENT_TYPE] = 455;
+  eventTypeFirstTop_[0] = 640;
 }
 
 void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
@@ -42,21 +52,38 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
   auto newObjectEvent = item->getAeraEvent();
   if (qIsNaN(newObjectEvent->itemPosition_.x())) {
     // Assign an initial position.
-    // TODO: Do this with a grid layout.
-    if (newObjectEvent->object_->get_oid() == 60)
-      newObjectEvent->itemPosition_ = QPointF(620, 20 + item->boundingRect().height() / 2);
-    else if (newObjectEvent->object_->get_debug_oid() == 2061)
-      newObjectEvent->itemPosition_ = QPointF(1050, 20 + item->boundingRect().height() / 2);
-    else if (newObjectEvent->eventType_ == ProgramReductionNewObjectEvent::EVENT_TYPE)
-      newObjectEvent->itemPosition_ = QPointF(
-        140 + (newObjectEvent->object_->get_oid() - 49) * 12, 20 + item->boundingRect().height() / 2);
-    else if (newObjectEvent->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE)
-      newObjectEvent->itemPosition_ = QPointF(
-        190 + (newObjectEvent->object_->get_oid() - 59) * 21, 270);
+    microseconds samplingPeriod(100000);
+    if (newObjectEvent->time_ >= thisFrameTime_ + samplingPeriod) {
+      // Start a new frame (or the first frame).
+      // TODO: Quantize thisFrameTime_ to a frame boundary from newObjectEvent->time_.
+      auto relativeTime = duration_cast<microseconds>(newObjectEvent->time_ - replicodeObjects_.getTimeReference());
+      thisFrameTime_ = newObjectEvent->time_ - (relativeTime % samplingPeriod);
+      thisFrameLeft_ = nextFrameLeft_;
+      // nextFrameLeft_ will be updated below.
+      nextFrameLeft_ = 0;
+      // Reset the top.
+      eventTypeNextTop_.clear();
+    }
+
+    int eventType = 0;
+    if (eventTypeFirstTop_.find(newObjectEvent->eventType_) != eventTypeFirstTop_.end())
+      // This is a recognized event type.
+      eventType = newObjectEvent->eventType_;
+
+    qreal top;
+    if (eventTypeNextTop_.find(eventType) != eventTypeNextTop_.end())
+      top = eventTypeNextTop_[eventType];
     else
-      newObjectEvent->itemPosition_ = QPointF(
-        150 + (newObjectEvent->object_->get_oid() - 52) * 320, 
-        640 + item->boundingRect().height() / 2);
+      top = eventTypeFirstTop_[eventType];
+
+    // The item origin is in its center, so offset to the top-left.
+    newObjectEvent->itemPosition_ = QPointF(
+      thisFrameLeft_ + item->boundingRect().width() / 2, top + item->boundingRect().height() / 2);
+
+    // Set up eventTypeNextTop_ for the next item.
+    eventTypeNextTop_[eventType] = top + item->boundingRect().height() + 15;
+    // Set up nextFrameLeft_ for the next frame.
+    nextFrameLeft_ = max(nextFrameLeft_, thisFrameLeft_ + item->boundingRect().width() + 15);
   }
 
   addItem(item);
