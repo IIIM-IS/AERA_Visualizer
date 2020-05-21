@@ -82,12 +82,12 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 
     // The item origin is in its center, so offset to the top-left.
     newObjectEvent->itemPosition_ = QPointF(
-      thisFrameLeft_ + item->boundingRect().width() / 2, top + item->boundingRect().height() / 2);
+      thisFrameLeft_ + 3 + item->boundingRect().width() / 2, top + item->boundingRect().height() / 2);
 
     // Set up eventTypeNextTop_ for the next item.
     eventTypeNextTop_[eventType] = top + item->boundingRect().height() + 15;
     // Set up nextFrameLeft_ for the next frame.
-    nextFrameLeft_ = max(nextFrameLeft_, thisFrameLeft_ + item->boundingRect().width() + 15);
+    nextFrameLeft_ = max(nextFrameLeft_, thisFrameLeft_ + item->boundingRect().width() + 14);
   }
 
   addItem(item);
