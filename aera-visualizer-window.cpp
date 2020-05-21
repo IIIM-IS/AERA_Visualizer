@@ -172,7 +172,19 @@ Timestamp AeraVisulizerWindow::getTimestamp(const smatch& matches)
   return replicodeObjects_.getTimeReference() + us;
 }
 
-void AeraVisulizerWindow::flashItem(r_code::Code* object)
+bool AeraVisulizerWindow::hasAeraGraphicsItem(r_code::Code* object)
+{ 
+  return !!scene_->getAeraGraphicsItem(object);
+}
+
+void AeraVisulizerWindow::zoomToAeraGraphicsItem(r_code::Code* object)
+{
+  auto item = scene_->getAeraGraphicsItem(object);
+  if (item)
+    scene_->zoomToItem(item);
+}
+
+void AeraVisulizerWindow::flashAeraGraphicsItem(r_code::Code* object)
 {
   auto item = scene_->getAeraGraphicsItem(object);
   if (item) {

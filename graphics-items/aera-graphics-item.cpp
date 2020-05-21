@@ -181,7 +181,7 @@ void AeraGraphicsItem::textItemLinkHovered(const QString& link)
     uint64 debug_oid = link.mid(11).toULongLong();
     auto object = replicodeObjects_.getObjectByDebugOid(debug_oid);
     if (object)
-      parent_->getParent()->flashItem(object);
+      parent_->getParent()->flashAeraGraphicsItem(object);
   }
 }
 
@@ -197,12 +197,11 @@ void AeraGraphicsItem::textItemLinkActivated(const QString& link)
     uint64 debug_oid = link.mid(11).toULongLong();
     auto object = replicodeObjects_.getObjectByDebugOid(debug_oid);
     if (object) {
-      auto item = parent_->getAeraGraphicsItem(object);
-      if (item) {
+      if (parent_->getParent()->hasAeraGraphicsItem(object)) {
         // Show the menu.
         auto menu = new QMenu();
         menu->addAction(QString("Zoom to ") + replicodeObjects_.getLabel(object).c_str(),
-          [=]() { parent_->zoomToItem(item); });
+          [=]() { parent_->getParent()->zoomToAeraGraphicsItem(object); });
         menu->exec(parent_->getMouseScreenPosition() - QPoint(10, 10));
         delete menu;
       }

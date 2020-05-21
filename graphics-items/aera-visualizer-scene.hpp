@@ -38,7 +38,7 @@ public:
   void addAeraGraphicsItem(AeraGraphicsItem* item);
   void addArrow(AeraGraphicsItem* startItem, AeraGraphicsItem* endItem);
   /**
-   * Get the getAeraGraphicsItem whose getAeraEvent() has the given object.
+   * Get the AeraGraphicsItem whose getAeraEvent() has the given object.
    * \param object The Code* object to search for.
    * \return The AeraGraphicsItem, or null if not found.
    */

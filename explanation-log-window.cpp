@@ -1,7 +1,6 @@
 #include <QtWidgets>
 #include "submodules/replicode/r_exec/opcodes.h"
 #include "graphics-items/program-reduction-item.hpp"
-#include "graphics-items/aera-visualizer-scene.hpp"
 #include "aera-visualizer-window.hpp"
 #include "explanation-log-window.hpp"
 
@@ -56,14 +55,13 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
       delete menu;
     }
     else {
-      auto item = parent_->getScene()->getAeraGraphicsItem(object);
-      if (!item)
+      if (!parent_->hasAeraGraphicsItem(object))
         return;
 
       // Show the menu.
       auto menu = new QMenu();
       menu->addAction(QString("Zoom to ") + replicodeObjects_.getLabel(object).c_str(),
-        [=]() { parent_->getScene()->zoomToItem(item); });
+        [=]() { parent_->zoomToAeraGraphicsItem(object); });
       menu->exec(textBrowser_->mouseScreenPosition_ - QPoint(10, 10));
       delete menu;
     }
@@ -89,7 +87,7 @@ void ExplanationLogWindow::TextBrowser::mouseMoveEvent(QMouseEvent* event)
     uint64 debug_oid = url.mid(11).toULongLong();
     auto object = parent_->replicodeObjects_.getObjectByDebugOid(debug_oid);
     if (object)
-      parent_->parent_->flashItem(object);
+      parent_->parent_->flashAeraGraphicsItem(object);
   }
 }
 
