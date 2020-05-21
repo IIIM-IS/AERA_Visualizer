@@ -99,7 +99,6 @@ public:
   static const int EVENT_TYPE = 5;
 
   r_code::Code* programReduction_;
-  std::string syncMode_;
 };
 
 class AutoFocusNewObjectEvent : public AeraEvent {
@@ -142,6 +141,19 @@ public:
   static const int EVENT_TYPE = 8;
 
   std::vector<r_code::Code*> inputs_;
+};
+
+class NewPredictionSuccessEvent : public AeraEvent {
+public:
+  NewPredictionSuccessEvent(core::Timestamp time, r_code::Code* inputObject,
+    r_code::Code* factSuccessFactPred)
+    : AeraEvent(EVENT_TYPE, time, factSuccessFactPred),
+    inputObject_(inputObject)
+  {}
+
+  static const int EVENT_TYPE = 9;
+
+  r_code::Code* inputObject_;
 };
 
 }

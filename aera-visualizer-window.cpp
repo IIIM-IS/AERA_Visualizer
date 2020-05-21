@@ -69,6 +69,8 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
   regex newMkValPredictionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+)\\(\\d+\\) imdl mdl \\d+: (\\d+) -> fact (\\d+) pred fact mk.val VALUE .+$");
   // 0s:200ms:0us fact 59 icst[52][ 50 55]
   regex newInstantiatedCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+) icst\\[\\d+\\]\\[([ \\d]+)\\]$");
+  // 0s:300ms:0us fact 75 -> fact 79 success fact 60 pred
+  regex newPredictionSuccessRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+) -> fact (\\d+) success fact \\d+ pred$");
 
   string line;
   while (getline(consoleOutputFile, line)) {
@@ -151,6 +153,13 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
       if (instantiatedCompositeState && gotAllInputs)
         events_.push_back(make_shared<NewInstantiatedCompositeStateEvent>(
           timestamp, instantiatedCompositeState, inputs));
+    }
+    else if (regex_search(line, matches, newPredictionSuccessRegex)) {
+      auto inputObject = replicodeObjects_.getObject(stol(matches[4].str()));
+      auto factSuccessFactPred = replicodeObjects_.getObject(stol(matches[5].str()));
+      if (inputObject && factSuccessFactPred)
+        events_.push_back(make_shared<NewPredictionSuccessEvent>(
+          getTimestamp(matches), inputObject, factSuccessFactPred));
     }
   }
 }
