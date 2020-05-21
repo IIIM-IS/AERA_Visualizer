@@ -63,6 +63,10 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       nextFrameLeft_ = 0;
       // Reset the top.
       eventTypeNextTop_.clear();
+
+      // Add the frame boundary line.
+      addLine(thisFrameLeft_, sceneRect().top(), 
+              thisFrameLeft_, sceneRect().bottom(), QPen(Qt::black, 1, Qt::DashLine));
     }
 
     int eventType = 0;
@@ -152,7 +156,19 @@ void AeraVisualizerScene::scaleViewBy(double factor)
 
 void AeraVisualizerScene::zoomViewHome()
 {
-  views().at(0)->fitInView(itemsBoundingRect(), Qt::KeepAspectRatio);
+  // Get the bounding rect of all AeraGraphicsItem. This excludes lines such as frame boundaries.
+  QRectF boundingRect;
+  foreach(QGraphicsItem* item, items()) {
+    if (dynamic_cast<AeraGraphicsItem*>(item)) {
+      if (boundingRect.width() == 0)
+        boundingRect = item->sceneBoundingRect();
+      else
+        boundingRect = boundingRect.united(item->sceneBoundingRect());
+    }
+  }
+
+  if (boundingRect.width() != 0)
+    views().at(0)->fitInView(boundingRect, Qt::KeepAspectRatio);
 }
 
 void AeraVisualizerScene::zoomToItem(QGraphicsItem* item)
