@@ -158,21 +158,20 @@ void AeraGraphicsItem::addSourceCodeHtmlLinks(
           referencedObject->code(0).asOpcode() == Opcodes::AntiFact))
       continue;
 
-    auto referencedLabel = replicodeObjects.getLabel(referencedObject);
+    QString referencedLabel(replicodeObjects.getLabel(referencedObject).c_str());
     if (referencedLabel == "")
       continue;
 
-    // Spaces are alreay replaced with &nbsp; .
     // TODO: Handle case when the label is not surrounded by spaces.
     html.replace(
-      QString("&nbsp;") + referencedLabel.c_str() + "&nbsp;",
-      QString("&nbsp;<a href=\"#debug_oid-") + QString::number(referencedObject->get_debug_oid()) + "\">" +
-      referencedLabel.c_str() + "</a>&nbsp;");
+      " " + referencedLabel + " ",
+      " <a href=\"#debug_oid-" + QString::number(referencedObject->get_debug_oid()) + "\">" +
+      referencedLabel + "</a> ");
     // The same for at the end of a line.
     html.replace(
-      QString("&nbsp;") + referencedLabel.c_str() + "<br>",
-      QString("&nbsp;<a href=\"#debug_oid-") + QString::number(referencedObject->get_debug_oid()) + "\">" +
-      referencedLabel.c_str() + "</a><br>");
+      " " + referencedLabel + "<br>",
+      " <a href=\"#debug_oid-" + QString::number(referencedObject->get_debug_oid()) + "\">" +
+      referencedLabel + "</a><br>");
   }
 }
 
