@@ -67,7 +67,7 @@ void ProgramOutputFactItem::textItemLinkActivated(const QString& link)
         "This an output of instantiated program <b>" + replicodeObjects_.getLabel(mkRdx->get_reference(0)) +
         "</b>, according to<br>program reduction <a href=\"#debug_oid-" + 
         to_string(mkRdx->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(mkRdx) + "</a><br><br>";
-      parent_->getExplanationLogWindow()->appendHtml(explanation);
+      parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
     });
     menu->exec(parent_->getMouseScreenPosition() - QPoint(10, 10));
     delete menu;

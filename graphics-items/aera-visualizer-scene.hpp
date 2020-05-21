@@ -26,6 +26,8 @@ public:
   explicit AeraVisualizerScene(
     QMenu* itemMenu, ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent = 0);
 
+  AeraVisulizerWindow* getParent() { return parent_; }
+
   /**
    * Scale the first QGraphicsView by the given factor.
    * This also sets currentScaleFactor.
@@ -48,8 +50,6 @@ public:
   }
   QPoint getMouseScreenPosition() { return mouseScreenPosition_; }
 
-  ExplanationLogWindow* getExplanationLogWindow();
-
   // The initial value for the flash countdown;
   static const int FLASH_COUNT = 6;
 
@@ -62,9 +62,8 @@ protected:
   void wheelEvent(QGraphicsSceneWheelEvent* event) override;
 #endif
 
-  AeraVisulizerWindow* parent_;
-
 private:
+  AeraVisulizerWindow* parent_;
   ReplicodeObjects& replicodeObjects_;
   QMenu* itemMenu_;
   bool didInitialFit_;

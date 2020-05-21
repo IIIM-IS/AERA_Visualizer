@@ -241,9 +241,4 @@ void AeraVisualizerScene::timerEvent(QTimerEvent* event)
   }
 }
 
-ExplanationLogWindow* AeraVisualizerScene::getExplanationLogWindow()
-{
-  return parent_->getExplanationLogWindow();
-}
-
 }
