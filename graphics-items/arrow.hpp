@@ -50,7 +50,7 @@ private:
    */
   static void setArrowPointer(QPolygonF& polygon, const QPointF& point, double angle);
 
-  static const int arrowSize_ = 8;
+  static const int arrowSize_ = 6;
   QGraphicsPolygonItem* startItem_;
   QGraphicsPolygonItem* endItem_;
   QColor color_;
