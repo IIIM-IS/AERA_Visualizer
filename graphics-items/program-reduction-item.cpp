@@ -24,7 +24,7 @@ ProgramReductionItem::ProgramReductionItem(
     replicodeObjects_.getSourceCode(programReductionEvent->object_)));
   addSourceCodeHtmlLinks(programReductionEvent_->object_, sourceCodeHtml_);
 
-  setTextItemAndPolygon(makeHtml());
+  setTextItemAndPolygon(makeHtml(), true);
 }
 
 string ProgramReductionItem::simplifyMkRdxSource(const string& mkRdxSource)
@@ -43,7 +43,7 @@ string ProgramReductionItem::simplifyMkRdxSource(const string& mkRdxSource)
 
 QString ProgramReductionItem::makeHtml()
 {
-  return headerHtml_ + sourceCodeHtml_;
+  return sourceCodeHtml_;
 }
 
 }

@@ -18,7 +18,7 @@ AutoFocusFactItem::AutoFocusFactItem(
   autoFocusNewObjectEvent_(autoFocusNewObjectEvent)
 {
   setFactMkValHtml();
-  setTextItemAndPolygon(makeHtml());
+  setTextItemAndPolygon(factMkValHtml_, true);
 }
 
 void AutoFocusFactItem::setFactMkValHtml()
@@ -43,11 +43,6 @@ void AutoFocusFactItem::setFactMkValHtml()
   factMkValHtml_ = htmlify(factMkValHtml_);
   factMkValHtml_.replace("!down", DownArrowHtml);
   addSourceCodeHtmlLinks(autoFocusNewObjectEvent_->object_, factMkValHtml_);
-}
-
-QString AutoFocusFactItem::makeHtml()
-{
-  return headerHtml_ + factMkValHtml_;
 }
 
 void AutoFocusFactItem::textItemLinkActivated(const QString& link)

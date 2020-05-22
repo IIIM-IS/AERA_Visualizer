@@ -25,7 +25,7 @@ PredictionItem::PredictionItem(
   setFactPredFactMkValHtml();
   setFactImdlHtml();
   setBoundAndUnboundModelHtml();
-  setTextItemAndPolygon(makeHtml());
+  setTextItemAndPolygon(makeHtml(), true);
 }
 
 void PredictionItem::setFactPredFactMkValHtml()
@@ -164,7 +164,7 @@ void PredictionItem::setBoundAndUnboundModelHtml()
 
 QString PredictionItem::makeHtml()
 {
-  QString html = headerHtml_;
+  QString html = "";
   html += (showState_ == WHAT_MADE_THIS ? highlightedFactPredFactMkValHtml_ : factPredFactMkValHtml_);
 
   if (showState_ == WHAT_MADE_THIS ||
@@ -196,17 +196,17 @@ void PredictionItem::textItemLinkActivated(const QString& link)
 {
   if (link == "#hide-imodel") {
     showState_ = HIDE_IMODEL;
-    setTextItemAndPolygon(makeHtml());
+    setTextItemAndPolygon(makeHtml(), true);
     bringToFront();
   }
   else if (link == "#what-made-this") {
     showState_ = WHAT_MADE_THIS;
-    setTextItemAndPolygon(makeHtml());
+    setTextItemAndPolygon(makeHtml(), true);
     bringToFront();
   }
   else if (link == "#show-model") {
     showState_ = SHOW_MODEL;
-    setTextItemAndPolygon(makeHtml());
+    setTextItemAndPolygon(makeHtml(), true);
     bringToFront();
   }
   else

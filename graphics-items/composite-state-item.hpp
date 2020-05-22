@@ -26,8 +26,6 @@ public:
   static std::string simplifyCstSource(const std::string& cstSource);
 
 private:
-  QString makeHtml();
-
   NewCompositeStateEvent* newCompositeStateEvent_;
   QString sourceCodeHtml_;
 };

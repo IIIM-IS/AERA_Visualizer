@@ -17,7 +17,7 @@ PredictionSuccessFactItem::PredictionSuccessFactItem(
   newPredictionSuccessEvent_(newPredictionSuccessEvent)
 {
   setFactSuccessHtml();
-  setTextItemAndPolygon(makeHtml());
+  setTextItemAndPolygon(factSuccessHtml_, true);
 }
 
 void PredictionSuccessFactItem::setFactSuccessHtml()
@@ -40,11 +40,6 @@ void PredictionSuccessFactItem::setFactSuccessHtml()
   factSuccessHtml_ = htmlify(factSuccessHtml_);
   factSuccessHtml_.replace("!down", DownArrowHtml);
   addSourceCodeHtmlLinks(newPredictionSuccessEvent_->object_->get_reference(0), factSuccessHtml_);
-}
-
-QString PredictionSuccessFactItem::makeHtml()
-{
-  return headerHtml_ + factSuccessHtml_;
 }
 
 void PredictionSuccessFactItem::textItemLinkActivated(const QString& link)

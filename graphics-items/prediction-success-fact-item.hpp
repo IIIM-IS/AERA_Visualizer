@@ -27,12 +27,6 @@ private:
    */
   void setFactSuccessHtml();
 
-  /**
-   * Make the full HTML for the textItem_ from factSuccessHtml_ and the object label.
-   * \return The HTML.
-   */
-  QString makeHtml();
-
   NewPredictionSuccessEvent* newPredictionSuccessEvent_;
   QString factSuccessHtml_;
 };

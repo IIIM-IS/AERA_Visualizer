@@ -27,12 +27,6 @@ private:
    */
   void setFactMkValHtml();
 
-  /**
-   * Make the full HTML for the textItem_ from factMkValHtml_ and the object label.
-   * \return The HTML.
-   */
-  QString makeHtml();
-
   ProgramReductionNewObjectEvent* programReductionNewObjectEvent_;
   QString factMkValHtml_;
 };

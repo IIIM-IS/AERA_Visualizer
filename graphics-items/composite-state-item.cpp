@@ -26,7 +26,7 @@ CompositeStateItem::CompositeStateItem(
   addSourceCodeHtmlLinks(newCompositeStateEvent_->object_, sourceCodeHtml_);
   ModelItem::highlightVariables(sourceCodeHtml_);
 
-  setTextItemAndPolygon(makeHtml());
+  setTextItemAndPolygon(sourceCodeHtml_, true);
 }
 
 string CompositeStateItem::simplifyCstSource(const string& cstSource)
@@ -45,11 +45,6 @@ string CompositeStateItem::simplifyCstSource(const string& cstSource)
   // Restore \n.
   replace(result.begin(), result.end(), '\x01', '\n');
   return result;
-}
-
-QString CompositeStateItem::makeHtml()
-{
-  return headerHtml_ + sourceCodeHtml_;
 }
 
 }

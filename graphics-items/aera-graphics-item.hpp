@@ -100,8 +100,11 @@ protected:
    * the textItem_ to textItemLinkHovered and textItemLinkActivated, with default
    * behavior which a derived class can override.
    * \param html The HTML for the textItem_.
+   * \param prependHeaderHtml If false, use html as-is. If true, first set the text 
+   * to html and adjust the size, then set the text to headerHtml_+html. We do this because
+   * the header has a right-aligned table cell which needs to "know" the width of the text.
    */
-  void setTextItemAndPolygon(QString html);
+  void setTextItemAndPolygon(QString html, bool prependHeaderHtml);
 
   virtual void textItemLinkHovered(const QString& link);
 

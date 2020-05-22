@@ -28,7 +28,7 @@ InstantiatedCompositeStateItem::InstantiatedCompositeStateItem(
 {
   setFactIcstHtml();
   setBoundCstAndMembersHtml();
-  setTextItemAndPolygon(makeHtml());
+  setTextItemAndPolygon(makeHtml(), true);
 }
 
 void InstantiatedCompositeStateItem::getIcstOrImdlValues(
@@ -136,7 +136,7 @@ void InstantiatedCompositeStateItem::setBoundCstAndMembersHtml()
 
 QString InstantiatedCompositeStateItem::makeHtml()
 {
-  QString html = headerHtml_;
+  QString html = "";
   if (showState_ == HIDE_ICST) {
     html += SelectedRadioButtonHtml + " Hide iCst" +
       " <a href=\"#show-icst\">" + UnselectedRadioButtonHtml + " Show iCst</a><br>";
@@ -155,12 +155,12 @@ void InstantiatedCompositeStateItem::textItemLinkActivated(const QString& link)
 {
   if (link == "#hide-icst") {
     showState_ = HIDE_ICST;
-    setTextItemAndPolygon(makeHtml());
+    setTextItemAndPolygon(makeHtml(), true);
     bringToFront();
   }
   else if (link == "#show-icst") {
     showState_ = SHOW_ICST;
-    setTextItemAndPolygon(makeHtml());
+    setTextItemAndPolygon(makeHtml(), true);
     bringToFront();
   }
   else

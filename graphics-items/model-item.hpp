@@ -22,13 +22,13 @@ public:
   void setEvidenceCountColor(QString color) 
   { 
     evidenceCountColor_ = color;
-    textItem_->setHtml(makeHtml());
+    refreshText();
   };
 
   void setSuccessRateColor(QString color)
   {
     successRateColor_ = color;
-    textItem_->setHtml(makeHtml());
+    refreshText();
   };
 
   /**
@@ -60,6 +60,19 @@ public:
 
 private:
   QString makeHtml();
+
+  /**
+   * Set textItem_ to headerHtml_ + makeHtml().
+   */
+  void refreshText()
+  {
+    auto html = makeHtml();
+    textItem_->setHtml(html);
+    // adjustSize() is needed for right-aligned text.
+    textItem_->adjustSize();
+    textItem_->setHtml(headerHtml_ + html);
+    textItem_->adjustSize();
+  }
 
   NewModelEvent* newModelEvent_;
   QString sourceCodeHtml_;

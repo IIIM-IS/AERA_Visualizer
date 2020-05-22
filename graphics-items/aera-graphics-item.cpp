@@ -45,7 +45,7 @@ AeraGraphicsItem::AeraGraphicsItem(
     replicodeObjects_.relativeTime(aeraEvent_->time_).c_str() + "</font></td>" + "</tr></table><br>";
 }
 
-void AeraGraphicsItem::setTextItemAndPolygon(QString html)
+void AeraGraphicsItem::setTextItemAndPolygon(QString html, bool prependHeaderHtml)
 {
   // Set up the textItem_ first to get its size.
   if (textItem_)
@@ -54,6 +54,12 @@ void AeraGraphicsItem::setTextItemAndPolygon(QString html)
   textItem_->setHtml(html);
   // adjustSize() is needed for right-aligned text.
   textItem_->adjustSize();
+  if (prependHeaderHtml) {
+    // Now add headerHtml_ which has a right-aligned table cell.
+    textItem_->setHtml(headerHtml_ + html);
+    textItem_->adjustSize();
+  }
+
   qreal left = -textItem_->boundingRect().width() / 2 - 5;
   qreal top = -textItem_->boundingRect().height() / 2 - 5;
   textItem_->setPos(left + 5, top + 5);

@@ -29,7 +29,7 @@ ModelItem::ModelItem(
   highlightVariables(sourceCodeHtml_);
   sourceCodeHtml_ = htmlify(sourceCodeHtml_);
 
-  setTextItemAndPolygon(makeHtml());
+  setTextItemAndPolygon(makeHtml(), true);
 }
 
 QString ModelItem::simplifyModelSource(const string& modelSource)
@@ -94,7 +94,7 @@ QString ModelItem::makeHtml()
 {
   auto model = newModelEvent_->object_;
 
-  QString html = headerHtml_;
+  QString html = "";
   html += "<font style=\"color:" + evidenceCountColor_ + "\">Evidence Count: " +
     QString::number(evidenceCount_) + "</font><br>";
   html += "<font style=\"color:" + successRateColor_ + "\">&nbsp;&nbsp;&nbsp;&nbsp;Success Rate: " +
@@ -111,7 +111,7 @@ void ModelItem::updateFromModel()
   successRateIncreased_ = (model->code(MDL_SR).asFloat() >= successRate_);
   successRate_ = model->code(MDL_SR).asFloat();
 
-  textItem_->setHtml(makeHtml());
+  refreshText();
 }
 
 }

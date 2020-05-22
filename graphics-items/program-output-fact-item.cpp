@@ -23,7 +23,7 @@ ProgramOutputFactItem::ProgramOutputFactItem(
   programReductionNewObjectEvent_(programReductionNewObjectEvent)
 {
   setFactMkValHtml();
-  setTextItemAndPolygon(makeHtml());
+  setTextItemAndPolygon(factMkValHtml_, true);
 }
 
 void ProgramOutputFactItem::setFactMkValHtml()
@@ -46,11 +46,6 @@ void ProgramOutputFactItem::setFactMkValHtml()
   factMkValHtml_ = htmlify(factMkValHtml_);
   factMkValHtml_.replace("!down", DownArrowHtml);
   addSourceCodeHtmlLinks(programReductionNewObjectEvent_->object_, factMkValHtml_);
-}
-
-QString ProgramOutputFactItem::makeHtml()
-{
-  return headerHtml_ + factMkValHtml_;
 }
 
 void ProgramOutputFactItem::textItemLinkActivated(const QString& link)
