@@ -31,13 +31,13 @@ AeraVisualizerScene::AeraVisualizerScene(
   itemMenu_ = itemMenu;
   itemColor_ = Qt::white;
   lineColor_ = Qt::black;
-  setBackgroundBrush(QColor(230, 230, 230));
+  setBackgroundBrush(QColor(245, 245, 245));
   flashTimerId_ = 0;
 
-  eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] = 10;
-  eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 275;
-  eventTypeFirstTop_[NewMkValPredictionEvent::EVENT_TYPE] = 383;
-  eventTypeFirstTop_[NewPredictionSuccessEvent::EVENT_TYPE] = 520;
+  eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] = 20;
+  eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 285;
+  eventTypeFirstTop_[NewMkValPredictionEvent::EVENT_TYPE] = 393;
+  eventTypeFirstTop_[NewPredictionSuccessEvent::EVENT_TYPE] = 530;
   eventTypeFirstTop_[0] = 640;
 }
 
@@ -65,9 +65,14 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       // Reset the top.
       eventTypeNextTop_.clear();
 
-      // Add the frame boundary line.
-      addLine(thisFrameLeft_, sceneRect().top(), 
-              thisFrameLeft_, sceneRect().bottom(), QPen(Qt::black, 1, Qt::DashLine));
+      // Add the frame boundary line and timestamp.
+      auto line = addLine(thisFrameLeft_, sceneRect().top(), 
+                          thisFrameLeft_, sceneRect().bottom(), QPen(Qt::darkGray, 1, Qt::DashLine));
+      line->setZValue(-100);
+      auto text = addText(replicodeObjects_.relativeTime(thisFrameTime_).c_str());
+      text->setZValue(-100);
+      text->setDefaultTextColor(Qt::darkGray);
+      text->setPos(thisFrameLeft_, 0);
     }
 
     int eventType = 0;
