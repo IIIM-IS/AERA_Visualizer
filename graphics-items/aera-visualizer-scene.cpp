@@ -22,7 +22,7 @@ AeraVisualizerScene::AeraVisualizerScene(
   replicodeObjects_(replicodeObjects),
   didInitialFit_(false),
   thisFrameTime_(seconds(0)),
-  nextFrameLeft_(10),
+  nextFrameLeft_(160 /* Debug: Until we have a split panel for models 10 */),
   borderFlashPen_(Qt::blue, 3),
   noFlashColor_("black"),
   valueUpFlashColor_("green"),
@@ -38,7 +38,7 @@ AeraVisualizerScene::AeraVisualizerScene(
   eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 285;
   eventTypeFirstTop_[NewMkValPredictionEvent::EVENT_TYPE] = 393;
   eventTypeFirstTop_[NewPredictionSuccessEvent::EVENT_TYPE] = 530;
-  eventTypeFirstTop_[0] = 710;
+  eventTypeFirstTop_[0] = 670;
 }
 
 void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
@@ -75,25 +75,37 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       text->setPos(thisFrameLeft_, 0);
     }
 
-    int eventType = 0;
-    if (eventTypeFirstTop_.find(newObjectEvent->eventType_) != eventTypeFirstTop_.end())
-      // This is a recognized event type.
-      eventType = newObjectEvent->eventType_;
+    if (newObjectEvent->eventType_ == NewModelEvent::EVENT_TYPE || newObjectEvent->eventType_ == NewCompositeStateEvent::EVENT_TYPE) {
+      // Debug: Until we have a split panel for models.
+      if (newObjectEvent->object_->get_oid() == 52)
+        newObjectEvent->itemPosition_ = QPointF(0 + item->boundingRect().width() / 2, 330);
+      else if (newObjectEvent->object_->get_oid() == 53)
+        newObjectEvent->itemPosition_ = QPointF(0 + item->boundingRect().width() / 2, 530);
+      else if (newObjectEvent->object_->get_oid() == 54)
+        newObjectEvent->itemPosition_ = QPointF(0 + item->boundingRect().width() / 2, 740);
+      item->setZValue(-1);
+    }
+    else {
+      int eventType = 0;
+        if (eventTypeFirstTop_.find(newObjectEvent->eventType_) != eventTypeFirstTop_.end())
+          // This is a recognized event type.
+          eventType = newObjectEvent->eventType_;
 
-    qreal top;
-    if (eventTypeNextTop_.find(eventType) != eventTypeNextTop_.end())
-      top = eventTypeNextTop_[eventType];
-    else
-      top = eventTypeFirstTop_[eventType];
+        qreal top;
+        if (eventTypeNextTop_.find(eventType) != eventTypeNextTop_.end())
+          top = eventTypeNextTop_[eventType];
+        else
+          top = eventTypeFirstTop_[eventType];
 
-    // The item origin is in its center, so offset to the top-left.
-    newObjectEvent->itemPosition_ = QPointF(
-      thisFrameLeft_ + 3 + item->boundingRect().width() / 2, top + item->boundingRect().height() / 2);
+      // The item origin is in its center, so offset to the top-left.
+      newObjectEvent->itemPosition_ = QPointF(
+        thisFrameLeft_ + 3 + item->boundingRect().width() / 2, top + item->boundingRect().height() / 2);
 
-    // Set up eventTypeNextTop_ for the next item.
-    eventTypeNextTop_[eventType] = top + item->boundingRect().height() + 15;
-    // Set up nextFrameLeft_ for the next frame.
-    nextFrameLeft_ = max(nextFrameLeft_, thisFrameLeft_ + item->boundingRect().width() + 14);
+      // Set up eventTypeNextTop_ for the next item.
+      eventTypeNextTop_[eventType] = top + item->boundingRect().height() + 15;
+      // Set up nextFrameLeft_ for the next frame.
+      nextFrameLeft_ = max(nextFrameLeft_, thisFrameLeft_ + item->boundingRect().width() + 14);
+    }
   }
 
   addItem(item);
