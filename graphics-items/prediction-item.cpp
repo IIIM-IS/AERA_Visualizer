@@ -47,16 +47,15 @@ void PredictionItem::setFactPredFactMkValHtml()
   QString mkValLabel(replicodeObjects_.getLabel(mkVal).c_str());
 
   // Temporarily use "!down" which doesn't have spaces.
-  QString factPredHtml = QString(factPredSource.c_str()).replace(predLabel, "!down");
   QString predHtml = QString(predSource.c_str()).replace(factMkValLabel, "!down");
+  QString factPredHtml = QString(factPredSource.c_str()).replace(predLabel, predHtml);
   QString factMkValHtml = QString(factMkValSource.c_str()).replace(mkValLabel, "!down");
   QString mkValHtml(mkValSource.c_str());
 
   factPredFactMkValHtml_ = factPredHtml;
-  factPredFactMkValHtml_ += QString("\n      ") + predHtml;
-  factPredFactMkValHtml_ += QString("\n            !factMkVal-start") + factMkValHtml + "!factMkVal-end";
-  // We will replace !mkVal-start and !mkVal-end below, after highlighting.
-  factPredFactMkValHtml_ += QString("\n                !mkVal-start") + mkValHtml + "!mkVal-end";
+  // We will replace !factMkVal-start, etc. below, after highlighting.
+  factPredFactMkValHtml_ += QString("\n              !factMkVal-start") + factMkValHtml + "!factMkVal-end";
+  factPredFactMkValHtml_ += QString("\n                  !mkVal-start") + mkValHtml + "!mkVal-end";
 
   factPredFactMkValHtml_ = htmlify(factPredFactMkValHtml_);
   factPredFactMkValHtml_.replace("!down", DownArrowHtml);
