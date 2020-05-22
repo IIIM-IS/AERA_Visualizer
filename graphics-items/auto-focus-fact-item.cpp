@@ -58,9 +58,9 @@ void AutoFocusFactItem::textItemLinkActivated(const QString& link)
     menu->addAction("What Made This?", [=]() {
       auto fromObject = autoFocusNewObjectEvent_->fromObject_;
 
-      string explanation = "<u>Q: What made auto focus <a href=\"#debug_oid-" +
+      string explanation = "<b>Q: What made auto focus <a href=\"#debug_oid-" +
         to_string(autoFocusNewObjectEvent_->object_->get_debug_oid()) + "\">" +
-        replicodeObjects_.getLabel(autoFocusNewObjectEvent_->object_) + "</a> ?</u><br>" +
+        replicodeObjects_.getLabel(autoFocusNewObjectEvent_->object_) + "</a> ?</b><br>" +
         "The auto focus controller made this from <a href=\"#debug_oid-" +
         to_string(fromObject->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(fromObject) + "</a><br><br>";
       parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);

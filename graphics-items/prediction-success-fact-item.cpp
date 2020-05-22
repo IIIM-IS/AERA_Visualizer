@@ -56,9 +56,9 @@ void PredictionSuccessFactItem::textItemLinkActivated(const QString& link)
     menu->addAction("What Made This?", [=]() {
       auto mkRdx = programReductionNewObjectEvent_->programReduction_;
 
-      string explanation = "<u>Q: What made program output <a href=\"#debug_oid-" +
+      string explanation = "<b>Q: What made program output <a href=\"#debug_oid-" +
         to_string(programReductionNewObjectEvent_->object_->get_debug_oid()) + "\">" +
-        replicodeObjects_.getLabel(programReductionNewObjectEvent_->object_) + "</a> ?</u><br>" +
+        replicodeObjects_.getLabel(programReductionNewObjectEvent_->object_) + "</a> ?</b><br>" +
         "This an output of instantiated program <b>" + replicodeObjects_.getLabel(mkRdx->get_reference(0)) +
         "</b>, according to<br>program reduction <a href=\"#debug_oid-" +
         to_string(mkRdx->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(mkRdx) + "</a><br><br>";
