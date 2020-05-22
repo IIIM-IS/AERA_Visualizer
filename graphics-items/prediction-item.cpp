@@ -20,7 +20,7 @@ PredictionItem::PredictionItem(
   QMenu* contextMenu, NewMkValPredictionEvent* newPredictionEvent, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
   : AeraGraphicsItem(contextMenu, newPredictionEvent, replicodeObjects, parent, "Prediction"),
-  newPredictionEvent_(newPredictionEvent), showState_(HIDE_MODEL)
+  newPredictionEvent_(newPredictionEvent), showState_(HIDE_IMODEL)
 {
   setFactPredFactMkValHtml();
   setFactImdlHtml();
@@ -166,11 +166,11 @@ void PredictionItem::setBoundAndUnboundModelHtml()
 QString PredictionItem::makeHtml()
 {
   QString html = headerHtml_;
-  html += (showState_ == SHOW_INSTANTIATED_MODEL ? highlightedFactPredFactMkValHtml_ : factPredFactMkValHtml_);
+  html += (showState_ == WHAT_MADE_THIS ? highlightedFactPredFactMkValHtml_ : factPredFactMkValHtml_);
 
-  if (showState_ == SHOW_INSTANTIATED_MODEL ||
-      showState_ == SHOW_ORIGINAL_MODEL) {
-    if (showState_ == SHOW_INSTANTIATED_MODEL)
+  if (showState_ == WHAT_MADE_THIS ||
+      showState_ == SHOW_MODEL) {
+    if (showState_ == WHAT_MADE_THIS)
       html += "<br><a href=\"#hide-imodel\">" + UnselectedRadioButtonHtml + " Hide iModel</a>" +
         " " + SelectedRadioButtonHtml + " What Made This?" +
         " <a href=\"#show-model\">" + UnselectedRadioButtonHtml + " Show Model</a>";
@@ -182,7 +182,7 @@ QString PredictionItem::makeHtml()
     html += QString("<br>This prediction was made from instantiated model <b>") +
       replicodeObjects_.getLabel(newPredictionEvent_->factImdl_).c_str() + "</b><br>";
     html += factImdlHtml_;
-    html += "<br><br>" + (showState_ == SHOW_INSTANTIATED_MODEL ? boundModelHtml_ : unboundModelHtml_);
+    html += "<br><br>" + (showState_ == WHAT_MADE_THIS ? boundModelHtml_ : unboundModelHtml_);
   }
   else {
     html += "<br>" + SelectedRadioButtonHtml + " Hide iModel" +
@@ -196,15 +196,15 @@ QString PredictionItem::makeHtml()
 void PredictionItem::textItemLinkActivated(const QString& link)
 {
   if (link == "#hide-imodel") {
-    showState_ = HIDE_MODEL;
+    showState_ = HIDE_IMODEL;
     setTextItemAndPolygon(makeHtml());
   }
   else if (link == "#show-instantiated-model") {
-    showState_ = SHOW_INSTANTIATED_MODEL;
+    showState_ = WHAT_MADE_THIS;
     setTextItemAndPolygon(makeHtml());
   }
   else if (link == "#show-model") {
-    showState_ = SHOW_ORIGINAL_MODEL;
+    showState_ = SHOW_MODEL;
     setTextItemAndPolygon(makeHtml());
   }
   else
