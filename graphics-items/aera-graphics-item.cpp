@@ -192,6 +192,11 @@ void AeraGraphicsItem::addSourceCodeHtmlLinks(
       " " + referencedLabel + "<br>",
       " <a href=\"#debug_oid-" + QString::number(referencedObject->get_debug_oid()) + "\">" +
       referencedLabel + "</a><br>");
+    // The same for at the end of a list.
+    html.replace(
+      " " + referencedLabel + ")",
+      " <a href=\"#debug_oid-" + QString::number(referencedObject->get_debug_oid()) + "\">" +
+      referencedLabel + "</a>)");
   }
 }
 
