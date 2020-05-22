@@ -145,15 +145,11 @@ public:
 
 class NewPredictionSuccessEvent : public AeraEvent {
 public:
-  NewPredictionSuccessEvent(core::Timestamp time, r_code::Code* inputObject,
-    r_code::Code* factSuccessFactPred)
-    : AeraEvent(EVENT_TYPE, time, factSuccessFactPred),
-    inputObject_(inputObject)
+  NewPredictionSuccessEvent(core::Timestamp time, r_code::Code* factSuccessFactPred)
+    : AeraEvent(EVENT_TYPE, time, factSuccessFactPred)
   {}
 
   static const int EVENT_TYPE = 9;
-
-  r_code::Code* inputObject_;
 };
 
 }
