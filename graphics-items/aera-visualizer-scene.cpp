@@ -38,14 +38,14 @@ AeraVisualizerScene::AeraVisualizerScene(
   eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 285;
   eventTypeFirstTop_[NewMkValPredictionEvent::EVENT_TYPE] = 393;
   eventTypeFirstTop_[NewPredictionSuccessEvent::EVENT_TYPE] = 530;
-  eventTypeFirstTop_[0] = 640;
+  eventTypeFirstTop_[0] = 710;
 }
 
 void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 {
   if (!didInitialFit_) {
     didInitialFit_ = true;
-    views().at(0)->fitInView(QRectF(0, 0, 1180, 690));
+    views().at(0)->fitInView(QRectF(0, 0, 10, eventTypeFirstTop_[0] + 25), Qt::KeepAspectRatio);
   }
 
   item->setBrush(itemColor_);
