@@ -391,15 +391,9 @@ void AeraVisulizerWindow::bringToFront()
   if (scene_->selectedItems().isEmpty())
     return;
 
-  QGraphicsItem* selectedItem = scene_->selectedItems().first();
-  QList<QGraphicsItem*> overlapItems = selectedItem->collidingItems();
-
-  qreal zValue = 0;
-  foreach(QGraphicsItem* item, overlapItems) {
-    if (item->zValue() >= zValue && !!dynamic_cast<AeraGraphicsItem*>(item))
-      zValue = item->zValue() + 0.1;
-  }
-  selectedItem->setZValue(zValue);
+  auto selectedItem = dynamic_cast<AeraGraphicsItem*>(scene_->selectedItems().first());
+  if (selectedItem)
+    selectedItem->bringToFront();
 }
 
 void AeraVisulizerWindow::sendToBack()
@@ -407,15 +401,9 @@ void AeraVisulizerWindow::sendToBack()
   if (scene_->selectedItems().isEmpty())
     return;
 
-  QGraphicsItem* selectedItem = scene_->selectedItems().first();
-  QList<QGraphicsItem*> overlapItems = selectedItem->collidingItems();
-
-  qreal zValue = 0;
-  foreach(QGraphicsItem* item, overlapItems) {
-    if (item->zValue() <= zValue && item->type() == ModelItem::Type)
-      zValue = item->zValue() - 0.1;
-  }
-  selectedItem->setZValue(zValue);
+  auto selectedItem = dynamic_cast<AeraGraphicsItem*>(scene_->selectedItems().first());
+  if (selectedItem)
+    selectedItem->sendToBack();
 }
 
 void AeraVisulizerWindow::createActions()

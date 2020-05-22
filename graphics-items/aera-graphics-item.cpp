@@ -100,6 +100,26 @@ void AeraGraphicsItem::removeArrow(Arrow* arrow)
     arrows_.removeAt(index);
 }
 
+void AeraGraphicsItem::bringToFront()
+{
+  qreal zValue = 0;
+  foreach(QGraphicsItem* item, collidingItems()) {
+    if (item->zValue() >= zValue && !!dynamic_cast<AeraGraphicsItem*>(item))
+      zValue = item->zValue() + 0.1;
+  }
+  setZValue(zValue);
+}
+
+void AeraGraphicsItem::sendToBack()
+{
+  qreal zValue = 0;
+  foreach(QGraphicsItem * item, collidingItems()) {
+    if (item->zValue() <= zValue && !!dynamic_cast<AeraGraphicsItem*>(item))
+      zValue = item->zValue() - 0.1;
+  }
+  setZValue(zValue);
+}
+
 void AeraGraphicsItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
   scene()->clearSelection();

@@ -49,6 +49,16 @@ public:
   AeraEvent* getAeraEvent() { return aeraEvent_; }
 
   /**
+   * Change the Z value of this item to be slightly greater than other colliding AeraGraphicsItems.
+   */
+  void bringToFront();
+
+  /**
+   * Change the Z value of this item to be slightly less than other colliding AeraGraphicsItems.
+   */
+  void sendToBack();
+
+  /**
    * Replace all "\n" or "\x01" with "<br>" and extra " " with "&nbsp;".
    * \param input The input string to htmlify.
    * \return The HTML string.
