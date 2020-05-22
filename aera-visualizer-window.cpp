@@ -396,7 +396,7 @@ void AeraVisulizerWindow::bringToFront()
 
   qreal zValue = 0;
   foreach(QGraphicsItem* item, overlapItems) {
-    if (item->zValue() >= zValue && item->type() == ModelItem::Type)
+    if (item->zValue() >= zValue && !!dynamic_cast<AeraGraphicsItem*>(item))
       zValue = item->zValue() + 0.1;
   }
   selectedItem->setZValue(zValue);
