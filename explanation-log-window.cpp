@@ -48,7 +48,7 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
         string explanation = "<b>Q: What is program reduction " + replicodeObjects_.getLabel(object) +
           "?</b><br>This the notification of a reduction of instantiated program <b>" + 
           replicodeObjects_.getLabel(object->get_reference(0)) + 
-          "</b><br>It has the following sets of input objects and output actions.<br>" + 
+          "</b> . It has the following sets of input objects and output actions.<br>" + 
           reductionHtml.toStdString() + "<br><br>";
         appendHtml(explanation);
       });
@@ -70,7 +70,7 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
         string explanation = "<b>Q: What made program output <a href=\"#debug_oid-" +
           to_string(object->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(object) + "</a> ?</b><br>" +
           "This is an output of instantiated program <b>" + replicodeObjects_.getLabel(mkRdx->get_reference(0)) +
-          "</b>, according to<br>program reduction <a href=\"#debug_oid-" +
+          "</b>, according to program reduction <a href=\"#debug_oid-" +
           to_string(mkRdx->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(mkRdx) + "</a><br><br>";
         appendHtml(explanation);
       });
