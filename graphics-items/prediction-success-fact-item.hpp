@@ -22,19 +22,19 @@ protected:
 
 private:
   /**
-   * Set factMkValHtml_ to the HTML source code for the fact and mk.val from
-   * autoFocusNewObjectEvent_->object_.
+   * Set factSuccessHtml_ to the HTML source code for the fact and success from
+   * newPredictionSuccessEvent_->object_.
    */
-  void setFactMkValHtml();
+  void setFactSuccessHtml();
 
   /**
-   * Make the full HTML for the textItem_ from factMkValHtml_ and the object label.
+   * Make the full HTML for the textItem_ from factSuccessHtml_ and the object label.
    * \return The HTML.
    */
   QString makeHtml();
 
   NewPredictionSuccessEvent* newPredictionSuccessEvent_;
-  QString factMkValHtml_;
+  QString factSuccessHtml_;
 };
 
 }

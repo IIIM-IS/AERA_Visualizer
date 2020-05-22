@@ -16,37 +16,35 @@ PredictionSuccessFactItem::PredictionSuccessFactItem(
   : AeraGraphicsItem(contextMenu, newPredictionSuccessEvent, replicodeObjects, parent, "Prediction Success"),
   newPredictionSuccessEvent_(newPredictionSuccessEvent)
 {
-  setFactMkValHtml();
+  setFactSuccessHtml();
   setTextItemAndPolygon(makeHtml());
 }
 
-void PredictionSuccessFactItem::setFactMkValHtml()
+void PredictionSuccessFactItem::setFactSuccessHtml()
 {
-  auto mkVal = newPredictionSuccessEvent_->object_->get_reference(0);
+  auto success = newPredictionSuccessEvent_->object_->get_reference(0);
 
   // Strip the ending confidence value and propagation of saliency threshold.
   regex saliencyRegex("\\s+[\\w\\:]+\\)$");
   regex confidenceAndSaliencyRegex("\\s+\\w+\\s+[\\w\\:]+\\)$");
-  string factMkValSource = regex_replace(replicodeObjects_.getSourceCode(
+  string factSuccessSource = regex_replace(replicodeObjects_.getSourceCode(
     newPredictionSuccessEvent_->object_), confidenceAndSaliencyRegex, ")");
-  string mkValSource = regex_replace(replicodeObjects_.getSourceCode(mkVal), saliencyRegex, ")");
+  string successSource = regex_replace(replicodeObjects_.getSourceCode(success), saliencyRegex, ")");
 
-  QString mkValLabel(replicodeObjects_.getLabel(mkVal).c_str());
+  QString successLabel(replicodeObjects_.getLabel(success).c_str());
 
   // Temporarily use "!down" which doesn't have spaces.
-  factMkValHtml_ = QString(factMkValSource.c_str()).replace(mkValLabel, "!down");
-  factMkValHtml_ += QString("\n      ") + mkValSource.c_str();
+  factSuccessHtml_ = QString(factSuccessSource.c_str()).replace(successLabel, "!down");
+  factSuccessHtml_ += QString("\n      ") + successSource.c_str();
 
-  // TODO: Show autoFocusNewObjectEvent_->syncMode_?
-
-  factMkValHtml_ = htmlify(factMkValHtml_);
-  factMkValHtml_.replace("!down", DownArrowHtml);
-  addSourceCodeHtmlLinks(newPredictionSuccessEvent_->object_, factMkValHtml_);
+  factSuccessHtml_ = htmlify(factSuccessHtml_);
+  factSuccessHtml_.replace("!down", DownArrowHtml);
+  addSourceCodeHtmlLinks(newPredictionSuccessEvent_->object_->get_reference(0), factSuccessHtml_);
 }
 
 QString PredictionSuccessFactItem::makeHtml()
 {
-  return headerHtml_ + factMkValHtml_;
+  return headerHtml_ + factSuccessHtml_;
 }
 
 void PredictionSuccessFactItem::textItemLinkActivated(const QString& link)
