@@ -26,7 +26,12 @@ public:
   static void getIcstOrImdlValues(
     std::string source, std::vector<std::string>& templateValues, std::vector<std::string>& exposedValues);
 
+protected:
+  void textItemLinkActivated(const QString& link) override;
+
 private:
+  typedef enum { HIDE_ICST, SHOW_ICST } ShowState;
+
   /**
    * Set factIcstHtml_ to the HTML source code for the fact and icst from newInstantiatedCompositeStateEvent_->object_.
    */
@@ -34,9 +39,10 @@ private:
 
   /**
    * Set boundCstHtml_ to the HTML source code for the cst from newInstantiatedCompositeStateEvent_->object_
-   * with variables bound to the template parameters.
+   * with variables bound to the template parameters. Also set boundCstMembersHtml_ to just the set of
+   * members from boundCstHtml_ .
    */
-  void setBoundCstHtml();
+  void setBoundCstAndMembersHtml();
 
   /**
    * Make the full HTML for the textItem_ from factIcstHtml_, boundCstHtml_ and the object label.
@@ -45,8 +51,10 @@ private:
   QString makeHtml();
 
   NewInstantiatedCompositeStateEvent* newInstantiatedCompositeStateEvent_;
+  ShowState showState_;
   QString factIcstHtml_;
   QString boundCstHtml_;
+  QString boundCstMembersHtml_;
 };
 
 }
