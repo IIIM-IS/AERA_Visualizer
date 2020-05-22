@@ -124,7 +124,7 @@ void PredictionItem::setBoundAndUnboundModelHtml()
   modelSource = regex_replace(modelSource, regex("\\x01\\[\\](\\x01   [^\\x01]+)+$"), "\x01|[])");
 
   // Substitute variables.
-  // TODO: Share code with InstantiatedCompositeStateItem::setBoundCstHtml()?
+  // TODO: Share code with InstantiatedCompositeStateItem::setBoundCstAndMembersHtml()?
   int iVariable = -1;
   size_t iTemplateValues = 0;
   size_t iExposedValues = 0;
@@ -176,7 +176,7 @@ QString PredictionItem::makeHtml()
         " <a href=\"#show-model\">" + UnselectedRadioButtonHtml + " Show Model</a>";
     else
       html += "<br><a href=\"#hide-imodel\">" + UnselectedRadioButtonHtml + " Hide iModel</a> " +
-        " <a href=\"#show-instantiated-model\">" + UnselectedRadioButtonHtml + " What Made This?</a>" +
+        " <a href=\"#what-made-this\">" + UnselectedRadioButtonHtml + " What Made This?</a>" +
         " " + SelectedRadioButtonHtml + " Show Model";
 
     html += QString("<br>This prediction was made from instantiated model <b>") +
@@ -186,7 +186,7 @@ QString PredictionItem::makeHtml()
   }
   else {
     html += "<br>" + SelectedRadioButtonHtml + " Hide iModel" +
-      " <a href=\"#show-instantiated-model\">" + UnselectedRadioButtonHtml + " What Made This?</a>" +
+      " <a href=\"#what-made-this\">" + UnselectedRadioButtonHtml + " What Made This?</a>" +
       " <a href=\"#show-model\">" + UnselectedRadioButtonHtml + " Show Model</a>";
   }
 
@@ -199,7 +199,7 @@ void PredictionItem::textItemLinkActivated(const QString& link)
     showState_ = HIDE_IMODEL;
     setTextItemAndPolygon(makeHtml());
   }
-  else if (link == "#show-instantiated-model") {
+  else if (link == "#what-made-this") {
     showState_ = WHAT_MADE_THIS;
     setTextItemAndPolygon(makeHtml());
   }
