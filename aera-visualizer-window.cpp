@@ -1,10 +1,12 @@
 #include <fstream>
+#include "submodules/replicode/r_exec/opcodes.h"
 #include "graphics-items/arrow.hpp"
 #include "graphics-items/model-item.hpp"
 #include "graphics-items/composite-state-item.hpp"
 #include "graphics-items/program-reduction-item.hpp"
 #include "graphics-items/auto-focus-fact-item.hpp"
 #include "graphics-items/prediction-item.hpp"
+#include "graphics-items/prediction-success-fact-item.hpp"
 #include "graphics-items/instantiated-composite-state-item.hpp"
 #include "graphics-items/aera-visualizer-scene.hpp"
 #include "aera-visualizer-window.hpp"
@@ -15,6 +17,7 @@ using namespace std;
 using namespace std::chrono;
 using namespace core;
 using namespace r_code;
+using namespace r_exec;
 
 namespace aera_visualizer {
 
@@ -156,11 +159,10 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
           timestamp, instantiatedCompositeState, inputs));
     }
     else if (regex_search(line, matches, newPredictionSuccessRegex)) {
-      auto inputObject = replicodeObjects_.getObject(stol(matches[4].str()));
       auto factSuccessFactPred = replicodeObjects_.getObject(stol(matches[5].str()));
-      if (inputObject && factSuccessFactPred)
+      if (factSuccessFactPred)
         events_.push_back(make_shared<NewPredictionSuccessEvent>(
-          getTimestamp(matches), inputObject, factSuccessFactPred));
+          getTimestamp(matches), factSuccessFactPred));
     }
   }
 }
@@ -209,6 +211,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
       event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE ||
+      event->eventType_ == NewPredictionSuccessEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
     AeraGraphicsItem* newItem;
 
@@ -234,6 +237,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     }
     else if (event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE)
       newItem = new PredictionItem(itemMenu_, (NewMkValPredictionEvent*)event, replicodeObjects_, scene_);
+    else if (event->eventType_ == NewPredictionSuccessEvent::EVENT_TYPE)
+      newItem = new PredictionSuccessFactItem(itemMenu_, (NewPredictionSuccessEvent*)event, replicodeObjects_, scene_);
     else if (event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
       auto newIcstEvent = (NewInstantiatedCompositeStateEvent*)event;
       newItem = new InstantiatedCompositeStateItem(itemMenu_, newIcstEvent, replicodeObjects_, scene_);
@@ -254,6 +259,18 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       auto referencedItem = scene_->getAeraGraphicsItem(event->object_->get_reference(i));
       if (referencedItem)
         scene_->addArrow(newItem, referencedItem);
+    }
+    if (event->object_->code(0).asOpcode() == Opcodes::Fact ||
+        event->object_->code(0).asOpcode() == Opcodes::AntiFact) {
+      // Add references from the fact value.
+      auto value = event->object_->get_reference(0);
+      if (!(value->code(0).asOpcode() == Opcodes::IMdl || value->code(0).asOpcode() == Opcodes::ICst)) {
+        for (int i = 0; i < value->references_size(); ++i) {
+          auto referencedItem = scene_->getAeraGraphicsItem(value->get_reference(i));
+          if (referencedItem)
+            scene_->addArrow(newItem, referencedItem);
+        }
+      }
     }
 
     scene_->establishFlashTimer();
@@ -315,6 +332,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
       event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE ||
+      event->eventType_ == NewPredictionSuccessEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
     // Find the AeraGraphicsItem for this event and remove it.
     // Note that the event saves the updated item position and will use it when recreating the item.
