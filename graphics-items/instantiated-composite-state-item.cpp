@@ -156,10 +156,12 @@ void InstantiatedCompositeStateItem::textItemLinkActivated(const QString& link)
   if (link == "#hide-icst") {
     showState_ = HIDE_ICST;
     setTextItemAndPolygon(makeHtml());
+    bringToFront();
   }
   else if (link == "#show-icst") {
     showState_ = SHOW_ICST;
     setTextItemAndPolygon(makeHtml());
+    bringToFront();
   }
   else
     // For #debug_oid- and others, defer to the base class.

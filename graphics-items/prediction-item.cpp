@@ -197,14 +197,17 @@ void PredictionItem::textItemLinkActivated(const QString& link)
   if (link == "#hide-imodel") {
     showState_ = HIDE_IMODEL;
     setTextItemAndPolygon(makeHtml());
+    bringToFront();
   }
   else if (link == "#what-made-this") {
     showState_ = WHAT_MADE_THIS;
     setTextItemAndPolygon(makeHtml());
+    bringToFront();
   }
   else if (link == "#show-model") {
     showState_ = SHOW_MODEL;
     setTextItemAndPolygon(makeHtml());
+    bringToFront();
   }
   else
     // For #debug_oid- and others, defer to the base class.
