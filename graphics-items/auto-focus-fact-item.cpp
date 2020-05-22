@@ -1,13 +1,7 @@
 #include <regex>
-#include <algorithm>
-#include <QGraphicsScene>
-#include <QGraphicsSceneContextMenuEvent>
 #include <QMenu>
-#include <QPainter>
-#include <QtWidgets>
 #include "explanation-log-window.hpp"
 #include "aera-visualizer-scene.hpp"
-#include "program-reduction-item.hpp"
 #include "auto-focus-fact-item.hpp"
 
 using namespace std;
