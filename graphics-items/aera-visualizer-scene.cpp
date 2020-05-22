@@ -35,9 +35,9 @@ AeraVisualizerScene::AeraVisualizerScene(
   flashTimerId_ = 0;
 
   eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] = 10;
-  eventTypeFirstTop_[NewPredictionSuccessEvent::EVENT_TYPE] = 275;
-  eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 365;
-  eventTypeFirstTop_[NewMkValPredictionEvent::EVENT_TYPE] = 470;
+  eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 275;
+  eventTypeFirstTop_[NewMkValPredictionEvent::EVENT_TYPE] = 383;
+  eventTypeFirstTop_[NewPredictionSuccessEvent::EVENT_TYPE] = 520;
   eventTypeFirstTop_[0] = 640;
 }
 
