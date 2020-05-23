@@ -89,17 +89,17 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     }
     else {
       int eventType = 0;
-        if (eventTypeFirstTop_.find(newObjectEvent->eventType_) != eventTypeFirstTop_.end())
-          // This is a recognized event type.
-          eventType = newObjectEvent->eventType_;
+      if (eventTypeFirstTop_.find(newObjectEvent->eventType_) != eventTypeFirstTop_.end())
+        // This is a recognized event type.
+        eventType = newObjectEvent->eventType_;
 
-        qreal top;
-        if (eventTypeNextTop_.find(eventType) != eventTypeNextTop_.end())
-          top = eventTypeNextTop_[eventType];
-        else
-          top = eventTypeFirstTop_[eventType];
+      qreal top;
+      if (eventTypeNextTop_.find(eventType) != eventTypeNextTop_.end())
+        top = eventTypeNextTop_[eventType];
+      else
+        top = eventTypeFirstTop_[eventType];
 
-      newObjectEvent->itemTopLeftPosition_ = QPointF(thisFrameLeft_ + 3, top);
+      newObjectEvent->itemTopLeftPosition_ = QPointF(thisFrameLeft_ + 5, top);
 
       // Set up eventTypeNextTop_ for the next item.
       eventTypeNextTop_[eventType] = top + item->boundingRect().height() + 15;
