@@ -141,7 +141,6 @@ private:
 
   size_t iNextEvent_;
   ReplicodeObjects& replicodeObjects_;
-  QPen itemBorderNoHighlightPen_;
   QPen itemBorderHighlightPen_;
   r_code::Code* hoverHighlightObject_;
   QString hoverPreviousUrl_;

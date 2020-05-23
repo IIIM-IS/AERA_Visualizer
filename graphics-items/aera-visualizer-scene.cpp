@@ -15,6 +15,8 @@ using namespace r_code;
 
 namespace aera_visualizer {
 
+const QPen AeraVisualizerScene::ItemBorderNoHighlightPen(Qt::black, 1);
+
 AeraVisualizerScene::AeraVisualizerScene(
   QMenu* itemMenu, ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent)
   : QGraphicsScene(parent),
@@ -222,7 +224,7 @@ void AeraVisualizerScene::timerEvent(QTimerEvent* event)
       if (aeraGraphicsItem->borderFlashCountdown_ % 2 == 1)
         aeraGraphicsItem->setPen(borderFlashPen_);
       else
-        aeraGraphicsItem->setPen(lineColor_);
+        aeraGraphicsItem->setPen(ItemBorderNoHighlightPen);
     }
 
     auto modelItem = dynamic_cast<ModelItem*>(item);

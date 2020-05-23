@@ -25,7 +25,6 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 : AeraVisulizerWindowBase(0),
   replicodeObjects_(replicodeObjects), iNextEvent_(0), explanationLogWindow_(0),
   hoverHighlightObject_(0),
-  itemBorderNoHighlightPen_(Qt::black, 1),
   itemBorderHighlightPen_(Qt::blue, 3)
 {
   createActions();
@@ -204,7 +203,7 @@ void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, 
     // The mouse cursor exited the link.
     if (hoverHighlightObject_) {
       // Clear the previous highlighting.
-      setAeraGraphicsItemPen(hoverHighlightObject_, itemBorderNoHighlightPen_);
+      setAeraGraphicsItemPen(hoverHighlightObject_, AeraVisualizerScene::ItemBorderNoHighlightPen);
       hoverHighlightObject_ = 0;
     }
 
@@ -223,7 +222,7 @@ void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, 
     if (object) {
       if (hoverHighlightObject_)
         // Unhighlight a previous object.
-        setAeraGraphicsItemPen(hoverHighlightObject_, itemBorderNoHighlightPen_);
+        setAeraGraphicsItemPen(hoverHighlightObject_, AeraVisualizerScene::ItemBorderNoHighlightPen);
 
       hoverHighlightObject_ = object;
       setAeraGraphicsItemPen(object, itemBorderHighlightPen_);
