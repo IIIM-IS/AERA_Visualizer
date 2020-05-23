@@ -40,7 +40,7 @@ AeraVisualizerScene::AeraVisualizerScene(
   eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 285;
   eventTypeFirstTop_[NewMkValPredictionEvent::EVENT_TYPE] = 393;
   eventTypeFirstTop_[NewPredictionSuccessEvent::EVENT_TYPE] = 530;
-  eventTypeFirstTop_[0] = 670;
+  eventTypeFirstTop_[0] = 750;
 }
 
 void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)

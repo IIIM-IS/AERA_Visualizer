@@ -20,10 +20,10 @@ int main(int argv, char *args[])
 
   AeraVisulizerWindow mainWindow(replicodeObjects);
   // TODO: Use the actual screen resolution.
-  const int left = 10;
-  const int top = 40;
-  const int width = 1280;
-  const int height = 810;
+  const int left = 0;
+  const int top = 35;
+  const int width = 1620;
+  const int height = 1000;
   mainWindow.setGeometry(left, top, width, height);
 
   auto explanationLogWindow = new ExplanationLogWindow(&mainWindow, replicodeObjects);
