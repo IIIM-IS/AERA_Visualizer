@@ -186,6 +186,10 @@ void AeraVisualizerScene::zoomViewHome()
 void AeraVisualizerScene::zoomToItem(QGraphicsItem* item)
 {
   views().at(0)->fitInView(item, Qt::KeepAspectRatio);
+
+  auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
+  if (aeraGraphicsItem)
+    aeraGraphicsItem->bringToFront();
 }
 
 #if QT_CONFIG(wheelevent)
