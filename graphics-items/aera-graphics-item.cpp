@@ -221,7 +221,7 @@ void AeraGraphicsItem::textItemLinkActivated(const QString& link)
   if (link == "#this") {
     auto menu = new QMenu();
     menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
-    menu->exec(parent_->getMouseScreenPosition() - QPoint(10, 10));
+    menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
   }
   else if (link.startsWith("#debug_oid-")) {
@@ -233,7 +233,7 @@ void AeraGraphicsItem::textItemLinkActivated(const QString& link)
         auto menu = new QMenu();
         menu->addAction(QString("Zoom to ") + replicodeObjects_.getLabel(object).c_str(),
           [=]() { parent_->getParent()->zoomToAeraGraphicsItem(object); });
-        menu->exec(parent_->getMouseScreenPosition() - QPoint(10, 10));
+        menu->exec(QCursor::pos() - QPoint(10, 10));
         delete menu;
       }
     }

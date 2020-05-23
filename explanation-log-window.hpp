@@ -54,7 +54,6 @@ private:
 
     ExplanationLogWindow* parent_;
     QString previousUrl_;
-    QPoint mouseScreenPosition_;
 
   protected:
     void mouseMoveEvent(QMouseEvent* event) override;
@@ -63,7 +62,7 @@ private:
 
   AeraVisulizerWindow* parent_;
   ReplicodeObjects& replicodeObjects_;
-  // TODO: We should be able to use textBrowser_.
+  // TODO: We should be able to use textBrowser_ to append HTML.
   QString html_;
   TextBrowser* textBrowser_;
 };

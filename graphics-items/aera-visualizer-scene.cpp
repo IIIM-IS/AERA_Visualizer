@@ -112,12 +112,6 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
   item->setPos(newObjectEvent->itemPosition_);
 }
 
-void AeraVisualizerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
-{
-  mouseScreenPosition_ = event->screenPos();
-  QGraphicsScene::mouseMoveEvent(event);
-}
-
 void AeraVisualizerScene::mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent)
 {
   if (mouseEvent->button() != Qt::LeftButton)

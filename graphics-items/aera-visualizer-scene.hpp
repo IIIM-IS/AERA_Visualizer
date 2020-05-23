@@ -48,13 +48,11 @@ public:
     if (flashTimerId_ == 0)
       flashTimerId_ = startTimer(200);
   }
-  QPoint getMouseScreenPosition() { return mouseScreenPosition_; }
 
   // The initial value for the flash countdown;
   static const int FLASH_COUNT = 6;
 
 protected:
-  void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
   void mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent) override;
   void mouseReleaseEvent(QGraphicsSceneMouseEvent* mouseEvent) override;
   void timerEvent(QTimerEvent* event) override;
@@ -81,7 +79,6 @@ private:
   QString valueUpFlashColor_;
   QString valueDownFlashColor_;
   int flashTimerId_;
-  QPoint mouseScreenPosition_;
 };
 
 }

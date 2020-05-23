@@ -64,7 +64,7 @@ void ProgramOutputFactItem::textItemLinkActivated(const QString& link)
         to_string(mkRdx->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(mkRdx) + "</a><br><br>";
       parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
     });
-    menu->exec(parent_->getMouseScreenPosition() - QPoint(10, 10));
+    menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
   }
   else

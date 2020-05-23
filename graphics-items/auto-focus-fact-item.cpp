@@ -60,7 +60,7 @@ void AutoFocusFactItem::textItemLinkActivated(const QString& link)
         to_string(fromObject->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(fromObject) + "</a><br><br>";
       parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
     });
-    menu->exec(parent_->getMouseScreenPosition() - QPoint(10, 10));
+    menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
   }
   else

@@ -52,7 +52,7 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
           reductionHtml.toStdString() + "<br><br>";
         appendHtml(explanation);
       });
-      menu->exec(textBrowser_->mouseScreenPosition_ - QPoint(10, 10));
+      menu->exec(QCursor::pos() - QPoint(10, 10));
       delete menu;
     }
     // Debug: Replace this with a search for the MkRdx output.
@@ -74,7 +74,7 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
           to_string(mkRdx->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(mkRdx) + "</a><br><br>";
         appendHtml(explanation);
       });
-      menu->exec(textBrowser_->mouseScreenPosition_ - QPoint(10, 10));
+      menu->exec(QCursor::pos() - QPoint(10, 10));
       delete menu;
     }
     else {
@@ -85,7 +85,7 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
       auto menu = new QMenu();
       menu->addAction(QString("Zoom to ") + replicodeObjects_.getLabel(object).c_str(),
         [=]() { parent_->zoomToAeraGraphicsItem(object); });
-      menu->exec(textBrowser_->mouseScreenPosition_ - QPoint(10, 10));
+      menu->exec(QCursor::pos() - QPoint(10, 10));
       delete menu;
     }
   }
@@ -93,8 +93,6 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
 
 void ExplanationLogWindow::TextBrowser::mouseMoveEvent(QMouseEvent* event)
 {
-  mouseScreenPosition_ = event->globalPos();
-
   auto url = anchorAt(event->pos());
   if (url == "") {
     // The mouse cursor exited the link.
