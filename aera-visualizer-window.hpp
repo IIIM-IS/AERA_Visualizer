@@ -61,12 +61,12 @@ public:
   void zoomToAeraGraphicsItem(r_code::Code* object);
 
   /**
-   * Get the scene AeraGraphicsItem whose getAeraEvent() has the given object, and flash it.
-   * \param object The Code* object to search for.
+   * Handle hover move events to get the HTML link at the position and highlight the linked item
+   * until the mouse leaves the link.
+   * \param document This calls document->documentLayout()->anchorAt(position) to get the hovered link.
+   * \param position The position relative to the text item from the move event.
    */
-  void flashAeraGraphicsItem(r_code::Code* object);
-
-  void textItemHoverMoveEvent(const QTextDocument* document, QPointF pos);
+  void textItemHoverMoveEvent(const QTextDocument* document, QPointF position);
 
 protected:
   bool haveMoreEvents() override { return iNextEvent_ < events_.size(); }
@@ -119,6 +119,14 @@ private:
    */
   core::Timestamp getTimestamp(const smatch& matches);
 
+  /**
+   * Get the scene AeraGraphicsItem whose getAeraEvent() has the given object, and set its pen.
+   * If the object or item is not found, do nothing.
+   * \param object The Code* object to search for.
+   * \param pen The pen (for the border).
+   */
+  void setAeraGraphicsItemPen(r_code::Code* object, const QPen& pen);
+
   AeraVisualizerScene* scene_;
 
   QAction* exitAction_;
@@ -133,6 +141,9 @@ private:
 
   size_t iNextEvent_;
   ReplicodeObjects& replicodeObjects_;
+  QPen itemBorderNoHighlightPen_;
+  QPen itemBorderHighlightPen_;
+  r_code::Code* hoverHighlightObject_;
   QString hoverPreviousUrl_;
 };
 

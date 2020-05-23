@@ -23,7 +23,10 @@ namespace aera_visualizer {
 
 AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 : AeraVisulizerWindowBase(0),
-replicodeObjects_(replicodeObjects), iNextEvent_(0), explanationLogWindow_(0)
+  replicodeObjects_(replicodeObjects), iNextEvent_(0), explanationLogWindow_(0),
+  hoverHighlightObject_(0),
+  itemBorderNoHighlightPen_(Qt::black, 1),
+  itemBorderHighlightPen_(Qt::blue, 3)
 {
   createActions();
   createMenus();
@@ -187,21 +190,24 @@ void AeraVisulizerWindow::zoomToAeraGraphicsItem(r_code::Code* object)
     scene_->zoomToItem(item);
 }
 
-void AeraVisulizerWindow::flashAeraGraphicsItem(r_code::Code* object)
+void AeraVisulizerWindow::setAeraGraphicsItemPen(r_code::Code* object, const QPen& pen)
 {
   auto item = scene_->getAeraGraphicsItem(object);
-  if (item) {
-    // Flash the corresponding item.
-    item->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
-    scene_->establishFlashTimer();
-  }
+  if (item)
+    item->setPen(pen);
 }
 
-void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, QPointF pos)
+void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, QPointF position)
 {
-  auto url = document->documentLayout()->anchorAt(pos);
+  auto url = document->documentLayout()->anchorAt(position);
   if (url == "") {
     // The mouse cursor exited the link.
+    if (hoverHighlightObject_) {
+      // Clear the previous highlighting.
+      setAeraGraphicsItemPen(hoverHighlightObject_, itemBorderNoHighlightPen_);
+      hoverHighlightObject_ = 0;
+    }
+
     hoverPreviousUrl_ = "";
     return;
   }
@@ -211,10 +217,17 @@ void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, 
 
   hoverPreviousUrl_ = url;
   if (url.startsWith("#debug_oid-")) {
+    // Highlight the linked item.
     uint64 debug_oid = url.mid(11).toULongLong();
     auto object = replicodeObjects_.getObjectByDebugOid(debug_oid);
-    if (object)
-      flashAeraGraphicsItem(object);
+    if (object) {
+      if (hoverHighlightObject_)
+        // Unhighlight a previous object.
+        setAeraGraphicsItemPen(hoverHighlightObject_, itemBorderNoHighlightPen_);
+
+      hoverHighlightObject_ = object;
+      setAeraGraphicsItemPen(object, itemBorderHighlightPen_);
+    }
   }
 }
 
