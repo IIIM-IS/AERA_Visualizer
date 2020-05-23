@@ -92,13 +92,29 @@ public:
   static const QString UnselectedRadioButtonHtml;
 
 protected:
+  /**
+   * AeraGraphicsItem::TextItem extends QGraphicsTextItem so that we can override its
+   * hoverMoveEvent.
+   */
+  class TextItem : public QGraphicsTextItem {
+  public:
+    TextItem(AeraGraphicsItem* parent)
+      : QGraphicsTextItem(parent), parent_(parent)
+    {}
+
+    AeraGraphicsItem* parent_;
+
+  protected:
+    void hoverMoveEvent(QGraphicsSceneHoverEvent* event) override;
+  };
+  friend TextItem;
+
   void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
   QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
   /**
    * Set the textItem_ to the given html and create the border polygon. Connect
-   * the textItem_ to textItemLinkHovered and textItemLinkActivated, with default
-   * behavior which a derived class can override.
+   * the textItem_ to textItemLinkActivated, with default behavior which a derived class can override.
    * \param html The HTML for the textItem_.
    * \param prependHeaderHtml If false, use html as-is. If true, first set the text 
    * to html and adjust the size, then set the text to headerHtml_+html. We do this because
@@ -106,14 +122,12 @@ protected:
    */
   void setTextItemAndPolygon(QString html, bool prependHeaderHtml);
 
-  virtual void textItemLinkHovered(const QString& link);
-
   virtual void textItemLinkActivated(const QString& link);
 
   AeraVisualizerScene* parent_;
   ReplicodeObjects& replicodeObjects_;
   QString headerHtml_;
-  QGraphicsTextItem* textItem_;
+  TextItem* textItem_;
 
 private:
   void removeArrow(Arrow* arrow);

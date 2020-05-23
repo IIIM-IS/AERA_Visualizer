@@ -50,7 +50,7 @@ void AeraGraphicsItem::setTextItemAndPolygon(QString html, bool prependHeaderHtm
   // Set up the textItem_ first to get its size.
   if (textItem_)
     delete textItem_;
-  textItem_ = new QGraphicsTextItem(this);
+  textItem_ = new TextItem(this);
   textItem_->setHtml(html);
   // adjustSize() is needed for right-aligned text.
   textItem_->adjustSize();
@@ -64,8 +64,6 @@ void AeraGraphicsItem::setTextItemAndPolygon(QString html, bool prependHeaderHtm
   qreal top = -textItem_->boundingRect().height() / 2 - 5;
   textItem_->setPos(left + 5, top + 5);
   textItem_->setTextInteractionFlags(Qt::TextBrowserInteraction);
-  QObject::connect(textItem_, &QGraphicsTextItem::linkHovered,
-    [this](const QString& link) { textItemLinkHovered(link); });
   QObject::connect(textItem_, &QGraphicsTextItem::linkActivated,
     [this](const QString& link) { textItemLinkActivated(link); });
 
@@ -206,16 +204,6 @@ void AeraGraphicsItem::addSourceCodeHtmlLinks(
   }
 }
 
-void AeraGraphicsItem::textItemLinkHovered(const QString& link)
-{
-  if (link.startsWith("#debug_oid-")) {
-    uint64 debug_oid = link.mid(11).toULongLong();
-    auto object = replicodeObjects_.getObjectByDebugOid(debug_oid);
-    if (object)
-      parent_->getParent()->flashAeraGraphicsItem(object);
-  }
-}
-
 void AeraGraphicsItem::textItemLinkActivated(const QString& link)
 {
   if (link == "#this") {
@@ -238,6 +226,13 @@ void AeraGraphicsItem::textItemLinkActivated(const QString& link)
       }
     }
   }
+}
+
+void AeraGraphicsItem::TextItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
+{
+  parent_->parent_->getParent()->textItemHoverMoveEvent(document(), event->pos());
+
+  QGraphicsTextItem::hoverMoveEvent(event);
 }
 
 }
