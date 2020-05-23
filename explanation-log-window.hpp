@@ -53,7 +53,6 @@ private:
     {}
 
     ExplanationLogWindow* parent_;
-    QString previousUrl_;
 
   protected:
     void mouseMoveEvent(QMouseEvent* event) override;

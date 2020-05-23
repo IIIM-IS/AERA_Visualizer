@@ -93,23 +93,9 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
 
 void ExplanationLogWindow::TextBrowser::mouseMoveEvent(QMouseEvent* event)
 {
-  auto url = anchorAt(event->pos());
-  if (url == "") {
-    // The mouse cursor exited the link.
-    previousUrl_ = "";
-    return;
-  }
-  if (url == previousUrl_)
-    // Still hovering the same link, so do nothing.
-    return;
+  parent_->parent_->textItemHoverMoveEvent(document(), event->pos());
 
-  previousUrl_ = url;
-  if (url.startsWith("#debug_oid-")) {
-    uint64 debug_oid = url.mid(11).toULongLong();
-    auto object = parent_->replicodeObjects_.getObjectByDebugOid(debug_oid);
-    if (object)
-      parent_->parent_->flashAeraGraphicsItem(object);
-  }
+  QTextBrowser::mouseMoveEvent(event);
 }
 
 }

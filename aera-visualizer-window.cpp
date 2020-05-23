@@ -197,6 +197,27 @@ void AeraVisulizerWindow::flashAeraGraphicsItem(r_code::Code* object)
   }
 }
 
+void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, QPointF pos)
+{
+  auto url = document->documentLayout()->anchorAt(pos);
+  if (url == "") {
+    // The mouse cursor exited the link.
+    hoverPreviousUrl_ = "";
+    return;
+  }
+  if (url == hoverPreviousUrl_)
+    // Still hovering the same link, so do nothing.
+    return;
+
+  hoverPreviousUrl_ = url;
+  if (url.startsWith("#debug_oid-")) {
+    uint64 debug_oid = url.mid(11).toULongLong();
+    auto object = replicodeObjects_.getObjectByDebugOid(debug_oid);
+    if (object)
+      flashAeraGraphicsItem(object);
+  }
+}
+
 Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 {
   if (iNextEvent_ >= events_.size())

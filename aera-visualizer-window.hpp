@@ -66,6 +66,8 @@ public:
    */
   void flashAeraGraphicsItem(r_code::Code* object);
 
+  void textItemHoverMoveEvent(const QTextDocument* document, QPointF pos);
+
 protected:
   bool haveMoreEvents() override { return iNextEvent_ < events_.size(); }
 
@@ -131,6 +133,7 @@ private:
 
   size_t iNextEvent_;
   ReplicodeObjects& replicodeObjects_;
+  QString hoverPreviousUrl_;
 };
 
 }
