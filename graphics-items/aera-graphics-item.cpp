@@ -134,7 +134,7 @@ void AeraGraphicsItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 QVariant AeraGraphicsItem::itemChange(GraphicsItemChange change, const QVariant& value)
 {
   if (change == QGraphicsItem::ItemPositionChange) {
-    aeraEvent_->itemPosition_ = value.toPointF();
+    aeraEvent_->itemTopLeftPosition_ = boundingRect().topLeft() + value.toPointF();
 
     foreach(Arrow * arrow, arrows_)
       arrow->updatePosition();

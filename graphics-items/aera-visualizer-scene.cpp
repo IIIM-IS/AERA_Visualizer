@@ -53,7 +53,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
   item->setBrush(itemColor_);
 
   auto newObjectEvent = item->getAeraEvent();
-  if (qIsNaN(newObjectEvent->itemPosition_.x())) {
+  if (qIsNaN(newObjectEvent->itemTopLeftPosition_.x())) {
     // Assign an initial position.
     microseconds samplingPeriod(100000);
     if (newObjectEvent->time_ >= thisFrameTime_ + samplingPeriod) {
@@ -80,11 +80,11 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     if (newObjectEvent->eventType_ == NewModelEvent::EVENT_TYPE || newObjectEvent->eventType_ == NewCompositeStateEvent::EVENT_TYPE) {
       // Debug: Until we have a split panel for models.
       if (newObjectEvent->object_->get_oid() == 52)
-        newObjectEvent->itemPosition_ = QPointF(0 + item->boundingRect().width() / 2, 330);
+        newObjectEvent->itemTopLeftPosition_ = QPointF(0, 330 - item->boundingRect().height() / 2);
       else if (newObjectEvent->object_->get_oid() == 53)
-        newObjectEvent->itemPosition_ = QPointF(0 + item->boundingRect().width() / 2, 530);
+        newObjectEvent->itemTopLeftPosition_ = QPointF(0, 530 - item->boundingRect().height() / 2);
       else if (newObjectEvent->object_->get_oid() == 54)
-        newObjectEvent->itemPosition_ = QPointF(0 + item->boundingRect().width() / 2, 740);
+        newObjectEvent->itemTopLeftPosition_ = QPointF(0, 740 - item->boundingRect().height() / 2);
       item->setZValue(-1);
     }
     else {
@@ -99,9 +99,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
         else
           top = eventTypeFirstTop_[eventType];
 
-      // The item origin is in its center, so offset to the top-left.
-      newObjectEvent->itemPosition_ = QPointF(
-        thisFrameLeft_ + 3 + item->boundingRect().width() / 2, top + item->boundingRect().height() / 2);
+      newObjectEvent->itemTopLeftPosition_ = QPointF(thisFrameLeft_ + 3, top);
 
       // Set up eventTypeNextTop_ for the next item.
       eventTypeNextTop_[eventType] = top + item->boundingRect().height() + 15;
@@ -111,7 +109,8 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
   }
 
   addItem(item);
-  item->setPos(newObjectEvent->itemPosition_);
+  // Adjust the position from the topLeft.
+  item->setPos(newObjectEvent->itemTopLeftPosition_ - item->boundingRect().topLeft());
 }
 
 void AeraVisualizerScene::mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent)

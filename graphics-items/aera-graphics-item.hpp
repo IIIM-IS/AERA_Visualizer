@@ -35,7 +35,7 @@ public:
    * Create an AeraGraphicsItem, and set headerHtml_ to a header with aeraEvent_->time_ and 
    * headerPrefix + the aeraEvent label with a "#this" link.
    * \param contextMenu The right-click context menu from the parent.
-   * \param aeraEvent The AeraEvent which is used to get the time_ for the header and the itemPosition_.
+   * \param aeraEvent The AeraEvent which is used to get the time_ for the header and the itemTopLeftPosition_.
    * \param replicodeObjects The ReplicodeObjects used to get the debug OID and label.
    * \param parent The parent AeraVisualizerScene.
    * \param headerPrefix The prefix for headerHtml_ as described above.

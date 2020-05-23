@@ -12,14 +12,14 @@ public:
   : eventType_(eventType),
     time_(time),
     object_(object),
-    itemPosition_(qQNaN(), qQNaN())
+    itemTopLeftPosition_(qQNaN(), qQNaN())
   {}
 
   int eventType_;
   core::Timestamp time_;
   r_code::Code* object_;
-  // itemPosition_ is used by "New" events to remember the screen position after undoing.
-  QPointF itemPosition_;
+  // itemTopLeftPosition_ is used by "New" events to remember the screen position after undoing.
+  QPointF itemTopLeftPosition_;
 };
 
 class NewModelEvent : public AeraEvent {
