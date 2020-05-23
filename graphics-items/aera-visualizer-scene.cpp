@@ -23,7 +23,7 @@ AeraVisualizerScene::AeraVisualizerScene(
   didInitialFit_(false),
   thisFrameTime_(seconds(0)),
   nextFrameLeft_(160 /* Debug: Until we have a split panel for models 10 */),
-  borderFlashPen_(Qt::blue, 3),
+  borderFlashPen_(Qt::green, 3),
   noFlashColor_("black"),
   valueUpFlashColor_("green"),
   valueDownFlashColor_("red")
