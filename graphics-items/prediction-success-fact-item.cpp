@@ -2,6 +2,7 @@
 #include <QMenu>
 #include "explanation-log-window.hpp"
 #include "aera-visualizer-scene.hpp"
+#include "prediction-item.hpp"
 #include "prediction-success-fact-item.hpp"
 
 using namespace std;
@@ -44,26 +45,26 @@ void PredictionSuccessFactItem::setFactSuccessHtml()
 
 void PredictionSuccessFactItem::textItemLinkActivated(const QString& link)
 {
-#if 0
   if (link == "#this") {
     auto menu = new QMenu();
     menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
     menu->addAction("What Made This?", [=]() {
-      auto mkRdx = programReductionNewObjectEvent_->programReduction_;
+      Code* factPrediction = newPredictionSuccessEvent_->object_->get_reference(0)->get_reference(0);
+      Code* input = newPredictionSuccessEvent_->object_->get_reference(0)->get_reference(1);
 
-      string explanation = "<b>Q: What made program output <a href=\"#debug_oid-" +
-        to_string(programReductionNewObjectEvent_->object_->get_debug_oid()) + "\">" +
-        replicodeObjects_.getLabel(programReductionNewObjectEvent_->object_) + "</a> ?</b><br>" +
-        "This an output of instantiated program <b>" + replicodeObjects_.getLabel(mkRdx->get_reference(0)) +
-        "</b>, according to<br>program reduction <a href=\"#debug_oid-" +
-        to_string(mkRdx->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(mkRdx) + "</a><br><br>";
-      parent_->getExplanationLogWindow()->appendHtml(explanation);
+      string explanation = "<b>Q: What made prediction success <a href=\"#debug_oid-" +
+        to_string(newPredictionSuccessEvent_->object_->get_debug_oid()) + "\">" +
+        replicodeObjects_.getLabel(newPredictionSuccessEvent_->object_) + "</a> ?</b><br>" +
+        "Input <a href=\"#debug_oid-" + to_string(input->get_debug_oid()) + "\">" + 
+        replicodeObjects_.getLabel(input) + "</a> was matched against prediction <a href=\"#debug_oid-" + 
+        to_string(factPrediction->get_debug_oid()) + "\">" +
+        replicodeObjects_.getLabel(factPrediction) + "</a> with success.<br><br>";
+      parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
     });
-    menu->exec(parent_->getMouseScreenPosition() - QPoint(10, 10));
+    menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
   }
   else
-#endif
     // For #debug_oid- and others, defer to the base class.
     AeraGraphicsItem::textItemLinkActivated(link);
 }
