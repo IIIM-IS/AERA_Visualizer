@@ -124,6 +124,7 @@ private:
    */
   void setAeraGraphicsItemPen(r_code::Code* object, const QPen& pen);
 
+  AeraVisualizerScene* modelsScene_;
   AeraVisualizerScene* mainScene_;
 
   QAction* exitAction_;

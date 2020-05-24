@@ -36,16 +36,25 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 
   createToolbars();
 
-  mainScene_ = new AeraVisualizerScene(replicodeObjects_, this);
-  mainScene_->setSceneRect(QRectF(0, 0, 5000, 5000));
-  connect(mainScene_, SIGNAL(itemInserted(AeraGraphicsItem*)),
-    this, SLOT(itemInserted(AeraGraphicsItem*)));
+  modelsScene_ = new AeraVisualizerScene(replicodeObjects_, this, false);
+  auto modelsSceneView = new QGraphicsView(modelsScene_, this);
+  modelsSceneView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  modelsSceneView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+  mainScene_ = new AeraVisualizerScene(replicodeObjects_, this, true);
   auto mainSceneView = new QGraphicsView(mainScene_, this);
   mainSceneView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   mainSceneView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
+  auto splitter = new QSplitter(this);
+  splitter->addWidget(modelsSceneView);
+  splitter->addWidget(mainSceneView);
+  // The splitter sizes are proportional.
+  splitter->setSizes(QList<int>() << 100 << 700);
+
   auto centralLayout = new QVBoxLayout();
-  centralLayout->addWidget(mainSceneView);
+  // A stretch factor of 1, vs. the playerControlPanel factor of 0, makes the splitter maximize its space.
+  centralLayout->addWidget(splitter, 1);
   centralLayout->addWidget(getPlayerControlPanel());
 
   auto centralWidget = new QWidget();
@@ -248,6 +257,13 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
     AeraGraphicsItem* newItem;
 
+    AeraVisualizerScene* scene;
+    if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
+      event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
+      scene = modelsScene_;
+    else
+      scene = mainScene_;
+
     if (event->eventType_ == NewModelEvent::EVENT_TYPE) {
       auto newModelEvent = (NewModelEvent*)event;
 
@@ -255,10 +271,10 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       newModelEvent->object_->code(MDL_CNT) = Atom::Float(newModelEvent->evidenceCount_);
       newModelEvent->object_->code(MDL_SR) = Atom::Float(newModelEvent->successRate_);
 
-      newItem = new ModelItem(newModelEvent, replicodeObjects_, mainScene_);
+      newItem = new ModelItem(newModelEvent, replicodeObjects_, scene);
     }
     else if (event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
-      newItem = new CompositeStateItem((NewCompositeStateEvent*)event, replicodeObjects_, mainScene_);
+      newItem = new CompositeStateItem((NewCompositeStateEvent*)event, replicodeObjects_, scene);
     else if (event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE) {
       if (event->time_ == replicodeObjects_.getTimeReference()) {
         // Debug: For now, skip auto focus events at startup.
@@ -266,32 +282,32 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
         return stepEvent(maximumTime);
       }
 
-      newItem = new AutoFocusFactItem((AutoFocusNewObjectEvent*)event, replicodeObjects_, mainScene_);
+      newItem = new AutoFocusFactItem((AutoFocusNewObjectEvent*)event, replicodeObjects_, scene);
     }
     else if (event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE)
-      newItem = new PredictionItem((NewMkValPredictionEvent*)event, replicodeObjects_, mainScene_);
+      newItem = new PredictionItem((NewMkValPredictionEvent*)event, replicodeObjects_, scene);
     else if (event->eventType_ == NewPredictionSuccessEvent::EVENT_TYPE)
-      newItem = new PredictionSuccessFactItem((NewPredictionSuccessEvent*)event, replicodeObjects_, mainScene_);
+      newItem = new PredictionSuccessFactItem((NewPredictionSuccessEvent*)event, replicodeObjects_, scene);
     else if (event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
       auto newIcstEvent = (NewInstantiatedCompositeStateEvent*)event;
-      newItem = new InstantiatedCompositeStateItem(newIcstEvent, replicodeObjects_, mainScene_);
+      newItem = new InstantiatedCompositeStateItem(newIcstEvent, replicodeObjects_, scene);
 
       // Add arrows to inputs.
       for (int i = 0; i < newIcstEvent->inputs_.size(); ++i) {
-        auto referencedItem = mainScene_->getAeraGraphicsItem(newIcstEvent->inputs_[i]);
+        auto referencedItem = scene->getAeraGraphicsItem(newIcstEvent->inputs_[i]);
         if (referencedItem)
-          mainScene_->addArrow(newItem, referencedItem);
+          scene->addArrow(newItem, referencedItem);
       }
     }
 
     // Add the new item.
-    mainScene_->addAeraGraphicsItem(newItem);
+    scene->addAeraGraphicsItem(newItem);
 
     // Add arrows to all referenced objects.
     for (int i = 0; i < event->object_->references_size(); ++i) {
-      auto referencedItem = mainScene_->getAeraGraphicsItem(event->object_->get_reference(i));
+      auto referencedItem = scene->getAeraGraphicsItem(event->object_->get_reference(i));
       if (referencedItem)
-        mainScene_->addArrow(newItem, referencedItem);
+        scene->addArrow(newItem, referencedItem);
     }
     if (event->object_->code(0).asOpcode() == Opcodes::Fact ||
         event->object_->code(0).asOpcode() == Opcodes::AntiFact) {
@@ -299,14 +315,14 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       auto value = event->object_->get_reference(0);
       if (!(value->code(0).asOpcode() == Opcodes::IMdl || value->code(0).asOpcode() == Opcodes::ICst)) {
         for (int i = 0; i < value->references_size(); ++i) {
-          auto referencedItem = mainScene_->getAeraGraphicsItem(value->get_reference(i));
+          auto referencedItem = scene->getAeraGraphicsItem(value->get_reference(i));
           if (referencedItem)
-            mainScene_->addArrow(newItem, referencedItem);
+            scene->addArrow(newItem, referencedItem);
         }
       }
     }
 
-    mainScene_->establishFlashTimer();
+    scene->establishFlashTimer();
   }
   else if (event->eventType_ == SetModelEvidenceCountAndSuccessRateEvent::EVENT_TYPE) {
     auto setSuccessRateEvent = (SetModelEvidenceCountAndSuccessRateEvent*)event;
@@ -319,7 +335,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     setSuccessRateEvent->object_->code(MDL_CNT) = Atom::Float(setSuccessRateEvent->evidenceCount_);
     setSuccessRateEvent->object_->code(MDL_SR) = Atom::Float(setSuccessRateEvent->successRate_);
 
-    auto modelItem = dynamic_cast<ModelItem*>(mainScene_->getAeraGraphicsItem(setSuccessRateEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(setSuccessRateEvent->object_));
     if (modelItem) {
       modelItem->updateFromModel();
       if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
@@ -334,7 +350,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
         modelItem->evidenceCountFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
         modelItem->successRateFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
       }
-      mainScene_->establishFlashTimer();
+      modelsScene_->establishFlashTimer();
     }
   }
   else {
@@ -367,12 +383,19 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
       event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE ||
       event->eventType_ == NewPredictionSuccessEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
+    AeraVisualizerScene* scene;
+    if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
+      event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
+      scene = modelsScene_;
+    else
+      scene = mainScene_;
+
     // Find the AeraGraphicsItem for this event and remove it.
     // Note that the event saves the updated item position and will use it when recreating the item.
-    auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(mainScene_->getAeraGraphicsItem(event->object_));
+    auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(scene->getAeraGraphicsItem(event->object_));
     if (aeraGraphicsItem) {
       aeraGraphicsItem->removeArrows();
-      mainScene_->removeItem(aeraGraphicsItem);
+      scene->removeItem(aeraGraphicsItem);
       delete aeraGraphicsItem;
     }
   }
@@ -383,7 +406,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
     setSuccessRateEvent->object_->code(MDL_CNT) = Atom::Float(setSuccessRateEvent->oldEvidenceCount_);
     setSuccessRateEvent->object_->code(MDL_SR) = Atom::Float(setSuccessRateEvent->oldSuccessRate_);
 
-    auto modelItem = dynamic_cast<ModelItem*>(mainScene_->getAeraGraphicsItem(setSuccessRateEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(setSuccessRateEvent->object_));
     if (modelItem) {
       if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
           setSuccessRateEvent->successRate_ == setSuccessRateEvent->oldSuccessRate_)
@@ -399,7 +422,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
       }
 
       modelItem->updateFromModel();
-      mainScene_->establishFlashTimer();
+      modelsScene_->establishFlashTimer();
     }
   }
   else
@@ -415,16 +438,19 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
 
 void AeraVisulizerWindow::zoomIn()
 {
+  // TODO: Determine which scene last had an item selected.
   mainScene_->scaleViewBy(1.09);
 }
 
 void AeraVisulizerWindow::zoomOut()
 {
+  // TODO: Determine which scene last had an item selected.
   mainScene_->scaleViewBy(1 / 1.09);
 }
 
 void AeraVisulizerWindow::zoomHome()
 {
+  modelsScene_->zoomViewHome();
   mainScene_->zoomViewHome();
 }
 
