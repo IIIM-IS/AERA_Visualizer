@@ -18,13 +18,15 @@ namespace aera_visualizer {
 const QPen AeraVisualizerScene::ItemBorderNoHighlightPen(Qt::black, 1);
 
 AeraVisualizerScene::AeraVisualizerScene(
-  ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent)
+  ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent, bool isMainScene)
 : QGraphicsScene(parent),
   parent_(parent),
   replicodeObjects_(replicodeObjects),
+  isMainScene_(isMainScene),
   didInitialFit_(false),
   thisFrameTime_(seconds(0)),
-  nextFrameLeft_(160 /* Debug: Until we have a split panel for models 10 */),
+  thisFrameLeft_(0),
+  nextFrameLeft_(0),
   borderFlashPen_(Qt::green, 3),
   noFlashColor_("black"),
   valueUpFlashColor_("green"),
@@ -34,21 +36,26 @@ AeraVisualizerScene::AeraVisualizerScene(
   lineColor_ = Qt::black;
   setBackgroundBrush(QColor(245, 245, 245));
   flashTimerId_ = 0;
+  setSceneRect(QRectF(0, 0, 5000, 5000));
 
-  eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] = 20;
-  eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 285;
-  eventTypeFirstTop_[NewMkValPredictionEvent::EVENT_TYPE] = 393;
-  eventTypeFirstTop_[NewPredictionSuccessEvent::EVENT_TYPE] = 530;
-  eventTypeFirstTop_[NewCompositeStateEvent::EVENT_TYPE] = 280; // Debug: Until we have a split panel for models.
-  eventTypeFirstTop_[NewModelEvent::EVENT_TYPE] = 420; // Debug: Until we have a split panel for models.
-  eventTypeFirstTop_[0] = 750;
+  if (isMainScene_) {
+    eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] = 20;
+    eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 285;
+    eventTypeFirstTop_[NewMkValPredictionEvent::EVENT_TYPE] = 393;
+    eventTypeFirstTop_[NewPredictionSuccessEvent::EVENT_TYPE] = 530;
+    eventTypeFirstTop_[0] = 750;
+  }
+  else
+    // The default, which is used for the models scene.
+    eventTypeFirstTop_[0] = 5;
 }
 
 void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 {
   if (!didInitialFit_) {
     didInitialFit_ = true;
-    views().at(0)->fitInView(QRectF(0, 0, 10, eventTypeFirstTop_[0] + 25), Qt::KeepAspectRatio);
+    // Set the height of the view. The width will be set accordingly.
+    views().at(0)->fitInView(QRectF(0, 0, 1, 780), Qt::KeepAspectRatio);
   }
 
   item->setBrush(itemColor_);
@@ -57,7 +64,8 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
   if (qIsNaN(newObjectEvent->itemTopLeftPosition_.x())) {
     // Assign an initial position.
     microseconds samplingPeriod(100000);
-    if (newObjectEvent->time_ >= thisFrameTime_ + samplingPeriod) {
+    // Only update positions based on time for the main scehe.
+    if (isMainScene_ && newObjectEvent->time_ >= thisFrameTime_ + samplingPeriod) {
       // Start a new frame (or the first frame).
       // TODO: Quantize thisFrameTime_ to a frame boundary from newObjectEvent->time_.
       auto relativeTime = duration_cast<microseconds>(newObjectEvent->time_ - replicodeObjects_.getTimeReference());
@@ -89,17 +97,11 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     else
       top = eventTypeFirstTop_[eventType];
 
-    if (newObjectEvent->eventType_ == NewModelEvent::EVENT_TYPE || newObjectEvent->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
-      // Debug: Until we have a split panel for models.
-      newObjectEvent->itemTopLeftPosition_ = QPointF(0, top);
-    else
-      newObjectEvent->itemTopLeftPosition_ = QPointF(thisFrameLeft_ + 5, top);
+    newObjectEvent->itemTopLeftPosition_ = QPointF(thisFrameLeft_ + 5, top);
 
     // Set up eventTypeNextTop_ for the next item.
     eventTypeNextTop_[eventType] = top + item->boundingRect().height() + 15;
-    if (!(newObjectEvent->eventType_ == NewModelEvent::EVENT_TYPE || newObjectEvent->eventType_ == NewCompositeStateEvent::EVENT_TYPE)) // Debug: Until we have a split panel for models.
-      // Set up nextFrameLeft_ for the next frame.
-      nextFrameLeft_ = max(nextFrameLeft_, thisFrameLeft_ + item->boundingRect().width() + 14);
+    nextFrameLeft_ = max(nextFrameLeft_, thisFrameLeft_ + item->boundingRect().width() + 14);
   }
 
   addItem(item);
