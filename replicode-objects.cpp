@@ -27,7 +27,7 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
   ostringstream dummyPreprocessedUserOperators;
   if (!preprocessor.process(
       &userOperatorsFile, userOperatorsFilePath, &dummyPreprocessedUserOperators, error, &metadata))
-    return false;
+    return error;
   dummyPreprocessedUserOperators.clear();
 
   r_exec::InitOpcodes(metadata);
@@ -51,8 +51,14 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
   istringstream preprocessedIn(preprocessedOutString);
   Compiler compiler(true);
   r_comp::Image image;
-  if (!compiler.compile(&preprocessedIn, &image, &metadata, error, false))
-    return error;
+  if (!compiler.compile(&preprocessedIn, &image, &metadata, error, false)) {
+    auto iError = (size_t)preprocessedIn.tellg();
+    auto nBeforeError = min(iError, 50);
+    auto nAfterError = min(preprocessedIn.str().size() - iError, 50);
+    string codeBefore = preprocessedIn.str().substr(iError - nBeforeError, nBeforeError);
+    string codeAfter = preprocessedIn.str().substr(iError, nBeforeError);
+    return codeBefore + "\n<< " + error + "\n" + codeAfter;
+  }
 
   // Get the the objects from the compiler image.
   r_code::vector<Code*> imageObjects;
