@@ -98,8 +98,9 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 
     // Set up eventTypeNextTop_ for the next item.
     eventTypeNextTop_[eventType] = top + item->boundingRect().height() + 15;
-    // Set up nextFrameLeft_ for the next frame.
-    nextFrameLeft_ = max(nextFrameLeft_, thisFrameLeft_ + item->boundingRect().width() + 14);
+    if (!(newObjectEvent->eventType_ == NewModelEvent::EVENT_TYPE || newObjectEvent->eventType_ == NewCompositeStateEvent::EVENT_TYPE)) // Debug: Until we have a split panel for models.
+      // Set up nextFrameLeft_ for the next frame.
+      nextFrameLeft_ = max(nextFrameLeft_, thisFrameLeft_ + item->boundingRect().width() + 14);
   }
 
   addItem(item);
