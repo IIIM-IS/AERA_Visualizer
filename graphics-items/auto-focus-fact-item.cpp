@@ -12,9 +12,9 @@ using namespace r_code;
 namespace aera_visualizer {
 
 AutoFocusFactItem::AutoFocusFactItem(
-  QMenu* contextMenu, AutoFocusNewObjectEvent* autoFocusNewObjectEvent,
-  ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
-  : AeraGraphicsItem(contextMenu, autoFocusNewObjectEvent, replicodeObjects, parent, "Auto Focus"),
+  AutoFocusNewObjectEvent* autoFocusNewObjectEvent, ReplicodeObjects& replicodeObjects, 
+  AeraVisualizerScene* parent)
+  : AeraGraphicsItem(autoFocusNewObjectEvent, replicodeObjects, parent, "Auto Focus"),
   autoFocusNewObjectEvent_(autoFocusNewObjectEvent)
 {
   setFactMkValHtml();

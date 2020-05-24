@@ -1,9 +1,4 @@
 #include <algorithm>
-#include <QGraphicsScene>
-#include <QGraphicsSceneContextMenuEvent>
-#include <QMenu>
-#include <QPainter>
-#include <QtWidgets>
 #include <QRegularExpression>
 #include "model-item.hpp"
 
@@ -14,8 +9,8 @@ using namespace r_code;
 namespace aera_visualizer {
 
 ModelItem::ModelItem(
-  QMenu* contextMenu, NewModelEvent* newModelEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
-  : AeraGraphicsItem(contextMenu, newModelEvent, replicodeObjects, parent, "Model"),
+  NewModelEvent* newModelEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
+  : AeraGraphicsItem(newModelEvent, replicodeObjects, parent, "Model"),
   newModelEvent_(newModelEvent),
   evidenceCount_(newModelEvent_->object_->code(MDL_CNT).asFloat()),
   successRate_(newModelEvent_->object_->code(MDL_SR).asFloat()),

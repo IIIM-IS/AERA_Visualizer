@@ -14,8 +14,8 @@ class CompositeStateItem : public AeraGraphicsItem
 {
 public:
   CompositeStateItem(
-    QMenu* contextMenu, NewCompositeStateEvent* newCompositeStateEvent, 
-    ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
+    NewCompositeStateEvent* newCompositeStateEvent, ReplicodeObjects& replicodeObjects, 
+    AeraVisualizerScene* parent);
 
   /**
    * Start with the source from replicodeObjects_.getSourceCode for a cst, and

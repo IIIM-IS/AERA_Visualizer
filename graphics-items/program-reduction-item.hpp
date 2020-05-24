@@ -14,8 +14,8 @@ class ProgramReductionItem : public AeraGraphicsItem
 {
 public:
   ProgramReductionItem(
-    QMenu* contextMenu, ProgramReductionEvent* programReductionEvent,
-    ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
+    ProgramReductionEvent* programReductionEvent, ReplicodeObjects& replicodeObjects,
+    AeraVisualizerScene* parent);
 
   /**
    * Start with the source from replicodeObjects_.getSourceCode for a mk.rdx, and

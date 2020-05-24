@@ -14,8 +14,8 @@ class PredictionSuccessFactItem : public AeraGraphicsItem
 {
 public:
   PredictionSuccessFactItem(
-    QMenu* contextMenu, NewPredictionSuccessEvent* newPredictionSuccessEvent,
-    ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
+    NewPredictionSuccessEvent* newPredictionSuccessEvent, ReplicodeObjects& replicodeObjects,
+    AeraVisualizerScene* parent);
 
 protected:
   void textItemLinkActivated(const QString& link) override;

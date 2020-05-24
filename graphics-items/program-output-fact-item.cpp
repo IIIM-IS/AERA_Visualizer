@@ -1,10 +1,6 @@
 #include <regex>
 #include <algorithm>
-#include <QGraphicsScene>
-#include <QGraphicsSceneContextMenuEvent>
 #include <QMenu>
-#include <QPainter>
-#include <QtWidgets>
 #include "explanation-log-window.hpp"
 #include "aera-visualizer-scene.hpp"
 #include "program-reduction-item.hpp"
@@ -17,9 +13,9 @@ using namespace r_code;
 namespace aera_visualizer {
 
 ProgramOutputFactItem::ProgramOutputFactItem(
-  QMenu* contextMenu, ProgramReductionNewObjectEvent* programReductionNewObjectEvent,
-    ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
-  : AeraGraphicsItem(contextMenu, programReductionNewObjectEvent, replicodeObjects, parent, "Program Output"),
+  ProgramReductionNewObjectEvent* programReductionNewObjectEvent, ReplicodeObjects& replicodeObjects, 
+  AeraVisualizerScene* parent)
+  : AeraGraphicsItem(programReductionNewObjectEvent, replicodeObjects, parent, "Program Output"),
   programReductionNewObjectEvent_(programReductionNewObjectEvent)
 {
   setFactMkValHtml();

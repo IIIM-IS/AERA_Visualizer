@@ -1,10 +1,5 @@
 #include <regex>
 #include <algorithm>
-#include <QGraphicsScene>
-#include <QGraphicsSceneContextMenuEvent>
-#include <QMenu>
-#include <QPainter>
-#include <QtWidgets>
 #include <QRegularExpression>
 #include "explanation-log-window.hpp"
 #include "aera-visualizer-scene.hpp"
@@ -20,9 +15,9 @@ using namespace r_exec;
 namespace aera_visualizer {
 
 InstantiatedCompositeStateItem::InstantiatedCompositeStateItem(
-  QMenu* contextMenu, NewInstantiatedCompositeStateEvent* newInstantiatedCompositeStateEvent,
+  NewInstantiatedCompositeStateEvent* newInstantiatedCompositeStateEvent,
   ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
-  : AeraGraphicsItem(contextMenu, newInstantiatedCompositeStateEvent, replicodeObjects, parent,
+  : AeraGraphicsItem(newInstantiatedCompositeStateEvent, replicodeObjects, parent,
       "Instantiated Composite State"),
   newInstantiatedCompositeStateEvent_(newInstantiatedCompositeStateEvent), showState_(HIDE_ICST)
 {

@@ -1,10 +1,5 @@
 #include <regex>
 #include <algorithm>
-#include <QGraphicsScene>
-#include <QGraphicsSceneContextMenuEvent>
-#include <QMenu>
-#include <QPainter>
-#include <QtWidgets>
 #include "program-reduction-item.hpp"
 
 using namespace std;
@@ -14,9 +9,8 @@ using namespace r_code;
 namespace aera_visualizer {
 
 ProgramReductionItem::ProgramReductionItem(
-  QMenu* contextMenu, ProgramReductionEvent* programReductionEvent, ReplicodeObjects& replicodeObjects,
-  AeraVisualizerScene* parent)
-  : AeraGraphicsItem(contextMenu, programReductionEvent, replicodeObjects, parent, "Program Reduction"),
+  ProgramReductionEvent* programReductionEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
+  : AeraGraphicsItem(programReductionEvent, replicodeObjects, parent, "Program Reduction"),
   programReductionEvent_(programReductionEvent)
 {
   // Set up sourceCodeHtml_

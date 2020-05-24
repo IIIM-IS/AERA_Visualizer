@@ -95,9 +95,6 @@ private slots:
   void zoomIn();
   void zoomOut();
   void zoomHome();
-  void zoomToThis();
-  void bringToFront();
-  void sendToBack();
 
 private:
   void createActions();
@@ -130,14 +127,9 @@ private:
   AeraVisualizerScene* scene_;
 
   QAction* exitAction_;
-  QAction* zoomToThisAction_;
-  QAction* toFrontAction_;
-  QAction* sendBackAction_;
   QAction* zoomInAction_;
   QAction* zoomOutAction_;
   QAction* zoomHomeAction_;
-
-  QMenu* itemMenu_;
 
   size_t iNextEvent_;
   ReplicodeObjects& replicodeObjects_;

@@ -14,8 +14,8 @@ class PredictionItem : public AeraGraphicsItem
 {
 public:
   PredictionItem(
-    QMenu* contextMenu, NewMkValPredictionEvent* newPredictionEvent,
-    ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
+    NewMkValPredictionEvent* newPredictionEvent, ReplicodeObjects& replicodeObjects, 
+    AeraVisualizerScene* parent);
 
 protected:
   void textItemLinkActivated(const QString& link) override;

@@ -18,8 +18,8 @@ namespace aera_visualizer {
 const QPen AeraVisualizerScene::ItemBorderNoHighlightPen(Qt::black, 1);
 
 AeraVisualizerScene::AeraVisualizerScene(
-  QMenu* itemMenu, ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent)
-  : QGraphicsScene(parent),
+  ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent)
+: QGraphicsScene(parent),
   parent_(parent),
   replicodeObjects_(replicodeObjects),
   didInitialFit_(false),
@@ -30,7 +30,6 @@ AeraVisualizerScene::AeraVisualizerScene(
   valueUpFlashColor_("green"),
   valueDownFlashColor_("red")
 {
-  itemMenu_ = itemMenu;
   itemColor_ = Qt::white;
   lineColor_ = Qt::black;
   setBackgroundBrush(QColor(245, 245, 245));

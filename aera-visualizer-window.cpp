@@ -34,7 +34,7 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 
   setTimeReference(replicodeObjects_.getTimeReference());
 
-  scene_ = new AeraVisualizerScene(itemMenu_, replicodeObjects_, this);
+  scene_ = new AeraVisualizerScene(replicodeObjects_, this);
   scene_->setSceneRect(QRectF(0, 0, 5000, 5000));
   connect(scene_, SIGNAL(itemInserted(AeraGraphicsItem*)),
     this, SLOT(itemInserted(AeraGraphicsItem*)));
@@ -254,10 +254,10 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       newModelEvent->object_->code(MDL_CNT) = Atom::Float(newModelEvent->evidenceCount_);
       newModelEvent->object_->code(MDL_SR) = Atom::Float(newModelEvent->successRate_);
 
-      newItem = new ModelItem(itemMenu_, newModelEvent, replicodeObjects_, scene_);
+      newItem = new ModelItem(newModelEvent, replicodeObjects_, scene_);
     }
     else if (event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
-      newItem = new CompositeStateItem(itemMenu_, (NewCompositeStateEvent*)event, replicodeObjects_, scene_);
+      newItem = new CompositeStateItem((NewCompositeStateEvent*)event, replicodeObjects_, scene_);
     else if (event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE) {
       if (event->time_ == replicodeObjects_.getTimeReference()) {
         // Debug: For now, skip auto focus events at startup.
@@ -265,15 +265,15 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
         return stepEvent(maximumTime);
       }
 
-      newItem = new AutoFocusFactItem(itemMenu_, (AutoFocusNewObjectEvent*)event, replicodeObjects_, scene_);
+      newItem = new AutoFocusFactItem((AutoFocusNewObjectEvent*)event, replicodeObjects_, scene_);
     }
     else if (event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE)
-      newItem = new PredictionItem(itemMenu_, (NewMkValPredictionEvent*)event, replicodeObjects_, scene_);
+      newItem = new PredictionItem((NewMkValPredictionEvent*)event, replicodeObjects_, scene_);
     else if (event->eventType_ == NewPredictionSuccessEvent::EVENT_TYPE)
-      newItem = new PredictionSuccessFactItem(itemMenu_, (NewPredictionSuccessEvent*)event, replicodeObjects_, scene_);
+      newItem = new PredictionSuccessFactItem((NewPredictionSuccessEvent*)event, replicodeObjects_, scene_);
     else if (event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
       auto newIcstEvent = (NewInstantiatedCompositeStateEvent*)event;
-      newItem = new InstantiatedCompositeStateItem(itemMenu_, newIcstEvent, replicodeObjects_, scene_);
+      newItem = new InstantiatedCompositeStateItem(newIcstEvent, replicodeObjects_, scene_);
 
       // Add arrows to inputs.
       for (int i = 0; i < newIcstEvent->inputs_.size(); ++i) {
@@ -427,35 +427,6 @@ void AeraVisulizerWindow::zoomHome()
   scene_->zoomViewHome();
 }
 
-void AeraVisulizerWindow::zoomToThis()
-{
-  if (scene_->selectedItems().isEmpty())
-    return;
-
-  if (scene_->selectedItems().size() == 1)
-    scene_->zoomToItem(scene_->selectedItems().first());
-}
-
-void AeraVisulizerWindow::bringToFront()
-{
-  if (scene_->selectedItems().isEmpty())
-    return;
-
-  auto selectedItem = dynamic_cast<AeraGraphicsItem*>(scene_->selectedItems().first());
-  if (selectedItem)
-    selectedItem->bringToFront();
-}
-
-void AeraVisulizerWindow::sendToBack()
-{
-  if (scene_->selectedItems().isEmpty())
-    return;
-
-  auto selectedItem = dynamic_cast<AeraGraphicsItem*>(scene_->selectedItems().first());
-  if (selectedItem)
-    selectedItem->sendToBack();
-}
-
 void AeraVisulizerWindow::createActions()
 {
   exitAction_ = new QAction(tr("E&xit"), this);
@@ -473,15 +444,6 @@ void AeraVisulizerWindow::createActions()
   zoomHomeAction_ = new QAction(QIcon(":/images/zoom-home.png"), tr("Zoom Home"), this);
   zoomHomeAction_->setStatusTip(tr("Zoom to show all"));
   connect(zoomHomeAction_, SIGNAL(triggered()), this, SLOT(zoomHome()));
-
-  zoomToThisAction_ = new QAction(tr("&Zoom to This"), this);
-  connect(zoomToThisAction_, SIGNAL(triggered()), this, SLOT(zoomToThis()));
-
-  toFrontAction_ = new QAction(tr("Bring to &Front"), this);
-  connect(toFrontAction_, SIGNAL(triggered()), this, SLOT(bringToFront()));
-
-  sendBackAction_ = new QAction(tr("Send to &Back"), this);
-  connect(sendBackAction_, SIGNAL(triggered()), this, SLOT(sendToBack()));
 }
 
 void AeraVisulizerWindow::createMenus()
@@ -493,11 +455,6 @@ void AeraVisulizerWindow::createMenus()
   viewMenu->addAction(zoomInAction_);
   viewMenu->addAction(zoomOutAction_);
   viewMenu->addAction(zoomHomeAction_);
-
-  itemMenu_ = menuBar()->addMenu(tr("&Item"));
-  itemMenu_->addAction(zoomToThisAction_);
-  itemMenu_->addAction(toFrontAction_);
-  itemMenu_->addAction(sendBackAction_);
 }
 
 void AeraVisulizerWindow::createToolbars()

@@ -12,9 +12,9 @@ using namespace r_code;
 namespace aera_visualizer {
 
 PredictionSuccessFactItem::PredictionSuccessFactItem(
-  QMenu* contextMenu, NewPredictionSuccessEvent* newPredictionSuccessEvent,
-  ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
-  : AeraGraphicsItem(contextMenu, newPredictionSuccessEvent, replicodeObjects, parent, "Prediction Success"),
+  NewPredictionSuccessEvent* newPredictionSuccessEvent, ReplicodeObjects& replicodeObjects, 
+  AeraVisualizerScene* parent)
+  : AeraGraphicsItem(newPredictionSuccessEvent, replicodeObjects, parent, "Prediction Success"),
   newPredictionSuccessEvent_(newPredictionSuccessEvent)
 {
   setFactSuccessHtml();

@@ -24,7 +24,7 @@ class AeraVisualizerScene : public QGraphicsScene
 {
 public:
   explicit AeraVisualizerScene(
-    QMenu* itemMenu, ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent = 0);
+    ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent = 0);
 
   AeraVisulizerWindow* getParent() { return parent_; }
 
@@ -68,7 +68,6 @@ private:
 
   AeraVisulizerWindow* parent_;
   ReplicodeObjects& replicodeObjects_;
-  QMenu* itemMenu_;
   bool didInitialFit_;
   // key: The AeraEvent eventType_, or 0 for "other". value: The top of the first item for that event type.
   std::map<int, qreal> eventTypeFirstTop_;

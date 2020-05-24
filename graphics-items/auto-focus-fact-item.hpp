@@ -14,8 +14,8 @@ class AutoFocusFactItem : public AeraGraphicsItem
 {
 public:
   AutoFocusFactItem(
-    QMenu* contextMenu, AutoFocusNewObjectEvent* autoFocusNewObjectEvent,
-    ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
+    AutoFocusNewObjectEvent* autoFocusNewObjectEvent, ReplicodeObjects& replicodeObjects, 
+    AeraVisualizerScene* parent);
 
 protected:
   void textItemLinkActivated(const QString& link) override;

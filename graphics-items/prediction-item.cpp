@@ -1,10 +1,5 @@
 #include <regex>
 #include <algorithm>
-#include <QGraphicsScene>
-#include <QGraphicsSceneContextMenuEvent>
-#include <QMenu>
-#include <QPainter>
-#include <QtWidgets>
 #include "instantiated-composite-state-item.hpp"
 #include "model-item.hpp"
 #include "prediction-item.hpp"
@@ -17,9 +12,9 @@ using namespace r_exec;
 namespace aera_visualizer {
 
 PredictionItem::PredictionItem(
-  QMenu* contextMenu, NewMkValPredictionEvent* newPredictionEvent, ReplicodeObjects& replicodeObjects,
+  NewMkValPredictionEvent* newPredictionEvent, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-  : AeraGraphicsItem(contextMenu, newPredictionEvent, replicodeObjects, parent, "Prediction"),
+  : AeraGraphicsItem(newPredictionEvent, replicodeObjects, parent, "Prediction"),
   newPredictionEvent_(newPredictionEvent), showState_(HIDE_IMODEL)
 {
   setFactPredFactMkValHtml();

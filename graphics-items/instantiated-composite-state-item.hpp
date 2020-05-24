@@ -14,7 +14,7 @@ class InstantiatedCompositeStateItem : public AeraGraphicsItem
 {
 public:
   InstantiatedCompositeStateItem(
-    QMenu* contextMenu, NewInstantiatedCompositeStateEvent* newInstantiatedCompositeStateEvent,
+    NewInstantiatedCompositeStateEvent* newInstantiatedCompositeStateEvent,
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 
   /**

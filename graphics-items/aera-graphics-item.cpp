@@ -1,9 +1,7 @@
 #include <regex>
 #include <algorithm>
-#include <QGraphicsScene>
 #include <QGraphicsSceneContextMenuEvent>
 #include <QMenu>
-#include <QPainter>
 #include <QtWidgets>
 #include <QRegularExpression>
 #include "submodules/replicode/r_exec/opcodes.h"
@@ -24,7 +22,7 @@ const QString AeraGraphicsItem::SelectedRadioButtonHtml = "<font size=\"+2\">&#x
 const QString AeraGraphicsItem::UnselectedRadioButtonHtml = "<font size=\"+3\">&#x25CB;</font>";
 
 AeraGraphicsItem::AeraGraphicsItem(
-  QMenu* contextMenu, AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent,
+  AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent,
   const QString& headerPrefix)
 : parent_(parent),
   aeraEvent_(aeraEvent), replicodeObjects_(replicodeObjects),
@@ -32,8 +30,6 @@ AeraGraphicsItem::AeraGraphicsItem(
   // The base class should call setTextItemAndPolygon()
   textItem_(0)
 {
-  contextMenu_ = contextMenu;
-
   setFlag(QGraphicsItem::ItemIsMovable, true);
   setFlag(QGraphicsItem::ItemIsSelectable, true);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
@@ -126,9 +122,12 @@ void AeraGraphicsItem::sendToBack()
 
 void AeraGraphicsItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
-  scene()->clearSelection();
-  setSelected(true);
-  contextMenu_->exec(event->screenPos());
+  auto menu = new QMenu();
+  menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
+  menu->addAction("Bring To Front", [=]() { bringToFront(); });
+  menu->addAction("Send To Back", [=]() { sendToBack(); });
+  menu->exec(QCursor::pos() - QPoint(10, 10));
+  delete menu;
 }
 
 QVariant AeraGraphicsItem::itemChange(GraphicsItemChange change, const QVariant& value)

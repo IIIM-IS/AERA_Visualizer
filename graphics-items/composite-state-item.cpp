@@ -1,10 +1,5 @@
 #include <regex>
 #include <algorithm>
-#include <QGraphicsScene>
-#include <QGraphicsSceneContextMenuEvent>
-#include <QMenu>
-#include <QPainter>
-#include <QtWidgets>
 #include "model-item.hpp"
 #include "composite-state-item.hpp"
 
@@ -15,9 +10,9 @@ using namespace r_code;
 namespace aera_visualizer {
 
 CompositeStateItem::CompositeStateItem(
-  QMenu* contextMenu, NewCompositeStateEvent* newCompositeStateEvent, ReplicodeObjects& replicodeObjects,
+  NewCompositeStateEvent* newCompositeStateEvent, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-  : AeraGraphicsItem(contextMenu, newCompositeStateEvent, replicodeObjects, parent, "Composite State"),
+  : AeraGraphicsItem(newCompositeStateEvent, replicodeObjects, parent, "Composite State"),
   newCompositeStateEvent_(newCompositeStateEvent)
 {
   // Set up sourceCodeHtml_

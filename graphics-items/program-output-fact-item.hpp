@@ -14,8 +14,8 @@ class ProgramOutputFactItem : public AeraGraphicsItem
 {
 public:
   ProgramOutputFactItem(
-    QMenu* contextMenu, ProgramReductionNewObjectEvent* programReductionNewObjectEvent,
-    ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
+    ProgramReductionNewObjectEvent* programReductionNewObjectEvent, ReplicodeObjects& replicodeObjects, 
+    AeraVisualizerScene* parent);
 
 protected:
   void textItemLinkActivated(const QString& link) override;

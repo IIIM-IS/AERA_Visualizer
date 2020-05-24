@@ -14,8 +14,7 @@ class ModelItem : public AeraGraphicsItem
 {
 public:
   ModelItem(
-    QMenu* contextMenu, NewModelEvent* newModelEvent, ReplicodeObjects& replicodeObjects, 
-    AeraVisualizerScene* parent);
+    NewModelEvent* newModelEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 
   void updateFromModel();
 

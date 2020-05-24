@@ -14,7 +14,6 @@ class QTextEdit;
 class QGraphicsSceneMouseEvent;
 class QMenu;
 class QGraphicsSceneContextMenuEvent;
-class QPainter;
 class QStyleOptionGraphicsItem;
 class QWidget;
 class QPolygonF;
@@ -34,14 +33,13 @@ public:
   /**
    * Create an AeraGraphicsItem, and set headerHtml_ to a header with aeraEvent_->time_ and 
    * headerPrefix + the aeraEvent label with a "#this" link.
-   * \param contextMenu The right-click context menu from the parent.
    * \param aeraEvent The AeraEvent which is used to get the time_ for the header and the itemTopLeftPosition_.
    * \param replicodeObjects The ReplicodeObjects used to get the debug OID and label.
    * \param parent The parent AeraVisualizerScene.
    * \param headerPrefix The prefix for headerHtml_ as described above.
    */
   AeraGraphicsItem(
-    QMenu* contextMenu, AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects,
+    AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects,
     AeraVisualizerScene* parent, const QString& headerPrefix = "");
 
   void removeArrows();
@@ -132,7 +130,6 @@ protected:
 private:
   void removeArrow(Arrow* arrow);
 
-  QMenu* contextMenu_;
   AeraEvent* aeraEvent_;
   QList<Arrow*> arrows_;
 };
