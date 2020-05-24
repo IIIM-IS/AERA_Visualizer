@@ -40,6 +40,8 @@ AeraVisualizerScene::AeraVisualizerScene(
   eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 285;
   eventTypeFirstTop_[NewMkValPredictionEvent::EVENT_TYPE] = 393;
   eventTypeFirstTop_[NewPredictionSuccessEvent::EVENT_TYPE] = 530;
+  eventTypeFirstTop_[NewCompositeStateEvent::EVENT_TYPE] = 280; // Debug: Until we have a split panel for models.
+  eventTypeFirstTop_[NewModelEvent::EVENT_TYPE] = 420; // Debug: Until we have a split panel for models.
   eventTypeFirstTop_[0] = 750;
 }
 
@@ -77,35 +79,27 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       text->setPos(thisFrameLeft_, 0);
     }
 
-    if (newObjectEvent->eventType_ == NewModelEvent::EVENT_TYPE || newObjectEvent->eventType_ == NewCompositeStateEvent::EVENT_TYPE) {
+    int eventType = 0;
+    if (eventTypeFirstTop_.find(newObjectEvent->eventType_) != eventTypeFirstTop_.end())
+      // This is a recognized event type.
+      eventType = newObjectEvent->eventType_;
+
+    qreal top;
+    if (eventTypeNextTop_.find(eventType) != eventTypeNextTop_.end())
+      top = eventTypeNextTop_[eventType];
+    else
+      top = eventTypeFirstTop_[eventType];
+
+    if (newObjectEvent->eventType_ == NewModelEvent::EVENT_TYPE || newObjectEvent->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
       // Debug: Until we have a split panel for models.
-      if (newObjectEvent->object_->get_oid() == 52)
-        newObjectEvent->itemTopLeftPosition_ = QPointF(0, 330 - item->boundingRect().height() / 2);
-      else if (newObjectEvent->object_->get_oid() == 53)
-        newObjectEvent->itemTopLeftPosition_ = QPointF(0, 530 - item->boundingRect().height() / 2);
-      else if (newObjectEvent->object_->get_oid() == 54)
-        newObjectEvent->itemTopLeftPosition_ = QPointF(0, 740 - item->boundingRect().height() / 2);
-      item->setZValue(-1);
-    }
-    else {
-      int eventType = 0;
-      if (eventTypeFirstTop_.find(newObjectEvent->eventType_) != eventTypeFirstTop_.end())
-        // This is a recognized event type.
-        eventType = newObjectEvent->eventType_;
-
-      qreal top;
-      if (eventTypeNextTop_.find(eventType) != eventTypeNextTop_.end())
-        top = eventTypeNextTop_[eventType];
-      else
-        top = eventTypeFirstTop_[eventType];
-
+      newObjectEvent->itemTopLeftPosition_ = QPointF(0, top);
+    else
       newObjectEvent->itemTopLeftPosition_ = QPointF(thisFrameLeft_ + 5, top);
 
-      // Set up eventTypeNextTop_ for the next item.
-      eventTypeNextTop_[eventType] = top + item->boundingRect().height() + 15;
-      // Set up nextFrameLeft_ for the next frame.
-      nextFrameLeft_ = max(nextFrameLeft_, thisFrameLeft_ + item->boundingRect().width() + 14);
-    }
+    // Set up eventTypeNextTop_ for the next item.
+    eventTypeNextTop_[eventType] = top + item->boundingRect().height() + 15;
+    // Set up nextFrameLeft_ for the next frame.
+    nextFrameLeft_ = max(nextFrameLeft_, thisFrameLeft_ + item->boundingRect().width() + 14);
   }
 
   addItem(item);
