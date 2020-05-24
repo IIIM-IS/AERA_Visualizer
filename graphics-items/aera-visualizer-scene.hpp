@@ -28,26 +28,7 @@ public:
 
   AeraVisulizerWindow* getParent() { return parent_; }
 
-  /**
-   * Scale the first QGraphicsView by the given factor.
-   * This also sets currentScaleFactor.
-   */
-  void scaleViewBy(double factor);
-  void zoomViewHome();
   void zoomToItem(QGraphicsItem* item);
-  void addAeraGraphicsItem(AeraGraphicsItem* item);
-  void addArrow(AeraGraphicsItem* startItem, AeraGraphicsItem* endItem);
-  /**
-   * Get the AeraGraphicsItem whose getAeraEvent() has the given object.
-   * \param object The Code* object to search for.
-   * \return The AeraGraphicsItem, or null if not found.
-   */
-  AeraGraphicsItem* getAeraGraphicsItem(r_code::Code* object);
-  void establishFlashTimer()
-  {
-    if (flashTimerId_ == 0)
-      flashTimerId_ = startTimer(200);
-  }
 
   // The initial value for the flash countdown;
   static const int FLASH_COUNT = 6;
@@ -63,6 +44,28 @@ protected:
 #endif
 
 private:
+  friend class AeraVisulizerWindow;
+
+  /**
+   * Scale the first QGraphicsView by the given factor.
+   * This also sets currentScaleFactor.
+   */
+  void scaleViewBy(double factor);
+  void zoomViewHome();
+  void addAeraGraphicsItem(AeraGraphicsItem* item);
+  void addArrow(AeraGraphicsItem* startItem, AeraGraphicsItem* endItem);
+  /**
+   * Get the AeraGraphicsItem whose getAeraEvent() has the given object.
+   * \param object The Code* object to search for.
+   * \return The AeraGraphicsItem, or null if not found.
+   */
+  AeraGraphicsItem* getAeraGraphicsItem(r_code::Code* object);
+  void establishFlashTimer()
+  {
+    if (flashTimerId_ == 0)
+      flashTimerId_ = startTimer(200);
+  }
+
   AeraVisulizerWindow* parent_;
   ReplicodeObjects& replicodeObjects_;
   QMenu* itemMenu_;
