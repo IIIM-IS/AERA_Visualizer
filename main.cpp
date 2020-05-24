@@ -2,6 +2,7 @@
 #include "explanation-log-window.hpp"
 
 #include <QApplication>
+#include <QMessageBox>
 
 using namespace aera_visualizer;
 
@@ -16,7 +17,10 @@ int main(int argv, char *args[])
 
   ReplicodeObjects replicodeObjects;
   string error = replicodeObjects.init(userOperatorsFilePath, decompiledFilePath);
-  // TODO: Show the error.
+  if (error != "") {
+    QMessageBox::information(NULL, "Compiler Error", error.c_str(), QMessageBox::Ok);
+    return -1;
+  }
 
   AeraVisulizerWindow mainWindow(replicodeObjects);
   // TODO: Use the actual screen resolution.
