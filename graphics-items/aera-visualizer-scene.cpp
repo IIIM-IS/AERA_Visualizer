@@ -57,7 +57,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
   if (!didInitialFit_) {
     didInitialFit_ = true;
     // Set the height of the view. The width will be set accordingly.
-    views().at(0)->fitInView(QRectF(0, 0, 1, 780), Qt::KeepAspectRatio);
+    views().at(0)->fitInView(QRectF(0, 0, 1, 800), Qt::KeepAspectRatio);
   }
 
   item->setBrush(itemColor_);

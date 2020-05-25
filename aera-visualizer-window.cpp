@@ -54,7 +54,7 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
   splitter->addWidget(modelsSceneView);
   splitter->addWidget(mainSceneView);
   // The splitter sizes are proportional.
-  splitter->setSizes(QList<int>() << 100 << 850);
+  splitter->setSizes(QList<int>() << 100 << 750);
 
   auto centralLayout = new QVBoxLayout();
   // A stretch factor of 1, vs. the playerControlPanel factor of 0, makes the splitter maximize its space.
