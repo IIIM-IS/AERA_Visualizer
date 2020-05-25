@@ -36,15 +36,19 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 
   createToolbars();
 
-  modelsScene_ = new AeraVisualizerScene(replicodeObjects_, this, false);
+  modelsScene_ = new AeraVisualizerScene(replicodeObjects_, this, false,
+    [=]() { selectedScene_ = modelsScene_; });
   auto modelsSceneView = new QGraphicsView(modelsScene_, this);
   modelsSceneView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   modelsSceneView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-  mainScene_ = new AeraVisualizerScene(replicodeObjects_, this, true);
+  mainScene_ = new AeraVisualizerScene(replicodeObjects_, this, true,
+    [=]() { selectedScene_ = mainScene_; });
   auto mainSceneView = new QGraphicsView(mainScene_, this);
   mainSceneView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   mainSceneView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  // Set a default selected scene.
+  selectedScene_ = mainScene_;
 
   auto splitter = new QSplitter(this);
   splitter->addWidget(modelsSceneView);
@@ -457,20 +461,17 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
 
 void AeraVisulizerWindow::zoomIn()
 {
-  // TODO: Determine which scene last had an item selected.
-  mainScene_->scaleViewBy(1.09);
+  selectedScene_->scaleViewBy(1.09);
 }
 
 void AeraVisulizerWindow::zoomOut()
 {
-  // TODO: Determine which scene last had an item selected.
-  mainScene_->scaleViewBy(1 / 1.09);
+  selectedScene_->scaleViewBy(1 / 1.09);
 }
 
 void AeraVisulizerWindow::zoomHome()
 {
-  modelsScene_->zoomViewHome();
-  mainScene_->zoomViewHome();
+  selectedScene_->zoomViewHome();
 }
 
 void AeraVisulizerWindow::createActions()

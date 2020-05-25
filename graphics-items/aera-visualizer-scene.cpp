@@ -18,11 +18,13 @@ namespace aera_visualizer {
 const QPen AeraVisualizerScene::ItemBorderNoHighlightPen(Qt::black, 1);
 
 AeraVisualizerScene::AeraVisualizerScene(
-  ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent, bool isMainScene)
+  ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent, bool isMainScene,
+  const OnSceneSelected& onSceneSelected)
 : QGraphicsScene(parent),
   parent_(parent),
   replicodeObjects_(replicodeObjects),
   isMainScene_(isMainScene),
+  onSceneSelected_(onSceneSelected),
   didInitialFit_(false),
   thisFrameTime_(seconds(0)),
   thisFrameLeft_(0),
@@ -115,6 +117,9 @@ void AeraVisualizerScene::mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent)
     return;
 
   views().at(0)->setDragMode(QGraphicsView::ScrollHandDrag);
+  if (onSceneSelected_)
+    // Notify the parent that this scene was selected.
+    onSceneSelected_();
   QGraphicsScene::mousePressEvent(mouseEvent);
 }
 

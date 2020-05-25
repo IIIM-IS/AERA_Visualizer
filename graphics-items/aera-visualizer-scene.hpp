@@ -23,8 +23,11 @@ class ExplanationLogWindow;
 class AeraVisualizerScene : public QGraphicsScene
 {
 public:
+  typedef std::function<void()> OnSceneSelected;
+
   explicit AeraVisualizerScene(
-    ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent, bool isMainScene);
+    ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent, bool isMainScene,
+    const OnSceneSelected& onSceneSelected);
 
   AeraVisulizerWindow* getParent() { return parent_; }
 
@@ -69,6 +72,7 @@ private:
   AeraVisulizerWindow* parent_;
   ReplicodeObjects& replicodeObjects_;
   bool isMainScene_;
+  OnSceneSelected onSceneSelected_;
   bool didInitialFit_;
   // key: The AeraEvent eventType_, or 0 for "other". value: The top of the first item for that event type.
   std::map<int, qreal> eventTypeFirstTop_;

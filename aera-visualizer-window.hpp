@@ -128,6 +128,7 @@ private:
 
   AeraVisualizerScene* modelsScene_;
   AeraVisualizerScene* mainScene_;
+  AeraVisualizerScene* selectedScene_;
 
   QAction* exitAction_;
   QAction* zoomInAction_;
