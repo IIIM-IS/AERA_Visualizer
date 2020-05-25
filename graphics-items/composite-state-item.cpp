@@ -12,7 +12,7 @@ namespace aera_visualizer {
 CompositeStateItem::CompositeStateItem(
   NewCompositeStateEvent* newCompositeStateEvent, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-  : AeraGraphicsItem(newCompositeStateEvent, replicodeObjects, parent, "Composite State"),
+  : AeraGraphicsItem(newCompositeStateEvent, replicodeObjects, parent, "Comp. State"),
   newCompositeStateEvent_(newCompositeStateEvent)
 {
   // Set up sourceCodeHtml_

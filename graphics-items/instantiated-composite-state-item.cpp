@@ -18,7 +18,7 @@ InstantiatedCompositeStateItem::InstantiatedCompositeStateItem(
   NewInstantiatedCompositeStateEvent* newInstantiatedCompositeStateEvent,
   ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
   : AeraGraphicsItem(newInstantiatedCompositeStateEvent, replicodeObjects, parent,
-      "Instantiated Composite State"),
+      "Instantiated Comp. State"),
   newInstantiatedCompositeStateEvent_(newInstantiatedCompositeStateEvent), showState_(HIDE_ICST)
 {
   setFactIcstHtml();
