@@ -78,7 +78,7 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
       delete menu;
     }
     else {
-      if (!parent_->hasAeraGraphicsItem(object))
+      if (!parent_->getAeraGraphicsItem(object))
         return;
 
       // Show the menu.

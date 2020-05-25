@@ -215,7 +215,7 @@ void AeraGraphicsItem::textItemLinkActivated(const QString& link)
     uint64 debug_oid = link.mid(11).toULongLong();
     auto object = replicodeObjects_.getObjectByDebugOid(debug_oid);
     if (object) {
-      if (parent_->getParent()->hasAeraGraphicsItem(object)) {
+      if (parent_->getParent()->getAeraGraphicsItem(object)) {
         // Show the menu.
         auto menu = new QMenu();
         menu->addAction(QString("Zoom to ") + replicodeObjects_.getLabel(object).c_str(),

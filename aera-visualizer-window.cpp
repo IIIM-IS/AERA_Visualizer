@@ -186,21 +186,40 @@ Timestamp AeraVisulizerWindow::getTimestamp(const smatch& matches)
   return replicodeObjects_.getTimeReference() + us;
 }
 
-bool AeraVisulizerWindow::hasAeraGraphicsItem(r_code::Code* object)
-{ 
-  return !!mainScene_->getAeraGraphicsItem(object);
+AeraGraphicsItem* AeraVisulizerWindow::getAeraGraphicsItem(r_code::Code* object, AeraVisualizerScene** scene)
+{
+  if (scene)
+    // Initialize to default NULL.
+    *scene = 0;
+
+  auto item = modelsScene_->getAeraGraphicsItem(object);
+  if (item) {
+    if (scene)
+      *scene = modelsScene_;
+    return item;
+  }
+
+  item = mainScene_->getAeraGraphicsItem(object);
+  if (item) {
+    if (scene)
+      *scene = mainScene_;
+    return item;
+  }
+
+  return NULL;
 }
 
 void AeraVisulizerWindow::zoomToAeraGraphicsItem(r_code::Code* object)
 {
-  auto item = mainScene_->getAeraGraphicsItem(object);
+  AeraVisualizerScene* scene;
+  auto item = getAeraGraphicsItem(object, &scene);
   if (item)
-    mainScene_->zoomToItem(item);
+    scene->zoomToItem(item);
 }
 
 void AeraVisulizerWindow::setAeraGraphicsItemPen(r_code::Code* object, const QPen& pen)
 {
-  auto item = mainScene_->getAeraGraphicsItem(object);
+  auto item = getAeraGraphicsItem(object);
   if (item)
     item->setPen(pen);
 }

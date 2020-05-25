@@ -45,12 +45,14 @@ public:
   ExplanationLogWindow* getExplanationLogWindow() { return explanationLogWindow_;  }
 
   /**
-   * Check if the scene has an AeraGraphicsItem for the object, such that zoomToItem, etc.
-   * will succeed.
+   * Check if one of the scenes has an AeraGraphicsItem for the object. You can use this to
+   * get the item, or just check if it exists, e.g. such that zoomToAeraGraphicsItem will succeed.
    * \param object The Code* object to search for.
-   * \return True if the scene has an AeraGraphicsItem for the object.
+   * \param scene (optional) If this returns an item, set *scene to a pointer to the
+   * AeraVisualizerScene where it was found. If omitted or NULL, don't set it. 
+   * \return The AeraGraphicsItem, or null if not found.
    */
-  bool hasAeraGraphicsItem(r_code::Code* object);
+  AeraGraphicsItem* getAeraGraphicsItem(r_code::Code* object, AeraVisualizerScene** scene = 0);
 
   /**
    * Get the scene AeraGraphicsItem whose getAeraEvent() has the given object, and zoom the
