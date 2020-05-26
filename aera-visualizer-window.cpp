@@ -30,7 +30,7 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
   createActions();
   createMenus();
 
-  string consoleOutputFilePath = "C:\\Users\\Jeff\\temp\\Test.out.txt";
+  string consoleOutputFilePath = "C:\\Users\\Jeff\\AERA\\replicode\\Test\\debug_out.txt";
 
   setTimeReference(replicodeObjects_.getTimeReference());
 
