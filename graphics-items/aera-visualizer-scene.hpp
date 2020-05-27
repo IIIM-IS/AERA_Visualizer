@@ -36,8 +36,6 @@ public:
   // The initial value for the flash countdown;
   static const int FLASH_COUNT = 6;
 
-  static const QPen ItemBorderNoHighlightPen;
-
 protected:
   void mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent) override;
   void mouseReleaseEvent(QGraphicsSceneMouseEvent* mouseEvent) override;

@@ -126,6 +126,14 @@ private:
    */
   void setAeraGraphicsItemPen(r_code::Code* object, const QPen& pen);
 
+  /**
+   * Get the scene AeraGraphicsItem whose getAeraEvent() has the given object, and set its pen to
+   * its getBorderNoHighlightPen().
+   * If the object or item is not found, do nothing.
+   * \param object The Code* object to search for.
+   */
+  void resetAeraGraphicsItemPen(r_code::Code* object);
+
   AeraVisualizerScene* modelsScene_;
   AeraVisualizerScene* mainScene_;
   AeraVisualizerScene* selectedScene_;

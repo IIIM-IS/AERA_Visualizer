@@ -85,6 +85,8 @@ public:
 
   int borderFlashCountdown_;
 
+  const QPen& getBorderNoHighlightPen() { return borderNoHighlightPen_;  }
+
   static const QString DownArrowHtml;
   static const QString SelectedRadioButtonHtml;
   static const QString UnselectedRadioButtonHtml;
@@ -126,6 +128,7 @@ protected:
   ReplicodeObjects& replicodeObjects_;
   QString headerHtml_;
   TextItem* textItem_;
+  QPen borderNoHighlightPen_;
 
 private:
   void removeArrow(Arrow* arrow);

@@ -28,7 +28,8 @@ AeraGraphicsItem::AeraGraphicsItem(
   aeraEvent_(aeraEvent), replicodeObjects_(replicodeObjects),
   borderFlashCountdown_(AeraVisualizerScene::FLASH_COUNT),
   // The base class should call setTextItemAndPolygon()
-  textItem_(0)
+  textItem_(0),
+  borderNoHighlightPen_(Qt::black, 1)
 {
   setFlag(QGraphicsItem::ItemIsMovable, true);
   setFlag(QGraphicsItem::ItemIsSelectable, true);
