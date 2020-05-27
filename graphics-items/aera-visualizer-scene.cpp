@@ -15,8 +15,6 @@ using namespace r_code;
 
 namespace aera_visualizer {
 
-const QPen AeraVisualizerScene::ItemBorderNoHighlightPen(Qt::black, 1);
-
 AeraVisualizerScene::AeraVisualizerScene(
   ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent, bool isMainScene,
   const OnSceneSelected& onSceneSelected)
@@ -28,7 +26,7 @@ AeraVisualizerScene::AeraVisualizerScene(
   didInitialFit_(false),
   thisFrameTime_(seconds(0)),
   thisFrameLeft_(0),
-  nextFrameLeft_(0),
+  nextFrameLeft_(10),
   borderFlashPen_(Qt::green, 3),
   noFlashColor_("black"),
   valueUpFlashColor_("green"),
@@ -41,10 +39,12 @@ AeraVisualizerScene::AeraVisualizerScene(
   setSceneRect(QRectF(0, 0, 5000, 5000));
 
   if (isMainScene_) {
-    eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] = 20;
-    eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 285;
-    eventTypeFirstTop_[NewMkValPredictionEvent::EVENT_TYPE] = 393;
-    eventTypeFirstTop_[NewPredictionSuccessEvent::EVENT_TYPE] = 530;
+    eventTypeFirstTop_[EnvironmentEjectEvent::EVENT_TYPE] = 20;
+    eventTypeFirstTop_[EnvironmentInjectEvent::EVENT_TYPE] = 45;
+    eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] = 120;
+    eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 385;
+    eventTypeFirstTop_[NewMkValPredictionEvent::EVENT_TYPE] = 493;
+    eventTypeFirstTop_[NewPredictionSuccessEvent::EVENT_TYPE] = 630;
     eventTypeFirstTop_[0] = 750;
   }
   else
@@ -99,10 +99,18 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     else
       top = eventTypeFirstTop_[eventType];
 
-    newObjectEvent->itemTopLeftPosition_ = QPointF(thisFrameLeft_ + 5, top);
+    int verticalMargin = 15;
+    if (newObjectEvent->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
+      newObjectEvent->eventType_ == EnvironmentEjectEvent::EVENT_TYPE) {
+      // Allow inject/eject items to be on the frame boundary.
+      newObjectEvent->itemTopLeftPosition_ = QPointF(thisFrameLeft_ + item->boundingRect().left(), top);
+      verticalMargin = 5;
+    }
+    else
+      newObjectEvent->itemTopLeftPosition_ = QPointF(thisFrameLeft_ + 5, top);
 
     // Set up eventTypeNextTop_ for the next item.
-    eventTypeNextTop_[eventType] = top + item->boundingRect().height() + 15;
+    eventTypeNextTop_[eventType] = top + item->boundingRect().height() + verticalMargin;
     nextFrameLeft_ = max(nextFrameLeft_, thisFrameLeft_ + item->boundingRect().width() + 14);
   }
 
@@ -224,7 +232,7 @@ void AeraVisualizerScene::timerEvent(QTimerEvent* event)
       if (aeraGraphicsItem->borderFlashCountdown_ % 2 == 1)
         aeraGraphicsItem->setPen(borderFlashPen_);
       else
-        aeraGraphicsItem->setPen(ItemBorderNoHighlightPen);
+        aeraGraphicsItem->setPen(aeraGraphicsItem->getBorderNoHighlightPen());
     }
 
     auto modelItem = dynamic_cast<ModelItem*>(item);
