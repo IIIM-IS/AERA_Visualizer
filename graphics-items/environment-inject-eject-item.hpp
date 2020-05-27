@@ -22,8 +22,8 @@ public:
   EnvironmentInjectEjectItem(
     AeraEvent* event, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 
-  static const QString UpArrowHtml;
-  static const QString DownArrowHtml;
+  static const QString UpWideArrowHtml;
+  static const QString DownWideArrowHtml;
 
 protected:
   void textItemLinkActivated(const QString& link) override;
@@ -36,8 +36,15 @@ private:
    */
   void setLabelHtml();
 
+  /**
+   * Set factValHtml_ to the HTML source code for the fact and value from
+   * autoFocusNewObjectEvent_->object_.
+   */
+  void setFactValHtml();
+
   AeraEvent* event_;
   QString labelHtml_;
+  QString factValHtml_;
 };
 
 }

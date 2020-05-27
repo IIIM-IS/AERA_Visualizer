@@ -11,8 +11,8 @@ using namespace r_code;
 
 namespace aera_visualizer {
 
-const QString EnvironmentInjectEjectItem::UpArrowHtml("&#129145;");
-const QString EnvironmentInjectEjectItem::DownArrowHtml("&#129147;");
+const QString EnvironmentInjectEjectItem::UpWideArrowHtml("<b>&#129093;</b>");
+const QString EnvironmentInjectEjectItem::DownWideArrowHtml("<b>&#129095;</b>");
 
 EnvironmentInjectEjectItem::EnvironmentInjectEjectItem(
   AeraEvent* event, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
@@ -20,6 +20,7 @@ EnvironmentInjectEjectItem::EnvironmentInjectEjectItem(
   event_(event)
 {
   setLabelHtml();
+  setFactValHtml();
 
   // Set up the textItem_ first to get its size.
   if (textItem_)
@@ -30,7 +31,7 @@ EnvironmentInjectEjectItem::EnvironmentInjectEjectItem(
   textItem_->adjustSize();
 
   // Position the item origin on the arrow.
-  qreal left = -5;
+  qreal left = -4;
   qreal top = -textItem_->boundingRect().height() / 2 + 5;
   textItem_->setPos(left -5, top - 5);
   textItem_->setTextInteractionFlags(Qt::TextBrowserInteraction);
@@ -56,33 +57,54 @@ EnvironmentInjectEjectItem::EnvironmentInjectEjectItem(
 void EnvironmentInjectEjectItem::setLabelHtml()
 {
   bool debug1 = (event_->eventType_ == EnvironmentInjectEvent::EVENT_TYPE);
-  labelHtml_ = (event_->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ? DownArrowHtml : UpArrowHtml) +
-    replicodeObjects_.getLabel(event_->object_).c_str();
+  labelHtml_ = (event_->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ? DownWideArrowHtml : UpWideArrowHtml) +
+    "<a href=\"#this\">" + replicodeObjects_.getLabel(event_->object_).c_str() + "</a>";
+}
+
+void EnvironmentInjectEjectItem::setFactValHtml()
+{
+  auto val = event_->object_->get_reference(0);
+
+  // Strip the ending confidence value and propagation of saliency threshold.
+  regex saliencyRegex("\\s+[\\w\\:]+\\)$");
+  regex confidenceAndSaliencyRegex("\\s+\\w+\\s+[\\w\\:]+\\)$");
+  string factSource = regex_replace(replicodeObjects_.getSourceCode(
+    event_->object_), confidenceAndSaliencyRegex, ")");
+  string valSource = regex_replace(replicodeObjects_.getSourceCode(val), saliencyRegex, ")");
+
+  QString valLabel(replicodeObjects_.getLabel(val).c_str());
+
+  // Temporarily use "!down" which doesn't have spaces.
+  factValHtml_ = QString(factSource.c_str()).replace(valLabel, "!down");
+  factValHtml_ += QString("\n      ") + valSource.c_str();
+
+  factValHtml_ = htmlify(factValHtml_);
+  factValHtml_.replace("!down", DownArrowHtml);
+  addSourceCodeHtmlLinks(event_->object_, factValHtml_);
 }
 
 void EnvironmentInjectEjectItem::textItemLinkActivated(const QString& link)
 {
-#if 0 // debug
   if (link == "#this") {
     auto menu = new QMenu();
-    menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
-    menu->addAction("What Made This?", [=]() {
-      auto fromObject = autoFocusNewObjectEvent_->fromObject_;
+    menu->addAction("What Is This?", [=]() {
+      QString explanation;
+      if (event_->eventType_ == EnvironmentInjectEvent::EVENT_TYPE)
+        explanation = "<b>Q: What is inject <a href=\"#debug_oid-" +
+          QString::number(event_->object_->get_debug_oid()) + "\">" +
+          replicodeObjects_.getLabel(event_->object_).c_str() + "</a> ?</b><br>" +
+          "This fact was injected from the environment:<br>" + factValHtml_ + "<br><br>";
+      else
+        explanation = "<b>Q: What is eject <a href=\"#debug_oid-" +
+          QString::number(event_->object_->get_debug_oid()) + "\">" +
+          replicodeObjects_.getLabel(event_->object_).c_str() + "</a> ?</b><br>" +
+          "This fact was made when a command was ejected to the environment:<br>" + factValHtml_ + "<br><br>";
 
-      string explanation = "<b>Q: What made auto focus <a href=\"#debug_oid-" +
-        to_string(autoFocusNewObjectEvent_->object_->get_debug_oid()) + "\">" +
-        replicodeObjects_.getLabel(autoFocusNewObjectEvent_->object_) + "</a> ?</b><br>" +
-        "The auto focus controller made this from <a href=\"#debug_oid-" +
-        to_string(fromObject->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(fromObject) + "</a><br><br>";
       parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
     });
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
   }
-  else
-    // For #debug_oid- and others, defer to the base class.
-#endif
-    AeraGraphicsItem::textItemLinkActivated(link);
 }
 
 void EnvironmentInjectEjectItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
