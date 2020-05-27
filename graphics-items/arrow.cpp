@@ -51,7 +51,9 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
   painter->setPen(myPen);
   painter->setBrush(color_);
 
-  QLineF centerLine(startItem_->pos(), endItem_->pos());
+  // Add the boundingRect().center() so the arrow points to the center of the item.
+  QLineF centerLine(startItem_->pos() + startItem_->boundingRect().center(), 
+                    endItem_->pos() +   endItem_->boundingRect().center());
   QPointF startIntersectPoint = intersectItem(centerLine, *startItem_);
   QPointF endIntersectPoint = intersectItem(centerLine, *endItem_);
 
