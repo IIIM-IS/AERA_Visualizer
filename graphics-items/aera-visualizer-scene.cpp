@@ -99,6 +99,10 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     else
       top = eventTypeFirstTop_[eventType];
 
+    if (newObjectEvent->object_->get_oid() == 46)
+      // Debug: Override for the test case to make the same types of values line up. Should use a layout algorithm.
+      top = 296;
+
     int verticalMargin = 15;
     if (newObjectEvent->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
       newObjectEvent->eventType_ == EnvironmentEjectEvent::EVENT_TYPE) {
