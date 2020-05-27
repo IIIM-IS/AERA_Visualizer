@@ -214,9 +214,11 @@ void AeraVisualizerScene::zoomToItem(QGraphicsItem* item)
 #if QT_CONFIG(wheelevent)
 void AeraVisualizerScene::wheelEvent(QGraphicsSceneWheelEvent* event)
 {
-  // Accept the event to override other behavior.
-  event->accept();
-  scaleViewBy(pow((double)2, event->delta() / 1000.0));
+  if (event->modifiers() == Qt::ControlModifier) {
+    // Accept the event to override other behavior.
+    event->accept();
+    scaleViewBy(pow((double)2, event->delta() / 1000.0));
+  }
 }
 #endif
 
