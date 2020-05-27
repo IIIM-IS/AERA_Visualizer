@@ -94,11 +94,24 @@ void EnvironmentInjectEjectItem::textItemLinkActivated(const QString& link)
           QString::number(event_->object_->get_debug_oid()) + "\">" +
           replicodeObjects_.getLabel(event_->object_).c_str() + "</a> ?</b><br>" +
           "This fact was injected from the environment:<br>" + factValHtml_ + "<br><br>";
-      else
+      else {
         explanation = "<b>Q: What is eject <a href=\"#debug_oid-" +
           QString::number(event_->object_->get_debug_oid()) + "\">" +
           replicodeObjects_.getLabel(event_->object_).c_str() + "</a> ?</b><br>" +
-          "This fact was made when a command was ejected to the environment:<br>" + factValHtml_ + "<br><br>";
+          "A command was ejected to the environment:<br>" + factValHtml_;
+
+        // Debug: Properly find the related program reduction.
+        Code* mkRdx = NULL;
+        if (event_->object_->get_oid() == 44)
+          mkRdx = replicodeObjects_.getObject(45);
+        if (mkRdx)
+          explanation += QString("<br>It was ejected by instantiated program <b>") + 
+            replicodeObjects_.getLabel(mkRdx->get_reference(0)).c_str() +
+            "</b>, according to program reduction <a href=\"#debug_oid-" + QString::number(mkRdx->get_debug_oid()) + 
+            "\">" + replicodeObjects_.getLabel(mkRdx).c_str() + "</a> .";
+
+        explanation += "<br><br>";
+      }
 
       parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
     });
