@@ -58,6 +58,11 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     didInitialFit_ = true;
     // Set the height of the view. The width will be set accordingly.
     views().at(0)->fitInView(QRectF(0, 0, 1, 800), Qt::KeepAspectRatio);
+
+    // Separate the environment eject/inject region.
+    auto y = eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] - 5;
+    auto line = addLine(sceneRect().left(), y, sceneRect().right(), y, QPen(Qt::darkGray, 1));
+    line->setZValue(-100);
   }
 
   item->setBrush(itemColor_);
