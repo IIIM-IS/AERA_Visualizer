@@ -1,6 +1,7 @@
 #include <QtWidgets>
 #include "submodules/replicode/r_exec/opcodes.h"
 #include "graphics-items/program-reduction-item.hpp"
+#include "graphics-items/environment-inject-eject-item.hpp"
 #include "aera-visualizer-window.hpp"
 #include "explanation-log-window.hpp"
 
@@ -78,7 +79,11 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
       delete menu;
     }
     else {
-      if (!parent_->getAeraGraphicsItem(object))
+      auto item = parent_->getAeraGraphicsItem(object);
+      if (!item)
+        return;
+      if (dynamic_cast<EnvironmentInjectEjectItem*>(item))
+        // The inject/eject items are too small to zoom to.
         return;
 
       // Show the menu.
