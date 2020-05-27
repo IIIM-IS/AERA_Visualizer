@@ -8,6 +8,7 @@
 #include "graphics-items/prediction-item.hpp"
 #include "graphics-items/prediction-success-fact-item.hpp"
 #include "graphics-items/instantiated-composite-state-item.hpp"
+#include "graphics-items/environment-inject-eject-item.hpp"
 #include "graphics-items/aera-visualizer-scene.hpp"
 #include "aera-visualizer-window.hpp"
 
@@ -90,6 +91,10 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
   regex newInstantiatedCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+) icst\\[\\d+\\]\\[([ \\d]+)\\]$");
   // 0s:300ms:0us fact 75 -> fact 79 success fact 60 pred
   regex newPredictionSuccessRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+) -> fact (\\d+) success fact \\d+ pred$");
+  // 0s:200ms:0us environment inject 46, ijt 0s:200ms:0us
+  regex newEnvironmentInjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us environment inject (\\d+), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
+  // 0s:100ms:0us environment eject 44
+  regex newEnvironmentEjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us environment eject (\\d+)$");
 
   string line;
   while (getline(consoleOutputFile, line)) {
@@ -137,7 +142,8 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
     else if (regex_search(line, matches, autofocusNewObjectRegex)) {
       auto fromObject = replicodeObjects_.getObject(stol(matches[4].str()));
       auto toObject = replicodeObjects_.getObject(stol(matches[5].str()));
-      if (fromObject && toObject)
+      // Skip auto-focus of the same object (such as eject facts).
+      if (fromObject && toObject && fromObject != toObject)
         events_.push_back(make_shared<AutoFocusNewObjectEvent>(
           getTimestamp(matches), fromObject, toObject, matches[6].str()));
     }
@@ -179,14 +185,25 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
         events_.push_back(make_shared<NewPredictionSuccessEvent>(
           getTimestamp(matches), factSuccessFactPred));
     }
+    else if (regex_search(line, matches, newEnvironmentInjectRegex)) {
+      auto object = replicodeObjects_.getObject(stol(matches[4].str()));
+      if (object)
+        events_.push_back(make_shared<EnvironmentInjectEvent>(
+          getTimestamp(matches), object, getTimestamp(matches, 5)));
+    }
+    else if (regex_search(line, matches, newEnvironmentEjectRegex)) {
+      auto object = replicodeObjects_.getObject(stol(matches[4].str()));
+      if (object)
+        events_.push_back(make_shared<EnvironmentEjectEvent>(getTimestamp(matches), object));
+    }
   }
 }
 
-Timestamp AeraVisulizerWindow::getTimestamp(const smatch& matches)
+Timestamp AeraVisulizerWindow::getTimestamp(const smatch& matches, int index)
 {
-  microseconds us(1000000 * stoll(matches[1].str()) +
-                     1000 * stoll(matches[2].str()) +
-                            stoll(matches[3].str()));
+  microseconds us(1000000 * stoll(matches[index].str()) +
+                     1000 * stoll(matches[index + 1].str()) +
+                            stoll(matches[index + 2].str()));
   return replicodeObjects_.getTimeReference() + us;
 }
 
@@ -228,6 +245,13 @@ void AeraVisulizerWindow::setAeraGraphicsItemPen(r_code::Code* object, const QPe
     item->setPen(pen);
 }
 
+void AeraVisulizerWindow::resetAeraGraphicsItemPen(r_code::Code* object)
+{
+  auto item = getAeraGraphicsItem(object);
+  if (item)
+    item->setPen(item->getBorderNoHighlightPen());
+}
+
 void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, QPointF position)
 {
   auto url = document->documentLayout()->anchorAt(position);
@@ -235,7 +259,7 @@ void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, 
     // The mouse cursor exited the link.
     if (hoverHighlightObject_) {
       // Clear the previous highlighting.
-      setAeraGraphicsItemPen(hoverHighlightObject_, AeraVisualizerScene::ItemBorderNoHighlightPen);
+      resetAeraGraphicsItemPen(hoverHighlightObject_);
       hoverHighlightObject_ = 0;
     }
 
@@ -254,7 +278,7 @@ void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, 
     if (object) {
       if (hoverHighlightObject_)
         // Unhighlight a previous object.
-        setAeraGraphicsItemPen(hoverHighlightObject_, AeraVisualizerScene::ItemBorderNoHighlightPen);
+        resetAeraGraphicsItemPen(hoverHighlightObject_);
 
       hoverHighlightObject_ = object;
       setAeraGraphicsItemPen(object, itemBorderHighlightPen_);
@@ -277,7 +301,9 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
       event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE ||
       event->eventType_ == NewPredictionSuccessEvent::EVENT_TYPE ||
-      event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
+      event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
+      event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
+      event->eventType_ == EnvironmentEjectEvent::EVENT_TYPE) {
     AeraGraphicsItem* newItem;
 
     AeraVisualizerScene* scene;
@@ -322,6 +348,10 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
           scene->addArrow(newItem, referencedItem);
       }
     }
+    else if (event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
+             event->eventType_ == EnvironmentEjectEvent::EVENT_TYPE)
+      // TODO: Position the EnvironmentInjectEvent at its injectionTime?
+      newItem = new EnvironmentInjectEjectItem(event, replicodeObjects_, scene);
 
     // Add the new item.
     scene->addAeraGraphicsItem(newItem);
@@ -405,7 +435,9 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
       event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
       event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE ||
       event->eventType_ == NewPredictionSuccessEvent::EVENT_TYPE ||
-      event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
+      event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
+      event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
+      event->eventType_ == EnvironmentEjectEvent::EVENT_TYPE) {
     AeraVisualizerScene* scene;
     if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)

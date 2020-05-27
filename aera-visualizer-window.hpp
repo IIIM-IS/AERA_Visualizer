@@ -111,12 +111,13 @@ private:
 
   /**
    * Get the time stamp from the decimal strings of seconds, milliseconds and
-   * microseconds at matches[1], matches[2] and matches[3], then add
+   * microseconds at matches[index], matches[index + 1] and matches[index + 2], then add
    * replicodeObjects_.getTimeReference().
    * \param matches The smatch object.
+   * \param index (optional) The matches index for the first number. If omitted, use 1.
    * \return The timestamp.
    */
-  core::Timestamp getTimestamp(const smatch& matches);
+  core::Timestamp getTimestamp(const smatch& matches, int index = 1);
 
   /**
    * Get the scene AeraGraphicsItem whose getAeraEvent() has the given object, and set its pen.
