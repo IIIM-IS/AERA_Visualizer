@@ -37,10 +37,8 @@ EnvironmentInjectEjectItem::EnvironmentInjectEjectItem(
   QObject::connect(textItem_, &QGraphicsTextItem::linkActivated,
     [this](const QString& link) { textItemLinkActivated(link); });
 
-  // Allow the text to extend past the boundary so that it blends with the background.
-  borderNoHighlightPen_ = QPen(parent_->backgroundBrush().color(), 1);
-  qreal right = left + 9;
-  qreal bottom = textItem_->boundingRect().height() / 2 - 5;
+  qreal right = left + textItem_->boundingRect().width() - 5;
+  qreal bottom = textItem_->boundingRect().height() / 2 - 2;
 
   // Make a simple rectangle.
   QPainterPath path;
@@ -50,6 +48,9 @@ EnvironmentInjectEjectItem::EnvironmentInjectEjectItem(
   path.lineTo(right, bottom);
   auto polygon = path.toFillPolygon();
   setPolygon(polygon);
+
+  // Blend with the background. Below, we override paint() to use the parent's background color.
+  borderNoHighlightPen_ = QPen(parent_->backgroundBrush().color(), 1);
 }
 
 void EnvironmentInjectEjectItem::setLabelHtml()
@@ -82,6 +83,13 @@ void EnvironmentInjectEjectItem::textItemLinkActivated(const QString& link)
     // For #debug_oid- and others, defer to the base class.
 #endif
     AeraGraphicsItem::textItemLinkActivated(link);
+}
+
+void EnvironmentInjectEjectItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+{
+  // TODO: Why can't we just set the brush in the constructor?
+  setBrush(parent_->backgroundBrush());
+  AeraGraphicsItem::paint(painter, option, widget);
 }
 
 }

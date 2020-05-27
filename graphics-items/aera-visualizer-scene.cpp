@@ -104,7 +104,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       newObjectEvent->eventType_ == EnvironmentEjectEvent::EVENT_TYPE) {
       // Allow inject/eject items to be on the frame boundary.
       newObjectEvent->itemTopLeftPosition_ = QPointF(thisFrameLeft_ + item->boundingRect().left(), top);
-      verticalMargin = 5;
+      verticalMargin = 2;
     }
     else
       newObjectEvent->itemTopLeftPosition_ = QPointF(thisFrameLeft_ + 5, top);

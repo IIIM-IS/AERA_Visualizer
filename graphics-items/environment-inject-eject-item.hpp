@@ -27,6 +27,7 @@ public:
 
 protected:
   void textItemLinkActivated(const QString& link) override;
+  void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 private:
   /**
