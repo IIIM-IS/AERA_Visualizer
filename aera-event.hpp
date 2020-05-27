@@ -152,6 +152,28 @@ public:
   static const int EVENT_TYPE = 9;
 };
 
+class EnvironmentInjectEvent : public AeraEvent {
+public:
+  EnvironmentInjectEvent(
+    core::Timestamp time, r_code::Code* object, core::Timestamp injectionTime)
+    : AeraEvent(EVENT_TYPE, time, object),
+    injectionTime_(injectionTime)
+  {}
+
+  static const int EVENT_TYPE = 10;
+
+  core::Timestamp injectionTime_;
+};
+
+class EnvironmentEjectEvent : public AeraEvent {
+public:
+  EnvironmentEjectEvent(core::Timestamp time, r_code::Code* object)
+    : AeraEvent(EVENT_TYPE, time, object)
+  {}
+
+  static const int EVENT_TYPE = 11;
+};
+
 }
 
 #endif
