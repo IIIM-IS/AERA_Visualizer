@@ -318,8 +318,15 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       if (fromObjectItem)
         scene->addArrow(newItem, fromObjectItem);
     }
-    else if (event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE)
-      newItem = new PredictionItem((NewMkValPredictionEvent*)event, replicodeObjects_, scene);
+    else if (event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE) {
+      auto predictionEvent = (NewMkValPredictionEvent*)event;
+      newItem = new PredictionItem(predictionEvent, replicodeObjects_, scene);
+
+      // Add an arrow to the cause.
+      auto causeItem = scene->getAeraGraphicsItem(predictionEvent->cause_);
+      if (causeItem)
+        scene->addArrow(newItem, causeItem);
+    }
     else if (event->eventType_ == NewPredictionSuccessEvent::EVENT_TYPE)
       newItem = new PredictionSuccessFactItem((NewPredictionSuccessEvent*)event, replicodeObjects_, scene);
     else if (event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
