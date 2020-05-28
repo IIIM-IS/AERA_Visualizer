@@ -81,8 +81,6 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
   regex setEvidenceCountAndSuccessRateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl (\\d+) cnt:(\\d+) sr:([\\d\\.]+)$");
   // 0s:200ms:0us -> cst 52, CSTController(375)
   regex newCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> cst (\\d+), CSTController\\((\\d+)\\)$");
-  // 0s:100ms:0us PGMController(92) -> mk.rdx 47
-  regex programReductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us PGMController\\((\\d+)\\) -> mk.rdx (\\d+)$");
   // 0s:0ms:0us A/F -> 35|40 (AXIOM)
   regex autofocusNewObjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us A/F -> (\\d+)\\|(\\d+) \\((\\w+)\\)$");
   // 0s:200ms:0us fact 61(1084) imdl mdl 53: 56 -> fact 60 pred fact mk.val VALUE nb: 2.000000e+01
@@ -118,26 +116,6 @@ void AeraVisulizerWindow::addEvents(const string& consoleOutputFilePath)
       if (compositeState)
         events_.push_back(make_shared<NewCompositeStateEvent>(
           getTimestamp(matches), compositeState, stoll(matches[5].str())));
-    }
-    else if (regex_search(line, matches, programReductionRegex)) {
-      auto programReduction = replicodeObjects_.getObject(stol(matches[5].str()));
-      if (programReduction) {
-        // First add events for the output objects.
-        // TODO: Get this from the actual object.
-        Code* outputObject = 0;
-        if (programReduction->get_oid() == 47)
-          outputObject = replicodeObjects_.getObject(49);
-        else if (programReduction->get_oid() == 58)
-          outputObject = replicodeObjects_.getObject(68);
-        else if (programReduction->get_oid() == 77)
-          outputObject = replicodeObjects_.getObjectByDebugOid(2061);
-        if (outputObject)
-          events_.push_back(make_shared<ProgramReductionNewObjectEvent>(
-            getTimestamp(matches), outputObject, programReduction));
-
-        events_.push_back(make_shared<ProgramReductionEvent>(
-          getTimestamp(matches), programReduction, stoll(matches[4].str())));
-      }
     }
     else if (regex_search(line, matches, autofocusNewObjectRegex)) {
       auto fromObject = replicodeObjects_.getObject(stol(matches[4].str()));
