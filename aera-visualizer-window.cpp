@@ -325,13 +325,20 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     else if (event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
       newItem = new CompositeStateItem((NewCompositeStateEvent*)event, replicodeObjects_, scene);
     else if (event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE) {
+      auto autoFocusEvent = (AutoFocusNewObjectEvent*)event;
       if (event->time_ == replicodeObjects_.getTimeReference()) {
         // Debug: For now, skip auto focus events at startup.
         ++iNextEvent_;
         return stepEvent(maximumTime);
       }
 
-      newItem = new AutoFocusFactItem((AutoFocusNewObjectEvent*)event, replicodeObjects_, scene);
+      newItem = new AutoFocusFactItem(autoFocusEvent, replicodeObjects_, scene);
+
+      // Add an arrow to the "from object".
+      // TODO: Make this a Show/Hide option.
+      auto fromObjectItem = scene->getAeraGraphicsItem(autoFocusEvent->fromObject_);
+      if (fromObjectItem)
+        scene->addArrow(newItem, fromObjectItem);
     }
     else if (event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE)
       newItem = new PredictionItem((NewMkValPredictionEvent*)event, replicodeObjects_, scene);
