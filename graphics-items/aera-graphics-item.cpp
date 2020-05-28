@@ -34,6 +34,7 @@ AeraGraphicsItem::AeraGraphicsItem(
   setFlag(QGraphicsItem::ItemIsMovable, true);
   setFlag(QGraphicsItem::ItemIsSelectable, true);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+  setAcceptHoverEvents(true);
 
   headerHtml_ = QString("<table width=\"100%\"><tr>") + 
     "<td style=\"white-space:nowrap\"><font size=\"+1\"><b><font color=\"darkred\">" + headerPrefix +
@@ -226,6 +227,30 @@ void AeraGraphicsItem::textItemLinkActivated(const QString& link)
       }
     }
   }
+}
+
+void AeraGraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+{
+  // Highlight connected arrows.
+  const QColor highlightColor(64, 200, 255);
+
+  foreach(Arrow * arrow, arrows_) {
+    arrow->setColor(highlightColor);
+    arrow->update();
+  }
+
+  QGraphicsPolygonItem::hoverEnterEvent(event);
+}
+
+void AeraGraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
+{
+  // Reset highlighting of connected arrows.
+  foreach(Arrow * arrow, arrows_) {
+    arrow->setColor(Qt::black);
+    arrow->update();
+  }
+
+  QGraphicsPolygonItem::hoverLeaveEvent(event);
 }
 
 void AeraGraphicsItem::TextItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)

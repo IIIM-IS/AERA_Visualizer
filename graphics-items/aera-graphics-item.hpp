@@ -111,6 +111,8 @@ protected:
 
   void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
   QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
+  void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
+  void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
 
   /**
    * Set the textItem_ to the given html and create the border polygon. Connect
