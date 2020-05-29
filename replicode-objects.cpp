@@ -15,20 +15,22 @@ using namespace r_comp;
 
 namespace aera_visualizer {
 
-string ReplicodeObjects::init(const string& userOperatorsFilePath, const string& decompiledFilePath)
+string ReplicodeObjects::init(const string& userClassesFilePath, const string& decompiledFilePath)
 {
   // Run the proprocessor on the user operators (which includes std.replicode) just to
   // get the Metadata. The objects are repeated in the decompiled output.
-  ifstream userOperatorsFile(userOperatorsFilePath);
+  ifstream userClassesFile(userClassesFilePath);
+  if (!userClassesFile)
+    return "Can't open user classes file: " + userClassesFilePath;
   Metadata metadata;
   Preprocessor preprocessor;
   string error;
   // We won't compile the preprocessed user operators code.
-  ostringstream dummyPreprocessedUserOperators;
+  ostringstream dummyPreprocessedUserClasses;
   if (!preprocessor.process(
-      &userOperatorsFile, userOperatorsFilePath, &dummyPreprocessedUserOperators, error, &metadata))
+      &userClassesFile, userClassesFilePath, &dummyPreprocessedUserClasses, error, &metadata))
     return error;
-  dummyPreprocessedUserOperators.clear();
+  dummyPreprocessedUserClasses.clear();
 
   r_exec::InitOpcodes(metadata);
   // Now() is called when construcing model controllers.
@@ -37,6 +39,11 @@ string ReplicodeObjects::init(const string& userOperatorsFilePath, const string&
   map<string, uint32> objectOids;
   map<string, uint64> objectDebugOids;
   map<uint64, string> objectSourceCodeByDebugOid;
+  {
+    ifstream testOpen(decompiledFilePath);
+    if (!testOpen)
+      return "Can't open decompiled objects file: " + decompiledFilePath;
+  }
   auto decompiledOut = processDecompiledObjects(
     decompiledFilePath, objectOids, objectDebugOids, objectSourceCodeByDebugOid);
 
