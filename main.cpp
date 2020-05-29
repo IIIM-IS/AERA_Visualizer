@@ -49,6 +49,7 @@ int main(int argv, char *args[])
     }
   }
   AeraVisulizerWindow mainWindow(replicodeObjects, debugStreamFilePath);
+  mainWindow.setWindowTitle(QString("AERA Visualizer - ") + QFileInfo(settings.source_file_name_.c_str()).fileName());
   // TODO: Use the actual screen resolution.
   const int left = 0;
   const int top = 35;
