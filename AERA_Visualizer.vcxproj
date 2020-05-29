@@ -114,7 +114,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING;WIN64;_DEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;EXECUTIVE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING;WIN64;_DEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;EXECUTIVE_EXPORTS;CORELIBRARY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -300,6 +300,7 @@
     <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\utils.tpl.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\xml_parser.cpp" />
     <ClCompile Include="submodules\replicode\usr_operators\auto_focus_callback.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -376,6 +377,7 @@
     <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\base.h" />
     <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\types.h" />
     <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\utils.h" />
+    <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\xml_parser.h" />
     <ClInclude Include="submodules\replicode\usr_operators\auto_focus_callback.h" />
     <QtMoc Include="explanation-log-window.hpp" />
     <QtMoc Include="aera-visualizer-window-base.hpp" />
