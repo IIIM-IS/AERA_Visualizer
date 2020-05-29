@@ -1,8 +1,10 @@
 #include "aera-visualizer-window.hpp"
 #include "explanation-log-window.hpp"
+#include "submodules/replicode/Test/settings.h"
 
 #include <QApplication>
 #include <QMessageBox>
+#include <QFileDialog>
 
 using namespace aera_visualizer;
 
@@ -12,17 +14,41 @@ int main(int argv, char *args[])
 
   QApplication app(argv, args);
 
-  string userOperatorsFilePath = "C:\\Users\\Jeff\\AERA\\replicode\\Test\\V1.2\\user.classes.replicode";
-  string decompiledFilePath = "C:\\Users\\Jeff\\AERA\\replicode\\Test\\decompiled_objects.txt";
+  // TODO: Remember the location between launches.
+  QString previousSettingsFilePath = "C:/Users/Jeff/AERA/replicode/Test/settings.xml";
+  auto settingsFilePath = QFileDialog::getOpenFileName(NULL,
+    "Open Replicode settings XML file", previousSettingsFilePath, "XML Files (*.xml);;All Files (*.*)");
+  if (settingsFilePath == "")
+    return 0;
 
+  Settings settings;
+  if (!settings.load(settingsFilePath.toStdString().c_str())) {
+    QMessageBox::information(NULL, "XML Error", "Cannot load XML file " + settingsFilePath, QMessageBox::Ok);
+    return -1;
+  }
+
+  // Files are relative to the directory of settingsFilePath.
+  QDir settingsFileDir = QFileInfo(settingsFilePath).dir();
   ReplicodeObjects replicodeObjects;
-  string error = replicodeObjects.init(userOperatorsFilePath, decompiledFilePath);
+  string error = replicodeObjects.init(
+    settingsFileDir.absoluteFilePath(settings.usr_class_path_.c_str()).toStdString(), 
+    settingsFileDir.absoluteFilePath(settings.decompilation_file_path_.c_str()).toStdString());
   if (error != "") {
     QMessageBox::information(NULL, "Compiler Error", error.c_str(), QMessageBox::Ok);
     return -1;
   }
 
-  AeraVisulizerWindow mainWindow(replicodeObjects);
+  string debugStreamFilePath = settingsFileDir.absoluteFilePath(settings.debug_stream_file_path_.c_str()).toStdString();
+  {
+    // Test opening the file now so we can exit on error.
+    ifstream testOpen(debugStreamFilePath);
+    if (!testOpen) {
+      QMessageBox::information(NULL, "File Error", 
+        QString("Can't open debug stream output file: ") + debugStreamFilePath.c_str(), QMessageBox::Ok);
+      return -1;
+    }
+  }
+  AeraVisulizerWindow mainWindow(replicodeObjects, debugStreamFilePath);
   // TODO: Use the actual screen resolution.
   const int left = 0;
   const int top = 35;

@@ -35,7 +35,7 @@ public:
   /**
    * Create an AeraVisulizerWindow.
    */
-  AeraVisulizerWindow(ReplicodeObjects& replicodeObjects);
+  AeraVisulizerWindow(ReplicodeObjects& replicodeObjects, const std::string& debugStreamFilePath);
 
   void setExplanationLogWindow(ExplanationLogWindow* explanationLogWindow)
   {
@@ -103,11 +103,11 @@ private:
   void createMenus();
   void createToolbars();
   /**
-   * Scan the consoleOutputFilePath and add to events_.
-   * \param consoleOutputFilePath The file path of the console output,
-   * typically ending in "Test.out.txt".
+   * Scan the debugStreamFilePath and add to events_.
+   * \param debugStreamFilePath The file path of the debug stream output,
+   * typically ending in "debug_out.txt".
    */
-  void addEvents(const std::string& consoleOutputFilePath);
+  void addEvents(const std::string& debugStreamFilePath);
 
   /**
    * Get the time stamp from the decimal strings of seconds, milliseconds and
