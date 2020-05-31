@@ -278,6 +278,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
       event->eventType_ == EnvironmentEjectEvent::EVENT_TYPE) {
     AeraGraphicsItem* newItem;
+    bool visible = true;
 
     AeraVisualizerScene* scene;
     if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
@@ -308,10 +309,16 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       newItem = new AutoFocusFactItem(autoFocusEvent, replicodeObjects_, scene);
 
       // Add an arrow to the "from object".
-      // TODO: Make this a Show/Hide option.
       auto fromObjectItem = scene->getAeraGraphicsItem(autoFocusEvent->fromObject_);
       if (fromObjectItem)
         scene->addArrow(newItem, fromObjectItem);
+
+      string predicate;
+      // Debug: Properly get the predicate from the fact.
+      if (event->object_->get_oid() == 46 || event->object_->get_oid() == 53 || event->object_->get_oid() == 61 || event->object_->get_oid() == 75)
+        predicate = "essence";
+      if (predicate == "essence")
+        visible = (essenceFactsCheckBox_->checkState() == Qt::Checked);
     }
     else if (event->eventType_ == ModelPredictionReduction::EVENT_TYPE) {
       auto reductionEvent = (ModelPredictionReduction*)event;
@@ -334,6 +341,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
         if (referencedItem)
           scene->addArrow(newItem, referencedItem);
       }
+
+      visible = (instantiatedCompositeStatesCheckBox_->checkState() == Qt::Checked);
     }
     else if (event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
              event->eventType_ == EnvironmentEjectEvent::EVENT_TYPE)
@@ -362,7 +371,11 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       }
     }
 
-    scene->establishFlashTimer();
+    if (visible)
+      // Only flash if visible.
+      scene->establishFlashTimer();
+    else
+      newItem->setItemAndArrowsVisible(false);
   }
   else if (event->eventType_ == SetModelEvidenceCountAndSuccessRateEvent::EVENT_TYPE) {
     auto setSuccessRateEvent = (SetModelEvidenceCountAndSuccessRateEvent*)event;
@@ -529,6 +542,19 @@ void AeraVisulizerWindow::createToolbars()
   toolbar->addAction(zoomInAction_);
   toolbar->addAction(zoomOutAction_);
   toolbar->addAction(zoomHomeAction_);
+
+  toolbar->addSeparator();
+  toolbar->addWidget(new QLabel("Show/Hide: ", this));
+
+  essenceFactsCheckBox_ = new QCheckBox("Essence Facts", this);
+  connect(essenceFactsCheckBox_, &QCheckBox::stateChanged, [=](int state) { 
+    mainScene_->setAutoFocusItemsVisible("essence", state == Qt::Checked);  });
+  toolbar->addWidget(essenceFactsCheckBox_);
+
+  instantiatedCompositeStatesCheckBox_ = new QCheckBox("Instantiated Comp. States", this);
+  connect(instantiatedCompositeStatesCheckBox_, &QCheckBox::stateChanged, [=](int state) {
+    mainScene_->setItemsVisible(NewInstantiatedCompositeStateEvent::EVENT_TYPE, state == Qt::Checked);  });
+  toolbar->addWidget(instantiatedCompositeStatesCheckBox_);
 }
 
 }

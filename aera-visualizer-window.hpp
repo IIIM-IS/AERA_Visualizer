@@ -17,6 +17,7 @@ class QToolBox;
 class QSpinBox;
 class QComboBox;
 class QLineEdit;
+class QCheckBox;
 class QGraphicsView;
 
 namespace aera_visualizer {
@@ -143,6 +144,9 @@ private:
   QAction* zoomInAction_;
   QAction* zoomOutAction_;
   QAction* zoomHomeAction_;
+
+  QCheckBox* essenceFactsCheckBox_;
+  QCheckBox* instantiatedCompositeStatesCheckBox_;
 
   size_t iNextEvent_;
   ReplicodeObjects& replicodeObjects_;
