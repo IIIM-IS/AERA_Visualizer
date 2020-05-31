@@ -115,18 +115,28 @@ public:
   std::string syncMode_;
 };
 
-class NewMkValPredictionEvent : public AeraEvent {
+class ModelPredictionReduction : public AeraEvent {
 public:
-  NewMkValPredictionEvent(core::Timestamp time, r_code::Code* factPrediction,
-    r_code::Code* factImdl, r_code::Code* cause)
-    : AeraEvent(EVENT_TYPE, time, factPrediction),
-    factImdl_(factImdl), cause_(cause)
+  /**
+   * Create a ModelPredictionReduction, but set object_ to the (fact (pred ...)).
+   * (mk.rdx fact_imdl [fact_cause] [fact_pred]) .
+   * \param time The reduction time.
+   * \param reduction The model reduction which points to the (fact (pred ...)) and cause
+   */
+  ModelPredictionReduction(core::Timestamp time, r_code::Code* reduction)
+    : AeraEvent(EVENT_TYPE, time, reduction->get_reference(2)),
+    reduction_(reduction)
   {}
 
   static const int EVENT_TYPE = 7;
 
-  r_code::Code* factImdl_;
-  r_code::Code* cause_;
+  r_code::Code* getFactImdl() { return reduction_->get_reference(0); }
+
+  r_code::Code* getCause() { return reduction_->get_reference(1); }
+
+  r_code::Code* getFactPred() { return object_; }
+
+  r_code::Code* reduction_;
 };
 
 class NewInstantiatedCompositeStateEvent : public AeraEvent {

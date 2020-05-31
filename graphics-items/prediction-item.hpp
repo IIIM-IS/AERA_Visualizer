@@ -14,7 +14,7 @@ class PredictionItem : public AeraGraphicsItem
 {
 public:
   PredictionItem(
-    NewMkValPredictionEvent* newPredictionEvent, ReplicodeObjects& replicodeObjects, 
+    ModelPredictionReduction* modelReduction, ReplicodeObjects& replicodeObjects, 
     AeraVisualizerScene* parent);
 
 protected:
@@ -25,19 +25,19 @@ private:
 
   /**
    * Set factPredFactMkValHtml_ to the HTML source code for the fact, pred, fact and mk.val
-   * from newPredictionEvent_->object_. Also set highlightedFactPredFactMkValHtml_ to 
+   * from modelReduction_->object_. Also set highlightedFactPredFactMkValHtml_ to 
    * factPredFactMkValHtml_ with text highlighted in conjunction with boundModelHtml_.
    */
   void setFactPredFactMkValHtml();
 
   /**
-   * Set factImdlHtml_ to the HTML source code for the fact and imdl from newPredictionEvent_->factImdl_.
+   * Set factImdlHtml_ to the HTML source code for the fact and imdl from modelReduction_->factImdl_.
    */
   void setFactImdlHtml();
 
   /**
    * Set unboundModelHtml_ to the HTML source code for the model from 
-   * newPredictionEvent_->factImdl_, and set boundModelHtml_ to the source 
+   * modelReduction_->factImdl_, and set boundModelHtml_ to the source 
    * with variables bound to the template parameters.
    */
   void setBoundAndUnboundModelHtml();
@@ -49,7 +49,7 @@ private:
    */
   QString makeHtml();
 
-  NewMkValPredictionEvent* newPredictionEvent_;
+  ModelPredictionReduction* modelReduction_;
   ShowState showState_;
   QString factPredFactMkValHtml_;
   QString highlightedFactPredFactMkValHtml_;

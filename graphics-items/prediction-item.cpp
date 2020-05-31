@@ -12,10 +12,10 @@ using namespace r_exec;
 namespace aera_visualizer {
 
 PredictionItem::PredictionItem(
-  NewMkValPredictionEvent* newPredictionEvent, ReplicodeObjects& replicodeObjects,
+  ModelPredictionReduction* modelReduction, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-  : AeraGraphicsItem(newPredictionEvent, replicodeObjects, parent, "Prediction"),
-  newPredictionEvent_(newPredictionEvent), showState_(HIDE_IMODEL)
+  : AeraGraphicsItem(modelReduction, replicodeObjects, parent, "Prediction"),
+  modelReduction_(modelReduction), showState_(HIDE_IMODEL)
 {
   setFactPredFactMkValHtml();
   setFactImdlHtml();
@@ -25,14 +25,14 @@ PredictionItem::PredictionItem(
 
 void PredictionItem::setFactPredFactMkValHtml()
 {
-  auto pred = newPredictionEvent_->object_->get_reference(0);
+  auto pred = modelReduction_->object_->get_reference(0);
   auto factMkVal = pred->get_reference(0);
   auto mkVal = factMkVal->get_reference(0);
 
   // Strip the ending confidence value and propagation of saliency threshold.
   regex saliencyRegex("\\s+[\\w\\:]+\\)$");
   regex confidenceAndSaliencyRegex("\\s+\\w+\\s+[\\w\\:]+\\)$");
-  string factPredSource = regex_replace(replicodeObjects_.getSourceCode(newPredictionEvent_->object_), confidenceAndSaliencyRegex, ")");
+  string factPredSource = regex_replace(replicodeObjects_.getSourceCode(modelReduction_->object_), confidenceAndSaliencyRegex, ")");
   string predSource = regex_replace(replicodeObjects_.getSourceCode(pred), saliencyRegex, ")");
   string factMkValSource = regex_replace(replicodeObjects_.getSourceCode(factMkVal), confidenceAndSaliencyRegex, ")");
   string mkValSource = regex_replace(replicodeObjects_.getSourceCode(mkVal), saliencyRegex, ")");
@@ -54,7 +54,7 @@ void PredictionItem::setFactPredFactMkValHtml()
 
   factPredFactMkValHtml_ = htmlify(factPredFactMkValHtml_);
   factPredFactMkValHtml_.replace("!down", DownArrowHtml);
-  addSourceCodeHtmlLinks(newPredictionEvent_->object_, factPredFactMkValHtml_);
+  addSourceCodeHtmlLinks(modelReduction_->object_, factPredFactMkValHtml_);
 
   highlightedFactPredFactMkValHtml_ = factPredFactMkValHtml_;
   factPredFactMkValHtml_.replace("!factMkVal-start", "");
@@ -71,13 +71,13 @@ void PredictionItem::setFactPredFactMkValHtml()
 void PredictionItem::setFactImdlHtml()
 {
   // TODO: Share with InstantiatedCompositeStateItem::setFactIcstHtml().
-  auto imdl = newPredictionEvent_->factImdl_->get_reference(0);
+  auto imdl = modelReduction_->getFactImdl()->get_reference(0);
 
   // Strip the ending confidence value and propagation of saliency threshold.
   regex saliencyRegex("\\s+[\\w\\:]+\\)$");
   regex confidenceAndSaliencyRegex("\\s+\\w+\\s+[\\w\\:]+\\)$");
   string factImdlSource = regex_replace(
-    replicodeObjects_.getSourceCode(newPredictionEvent_->factImdl_), confidenceAndSaliencyRegex, ")");
+    replicodeObjects_.getSourceCode(modelReduction_->getFactImdl()), confidenceAndSaliencyRegex, ")");
   string imdlSource = regex_replace(replicodeObjects_.getSourceCode(imdl), saliencyRegex, ")");
 
   QString imdlLabel(replicodeObjects_.getLabel(imdl).c_str());
@@ -93,8 +93,7 @@ void PredictionItem::setFactImdlHtml()
 
 void PredictionItem::setBoundAndUnboundModelHtml()
 {
-  auto factImdl = (_Fact*)newPredictionEvent_->factImdl_;
-  auto imdl = factImdl->get_reference(0);
+  auto imdl = modelReduction_->getFactImdl()->get_reference(0);
   auto mdl = imdl->get_reference(0);
 
   string imdlSource = replicodeObjects_.getSourceCode(imdl);
@@ -174,9 +173,9 @@ QString PredictionItem::makeHtml()
         " " + SelectedRadioButtonHtml + " Show Model";
 
     html += "<br>This prediction was made when input <a href=\"#debug_oid-" + 
-      QString::number(newPredictionEvent_->cause_->get_debug_oid()) + "\">" +
-      replicodeObjects_.getLabel(newPredictionEvent_->cause_).c_str() + "</a> triggered instantiated model <b>" +
-      replicodeObjects_.getLabel(newPredictionEvent_->factImdl_).c_str() + "</b><br>";
+      QString::number(modelReduction_->getCause()->get_debug_oid()) + "\">" +
+      replicodeObjects_.getLabel(modelReduction_->getCause()).c_str() + "</a> triggered instantiated model <b>" +
+      replicodeObjects_.getLabel(modelReduction_->getFactImdl()).c_str() + "</b><br>";
     html += factImdlHtml_;
     html += "<br><br>" + (showState_ == WHAT_MADE_THIS ? boundModelHtml_ : unboundModelHtml_);
   }

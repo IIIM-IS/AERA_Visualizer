@@ -3,7 +3,6 @@
 #include "graphics-items/arrow.hpp"
 #include "graphics-items/model-item.hpp"
 #include "graphics-items/composite-state-item.hpp"
-#include "graphics-items/program-reduction-item.hpp"
 #include "graphics-items/auto-focus-fact-item.hpp"
 #include "graphics-items/prediction-item.hpp"
 #include "graphics-items/prediction-success-fact-item.hpp"
@@ -82,8 +81,8 @@ void AeraVisulizerWindow::addEvents(const string& debugStreamFilePath)
   regex newCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> cst (\\d+), CSTController\\((\\d+)\\)$");
   // 0s:0ms:0us A/F -> 35|40 (AXIOM)
   regex autofocusNewObjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us A/F -> (\\d+)\\|(\\d+) \\((\\w+)\\)$");
-  // 0s:200ms:0us fact 61(1084) imdl mdl 53: 56 -> fact 60 pred fact mk.val VALUE nb: 2.000000e+01
-  regex newMkValPredictionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+)\\(\\d+\\) imdl mdl \\d+: (\\d+) -> fact (\\d+) pred fact mk.val VALUE .+$");
+  // 0s:300ms:0us MDLController(671) predict -> mk.rdx 68
+  regex modelPredictionReductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us MDLController\\((\\d+)\\) predict -> mk.rdx (\\d+)$");
   // 0s:200ms:0us fact 59 icst[52][ 50 55]
   regex newInstantiatedCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+) icst\\[\\d+\\]\\[([ \\d]+)\\]$");
   // 0s:300ms:0us fact 75 -> fact 79 success fact 60 pred
@@ -124,14 +123,11 @@ void AeraVisulizerWindow::addEvents(const string& debugStreamFilePath)
         events_.push_back(make_shared<AutoFocusNewObjectEvent>(
           getTimestamp(matches), fromObject, toObject, matches[6].str()));
     }
-    else if (regex_search(line, matches, newMkValPredictionRegex)) {
-      // TODO: Use the mk.rdx for the prediction.
-      auto factImdl = replicodeObjects_.getObject(stol(matches[4].str()));
-      auto cause = replicodeObjects_.getObject(stol(matches[5].str()));
-      auto factPrediction = replicodeObjects_.getObject(stol(matches[6].str()));
-      if (factImdl && cause && factPrediction)
-        events_.push_back(make_shared<NewMkValPredictionEvent>(
-          getTimestamp(matches), factPrediction, factImdl, cause));
+    else if (regex_search(line, matches, modelPredictionReductionRegex)) {
+      auto reduction = replicodeObjects_.getObject(stol(matches[5].str()));
+      if (reduction)
+        // Make a ModelPredictionReduction which references the reduction.
+        events_.push_back(make_shared<ModelPredictionReduction>(getTimestamp(matches), reduction));
     }
     else if (regex_search(line, matches, newInstantiatedCompositeStateRegex)) {
       auto timestamp = getTimestamp(matches);
@@ -276,7 +272,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
   if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
-      event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE ||
+      event->eventType_ == ModelPredictionReduction::EVENT_TYPE ||
       event->eventType_ == NewPredictionSuccessEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
@@ -317,12 +313,12 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       if (fromObjectItem)
         scene->addArrow(newItem, fromObjectItem);
     }
-    else if (event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE) {
-      auto predictionEvent = (NewMkValPredictionEvent*)event;
-      newItem = new PredictionItem(predictionEvent, replicodeObjects_, scene);
+    else if (event->eventType_ == ModelPredictionReduction::EVENT_TYPE) {
+      auto reductionEvent = (ModelPredictionReduction*)event;
+      newItem = new PredictionItem(reductionEvent, replicodeObjects_, scene);
 
       // Add an arrow to the cause.
-      auto causeItem = scene->getAeraGraphicsItem(predictionEvent->cause_);
+      auto causeItem = scene->getAeraGraphicsItem(reductionEvent->getCause());
       if (causeItem)
         scene->addArrow(newItem, causeItem);
     }
@@ -424,7 +420,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
   if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
-      event->eventType_ == NewMkValPredictionEvent::EVENT_TYPE ||
+      event->eventType_ == ModelPredictionReduction::EVENT_TYPE ||
       event->eventType_ == NewPredictionSuccessEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
