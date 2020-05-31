@@ -60,6 +60,19 @@ public:
   }
 
   /**
+   * Get the object by its label (from the decompiled objects file).
+   * \param label The label.
+   * \return The object, or NULL if not found.
+   */
+  r_code::Code* getObject(const std::string& label) const
+  {
+    auto result = labelObject_.find(label);
+    if (result == labelObject_.end())
+      return NULL;
+    return result->second;
+  }
+
+  /**
    * Get the object source code (from the decompiled objects file).
    * \param object The object.
    * \return The source code, or "" if not found. This does not have the label or view set.
@@ -107,6 +120,8 @@ private:
   std::map<r_code::Code*, std::string> objectSourceCode_;
   // Key is the Code* object, value is the label from the decompiled objects.
   std::map<r_code::Code*, std::string> objectLabel_;
+  // Key is the label from the decompiled objects, value is the Code* object.
+  std::map<std::string, r_code::Code*> labelObject_;
   r_code::list<P<r_code::Code> > objects_;
 };
 

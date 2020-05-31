@@ -78,6 +78,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     string label = compiler.getObjectName(i);
     if (label != "") {
       objectLabel_[imageObjects[i]] = label;
+      labelObject_[label] = imageObjects[i];
 
       auto oidEntry = objectOids.find(label);
       if (oidEntry != objectOids.end())
