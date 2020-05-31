@@ -154,7 +154,6 @@ void AeraVisualizerScene::addArrow(AeraGraphicsItem* startItem, AeraGraphicsItem
     return;
 
   Arrow* arrow = new Arrow(startItem, endItem);
-  arrow->setColor(lineColor_);
   startItem->addArrow(arrow);
   endItem->addArrow(arrow);
   arrow->setZValue(-1000.0);

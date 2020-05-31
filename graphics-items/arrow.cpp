@@ -6,14 +6,16 @@
 
 namespace aera_visualizer {
 
+const QPen Arrow::DefaultPen(Qt::gray, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+const QPen Arrow::HighlightedPen(QColor(0, 128, 255), 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+
 Arrow::Arrow(QGraphicsPolygonItem* startItem, QGraphicsPolygonItem* endItem, QGraphicsItem* parent)
   : QGraphicsLineItem(parent)
 {
   startItem_ = startItem;
   endItem_ = endItem;
   setFlag(QGraphicsItem::ItemIsSelectable, true);
-  color_ = Qt::black;
-  setPen(QPen(color_, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+  setPen(DefaultPen);
 }
 
 QRectF Arrow::boundingRect() const
@@ -46,10 +48,8 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
   if (startItem_->collidesWithItem(endItem_))
     return;
 
-  QPen myPen = pen();
-  myPen.setColor(color_);
-  painter->setPen(myPen);
-  painter->setBrush(color_);
+  painter->setPen(pen());
+  painter->setBrush(pen().color());
 
   // Add the boundingRect().center() so the arrow points to the center of the item.
   QLineF centerLine(startItem_->pos() + startItem_->boundingRect().center(), 
@@ -71,7 +71,7 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
   painter->drawPolygon(arrowHead_);
   painter->drawPolygon(arrowBase_);
   if (isSelected()) {
-    painter->setPen(QPen(color_, 1, Qt::DashLine));
+    painter->setPen(QPen(DefaultPen.color(), 1, Qt::DashLine));
     QLineF myLine = line();
     myLine.translate(0, 4.0);
     painter->drawLine(myLine);

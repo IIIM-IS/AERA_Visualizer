@@ -248,10 +248,8 @@ void AeraGraphicsItem::textItemLinkActivated(const QString& link)
 void AeraGraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
   // Highlight connected arrows.
-  const QColor highlightColor(64, 200, 255);
-
   foreach(Arrow * arrow, arrows_) {
-    arrow->setColor(highlightColor);
+    arrow->setPen(Arrow::HighlightedPen);
     arrow->update();
   }
 
@@ -262,7 +260,7 @@ void AeraGraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
   // Reset highlighting of connected arrows.
   foreach(Arrow * arrow, arrows_) {
-    arrow->setColor(Qt::black);
+    arrow->setPen(Arrow::DefaultPen);
     arrow->update();
   }
 

@@ -24,11 +24,13 @@ public:
   int type() const override { return Type; }
   QRectF boundingRect() const override;
   QPainterPath shape() const override;
-  void setColor(const QColor& color) { color_ = color; }
   QGraphicsPolygonItem* startItem() const { return startItem_; }
   QGraphicsPolygonItem* endItem() const { return endItem_; }
 
   void updatePosition();
+
+  static const QPen DefaultPen;
+  static const QPen HighlightedPen;
 
 protected:
   void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = 0) override;
@@ -53,7 +55,6 @@ private:
   static const int arrowSize_ = 6;
   QGraphicsPolygonItem* startItem_;
   QGraphicsPolygonItem* endItem_;
-  QColor color_;
   QPolygonF arrowHead_;
   QPolygonF arrowBase_;
 };
