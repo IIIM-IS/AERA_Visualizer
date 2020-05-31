@@ -83,13 +83,19 @@ public:
     addSourceCodeHtmlLinks(object, html, replicodeObjects_);
   }
 
-  int borderFlashCountdown_;
+  /**
+   * Set the the visible state of this item and the connected arrows.
+   * \param visible The visible state.
+   */
+  void setItemAndArrowsVisible(bool visible);
 
   const QPen& getBorderNoHighlightPen() { return borderNoHighlightPen_;  }
 
   static const QString DownArrowHtml;
   static const QString SelectedRadioButtonHtml;
   static const QString UnselectedRadioButtonHtml;
+
+  int borderFlashCountdown_;
 
 protected:
   /**

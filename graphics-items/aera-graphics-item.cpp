@@ -205,6 +205,22 @@ void AeraGraphicsItem::addSourceCodeHtmlLinks(
   }
 }
 
+void AeraGraphicsItem::setItemAndArrowsVisible(bool visible)
+{
+  foreach(Arrow* arrow, arrows_) {
+    if (visible) {
+      // Only set the arrow visible if the connected item is visible.
+      if (arrow->startItem() == this && arrow->endItem()->isVisible() ||
+          arrow->endItem() == this && arrow->startItem()->isVisible())
+        arrow->setVisible(true);
+    }
+    else
+      arrow->setVisible(false);
+  }
+
+  setVisible(visible);
+}
+
 void AeraGraphicsItem::textItemLinkActivated(const QString& link)
 {
   if (link == "#this") {
