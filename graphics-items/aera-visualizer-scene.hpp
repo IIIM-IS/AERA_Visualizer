@@ -67,6 +67,10 @@ private:
       flashTimerId_ = startTimer(200);
   }
 
+  void setItemsVisible(int eventType, bool visible);
+
+  void setAutoFocusItemsVisible(const std::string& predicate, bool visible);
+
   AeraVisulizerWindow* parent_;
   ReplicodeObjects& replicodeObjects_;
   bool isMainScene_;

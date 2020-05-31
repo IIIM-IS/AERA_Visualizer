@@ -2,6 +2,7 @@
 #include "aera-visualizer-window.hpp"
 #include "arrow.hpp"
 #include "model-item.hpp"
+#include "auto-focus-fact-item.hpp"
 #include "aera-visualizer-scene.hpp"
 
 #include <QGraphicsSceneMouseEvent>
@@ -209,6 +210,32 @@ void AeraVisualizerScene::zoomToItem(QGraphicsItem* item)
   auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
   if (aeraGraphicsItem)
     aeraGraphicsItem->bringToFront();
+}
+
+void AeraVisualizerScene::setItemsVisible(int eventType, bool visible)
+{
+  foreach(QGraphicsItem * item, items()) {
+    auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
+    if (aeraGraphicsItem && aeraGraphicsItem->getAeraEvent()->eventType_ == eventType)
+      aeraGraphicsItem->setItemAndArrowsVisible(visible);
+  }
+}
+
+void AeraVisualizerScene::setAutoFocusItemsVisible(const string& predicate, bool visible)
+{
+  foreach(QGraphicsItem * item, items()) {
+    auto autoFocusItem = dynamic_cast<AutoFocusFactItem*>(item);
+    if (autoFocusItem) {
+      auto fact = autoFocusItem->getAeraEvent()->object_;
+
+      string itemPredicate;
+      // Debug: Properly get the predicate from the fact.
+      if (fact->get_oid() == 46 || fact->get_oid() == 53 || fact->get_oid() == 61 || fact->get_oid() == 75)
+        itemPredicate = "essence";
+      if (predicate == itemPredicate)
+        autoFocusItem->setItemAndArrowsVisible(visible);
+    }
+  }
 }
 
 #if QT_CONFIG(wheelevent)
