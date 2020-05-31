@@ -172,7 +172,8 @@ QString PredictionItem::makeHtml()
         " <a href=\"#what-made-this\">" + UnselectedRadioButtonHtml + " What Made This?</a>" +
         " " + SelectedRadioButtonHtml + " Show Model";
 
-    html += "<br>This prediction was made when input <a href=\"#debug_oid-" + 
+    html += QString("<br>This prediction was made by model reduction <b>") + 
+      replicodeObjects_.getLabel(modelReduction_->reduction_).c_str() + "</b> when input <a href=\"#debug_oid-" +
       QString::number(modelReduction_->getCause()->get_debug_oid()) + "\">" +
       replicodeObjects_.getLabel(modelReduction_->getCause()).c_str() + "</a> triggered instantiated model <b>" +
       replicodeObjects_.getLabel(modelReduction_->getFactImdl()).c_str() + "</b><br>";
