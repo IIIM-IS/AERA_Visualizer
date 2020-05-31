@@ -220,18 +220,22 @@ void AeraVisualizerScene::setItemsVisible(int eventType, bool visible)
   }
 }
 
-void AeraVisualizerScene::setAutoFocusItemsVisible(const string& predicate, bool visible)
+void AeraVisualizerScene::setAutoFocusItemsVisible(const string& property, bool visible)
 {
+  auto propertyObject = replicodeObjects_.getObject(property);
+  if (!propertyObject)
+    return;
+
   foreach(QGraphicsItem * item, items()) {
     auto autoFocusItem = dynamic_cast<AutoFocusFactItem*>(item);
     if (autoFocusItem) {
-      auto fact = autoFocusItem->getAeraEvent()->object_;
+      auto mkVal = autoFocusItem->getAeraEvent()->object_->get_reference(0);
+      // TODO: Is this reference always the property?
+      if (mkVal->references_size() < 2)
+        continue;
 
-      string itemPredicate;
-      // Debug: Properly get the predicate from the fact.
-      if (fact->get_oid() == 46 || fact->get_oid() == 53 || fact->get_oid() == 61 || fact->get_oid() == 75)
-        itemPredicate = "essence";
-      if (predicate == itemPredicate)
+      auto mkValProperty = mkVal->get_reference(1);
+      if (mkValProperty == propertyObject)
         autoFocusItem->setItemAndArrowsVisible(visible);
     }
   }

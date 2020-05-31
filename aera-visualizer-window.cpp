@@ -313,11 +313,10 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       if (fromObjectItem)
         scene->addArrow(newItem, fromObjectItem);
 
-      string predicate;
-      // Debug: Properly get the predicate from the fact.
-      if (event->object_->get_oid() == 46 || event->object_->get_oid() == 53 || event->object_->get_oid() == 61 || event->object_->get_oid() == 75)
-        predicate = "essence";
-      if (predicate == "essence")
+      auto mkVal = autoFocusEvent->fromObject_->get_reference(0);
+      auto essencePropertyObject = replicodeObjects_.getObject("essence");
+      // TODO: Is this reference always the property?
+      if (essencePropertyObject && mkVal->references_size() >= 2 && mkVal->get_reference(1) == essencePropertyObject)
         visible = (essenceFactsCheckBox_->checkState() == Qt::Checked);
     }
     else if (event->eventType_ == ModelPredictionReduction::EVENT_TYPE) {

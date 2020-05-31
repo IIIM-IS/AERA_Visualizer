@@ -67,9 +67,19 @@ private:
       flashTimerId_ = startTimer(200);
   }
 
+  /**
+   * Find all items with the given event type, and call setItemAndArrowsVisible.
+   * \param eventType The event type of the item's getAeraEvent().
+   * \param visible The visible state for setItemAndArrowsVisible.
+   */
   void setItemsVisible(int eventType, bool visible);
 
-  void setAutoFocusItemsVisible(const std::string& predicate, bool visible);
+  /**
+   * Find all AutoFocusFactItem whose object_ is (fact (mk.val X property Y)), and call setItemAndArrowsVisible.
+   * \param property The event type of the item's object_ mk.val.
+   * \param visible The visible state for setItemAndArrowsVisible.
+   */
+  void setAutoFocusItemsVisible(const std::string& property, bool visible);
 
   AeraVisulizerWindow* parent_;
   ReplicodeObjects& replicodeObjects_;
