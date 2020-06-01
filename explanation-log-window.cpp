@@ -31,7 +31,45 @@ ExplanationLogWindow::ExplanationLogWindow(AeraVisulizerWindow* mainWindow, Repl
 
 void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
 {
-  if (url.url().startsWith("#debug_oid-")) {
+  if (url.url() == "#requirement_prediction-fact103" || url.url() == "#requirement_prediction-fact203") {
+    // There is no item for a requirement prediction, so show a menu for a "What Is" explanation.
+    // Debug: Use the requirement's real debug OID.
+    Code* predictingModel;
+    Code* predictedModel;
+    QString factPredLabel;
+    Code* cause;
+    if (url.url() == "#requirement_prediction-fact103") {
+      predictingModel = replicodeObjects_.getObject(64);
+      predictedModel = replicodeObjects_.getObject(63);
+      factPredLabel = "fact103";
+      cause = replicodeObjects_.getObject(65);
+    }
+    else if (url.url() == "#requirement_prediction-fact203") {
+      predictingModel = replicodeObjects_.getObject(64);
+      predictedModel = replicodeObjects_.getObject(63);
+      factPredLabel = "fact203";
+      cause = replicodeObjects_.getObject(77);
+    }
+    else
+      return;
+
+    auto menu = new QMenu();
+    menu->addAction("What Is This?", [=]() {
+      // TODO: Handle this in a static method of PredictionItem.
+      // TODO: Handle the case of an anti-fact imdl prediction.
+      string explanation = "<b>Q: What is requirement prediction " + factPredLabel.toStdString() +
+        "?</b><br>Input <a href=\"#debug_oid-" + to_string(cause->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(cause) + 
+        "</a> matched the left-hand side of model <a href=\"#debug_oid-" + to_string(predictingModel->get_debug_oid()) +
+        "\">" + replicodeObjects_.getLabel(predictingModel) + 
+        "</a> and the requirement is the right-hand side of the model, which predicts that model <a href=\"#debug_oid-" + 
+        to_string(predictedModel->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(predictedModel) + 
+        "</a> will succeed when instantiated with the given template values.<br><br>";
+      appendHtml(explanation);
+    });
+    menu->exec(QCursor::pos() - QPoint(10, 10));
+    delete menu;
+  }
+  else if (url.url().startsWith("#debug_oid-")) {
     uint64 debug_oid = url.url().mid(11).toULongLong();
     auto object = replicodeObjects_.getObjectByDebugOid(debug_oid);
     if (!object)
