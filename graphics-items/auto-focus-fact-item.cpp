@@ -34,14 +34,12 @@ void AutoFocusFactItem::setFactMkValHtml()
 
   QString mkValLabel(replicodeObjects_.getLabel(mkVal).c_str());
 
-  // Temporarily use "!down" which doesn't have spaces.
-  factMkValHtml_ = QString(factMkValSource.c_str()).replace(mkValLabel, "!down");
+  factMkValHtml_ = QString(factMkValSource.c_str()).replace(mkValLabel, DownArrowHtml);
   factMkValHtml_ += QString("\n      ") + mkValSource.c_str();
 
   // TODO: Show autoFocusNewObjectEvent_->syncMode_?
 
   factMkValHtml_ = htmlify(factMkValHtml_);
-  factMkValHtml_.replace("!down", DownArrowHtml);
   addSourceCodeHtmlLinks(autoFocusNewObjectEvent_->object_, factMkValHtml_);
 }
 

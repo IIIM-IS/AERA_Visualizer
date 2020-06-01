@@ -62,12 +62,10 @@ void InstantiatedCompositeStateItem::setFactIcstHtml()
 
   QString icstLabel(replicodeObjects_.getLabel(icst).c_str());
 
-  // Temporarily use "!down" which doesn't have spaces.
-  factIcstHtml_ = QString(factIcstSource.c_str()).replace(icstLabel, "!down");
+  factIcstHtml_ = QString(factIcstSource.c_str()).replace(icstLabel, DownArrowHtml);
   factIcstHtml_ += QString("\n      ") + icstSource.c_str();
 
   factIcstHtml_ = htmlify(factIcstHtml_);
-  factIcstHtml_.replace("!down", DownArrowHtml);
   addSourceCodeHtmlLinks(icst, factIcstHtml_);
 }
 

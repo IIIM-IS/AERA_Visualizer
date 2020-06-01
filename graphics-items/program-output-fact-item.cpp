@@ -35,12 +35,10 @@ void ProgramOutputFactItem::setFactMkValHtml()
 
   QString mkValLabel(replicodeObjects_.getLabel(mkVal).c_str());
 
-  // Temporarily use "!down" which doesn't have spaces.
-  factMkValHtml_ = QString(factMkValSource.c_str()).replace(mkValLabel, "!down");
+  factMkValHtml_ = QString(factMkValSource.c_str()).replace(mkValLabel, DownArrowHtml);
   factMkValHtml_ += QString("\n      ") + mkValSource.c_str();
 
   factMkValHtml_ = htmlify(factMkValHtml_);
-  factMkValHtml_.replace("!down", DownArrowHtml);
   addSourceCodeHtmlLinks(programReductionNewObjectEvent_->object_, factMkValHtml_);
 }
 

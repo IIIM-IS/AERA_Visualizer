@@ -74,12 +74,10 @@ void EnvironmentInjectEjectItem::setFactValHtml()
 
   QString valLabel(replicodeObjects_.getLabel(val).c_str());
 
-  // Temporarily use "!down" which doesn't have spaces.
-  factValHtml_ = QString(factSource.c_str()).replace(valLabel, "!down");
+  factValHtml_ = QString(factSource.c_str()).replace(valLabel, DownArrowHtml);
   factValHtml_ += QString("\n      ") + valSource.c_str();
 
   factValHtml_ = htmlify(factValHtml_);
-  factValHtml_.replace("!down", DownArrowHtml);
   addSourceCodeHtmlLinks(event_->object_, factValHtml_);
 }
 

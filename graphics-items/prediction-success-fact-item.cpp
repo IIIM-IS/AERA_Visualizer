@@ -34,12 +34,10 @@ void PredictionSuccessFactItem::setFactSuccessHtml()
 
   QString successLabel(replicodeObjects_.getLabel(success).c_str());
 
-  // Temporarily use "!down" which doesn't have spaces.
-  factSuccessHtml_ = QString(factSuccessSource.c_str()).replace(successLabel, "!down");
+  factSuccessHtml_ = QString(factSuccessSource.c_str()).replace(successLabel, DownArrowHtml);
   factSuccessHtml_ += QString("\n      ") + successSource.c_str();
 
   factSuccessHtml_ = htmlify(factSuccessHtml_);
-  factSuccessHtml_.replace("!down", DownArrowHtml);
   addSourceCodeHtmlLinks(newPredictionSuccessEvent_->object_->get_reference(0), factSuccessHtml_);
 }
 
