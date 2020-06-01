@@ -81,8 +81,8 @@ void AeraVisulizerWindow::addEvents(const string& debugStreamFilePath)
   regex newCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> cst (\\d+), CSTController\\((\\d+)\\)$");
   // 0s:0ms:0us A/F -> 35|40 (AXIOM)
   regex autofocusNewObjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us A/F -> (\\d+)\\|(\\d+) \\((\\w+)\\)$");
-  // 0s:300ms:0us MDLController(671) predict -> mk.rdx 68
-  regex modelPredictionReductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us MDLController\\((\\d+)\\) predict -> mk.rdx (\\d+)$");
+  // 0s:300ms:0us mdl 63 predict -> mk.rdx 68
+  regex modelPredictionReductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl \\d+ predict -> mk.rdx (\\d+)$");
   // 0s:200ms:0us fact 59 icst[52][ 50 55]
   regex newInstantiatedCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+) icst\\[\\d+\\]\\[([ \\d]+)\\]$");
   // 0s:300ms:0us fact 75 -> fact 79 success fact 60 pred
@@ -124,7 +124,7 @@ void AeraVisulizerWindow::addEvents(const string& debugStreamFilePath)
           getTimestamp(matches), fromObject, toObject, matches[6].str()));
     }
     else if (regex_search(line, matches, modelPredictionReductionRegex)) {
-      auto reduction = replicodeObjects_.getObject(stol(matches[5].str()));
+      auto reduction = replicodeObjects_.getObject(stol(matches[4].str()));
       if (reduction)
         // Make a ModelPredictionReduction which references the reduction.
         events_.push_back(make_shared<ModelPredictionReduction>(getTimestamp(matches), reduction));
