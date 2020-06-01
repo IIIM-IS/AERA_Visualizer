@@ -53,7 +53,7 @@ int main(int argv, char *args[])
   // TODO: Use the actual screen resolution.
   const int left = 0;
   const int top = 35;
-  const int width = 1620;
+  const int width = 1605;
   const int height = 1000;
   mainWindow.setGeometry(left, top, width, height);
 
@@ -61,7 +61,7 @@ int main(int argv, char *args[])
   mainWindow.setExplanationLogWindow(explanationLogWindow);
   // Disable the close button for the child window.
   explanationLogWindow->setWindowFlag(Qt::WindowCloseButtonHint, false);
-  explanationLogWindow->setGeometry(left + width, top, 300, height);
+  explanationLogWindow->setGeometry(left + width, top, 315, height);
   explanationLogWindow->show();
 
   mainWindow.show();
