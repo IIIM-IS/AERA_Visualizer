@@ -17,7 +17,7 @@ int main(int argv, char *args[])
   // TODO: Remember the location between launches.
   QString previousSettingsFilePath = "C:/Users/Jeff/AERA/replicode/Test/settings.xml";
   auto settingsFilePath = QFileDialog::getOpenFileName(NULL,
-    "Open Replicode settings XML file", previousSettingsFilePath, "XML Files (*.xml);;All Files (*.*)");
+    "Open AERA settings XML file", previousSettingsFilePath, "XML Files (*.xml);;All Files (*.*)");
   if (settingsFilePath == "")
     return 0;
 
