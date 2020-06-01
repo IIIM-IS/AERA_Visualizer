@@ -207,8 +207,11 @@ void AeraVisualizerScene::zoomToItem(QGraphicsItem* item)
   views().at(0)->fitInView(item, Qt::KeepAspectRatio);
 
   auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
-  if (aeraGraphicsItem)
+  if (aeraGraphicsItem) {
+    if (!aeraGraphicsItem->isVisible())
+      aeraGraphicsItem->setItemAndArrowsVisible(true);
     aeraGraphicsItem->bringToFront();
+  }
 }
 
 void AeraVisualizerScene::setItemsVisible(int eventType, bool visible)
