@@ -105,7 +105,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     else
       top = eventTypeFirstTop_[eventType];
 
-    if (newObjectEvent->object_->get_oid() == 46)
+    if (newObjectEvent->object_->get_oid() == 41)
       // Debug: Override for the test case to make the same types of values line up. Should use a layout algorithm.
       top = 296;
 

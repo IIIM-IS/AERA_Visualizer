@@ -182,8 +182,8 @@ QString PredictionItem::makeHtml()
     auto mdl = imdl->get_reference(0);
     html += QString("<br>Input <a href=\"#debug_oid-" + QString::number(modelReduction_->getCause()->get_debug_oid()) + "\">" +
       replicodeObjects_.getLabel(modelReduction_->getCause()).c_str() + 
-      "</a> matched the left-hand side of model <a href=\"#debug_oid-") + QString::number(mdl->get_debug_oid()) +
-      "\">" + replicodeObjects_.getLabel(mdl).c_str() + "</a> and the prediction is the right-hand side of instantiated model <b>" +
+      "</a> matched the LHS of model <a href=\"#debug_oid-") + QString::number(mdl->get_debug_oid()) +
+      "\">" + replicodeObjects_.getLabel(mdl).c_str() + "</a> and the prediction is the RHS of instantiated model <b>" +
       replicodeObjects_.getLabel(modelReduction_->getFactImdl()).c_str() + "</b>:<br>";
     html += factImdlHtml_;
     html += "<br><br>" + (showState_ == WHAT_MADE_THIS ? boundModelHtml_ : unboundModelHtml_);
@@ -226,8 +226,8 @@ void PredictionItem::textItemLinkActivated(const QString& link)
     string imdlSource;
 
     // Debug: Properly get the requirement from Replicode. Maybe add it to the mk.rdx and use wildcards in stead of v0: .
-    if (modelReduction_->reduction_->get_oid() == 68) {
-      predictingModel = replicodeObjects_.getObject(64);
+    if (modelReduction_->reduction_->get_oid() == 63) {
+      predictingModel = replicodeObjects_.getObject(59);
       factPredLabel = "fact103";
       predLabel = "fact102";
       factImdlLabel = "fact101";
@@ -235,10 +235,10 @@ void PredictionItem::textItemLinkActivated(const QString& link)
       factPredSource = "(fact fact102 0s:300ms:0us 0s:300ms:0us)";
       predSource = "(pred fact101)";
       factImdlSource = "(fact fact100 0s:300ms:0us 0s:400ms:0us)";
-      imdlSource = "(imdl mdl_63 [10 0s:300ms:0us 0s:400ms:0us] [b : : :])";
+      imdlSource = "(imdl mdl_58 [10 0s:300ms:0us 0s:400ms:0us] [b : : :])";
     }
-    else if (modelReduction_->reduction_->get_oid() == 80) {
-      predictingModel = replicodeObjects_.getObject(64);
+    else if (modelReduction_->reduction_->get_oid() == 75) {
+      predictingModel = replicodeObjects_.getObject(59);
       factPredLabel = "fact203";
       predLabel = "fact202";
       factImdlLabel = "fact201";
@@ -246,7 +246,7 @@ void PredictionItem::textItemLinkActivated(const QString& link)
       factPredSource = "(fact fact202 0s:400ms:0us 0s:400ms:0us)";
       predSource = "(pred fact201)";
       factImdlSource = "(fact fact200 0s:400ms:0us 0s:500ms:0us)";
-      imdlSource = "(imdl mdl_63 [20 0s:400ms:0us 0s:500ms:0us] [b : : :])";
+      imdlSource = "(imdl mdl_58 [20 0s:400ms:0us 0s:500ms:0us] [b : : :])";
     }
     else
       return;

@@ -39,16 +39,16 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
     QString factPredLabel;
     Code* cause;
     if (url.url() == "#requirement_prediction-fact103") {
-      predictingModel = replicodeObjects_.getObject(64);
-      predictedModel = replicodeObjects_.getObject(63);
+      predictingModel = replicodeObjects_.getObject(59);
+      predictedModel = replicodeObjects_.getObject(58);
       factPredLabel = "fact103";
-      cause = replicodeObjects_.getObject(65);
+      cause = replicodeObjects_.getObject(60);
     }
     else if (url.url() == "#requirement_prediction-fact203") {
-      predictingModel = replicodeObjects_.getObject(64);
-      predictedModel = replicodeObjects_.getObject(63);
+      predictingModel = replicodeObjects_.getObject(59);
+      predictedModel = replicodeObjects_.getObject(58);
       factPredLabel = "fact203";
-      cause = replicodeObjects_.getObject(77);
+      cause = replicodeObjects_.getObject(72);
     }
     else
       return;
@@ -59,9 +59,9 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
       // TODO: Handle the case of an anti-fact imdl prediction.
       string explanation = "<b>Q: What is requirement prediction " + factPredLabel.toStdString() +
         "?</b><br>Input <a href=\"#debug_oid-" + to_string(cause->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(cause) + 
-        "</a> matched the left-hand side of model <a href=\"#debug_oid-" + to_string(predictingModel->get_debug_oid()) +
+        "</a> matched the LHS of model <a href=\"#debug_oid-" + to_string(predictingModel->get_debug_oid()) +
         "\">" + replicodeObjects_.getLabel(predictingModel) + 
-        "</a> and the requirement is the right-hand side of the model, which predicts that model <a href=\"#debug_oid-" + 
+        "</a> and the requirement is the RHS of the model, which predicts that model <a href=\"#debug_oid-" + 
         to_string(predictedModel->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(predictedModel) + 
         "</a> will succeed when instantiated with the given template values.<br><br>";
       appendHtml(explanation);
