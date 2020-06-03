@@ -31,23 +31,26 @@ ExplanationLogWindow::ExplanationLogWindow(AeraVisulizerWindow* mainWindow, Repl
 
 void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
 {
-  if (url.url() == "#requirement_prediction-fact103" || url.url() == "#requirement_prediction-fact203") {
+  if (url.url().startsWith("#requirement_prediction-")) {
     // There is no item for a requirement prediction, so show a menu for a "What Is" explanation.
-    // Debug: Use the requirement's real debug OID.
+    uint64 debug_oid = url.url().mid(24).toULongLong();
+    Code* requirementFactPred = replicodeObjects_.getObjectByDebugOid(debug_oid);
+    if (!requirementFactPred)
+      return;
+    Code* requirementPred = requirementFactPred->get_reference(0);
+    Code* factImdl = requirementPred->get_reference(0);
+    Code* imdl = factImdl->get_reference(0);
+    Code* predictedModel = imdl->get_reference(0);
+
+    // Debug: Get predictingModel and cause from its model reduction which made requirementFactPred.
     Code* predictingModel;
-    Code* predictedModel;
-    QString factPredLabel;
     Code* cause;
-    if (url.url() == "#requirement_prediction-fact103") {
+    if (debug_oid == 1029) {
       predictingModel = replicodeObjects_.getObject(59);
-      predictedModel = replicodeObjects_.getObject(58);
-      factPredLabel = "fact103";
       cause = replicodeObjects_.getObject(60);
     }
-    else if (url.url() == "#requirement_prediction-fact203") {
+    else if (debug_oid == 1899) {
       predictingModel = replicodeObjects_.getObject(59);
-      predictedModel = replicodeObjects_.getObject(58);
-      factPredLabel = "fact203";
       cause = replicodeObjects_.getObject(72);
     }
     else
@@ -57,7 +60,7 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
     menu->addAction("What Is This?", [=]() {
       // TODO: Handle this in a static method of PredictionItem.
       // TODO: Handle the case of an anti-fact imdl prediction.
-      string explanation = "<b>Q: What is requirement prediction " + factPredLabel.toStdString() +
+      string explanation = "<b>Q: What is requirement prediction " + replicodeObjects_.getLabel(requirementFactPred) +
         "?</b><br>Input <a href=\"#debug_oid-" + to_string(cause->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(cause) + 
         "</a> matched the LHS of model <a href=\"#debug_oid-" + to_string(predictingModel->get_debug_oid()) +
         "\">" + replicodeObjects_.getLabel(predictingModel) + 

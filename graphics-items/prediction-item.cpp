@@ -215,43 +215,27 @@ void PredictionItem::textItemLinkActivated(const QString& link)
     bringToFront();
   }
   else if (link == "#imdl-template-values") {
-    Code* predictingModel;
-    QString factPredLabel;
-    QString predLabel;
-    QString factImdlLabel;
-    QString imdlLabel;
-    string factPredSource;
-    string predSource;
-    string factImdlSource;
-    string imdlSource;
-
-    // Debug: Properly get the requirement from Replicode. Maybe add it to the mk.rdx and use wildcards in stead of v0: .
-    if (modelReduction_->reduction_->get_oid() == 63) {
-      predictingModel = replicodeObjects_.getObject(59);
-      factPredLabel = "fact103";
-      predLabel = "fact102";
-      factImdlLabel = "fact101";
-      imdlLabel = "fact100";
-      factPredSource = "(fact fact102 0s:300ms:0us 0s:300ms:0us)";
-      predSource = "(pred fact101)";
-      factImdlSource = "(fact fact100 0s:300ms:0us 0s:400ms:0us)";
-      imdlSource = "(imdl mdl_58 [10 0s:300ms:0us 0s:400ms:0us] [b : : :])";
-    }
-    else if (modelReduction_->reduction_->get_oid() == 75) {
-      predictingModel = replicodeObjects_.getObject(59);
-      factPredLabel = "fact203";
-      predLabel = "fact202";
-      factImdlLabel = "fact201";
-      imdlLabel = "fact200";
-      factPredSource = "(fact fact202 0s:400ms:0us 0s:400ms:0us)";
-      predSource = "(pred fact201)";
-      factImdlSource = "(fact fact200 0s:400ms:0us 0s:500ms:0us)";
-      imdlSource = "(imdl mdl_58 [20 0s:400ms:0us 0s:500ms:0us] [b : : :])";
-    }
-    else
+    Code* requirementFactPred = modelReduction_->getRequirement();
+    if (!requirementFactPred)
       return;
-
+    Code* requirementPred = requirementFactPred->get_reference(0);
+    Code* factImdl = requirementPred->get_reference(0);
+    Code* imdl = factImdl->get_reference(0);
+    // Debug: Get predictingModel from its model reduction which made requirementFactPred.
+    Code* predictingModel = replicodeObjects_.getObject(59);
     // TODO: Share code with setFactPredFactMkValHtml()?
+    QString predLabel = replicodeObjects_.getLabel(requirementPred).c_str();
+    QString factImdlLabel = replicodeObjects_.getLabel(factImdl).c_str();
+    QString imdlLabel = replicodeObjects_.getLabel(imdl).c_str();
+
+    // Strip the ending confidence value and propagation of saliency threshold.
+    regex saliencyRegex("\\s+[\\w\\:]+\\)$");
+    regex confidenceAndSaliencyRegex("\\s+[\\w\\:]\\s+[\\w\\:]+\\)$");
+    string factPredSource = regex_replace(replicodeObjects_.getSourceCode(requirementFactPred), confidenceAndSaliencyRegex, ")");
+    string predSource = regex_replace(replicodeObjects_.getSourceCode(requirementPred), saliencyRegex, ")");
+    string factImdlSource = regex_replace(replicodeObjects_.getSourceCode(factImdl), confidenceAndSaliencyRegex, ")");
+    string imdlSource = regex_replace(replicodeObjects_.getSourceCode(imdl), confidenceAndSaliencyRegex, ")");
+
     QString predHtml = QString(predSource.c_str()).replace(factImdlLabel, DownArrowHtml);
     QString factPredHtml = QString(factPredSource.c_str()).replace(predLabel, predHtml);
     QString factImdlHtml = QString(factImdlSource.c_str()).replace(imdlLabel, DownArrowHtml);
@@ -271,8 +255,8 @@ void PredictionItem::textItemLinkActivated(const QString& link)
         replicodeObjects_.getLabel(modelReduction_->getFactImdl()) + "</b> ?</b><br>" +
         "The template values were made when model <a href=\"#debug_oid-" + to_string(predictingModel->get_debug_oid()) +
         "\">" + replicodeObjects_.getLabel(predictingModel) + "</a> made requirement prediction <a href=\"#requirement_prediction-" +
-        // Debug: Use the requirement's real debug OID.
-        factPredLabel.toStdString() + "\">" + factPredLabel.toStdString() + "</a>:<br>" + factPredFactImdlHtml.toStdString() + "<br><br>";
+        to_string(requirementFactPred->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(requirementFactPred) + "</a>:<br>" + 
+        factPredFactImdlHtml.toStdString() + "<br><br>";
       parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
     });
     menu->exec(QCursor::pos() - QPoint(10, 10));
