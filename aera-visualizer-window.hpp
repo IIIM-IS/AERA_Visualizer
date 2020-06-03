@@ -71,6 +71,13 @@ public:
    */
   void textItemHoverMoveEvent(const QTextDocument* document, QPointF position);
 
+  /**
+   * Get the AeraEvent at index i in the events list.
+   * \param i The index.
+   * \return A pointer to the AeraEvent.
+   */
+  const AeraEvent* getAeraEvent(size_t i) const { return events_[i].get(); }
+
 protected:
   bool haveMoreEvents() override { return iNextEvent_ < events_.size(); }
 
