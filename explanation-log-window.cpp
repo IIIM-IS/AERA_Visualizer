@@ -33,28 +33,16 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
 {
   if (url.url().startsWith("#requirement_prediction-")) {
     // There is no item for a requirement prediction, so show a menu for a "What Is" explanation.
-    uint64 debug_oid = url.url().mid(24).toULongLong();
-    Code* requirementFactPred = replicodeObjects_.getObjectByDebugOid(debug_oid);
-    if (!requirementFactPred)
-      return;
+    // TODO: This should be the debug_oid of an mk.rdx, which Replicode currently doesn't make. 
+    int imdlPredictionEventIndex = url.url().mid(24).toULongLong();
+    auto imdlPredictionEvent = (ModelImdlPredictionEvent*)parent_->getAeraEvent(17);
+    Code* predictingModel = imdlPredictionEvent->predictingModel_;
+    Code* cause = imdlPredictionEvent->cause_;
+    Code* requirementFactPred = imdlPredictionEvent->object_;
     Code* requirementPred = requirementFactPred->get_reference(0);
     Code* factImdl = requirementPred->get_reference(0);
     Code* imdl = factImdl->get_reference(0);
     Code* predictedModel = imdl->get_reference(0);
-
-    // Debug: Get predictingModel and cause from its model reduction which made requirementFactPred.
-    Code* predictingModel;
-    Code* cause;
-    if (debug_oid == 1029) {
-      predictingModel = replicodeObjects_.getObject(59);
-      cause = replicodeObjects_.getObject(60);
-    }
-    else if (debug_oid == 1899) {
-      predictingModel = replicodeObjects_.getObject(59);
-      cause = replicodeObjects_.getObject(72);
-    }
-    else
-      return;
 
     auto menu = new QMenu();
     menu->addAction("What Is This?", [=]() {

@@ -221,8 +221,9 @@ void PredictionItem::textItemLinkActivated(const QString& link)
     Code* requirementPred = requirementFactPred->get_reference(0);
     Code* factImdl = requirementPred->get_reference(0);
     Code* imdl = factImdl->get_reference(0);
-    // Debug: Get predictingModel from its model reduction which made requirementFactPred.
-    Code* predictingModel = replicodeObjects_.getObject(59);
+    auto imdlPredictionEvent = (ModelImdlPredictionEvent*)parent_->getParent()->getAeraEvent(
+      modelReduction_->imdlPredictionEventIndex_);
+    Code* predictingModel = imdlPredictionEvent->predictingModel_;
     // TODO: Share code with setFactPredFactMkValHtml()?
     QString predLabel = replicodeObjects_.getLabel(requirementPred).c_str();
     QString factImdlLabel = replicodeObjects_.getLabel(factImdl).c_str();
@@ -255,7 +256,7 @@ void PredictionItem::textItemLinkActivated(const QString& link)
         replicodeObjects_.getLabel(modelReduction_->getFactImdl()) + "</b> ?</b><br>" +
         "The template values were made when model <a href=\"#debug_oid-" + to_string(predictingModel->get_debug_oid()) +
         "\">" + replicodeObjects_.getLabel(predictingModel) + "</a> made requirement prediction <a href=\"#requirement_prediction-" +
-        to_string(requirementFactPred->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(requirementFactPred) + "</a>:<br>" + 
+        to_string(modelReduction_->imdlPredictionEventIndex_) + "\">" + replicodeObjects_.getLabel(requirementFactPred) + "</a>:<br>" +
         factPredFactImdlHtml.toStdString() + "<br><br>";
       parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
     });
