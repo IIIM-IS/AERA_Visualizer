@@ -116,6 +116,33 @@ public:
 };
 
 /**
+ * ModelImdlPredictionEvent is a reduction event specific to a prediction of an imdl,
+ * which doesn't have an associated requirement (as opposed to a mk.val prediction which does).
+ */
+class ModelImdlPredictionEvent : public AeraEvent {
+public:
+  /**
+   * Create a ModelImdlPredictionEvent.
+   * \param time The reduction time.
+   * \param factPred The (fact (pred (fact (imdl ...)))).
+   * \param predictingModel The model which made the prediction.
+   * TODO: Get this from an mk.rdx, which Replicode currently doesn't make.
+   * \param cause The input cause for the prediction.
+   * TODO: Get this from a mk.rdx, which Replicode currently doesn't make.
+   */
+  ModelImdlPredictionEvent(core::Timestamp time, r_code::Code* factPred,
+    r_code::Code* predictingModel, r_code::Code* cause)
+    : AeraEvent(EVENT_TYPE, time, factPred),
+    predictingModel_(predictingModel), cause_(cause)
+  {}
+
+  static const int EVENT_TYPE = 7;
+
+  r_code::Code* predictingModel_;
+  r_code::Code* cause_;
+};
+
+/**
  * ModelMkValPredictionReduction is a reduction event specific to a prediction of a mk.val,
  * which has an associated requirement (as opposed to a prediction of an imdl which doesn't).
  */
@@ -125,16 +152,18 @@ public:
    * Create a ModelMkValPredictionReduction, but set object_ to the (fact (pred ...)).
    * (mk.rdx fact_imdl [fact_cause fact_requirement] [fact_pred]) .
    * \param time The reduction time.
-   * \param reduction The model reduction which points to the (fact (pred ...)) and cause
+   * \param reduction The model reduction which points to the (fact (pred ...)) and the cause.
+   * \param imdlPredictionEventIndex The index in the events_ list of the previous prediction whose 
+   * object_ is this->getRequirement().
+   * TODO: This should be the debug_oid of an mk.rdx, which Replicode currently doesn't make.
    */
-  ModelMkValPredictionReduction(core::Timestamp time, r_code::Code* reduction)
+  ModelMkValPredictionReduction(core::Timestamp time, r_code::Code* reduction, int imdlPredictionEventIndex)
     // The prediction is the first item in the set of productions.
-    : AeraEvent(EVENT_TYPE, time, reduction->get_reference(
-        reduction->code(reduction->code(MK_RDX_PRODS).asIndex() + 1).asIndex())),
-    reduction_(reduction)
+    : AeraEvent(EVENT_TYPE, time, getFirstProduction(reduction)),
+    reduction_(reduction), imdlPredictionEventIndex_(imdlPredictionEventIndex)
   {}
 
-  static const int EVENT_TYPE = 7;
+  static const int EVENT_TYPE = 8;
 
   r_code::Code* getFactImdl() { return reduction_->get_reference(MK_RDX_IHLP_REF); }
 
@@ -152,17 +181,36 @@ public:
    * Get the requirement from the reduction_, which is the second item in the set of inputs.
    * \return The requirement, or NULL if the set of inputs has less than two items.
    */
-  r_code::Code* getRequirement() {
-    // The requirement is the second item in the set of inputs.
-    uint16 input_set_index = reduction_->code(MK_RDX_INPUTS).asIndex();
-    if (reduction_->code(input_set_index).getAtomCount() < 2)
-      return NULL;
-    return reduction_->get_reference(reduction_->code(input_set_index + 2).asIndex());
-  }
+  r_code::Code* getRequirement() { return getSecondInput(reduction_); }
 
   r_code::Code* getFactPred() { return object_; }
 
+  /**
+   * A helper method to get the first item in the reduction's set of productions.
+   * \param reduction The mk.rdx reduction.
+   * \return The first production.
+   */
+  static r_code::Code* getFirstProduction(r_code::Code* reduction)
+  {
+    return reduction->get_reference(
+      reduction->code(reduction->code(MK_RDX_PRODS).asIndex() + 1).asIndex());
+  }
+
+  /**
+   * A helper method to get the second item in the reduction's set of inputs.
+   * \param reduction The mk.rdx reduction.
+   * \return The second input, or NULL if the set of inputs size is less than two.
+   */
+  static r_code::Code* getSecondInput(r_code::Code* reduction)
+  {
+    uint16 input_set_index = reduction->code(MK_RDX_INPUTS).asIndex();
+    if (reduction->code(input_set_index).getAtomCount() < 2)
+      return NULL;
+    return reduction->get_reference(reduction->code(input_set_index + 2).asIndex());
+  }
+
   r_code::Code* reduction_;
+  int imdlPredictionEventIndex_;
 };
 
 class NewInstantiatedCompositeStateEvent : public AeraEvent {
@@ -174,7 +222,7 @@ public:
     inputs_(inputs)
   {}
 
-  static const int EVENT_TYPE = 8;
+  static const int EVENT_TYPE = 9;
 
   std::vector<r_code::Code*> inputs_;
 };
@@ -185,7 +233,7 @@ public:
     : AeraEvent(EVENT_TYPE, time, factSuccessFactPred)
   {}
 
-  static const int EVENT_TYPE = 9;
+  static const int EVENT_TYPE = 10;
 };
 
 class EnvironmentInjectEvent : public AeraEvent {
@@ -196,7 +244,7 @@ public:
     injectionTime_(injectionTime)
   {}
 
-  static const int EVENT_TYPE = 10;
+  static const int EVENT_TYPE = 11;
 
   core::Timestamp injectionTime_;
 };
@@ -207,7 +255,7 @@ public:
     : AeraEvent(EVENT_TYPE, time, object)
   {}
 
-  static const int EVENT_TYPE = 11;
+  static const int EVENT_TYPE = 12;
 };
 
 }

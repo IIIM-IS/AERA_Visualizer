@@ -81,6 +81,8 @@ void AeraVisulizerWindow::addEvents(const string& debugStreamFilePath)
   regex newCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> cst (\\d+), CSTController\\((\\d+)\\)$");
   // 0s:0ms:0us A/F -> 35|40 (AXIOM)
   regex autofocusNewObjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us A/F -> (\\d+)\\|(\\d+) \\((\\w+)\\)$");
+  // 0s:300ms:0us fact (1022) imdl mdl 59: 60 -> fact (1029) pred fact (1025) imdl mdl 58
+  regex modelImdlPredictionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact \\(\\d+\\) imdl mdl (\\d+): (\\d+) -> fact \\((\\d+)\\) pred fact \\(\\d+\\) imdl mdl \\d+$");
   // 0s:300ms:0us mdl 63 predict -> mk.rdx 68
   regex modelPredictionReductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl \\d+ predict -> mk.rdx (\\d+)$");
   // 0s:200ms:0us fact 59 icst[52][ 50 55]
@@ -123,19 +125,41 @@ void AeraVisulizerWindow::addEvents(const string& debugStreamFilePath)
         events_.push_back(make_shared<AutoFocusNewObjectEvent>(
           getTimestamp(matches), fromObject, toObject, matches[6].str()));
     }
+    else if (regex_search(line, matches, modelImdlPredictionRegex)) {
+      // TODO: When Replicode makes an mk.rdx for the prediction, use it.
+      auto predictingModel = replicodeObjects_.getObject(stol(matches[4].str()));
+      auto cause = replicodeObjects_.getObject(stol(matches[5].str()));
+      auto factPred = replicodeObjects_.getObjectByDebugOid(stol(matches[6].str()));
+      if (predictingModel && cause && factPred)
+        events_.push_back(make_shared<ModelImdlPredictionEvent>(
+          getTimestamp(matches), factPred, predictingModel, cause));
+    }
     else if (regex_search(line, matches, modelPredictionReductionRegex)) {
       auto reduction = replicodeObjects_.getObject(stol(matches[4].str()));
       if (reduction) {
         // Check the type of prediction.
-        auto factPred = reduction->get_reference(
-          reduction->code(reduction->code(MK_RDX_PRODS).asIndex() + 1).asIndex());
+        auto factPred = ModelMkValPredictionReduction::getFirstProduction(reduction);
         auto pred = factPred->get_reference(0);
         auto factValue = pred->get_reference(0);
         auto value = factValue->get_reference(0);
         auto valueOpcode = value->code(0).asOpcode();
 
-        if (valueOpcode == Opcodes::MkVal)
-          events_.push_back(make_shared<ModelMkValPredictionReduction>(getTimestamp(matches), reduction));
+        if (valueOpcode == Opcodes::MkVal) {
+          int imdlPredictionEventIndex = -1;
+          auto requirement = ModelMkValPredictionReduction::getSecondInput(reduction);
+          // Search events_ backwards for the previous prediction whose object_ is this->getRequirement().
+          for (int i = events_.size() - 1; i >= 0; --i) {
+            if (events_[i]->eventType_ == ModelImdlPredictionEvent::EVENT_TYPE &&
+                ((ModelImdlPredictionEvent*)events_[i].get())->object_ == requirement) {
+              imdlPredictionEventIndex = i;
+              break;
+            }
+          }
+
+          if (imdlPredictionEventIndex >= 0)
+            events_.push_back(make_shared<ModelMkValPredictionReduction>(
+              getTimestamp(matches), reduction, imdlPredictionEventIndex));
+        }
       }
     }
     else if (regex_search(line, matches, newInstantiatedCompositeStateRegex)) {
