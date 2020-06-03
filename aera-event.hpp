@@ -119,20 +119,42 @@ class ModelPredictionReduction : public AeraEvent {
 public:
   /**
    * Create a ModelPredictionReduction, but set object_ to the (fact (pred ...)).
-   * (mk.rdx fact_imdl [fact_cause] [fact_pred]) .
+   * (mk.rdx fact_imdl [fact_cause fact_requirement] [fact_pred]) .
    * \param time The reduction time.
    * \param reduction The model reduction which points to the (fact (pred ...)) and cause
    */
   ModelPredictionReduction(core::Timestamp time, r_code::Code* reduction)
-    : AeraEvent(EVENT_TYPE, time, reduction->get_reference(2)),
+    // The prediction is the first item in the set of productions.
+    : AeraEvent(EVENT_TYPE, time, reduction->get_reference(
+        reduction->code(reduction->code(MK_RDX_PRODS).asIndex() + 1).asIndex())),
     reduction_(reduction)
   {}
 
   static const int EVENT_TYPE = 7;
 
-  r_code::Code* getFactImdl() { return reduction_->get_reference(0); }
+  r_code::Code* getFactImdl() { return reduction_->get_reference(MK_RDX_IHLP_REF); }
 
-  r_code::Code* getCause() { return reduction_->get_reference(1); }
+  /**
+   * Get the cause from the reduction_, which is the first item in the set of inputs.
+   * \return The cause.
+   */
+  r_code::Code* getCause() {
+    // The cause is the 
+    return reduction_->get_reference(
+      reduction_->code(reduction_->code(MK_RDX_INPUTS).asIndex() + 1).asIndex());
+  }
+
+  /**
+   * Get the requirement from the reduction_, which is the second item in the set of inputs.
+   * \return The requirement, or NULL if the set of inputs has less than two items.
+   */
+  r_code::Code* getRequirement() {
+    // The requirement is the second item in the set of inputs.
+    uint16 input_set_index = reduction_->code(MK_RDX_INPUTS).asIndex();
+    if (reduction_->code(input_set_index).getAtomCount() < 2)
+      return NULL;
+    return reduction_->get_reference(reduction_->code(input_set_index + 2).asIndex());
+  }
 
   r_code::Code* getFactPred() { return object_; }
 
