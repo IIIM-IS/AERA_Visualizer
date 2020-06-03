@@ -14,7 +14,7 @@ class PredictionItem : public AeraGraphicsItem
 {
 public:
   PredictionItem(
-    ModelPredictionReduction* modelReduction, ReplicodeObjects& replicodeObjects, 
+    ModelMkValPredictionReduction* modelReduction, ReplicodeObjects& replicodeObjects, 
     AeraVisualizerScene* parent);
 
 protected:
@@ -49,7 +49,7 @@ private:
    */
   QString makeHtml();
 
-  ModelPredictionReduction* modelReduction_;
+  ModelMkValPredictionReduction* modelReduction_;
   ShowState showState_;
   QString factPredFactMkValHtml_;
   QString highlightedFactPredFactMkValHtml_;

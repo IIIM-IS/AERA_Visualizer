@@ -125,9 +125,18 @@ void AeraVisulizerWindow::addEvents(const string& debugStreamFilePath)
     }
     else if (regex_search(line, matches, modelPredictionReductionRegex)) {
       auto reduction = replicodeObjects_.getObject(stol(matches[4].str()));
-      if (reduction)
-        // Make a ModelPredictionReduction which references the reduction.
-        events_.push_back(make_shared<ModelPredictionReduction>(getTimestamp(matches), reduction));
+      if (reduction) {
+        // Check the type of prediction.
+        auto factPred = reduction->get_reference(
+          reduction->code(reduction->code(MK_RDX_PRODS).asIndex() + 1).asIndex());
+        auto pred = factPred->get_reference(0);
+        auto factValue = pred->get_reference(0);
+        auto value = factValue->get_reference(0);
+        auto valueOpcode = value->code(0).asOpcode();
+
+        if (valueOpcode == Opcodes::MkVal)
+          events_.push_back(make_shared<ModelMkValPredictionReduction>(getTimestamp(matches), reduction));
+      }
     }
     else if (regex_search(line, matches, newInstantiatedCompositeStateRegex)) {
       auto timestamp = getTimestamp(matches);
@@ -272,7 +281,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
   if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
-      event->eventType_ == ModelPredictionReduction::EVENT_TYPE ||
+      event->eventType_ == ModelMkValPredictionReduction::EVENT_TYPE ||
       event->eventType_ == NewPredictionSuccessEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
@@ -319,8 +328,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       if (essencePropertyObject && mkVal->references_size() >= 2 && mkVal->get_reference(1) == essencePropertyObject)
         visible = (essenceFactsCheckBox_->checkState() == Qt::Checked);
     }
-    else if (event->eventType_ == ModelPredictionReduction::EVENT_TYPE) {
-      auto reductionEvent = (ModelPredictionReduction*)event;
+    else if (event->eventType_ == ModelMkValPredictionReduction::EVENT_TYPE) {
+      auto reductionEvent = (ModelMkValPredictionReduction*)event;
       newItem = new PredictionItem(reductionEvent, replicodeObjects_, scene);
 
       // Add an arrow to the cause.
@@ -432,7 +441,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
   if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
-      event->eventType_ == ModelPredictionReduction::EVENT_TYPE ||
+      event->eventType_ == ModelMkValPredictionReduction::EVENT_TYPE ||
       event->eventType_ == NewPredictionSuccessEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||

@@ -15,7 +15,7 @@ using namespace r_exec;
 namespace aera_visualizer {
 
 PredictionItem::PredictionItem(
-  ModelPredictionReduction* modelReduction, ReplicodeObjects& replicodeObjects,
+  ModelMkValPredictionReduction* modelReduction, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
   : AeraGraphicsItem(modelReduction, replicodeObjects, parent, "Prediction"),
   modelReduction_(modelReduction), showState_(HIDE_IMODEL)

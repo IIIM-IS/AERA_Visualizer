@@ -115,15 +115,19 @@ public:
   std::string syncMode_;
 };
 
-class ModelPredictionReduction : public AeraEvent {
+/**
+ * ModelMkValPredictionReduction is a reduction event specific to a prediction of a mk.val,
+ * which has an associated requirement (as opposed to a prediction of an imdl which doesn't).
+ */
+class ModelMkValPredictionReduction : public AeraEvent {
 public:
   /**
-   * Create a ModelPredictionReduction, but set object_ to the (fact (pred ...)).
+   * Create a ModelMkValPredictionReduction, but set object_ to the (fact (pred ...)).
    * (mk.rdx fact_imdl [fact_cause fact_requirement] [fact_pred]) .
    * \param time The reduction time.
    * \param reduction The model reduction which points to the (fact (pred ...)) and cause
    */
-  ModelPredictionReduction(core::Timestamp time, r_code::Code* reduction)
+  ModelMkValPredictionReduction(core::Timestamp time, r_code::Code* reduction)
     // The prediction is the first item in the set of productions.
     : AeraEvent(EVENT_TYPE, time, reduction->get_reference(
         reduction->code(reduction->code(MK_RDX_PRODS).asIndex() + 1).asIndex())),
