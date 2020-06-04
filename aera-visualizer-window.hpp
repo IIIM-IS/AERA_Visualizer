@@ -127,22 +127,6 @@ private:
    */
   core::Timestamp getTimestamp(const smatch& matches, int index = 1);
 
-  /**
-   * Get the scene AeraGraphicsItem whose getAeraEvent() has the given object, and set its pen.
-   * If the object or item is not found, do nothing.
-   * \param object The Code* object to search for.
-   * \param pen The pen (for the border).
-   */
-  void setAeraGraphicsItemPen(r_code::Code* object, const QPen& pen);
-
-  /**
-   * Get the scene AeraGraphicsItem whose getAeraEvent() has the given object, and set its pen to
-   * its getBorderNoHighlightPen().
-   * If the object or item is not found, do nothing.
-   * \param object The Code* object to search for.
-   */
-  void resetAeraGraphicsItemPen(r_code::Code* object);
-
   AeraVisualizerScene* modelsScene_;
   AeraVisualizerScene* mainScene_;
   AeraVisualizerScene* selectedScene_;
@@ -158,7 +142,8 @@ private:
   size_t iNextEvent_;
   ReplicodeObjects& replicodeObjects_;
   QPen itemBorderHighlightPen_;
-  r_code::Code* hoverHighlightObject_;
+  AeraGraphicsItem* hoverHighlightItem_;
+  bool hoverHighlightItemWasVisible_;
   QString hoverPreviousUrl_;
 };
 

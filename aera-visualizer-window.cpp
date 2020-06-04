@@ -25,7 +25,7 @@ AeraVisulizerWindow::AeraVisulizerWindow(
     ReplicodeObjects& replicodeObjects, const string& debugStreamFilePath)
 : AeraVisulizerWindowBase(0),
   replicodeObjects_(replicodeObjects), iNextEvent_(0), explanationLogWindow_(0),
-  hoverHighlightObject_(0),
+  hoverHighlightItem_(0),
   itemBorderHighlightPen_(Qt::blue, 3)
 {
   createActions();
@@ -240,22 +240,13 @@ void AeraVisulizerWindow::zoomToAeraGraphicsItem(r_code::Code* object)
 {
   AeraVisualizerScene* scene;
   auto item = getAeraGraphicsItem(object, &scene);
-  if (item)
+  if (item) {
+    if (item == hoverHighlightItem_ && !hoverHighlightItemWasVisible_)
+      // The item is temporarily visible while hovering. Make sure it stays visible when we un-hover.
+      hoverHighlightItemWasVisible_ = true;
+
     scene->zoomToItem(item);
-}
-
-void AeraVisulizerWindow::setAeraGraphicsItemPen(r_code::Code* object, const QPen& pen)
-{
-  auto item = getAeraGraphicsItem(object);
-  if (item)
-    item->setPen(pen);
-}
-
-void AeraVisulizerWindow::resetAeraGraphicsItemPen(r_code::Code* object)
-{
-  auto item = getAeraGraphicsItem(object);
-  if (item)
-    item->setPen(item->getBorderNoHighlightPen());
+  }
 }
 
 void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, QPointF position)
@@ -263,10 +254,11 @@ void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, 
   auto url = document->documentLayout()->anchorAt(position);
   if (url == "") {
     // The mouse cursor exited the link.
-    if (hoverHighlightObject_) {
-      // Clear the previous highlighting.
-      resetAeraGraphicsItemPen(hoverHighlightObject_);
-      hoverHighlightObject_ = 0;
+    if (hoverHighlightItem_) {
+      // Clear the previous highlighting and restore the visible state.
+      hoverHighlightItem_->setPen(hoverHighlightItem_->getBorderNoHighlightPen());
+      hoverHighlightItem_->setItemAndArrowsVisible(hoverHighlightItemWasVisible_);
+      hoverHighlightItem_ = 0;
     }
 
     hoverPreviousUrl_ = "";
@@ -282,12 +274,22 @@ void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, 
     uint64 debug_oid = url.mid(11).toULongLong();
     auto object = replicodeObjects_.getObjectByDebugOid(debug_oid);
     if (object) {
-      if (hoverHighlightObject_)
+      if (hoverHighlightItem_) {
         // Unhighlight a previous object.
-        resetAeraGraphicsItemPen(hoverHighlightObject_);
+        hoverHighlightItem_->setPen(hoverHighlightItem_->getBorderNoHighlightPen());
+        hoverHighlightItem_->setItemAndArrowsVisible(hoverHighlightItemWasVisible_);
+        hoverHighlightItem_ = 0;
+      }
 
-      hoverHighlightObject_ = object;
-      setAeraGraphicsItemPen(object, itemBorderHighlightPen_);
+      hoverHighlightItem_ = getAeraGraphicsItem(object);
+      if (hoverHighlightItem_) {
+        hoverHighlightItemWasVisible_ = hoverHighlightItem_->isVisible();
+        if (!hoverHighlightItemWasVisible_)
+          // Make the item visible while we hover.
+          hoverHighlightItem_->setItemAndArrowsVisible(true);
+
+        hoverHighlightItem_->setPen(itemBorderHighlightPen_);
+      }
     }
   }
 }
