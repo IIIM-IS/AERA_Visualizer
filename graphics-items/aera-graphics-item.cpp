@@ -172,6 +172,18 @@ QString AeraGraphicsItem::htmlify(const QString& input)
   return result;
 }
 
+QString AeraGraphicsItem::makeHtmlLink(
+  r_code::Code* object, const ReplicodeObjects& replicodeObjects)
+{
+  QString label = replicodeObjects.getLabel(object).c_str();
+  if (label == "")
+    // We don't expect this to happen.
+    label = "object_" + QString::number(object->get_debug_oid());
+
+  return "<a href=\"#debug_oid-" + QString::number(object->get_debug_oid()) + "\">" +
+    label + "</a>";
+}
+
 void AeraGraphicsItem::addSourceCodeHtmlLinks(
   Code* object, QString& html, const ReplicodeObjects& replicodeObjects)
 {
@@ -190,18 +202,15 @@ void AeraGraphicsItem::addSourceCodeHtmlLinks(
     // TODO: Handle case when the label is not surrounded by spaces.
     html.replace(
       " " + referencedLabel + " ",
-      " <a href=\"#debug_oid-" + QString::number(referencedObject->get_debug_oid()) + "\">" +
-      referencedLabel + "</a> ");
+      " " + makeHtmlLink(referencedObject, replicodeObjects) + " ");
     // The same for at the end of a line.
     html.replace(
       " " + referencedLabel + "<br>",
-      " <a href=\"#debug_oid-" + QString::number(referencedObject->get_debug_oid()) + "\">" +
-      referencedLabel + "</a><br>");
+      " " + makeHtmlLink(referencedObject, replicodeObjects) + "<br>");
     // The same for at the end of a list.
     html.replace(
       " " + referencedLabel + ")",
-      " <a href=\"#debug_oid-" + QString::number(referencedObject->get_debug_oid()) + "\">" +
-      referencedLabel + "</a>)");
+      " " + makeHtmlLink(referencedObject, replicodeObjects) + ")");
   }
 }
 

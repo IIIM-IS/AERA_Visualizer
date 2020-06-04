@@ -66,6 +66,21 @@ public:
   static QString htmlify(const std::string& input) { return htmlify(QString(input.c_str())); }
 
   /**
+   * Make an HTML string with <a href="#debug_oid-XXX"></a> around the label the object. 
+   * When clicked, this link is handled by textItemLinkActivated().
+   * \param object The object to be linked.
+   * \param replicodeObjects the ReplicodeObjects for looking up labels. This is passed
+   * as a param so that this can be a static method. If you have an AeraGraphicsItem object,
+   * you can call the makeHtmlLink member method.
+   */
+  static QString makeHtmlLink(r_code::Code* object, const ReplicodeObjects& replicodeObjects);
+
+  QString makeHtmlLink(r_code::Code* object)
+  {
+    return makeHtmlLink(object, replicodeObjects_);
+  }
+
+  /**
    * Go through object's references and modify html with <a href="#debug_oid-XXX"></a>
    * around the label of each referenced object. When clicked, this link is handled
    * by textItemLinkActivated().
