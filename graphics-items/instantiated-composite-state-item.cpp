@@ -132,12 +132,29 @@ QString InstantiatedCompositeStateItem::makeHtml()
   QString html = "";
   if (showState_ == HIDE_ICST) {
     html += SelectedRadioButtonHtml + " Hide iCst" +
-      " <a href=\"#show-icst\">" + UnselectedRadioButtonHtml + " Show iCst</a><br>";
+      " <a href=\"#what-made-this\">" + UnselectedRadioButtonHtml + " What Made This?</a><br>";
     html += boundCstMembersHtml_;
   }
   else {
     html += "<a href=\"#hide-icst\">" + UnselectedRadioButtonHtml + " Hide iCst</a>" +
-      " " + SelectedRadioButtonHtml + " Show iCst<br>";
+      " " + SelectedRadioButtonHtml + " What Made This?";
+
+    auto factIcst = newInstantiatedCompositeStateEvent_->object_;
+    auto icst = factIcst->get_reference(0);
+    auto cst = icst->get_reference(0);
+
+    html += "<br>Inputs ";
+    for (int i = 0; i < newInstantiatedCompositeStateEvent_->inputs_.size(); ++i) {
+      if (i == newInstantiatedCompositeStateEvent_->inputs_.size() - 1)
+        html += " and ";
+      else if (i > 0)
+        html += ", ";
+
+      html += makeHtmlLink(newInstantiatedCompositeStateEvent_->inputs_[i]);
+    }
+
+    html += " matched composite state " + makeHtmlLink(cst) + ", which made instantiated composite state <b>" +
+      replicodeObjects_.getLabel(factIcst).c_str() + "</b>:<br>";
     html += factIcstHtml_ + "<br><br>" + boundCstHtml_;
   }
 
@@ -151,8 +168,8 @@ void InstantiatedCompositeStateItem::textItemLinkActivated(const QString& link)
     setTextItemAndPolygon(makeHtml(), true);
     bringToFront();
   }
-  else if (link == "#show-icst") {
-    showState_ = SHOW_ICST;
+  else if (link == "#what-made-this") {
+    showState_ = WHAT_MADE_THIS;
     setTextItemAndPolygon(makeHtml(), true);
     bringToFront();
   }

@@ -30,7 +30,7 @@ protected:
   void textItemLinkActivated(const QString& link) override;
 
 private:
-  typedef enum { HIDE_ICST, SHOW_ICST } ShowState;
+  typedef enum { HIDE_ICST, WHAT_MADE_THIS } ShowState;
 
   /**
    * Set factIcstHtml_ to the HTML source code for the fact and icst from newInstantiatedCompositeStateEvent_->object_.
