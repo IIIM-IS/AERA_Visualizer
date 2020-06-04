@@ -403,11 +403,12 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       }
     }
 
+    // Call setItemAndArrowsVisible, even if visible is true because we need to hide arrows to non-visible items.
+    newItem->setItemAndArrowsVisible(visible);
+
     if (visible)
       // Only flash if visible.
       scene->establishFlashTimer();
-    else
-      newItem->setItemAndArrowsVisible(false);
   }
   else if (event->eventType_ == SetModelEvidenceCountAndSuccessRateEvent::EVENT_TYPE) {
     auto setSuccessRateEvent = (SetModelEvidenceCountAndSuccessRateEvent*)event;
