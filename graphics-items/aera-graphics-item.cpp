@@ -213,6 +213,8 @@ void AeraGraphicsItem::setItemAndArrowsVisible(bool visible)
       if (arrow->startItem() == this && arrow->endItem()->isVisible() ||
           arrow->endItem() == this && arrow->startItem()->isVisible())
         arrow->setVisible(true);
+      else
+        arrow->setVisible(false);
     }
     else
       arrow->setVisible(false);
