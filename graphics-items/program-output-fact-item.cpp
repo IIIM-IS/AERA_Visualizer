@@ -50,12 +50,11 @@ void ProgramOutputFactItem::textItemLinkActivated(const QString& link)
     menu->addAction("What Made This?", [=]() {
       auto mkRdx = programReductionNewObjectEvent_->programReduction_;
 
-      string explanation = "<b>Q: What made program output <a href=\"#debug_oid-" +
-        to_string(programReductionNewObjectEvent_->object_->get_debug_oid()) + "\">" +
-        replicodeObjects_.getLabel(programReductionNewObjectEvent_->object_) + "</a> ?</b><br>" + 
-        "This an output of instantiated program <b>" + replicodeObjects_.getLabel(mkRdx->get_reference(0)) +
-        "</b>, according to<br>program reduction <a href=\"#debug_oid-" + 
-        to_string(mkRdx->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(mkRdx) + "</a><br><br>";
+      QString explanation = "<b>Q: What made program output " + 
+        makeHtmlLink(programReductionNewObjectEvent_->object_) + 
+        " ?</b><br>This an output of instantiated program <b>" + 
+        replicodeObjects_.getLabel(mkRdx->get_reference(0)).c_str() +
+        "</b>, according to<br>program reduction " + makeHtmlLink(mkRdx) + "<br><br>";
       parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
     });
     menu->exec(QCursor::pos() - QPoint(10, 10));

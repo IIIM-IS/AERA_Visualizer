@@ -48,13 +48,12 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
     menu->addAction("What Is This?", [=]() {
       // TODO: Handle this in a static method of PredictionItem.
       // TODO: Handle the case of an anti-fact imdl prediction.
-      string explanation = "<b>Q: What is requirement prediction " + replicodeObjects_.getLabel(requirementFactPred) +
-        "?</b><br>Input <a href=\"#debug_oid-" + to_string(cause->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(cause) + 
-        "</a> matched the LHS of model <a href=\"#debug_oid-" + to_string(predictingModel->get_debug_oid()) +
-        "\">" + replicodeObjects_.getLabel(predictingModel) + 
-        "</a> and the requirement is the RHS of the model, which predicts that model <a href=\"#debug_oid-" + 
-        to_string(predictedModel->get_debug_oid()) + "\">" + replicodeObjects_.getLabel(predictedModel) + 
-        "</a> will succeed when instantiated with the given template values.<br><br>";
+      QString explanation = QString("<b>Q: What is requirement prediction ") + replicodeObjects_.getLabel(requirementFactPred).c_str() +
+        "?</b><br>Input " + AeraGraphicsItem::makeHtmlLink(cause, replicodeObjects_) +
+        " matched the LHS of model " + AeraGraphicsItem::makeHtmlLink(predictingModel, replicodeObjects_) +
+        " and the requirement is the RHS of the model, which predicts that model " + 
+        AeraGraphicsItem::makeHtmlLink(predictedModel, replicodeObjects_) +
+        " will succeed when instantiated with the given template values.<br><br>";
       appendHtml(explanation);
     });
     menu->exec(QCursor::pos() - QPoint(10, 10));

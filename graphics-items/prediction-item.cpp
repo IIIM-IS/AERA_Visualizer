@@ -180,10 +180,8 @@ QString PredictionItem::makeHtml()
 
     auto imdl = modelReduction_->getFactImdl()->get_reference(0);
     auto mdl = imdl->get_reference(0);
-    html += QString("<br>Input <a href=\"#debug_oid-" + QString::number(modelReduction_->getCause()->get_debug_oid()) + "\">" +
-      replicodeObjects_.getLabel(modelReduction_->getCause()).c_str() + 
-      "</a> matched the LHS of model <a href=\"#debug_oid-") + QString::number(mdl->get_debug_oid()) +
-      "\">" + replicodeObjects_.getLabel(mdl).c_str() + "</a> and the prediction is the RHS of instantiated model <b>" +
+    html += "<br>Input " + makeHtmlLink(modelReduction_->getCause()) +
+      " matched the LHS of model " + makeHtmlLink(mdl) + " and the prediction is the RHS of instantiated model <b>" +
       replicodeObjects_.getLabel(modelReduction_->getFactImdl()).c_str() + "</b>:<br>";
     html += factImdlHtml_;
     html += "<br><br>" + (showState_ == WHAT_MADE_THIS ? boundModelHtml_ : unboundModelHtml_);
@@ -252,12 +250,13 @@ void PredictionItem::textItemLinkActivated(const QString& link)
     auto menu = new QMenu();
     menu->addAction("What Made This?", [=]() {
       // TODO: Enable a link to the instantiated model inside the prediction.
-      string explanation = "<b>Q: What made the template values of instantiated model <b>" +
-        replicodeObjects_.getLabel(modelReduction_->getFactImdl()) + "</b> ?</b><br>" +
-        "The template values were made when model <a href=\"#debug_oid-" + to_string(predictingModel->get_debug_oid()) +
-        "\">" + replicodeObjects_.getLabel(predictingModel) + "</a> made requirement prediction <a href=\"#requirement_prediction-" +
-        to_string(modelReduction_->imdlPredictionEventIndex_) + "\">" + replicodeObjects_.getLabel(requirementFactPred) + "</a>:<br>" +
-        factPredFactImdlHtml.toStdString() + "<br><br>";
+      QString explanation = QString("<b>Q: What made the template values of instantiated model <b>") +
+        replicodeObjects_.getLabel(modelReduction_->getFactImdl()).c_str() + "</b> ?</b><br>" +
+        "The template values were made when model " + makeHtmlLink(predictingModel) +
+        " made requirement prediction <a href=\"#requirement_prediction-" +
+        QString::number(modelReduction_->imdlPredictionEventIndex_) + "\">" +
+        replicodeObjects_.getLabel(requirementFactPred).c_str() + "</a>:<br>" +
+        factPredFactImdlHtml + "<br><br>";
       parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
     });
     menu->exec(QCursor::pos() - QPoint(10, 10));

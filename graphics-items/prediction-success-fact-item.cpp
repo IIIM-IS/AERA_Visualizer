@@ -50,13 +50,10 @@ void PredictionSuccessFactItem::textItemLinkActivated(const QString& link)
       Code* factPrediction = newPredictionSuccessEvent_->object_->get_reference(0)->get_reference(0);
       Code* input = newPredictionSuccessEvent_->object_->get_reference(0)->get_reference(1);
 
-      string explanation = "<b>Q: What made prediction success <a href=\"#debug_oid-" +
-        to_string(newPredictionSuccessEvent_->object_->get_debug_oid()) + "\">" +
-        replicodeObjects_.getLabel(newPredictionSuccessEvent_->object_) + "</a> ?</b><br>" +
-        "Input <a href=\"#debug_oid-" + to_string(input->get_debug_oid()) + "\">" + 
-        replicodeObjects_.getLabel(input) + "</a> was matched against prediction <a href=\"#debug_oid-" + 
-        to_string(factPrediction->get_debug_oid()) + "\">" +
-        replicodeObjects_.getLabel(factPrediction) + "</a> with success.<br><br>";
+      QString explanation = "<b>Q: What made prediction success " +
+        makeHtmlLink(newPredictionSuccessEvent_->object_) + " ?</b><br>Input " +
+        makeHtmlLink(input) + " was matched against prediction " + makeHtmlLink(factPrediction) +
+        " with success.<br><br>";
       parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
     });
     menu->exec(QCursor::pos() - QPoint(10, 10));
