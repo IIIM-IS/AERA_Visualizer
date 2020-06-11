@@ -3,6 +3,7 @@
 #include "submodules/replicode/Test/settings.h"
 
 #include <QApplication>
+#include <QSettings>
 #include <QMessageBox>
 #include <QFileDialog>
 
@@ -14,12 +15,13 @@ int main(int argv, char *args[])
 
   QApplication app(argv, args);
 
-  // TODO: Remember the location between launches.
-  QString previousSettingsFilePath = "C:/Users/Jeff/AERA/replicode/Test/settings.xml";
+  QSettings preferences("IIIM", "AERA_Visualizer");
   auto settingsFilePath = QFileDialog::getOpenFileName(NULL,
-    "Open AERA settings XML file", previousSettingsFilePath, "XML Files (*.xml);;All Files (*.*)");
+    "Open AERA settings XML file", preferences.value("settingsFilePath").toString(), 
+    "XML Files (*.xml);;All Files (*.*)");
   if (settingsFilePath == "")
     return 0;
+  preferences.setValue("settingsFilePath", settingsFilePath);
 
   Settings settings;
   if (!settings.load(settingsFilePath.toStdString().c_str())) {
