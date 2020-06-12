@@ -31,3 +31,12 @@ Launch Visual Studio and open the project `Replicode.sln` from the cloned reposi
 
 On the Build menu, click Build Solution. (Don't worry about all the compiler warnings.)
 
+Run
+===
+
+The AERA Visualizer requires output from running AERA. See the file [INSTALL.md](https://github.com/IIIM-IS/replicode/blob/master/INSTALL.md)
+for details. Be sure to change the `seetings.xml` parameter `keep_invalidated_objects` to "yes", and select a
+`source_file_name` such as "../Test/replicode_v1.2/pong.external.replicode" .
+
+To run, in Visual Studio on the Debug menu, select "Run Without Debugging". Select the `settings.xml` file used by AERA, e.g.
+`C:\Users\Alice\Documents\GitHub\replicode\Test\settings.xml` .
