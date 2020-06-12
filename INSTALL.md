@@ -27,8 +27,6 @@ Build
 Launch Visual Studio and open the project `Replicode.sln` from the cloned repository. E.g.:
   `C:\Users\Alice\Documents\GitHub\replicode\AERA_Visualizer.sln`
 
-## Compile
-
 On the Build menu, click Build Solution. (Don't worry about all the compiler warnings.)
 
 Run
