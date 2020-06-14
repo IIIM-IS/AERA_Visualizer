@@ -35,7 +35,7 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
     // There is no item for a requirement prediction, so show a menu for a "What Is" explanation.
     // TODO: This should be the debug_oid of an mk.rdx, which Replicode currently doesn't make. 
     int imdlPredictionEventIndex = url.url().mid(24).toULongLong();
-    auto imdlPredictionEvent = (ModelImdlPredictionEvent*)parent_->getAeraEvent(17);
+    auto imdlPredictionEvent = (ModelImdlPredictionEvent*)parent_->getAeraEvent(imdlPredictionEventIndex);
     Code* predictingModel = imdlPredictionEvent->predictingModel_;
     Code* cause = imdlPredictionEvent->cause_;
     Code* requirementFactPred = imdlPredictionEvent->object_;
