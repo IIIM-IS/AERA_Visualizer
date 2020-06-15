@@ -33,7 +33,7 @@ It should be a recursive clone (which is the default).
 
 Build
 =====
-Launch Visual Studio and open the project `Replicode.sln` from the cloned repository. E.g.:
+Launch Visual Studio and open the project `AERA_Visualizer.sln` from the cloned repository. E.g.:
 `C:\Users\remap\Documents\GitHub\AERA_Visualizer\AERA_Visualizer.sln` .  If a dialog box appears 
 asking to retarget the Windows version, click cancel.
 
