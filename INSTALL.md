@@ -16,10 +16,16 @@ Following are the detailed steps for each platform to install the prerequisites.
 To install Replicode, see https://github.com/IIIM-IS/replicode/blob/master/INSTALL.md . Be sure
 to follow the instructions to set `WITH_DEBUG_OID` .
 
-To install Qt Framework, download and install from https://www.qt.io/download-qt-installer . In the
-installer, select the latest Qt version, e.g. "Qt 5.15.0". When the installer if finished, you can uncheck
-"Launch Qt Creator" since we don't need it. Also, download and install the Qt Visual Studio Tools from
-https://marketplace.visualstudio.com/items?itemName=TheQtCompany.QtVisualStudioTools2019 .
+To install Qt Framework:
+
+* Download and install from https://www.qt.io/download-qt-installer . In the
+  installer, select the latest Qt version, e.g. "Qt 5.15.0". When the installer if finished, you can uncheck
+  "Launch Qt Creator" since we don't need it. 
+* With Visual Studio closed, download and install the Qt Visual Studio Tools from
+  https://marketplace.visualstudio.com/items?itemName=TheQtCompany.QtVisualStudioTools2019 .
+* Launch Visual Studio. On the Extensions menu, click "Qt VS Tools" then "Qt Options". On the "Qt Version"
+  tab, click Add. In "Path", click the "..." button and select the installed path, e.g. 
+  `C:\Qt\5.15.0\msvc2019_64` . Click "OK".
 
 To get the AERA Visualizer code repository, launch GitHub for Desktop and sign in to GitHub. In the File menu, 
 click "Clone a Repository". Click the URL tab and enter `https://github.com/IIIM-IS/AERA_Visualizer` . 
