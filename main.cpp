@@ -16,9 +16,11 @@ int main(int argv, char *args[])
   QApplication app(argv, args);
 
   QSettings preferences("IIIM", "AERA_Visualizer");
-  auto settingsFilePath = QFileDialog::getOpenFileName(NULL,
-    "Open AERA settings XML file", preferences.value("settingsFilePath").toString(), 
-    "XML Files (*.xml);;All Files (*.*)");
+  QString settingsFilePath0 = preferences.value("settingsFilePath").toString();
+  if (settingsFilePath0 == "")
+    settingsFilePath0 = "../replicode/AERA/settings.xml";
+  QString settingsFilePath = QFileDialog::getOpenFileName(NULL,
+    "Open AERA settings XML file", settingsFilePath0, "XML Files (*.xml);;All Files (*.*)");
   if (settingsFilePath == "")
     return 0;
   preferences.setValue("settingsFilePath", settingsFilePath);
