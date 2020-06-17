@@ -44,7 +44,7 @@ Run
 
 The AERA Visualizer requires output from running AERA. See the file [INSTALL.md](https://github.com/IIIM-IS/replicode/blob/master/INSTALL.md)
 for details. Be sure to change the `settings.xml` parameter `keep_invalidated_objects` to "yes", and set
-`source_file_name` to a file such as "../AERA/replicode_v1.2/pong.external.replicode" .
+`source_file_name` to a file such as "../AERA/replicode_v1.2/ball.external.replicode" .
 
 To run, in Visual Studio on the Debug menu, select "Run Without Debugging". Select the `settings.xml` file used by AERA, e.g.
 `C:\Users\Alice\Documents\GitHub\replicode\AERA\settings.xml` .
