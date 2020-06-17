@@ -6,6 +6,7 @@
 #include <QSettings>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QScreen>
 
 using namespace aera_visualizer;
 
@@ -54,18 +55,22 @@ int main(int argv, char *args[])
   }
   AeraVisulizerWindow mainWindow(replicodeObjects, runtimeOutputFilePath);
   mainWindow.setWindowTitle(QString("AERA Visualizer - ") + QFileInfo(settings.source_file_name_.c_str()).fileName());
-  // TODO: Use the actual screen resolution.
+  QScreen* screen = QGuiApplication::primaryScreen();
+  int availableHeight = screen->availableSize().height();
+  int availableWidth = screen->availableSize().width();
+  const int titleBarHeight = 35;
+  const int explanationLogWindowWidth = 315;
   const int left = 0;
-  const int top = 35;
-  const int width = 1605;
-  const int height = 1000;
+  const int top = titleBarHeight;
+  const int width = availableWidth - explanationLogWindowWidth;
+  const int height = availableHeight - titleBarHeight;
   mainWindow.setGeometry(left, top, width, height);
 
   auto explanationLogWindow = new ExplanationLogWindow(&mainWindow, replicodeObjects);
   mainWindow.setExplanationLogWindow(explanationLogWindow);
   // Disable the close button for the child window.
   explanationLogWindow->setWindowFlag(Qt::WindowCloseButtonHint, false);
-  explanationLogWindow->setGeometry(left + width, top, 315, height);
+  explanationLogWindow->setGeometry(left + width, top, explanationLogWindowWidth, height);
   explanationLogWindow->show();
 
   mainWindow.show();
