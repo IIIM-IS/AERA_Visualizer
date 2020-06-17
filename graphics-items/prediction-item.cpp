@@ -244,8 +244,7 @@ void PredictionItem::textItemLinkActivated(const QString& link)
     factPredFactImdlHtml += "\n    <font style=\"background-color:#e0ffe0\">" + factImdlHtml + "</font>";
     factPredFactImdlHtml += "\n        <font style=\"background-color:#e0ffe0\">" + imdlHtml + "</font>";
     factPredFactImdlHtml = htmlify(factPredFactImdlHtml);
-    // Debug: Use addSourceCodeHtmlLinks with the prediction object.
-    factPredFactImdlHtml.replace("mdl_63", "<a href=\"#debug_oid-592\">mdl_63</a>");
+    addSourceCodeHtmlLinks(imdl, factPredFactImdlHtml);
 
     auto menu = new QMenu();
     menu->addAction("What Made This?", [=]() {
