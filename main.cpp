@@ -42,17 +42,17 @@ int main(int argv, char *args[])
     return -1;
   }
 
-  string debugStreamFilePath = settingsFileDir.absoluteFilePath(settings.debug_stream_file_path_.c_str()).toStdString();
+  string runtimeOutputFilePath = settingsFileDir.absoluteFilePath(settings.runtime_output_file_path_.c_str()).toStdString();
   {
     // Test opening the file now so we can exit on error.
-    ifstream testOpen(debugStreamFilePath);
+    ifstream testOpen(runtimeOutputFilePath);
     if (!testOpen) {
       QMessageBox::information(NULL, "File Error", 
-        QString("Can't open debug stream output file: ") + debugStreamFilePath.c_str(), QMessageBox::Ok);
+        QString("Can't open debug stream output file: ") + runtimeOutputFilePath.c_str(), QMessageBox::Ok);
       return -1;
     }
   }
-  AeraVisulizerWindow mainWindow(replicodeObjects, debugStreamFilePath);
+  AeraVisulizerWindow mainWindow(replicodeObjects, runtimeOutputFilePath);
   mainWindow.setWindowTitle(QString("AERA Visualizer - ") + QFileInfo(settings.source_file_name_.c_str()).fileName());
   // TODO: Use the actual screen resolution.
   const int left = 0;

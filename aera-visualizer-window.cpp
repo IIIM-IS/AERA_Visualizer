@@ -22,7 +22,7 @@ using namespace r_exec;
 namespace aera_visualizer {
 
 AeraVisulizerWindow::AeraVisulizerWindow(
-    ReplicodeObjects& replicodeObjects, const string& debugStreamFilePath)
+    ReplicodeObjects& replicodeObjects, const string& runtimeOutputFilePath)
 : AeraVisulizerWindowBase(0),
   replicodeObjects_(replicodeObjects), iNextEvent_(0), explanationLogWindow_(0),
   hoverHighlightItem_(0),
@@ -67,12 +67,12 @@ AeraVisulizerWindow::AeraVisulizerWindow(
   setWindowTitle(tr("AERA Visualizer"));
   setUnifiedTitleAndToolBarOnMac(true);
 
-  addEvents(debugStreamFilePath);
+  addEvents(runtimeOutputFilePath);
 }
 
-void AeraVisulizerWindow::addEvents(const string& debugStreamFilePath)
+void AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
 {
-  ifstream debugStreamFile(debugStreamFilePath);
+  ifstream debugStreamFile(runtimeOutputFilePath);
   // 0s:200ms:0us -> mdl 53, MDLController(389)
   regex newModelRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> mdl (\\d+), MDLController\\((\\d+)\\)$");
   // 0s:300ms:0us mdl 53 cnt:2 sr:1
