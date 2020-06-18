@@ -196,6 +196,7 @@ private:
   AeraGraphicsItem* hoverHighlightItem_;
   bool hoverHighlightItemWasVisible_;
   QString hoverPreviousUrl_;
+  r_code::Code* essencePropertyObject_;
 };
 
 }

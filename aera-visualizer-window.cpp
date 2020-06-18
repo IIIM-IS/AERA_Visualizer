@@ -76,6 +76,7 @@ AeraVisulizerWindow::AeraVisulizerWindow(
     ReplicodeObjects& replicodeObjects, const string& runtimeOutputFilePath)
 : AeraVisulizerWindowBase(0),
   replicodeObjects_(replicodeObjects), iNextEvent_(0), explanationLogWindow_(0),
+  essencePropertyObject_(replicodeObjects_.getObject("essence")),
   hoverHighlightItem_(0),
   itemBorderHighlightPen_(Qt::blue, 3)
 {
@@ -400,9 +401,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
         scene->addArrow(newItem, fromObjectItem);
 
       auto mkVal = autoFocusEvent->fromObject_->get_reference(0);
-      auto essencePropertyObject = replicodeObjects_.getObject("essence");
-      // TODO: Is this reference always the property?
-      if (essencePropertyObject && mkVal->references_size() >= 2 && mkVal->get_reference(1) == essencePropertyObject)
+      if (essencePropertyObject_ && mkVal->references_size() >= 2 && mkVal->get_reference(1) == essencePropertyObject_)
         visible = (essenceFactsCheckBox_->checkState() == Qt::Checked);
     }
     else if (event->eventType_ == ModelMkValPredictionReduction::EVENT_TYPE) {
