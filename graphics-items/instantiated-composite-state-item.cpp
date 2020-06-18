@@ -116,8 +116,8 @@ void InstantiatedCompositeStateItem::setFactIcstHtml()
   factIcstHtml_ = QString(factIcstSource.c_str()).replace(icstLabel, DownArrowHtml);
   factIcstHtml_ += QString("\n      ") + icstSource.c_str();
 
-  factIcstHtml_ = htmlify(factIcstHtml_);
   addSourceCodeHtmlLinks(icst, factIcstHtml_);
+  factIcstHtml_ = htmlify(factIcstHtml_);
 }
 
 void InstantiatedCompositeStateItem::setBoundCstAndMembersHtml()
@@ -170,12 +170,14 @@ void InstantiatedCompositeStateItem::setBoundCstAndMembersHtml()
   cstMembersSource = regex_replace(cstMembersSource, regex(afterVariable), replicodeObjects_.relativeTime(factIcst->get_after()));
   cstMembersSource = regex_replace(cstMembersSource, regex(beforeVariable), replicodeObjects_.relativeTime(factIcst->get_before()));
 
-  boundCstHtml_ = htmlify(cstSource);
+  boundCstHtml_ = cstSource.c_str();
   addSourceCodeHtmlLinks(cst, boundCstHtml_);
+  boundCstHtml_ = htmlify(boundCstHtml_);
   ModelItem::highlightVariables(boundCstHtml_);
 
-  boundCstMembersHtml_ = htmlify(cstMembersSource);
+  boundCstMembersHtml_ = cstMembersSource.c_str();
   addSourceCodeHtmlLinks(cst, boundCstMembersHtml_);
+  boundCstMembersHtml_ = htmlify(boundCstMembersHtml_);
 }
 
 QString InstantiatedCompositeStateItem::makeHtml()

@@ -105,8 +105,8 @@ void PredictionItem::setFactPredFactMkValHtml()
   factPredFactMkValHtml_ += "\n              !factMkVal-start" + factMkValHtml + "!factMkVal-end";
   factPredFactMkValHtml_ += "\n                  !mkVal-start" + mkValHtml + "!mkVal-end";
 
-  factPredFactMkValHtml_ = htmlify(factPredFactMkValHtml_);
   addSourceCodeHtmlLinks(modelReduction_->object_, factPredFactMkValHtml_);
+  factPredFactMkValHtml_ = htmlify(factPredFactMkValHtml_);
 
   highlightedFactPredFactMkValHtml_ = factPredFactMkValHtml_;
   factPredFactMkValHtml_.replace("!factMkVal-start", "");
@@ -144,8 +144,8 @@ void PredictionItem::setFactImdlHtml()
   factImdlHtml_ = QString(factImdlSource.c_str()).replace(imdlLabel, DownArrowHtml);
   factImdlHtml_ += QString("\n      ") + imdlSource.c_str();
 
-  factImdlHtml_ = htmlify(factImdlHtml_);
   addSourceCodeHtmlLinks(imdl, factImdlHtml_);
+  factImdlHtml_ = htmlify(factImdlHtml_);
 }
 
 void PredictionItem::setBoundAndUnboundModelHtml()
@@ -204,10 +204,13 @@ void PredictionItem::setBoundAndUnboundModelHtml()
   // Restore \n.
   replace(modelSource.begin(), modelSource.end(), '\x01', '\n');
 
-  unboundModelHtml_ = htmlify(unboundModelSource);
+  unboundModelHtml_ = unboundModelSource;
   addSourceCodeHtmlLinks(mdl, unboundModelHtml_);
-  boundModelHtml_ = htmlify(modelSource);
+  unboundModelHtml_ = htmlify(unboundModelHtml_);
+
+  boundModelHtml_ = modelSource.c_str();
   addSourceCodeHtmlLinks(mdl, boundModelHtml_);
+  boundModelHtml_ = htmlify(boundModelHtml_);
 
   ModelItem::highlightVariables(boundModelHtml_);
   ModelItem::highlightVariables(unboundModelHtml_);
@@ -294,8 +297,8 @@ void PredictionItem::textItemLinkActivated(const QString& link)
     QString factPredFactImdlHtml = factPredHtml;
     factPredFactImdlHtml += "\n    <font style=\"background-color:#e0ffe0\">" + factImdlHtml + "</font>";
     factPredFactImdlHtml += "\n        <font style=\"background-color:#e0ffe0\">" + imdlHtml + "</font>";
-    factPredFactImdlHtml = htmlify(factPredFactImdlHtml);
     addSourceCodeHtmlLinks(imdl, factPredFactImdlHtml);
+    factPredFactImdlHtml = htmlify(factPredFactImdlHtml);
 
     auto menu = new QMenu();
     menu->addAction("What Made This?", [=]() {

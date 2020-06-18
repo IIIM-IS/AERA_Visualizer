@@ -90,8 +90,8 @@ void AutoFocusFactItem::setFactMkValHtml()
 
   // TODO: Show autoFocusNewObjectEvent_->syncMode_?
 
+  addSourceCodeHtmlLinks(autoFocusNewObjectEvent_->object_->get_reference(0), factMkValHtml_);
   factMkValHtml_ = htmlify(factMkValHtml_);
-  addSourceCodeHtmlLinks(autoFocusNewObjectEvent_->object_, factMkValHtml_);
 }
 
 void AutoFocusFactItem::textItemLinkActivated(const QString& link)

@@ -65,9 +65,9 @@ ProgramReductionItem::ProgramReductionItem(
   programReductionEvent_(programReductionEvent)
 {
   // Set up sourceCodeHtml_
-  sourceCodeHtml_ = htmlify(simplifyMkRdxSource(
-    replicodeObjects_.getSourceCode(programReductionEvent->object_)));
+  sourceCodeHtml_ = simplifyMkRdxSource(replicodeObjects_.getSourceCode(programReductionEvent->object_)).c_str();
   addSourceCodeHtmlLinks(programReductionEvent_->object_, sourceCodeHtml_);
+  sourceCodeHtml_ = htmlify(sourceCodeHtml_);
 
   setTextItemAndPolygon(makeHtml(), true);
 }

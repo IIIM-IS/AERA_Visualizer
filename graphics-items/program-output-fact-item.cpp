@@ -89,8 +89,8 @@ void ProgramOutputFactItem::setFactMkValHtml()
   factMkValHtml_ = QString(factMkValSource.c_str()).replace(mkValLabel, DownArrowHtml);
   factMkValHtml_ += QString("\n      ") + mkValSource.c_str();
 
-  factMkValHtml_ = htmlify(factMkValHtml_);
   addSourceCodeHtmlLinks(programReductionNewObjectEvent_->object_, factMkValHtml_);
+  factMkValHtml_ = htmlify(factMkValHtml_);
 }
 
 void ProgramOutputFactItem::textItemLinkActivated(const QString& link)

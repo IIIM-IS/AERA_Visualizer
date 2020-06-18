@@ -88,8 +88,8 @@ void PredictionSuccessFactItem::setFactSuccessHtml()
   factSuccessHtml_ = QString(factSuccessSource.c_str()).replace(successLabel, DownArrowHtml);
   factSuccessHtml_ += QString("\n      ") + successSource.c_str();
 
-  factSuccessHtml_ = htmlify(factSuccessHtml_);
   addSourceCodeHtmlLinks(newPredictionSuccessEvent_->object_->get_reference(0), factSuccessHtml_);
+  factSuccessHtml_ = htmlify(factSuccessHtml_);
 }
 
 void PredictionSuccessFactItem::textItemLinkActivated(const QString& link)

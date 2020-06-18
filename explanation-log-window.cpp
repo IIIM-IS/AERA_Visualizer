@@ -121,9 +121,10 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
       auto menu = new QMenu();
       menu->addAction("What Is This?", [=]() {
         // TODO: Handle this in a static method of ProgramReductionItem.
-        QString reductionHtml = AeraGraphicsItem::htmlify(ProgramReductionItem::simplifyMkRdxSource(
-          replicodeObjects_.getSourceCode(object)));
+        QString reductionHtml = ProgramReductionItem::simplifyMkRdxSource(
+          replicodeObjects_.getSourceCode(object)).c_str();
         AeraGraphicsItem::addSourceCodeHtmlLinks(object, reductionHtml, replicodeObjects_);
+        reductionHtml = AeraGraphicsItem::htmlify(reductionHtml);
 
         string explanation = "<b>Q: What is program reduction " + replicodeObjects_.getLabel(object) +
           "?</b><br>This the notification of a reduction of instantiated program <b>" + 

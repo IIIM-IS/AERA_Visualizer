@@ -128,8 +128,8 @@ void EnvironmentInjectEjectItem::setFactValHtml()
   factValHtml_ = QString(factSource.c_str()).replace(valLabel, DownArrowHtml);
   factValHtml_ += QString("\n      ") + valSource.c_str();
 
+  addSourceCodeHtmlLinks(val, factValHtml_);
   factValHtml_ = htmlify(factValHtml_);
-  addSourceCodeHtmlLinks(event_->object_, factValHtml_);
 }
 
 void EnvironmentInjectEjectItem::textItemLinkActivated(const QString& link)

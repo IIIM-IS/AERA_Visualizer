@@ -67,9 +67,9 @@ CompositeStateItem::CompositeStateItem(
   newCompositeStateEvent_(newCompositeStateEvent)
 {
   // Set up sourceCodeHtml_
-  sourceCodeHtml_ = htmlify(simplifyCstSource(
-    replicodeObjects_.getSourceCode(newCompositeStateEvent->object_)));
+  sourceCodeHtml_ = simplifyCstSource(replicodeObjects_.getSourceCode(newCompositeStateEvent->object_)).c_str();
   addSourceCodeHtmlLinks(newCompositeStateEvent_->object_, sourceCodeHtml_);
+  sourceCodeHtml_ = htmlify(sourceCodeHtml_);
   ModelItem::highlightVariables(sourceCodeHtml_);
 
   setTextItemAndPolygon(sourceCodeHtml_, true);
