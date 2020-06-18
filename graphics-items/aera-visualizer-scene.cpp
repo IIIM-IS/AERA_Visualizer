@@ -156,8 +156,10 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     else
       top = eventTypeFirstTop_[eventType];
 
-    if (newObjectEvent->object_->get_oid() == 41)
-      // Debug: Override for the test case to make the same types of values line up. Should use a layout algorithm.
+    if (thisFrameTime_ - replicodeObjects_.getTimeReference() < milliseconds(150) &&
+        eventType == AutoFocusNewObjectEvent::EVENT_TYPE &&
+        newObjectEvent->object_->get_reference(0)->get_reference(1) == replicodeObjects_.getObject("essence"))
+      // Debug: The first essence item. Override to make the same types of values line up. Should use a layout algorithm.
       top = 296;
 
     int verticalMargin = 15;
