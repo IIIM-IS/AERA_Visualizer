@@ -143,8 +143,8 @@ void AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   regex newPredictionSuccessRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+) -> fact (\\d+) success fact \\d+ pred$");
   // 0s:200ms:0us environment inject 46, ijt 0s:200ms:0us
   regex newEnvironmentInjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us environment inject (\\d+), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
-  // 0s:100ms:0us environment eject 44
-  regex newEnvironmentEjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us environment eject (\\d+)$");
+  // 0s:100ms:0us mk.rdx(100): environment eject 39
+  regex newEnvironmentEjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mk.rdx\\((\\d+)\\): environment eject (\\d+)$");
 
   string line;
   while (getline(debugStreamFile, line)) {
@@ -250,9 +250,11 @@ void AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
           getTimestamp(matches), object, getTimestamp(matches, 5)));
     }
     else if (regex_search(line, matches, newEnvironmentEjectRegex)) {
-      auto object = replicodeObjects_.getObject(stol(matches[4].str()));
+      auto reduction = replicodeObjects_.getObjectByDebugOid(stol(matches[4].str()));
+      auto object = replicodeObjects_.getObject(stol(matches[5].str()));
       if (object)
-        events_.push_back(make_shared<EnvironmentEjectEvent>(getTimestamp(matches), object));
+        events_.push_back(make_shared<EnvironmentEjectEvent>(
+          getTimestamp(matches), object, reduction));
     }
   }
 }

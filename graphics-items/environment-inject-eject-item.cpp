@@ -142,17 +142,13 @@ void EnvironmentInjectEjectItem::textItemLinkActivated(const QString& link)
         explanation = "<b>Q: What is inject " + makeHtmlLink(event_->object_) +
           " ?</b><br>This fact was injected from the environment:<br>" + factValHtml_ + "<br><br>";
       else {
-        explanation = "<b>Q: What is eject " + makeHtmlLink(event_->object_) +
+        auto ejectEvent = (EnvironmentEjectEvent*)event_;
+        explanation = "<b>Q: What is eject " + makeHtmlLink(ejectEvent->object_) +
           " ?</b><br>A command was ejected to the environment:<br>" + factValHtml_;
-
-        // Debug: Properly find the related program reduction.
-        Code* mkRdx = NULL;
-        if (event_->object_->get_oid() == 39)
-          mkRdx = replicodeObjects_.getObject(40);
-        if (mkRdx)
+        if (ejectEvent->reduction_)
           explanation += QString("<br><br>It was ejected by instantiated program <b>") + 
-            replicodeObjects_.getLabel(mkRdx->get_reference(0)).c_str() +
-            "</b>, according to program reduction " + makeHtmlLink(mkRdx) + " .";
+            replicodeObjects_.getLabel(ejectEvent->reduction_->get_reference(0)).c_str() +
+            "</b>, according to program reduction " + makeHtmlLink(ejectEvent->reduction_) + " .";
 
         explanation += "<br><br>";
       }

@@ -302,11 +302,14 @@ public:
 
 class EnvironmentEjectEvent : public AeraEvent {
 public:
-  EnvironmentEjectEvent(core::Timestamp time, r_code::Code* object)
-    : AeraEvent(EVENT_TYPE, time, object)
+  EnvironmentEjectEvent(core::Timestamp time, r_code::Code* object, r_code::Code* reduction)
+    : AeraEvent(EVENT_TYPE, time, object),
+    reduction_(reduction)
   {}
 
   static const int EVENT_TYPE = 12;
+
+  r_code::Code* reduction_;
 };
 
 }
