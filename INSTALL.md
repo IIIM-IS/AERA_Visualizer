@@ -34,7 +34,7 @@ It should be a recursive clone (which is the default).
 Build
 =====
 Launch Visual Studio and open the project `AERA_Visualizer.sln` from the cloned repository. E.g.:
-`C:\Users\remap\Documents\GitHub\AERA_Visualizer\AERA_Visualizer.sln` .  If a dialog box appears 
+`C:\Users\Alice\Documents\GitHub\AERA_Visualizer\AERA_Visualizer.sln` .  If a dialog box appears 
 asking to retarget the Windows version, click cancel.
 
 On the Build menu, click Build Solution. (Don't worry about all the compiler warnings.)
