@@ -9,3 +9,5 @@ See the file [INSTALL.md](https://github.com/IIIM-IS/AERA_Visualizer/blob/master
 See the file [CHANGELOG.md](https://github.com/IIIM-IS/AERA_Visualizer/blob/master/CHANGELOG.md) for version numbers and changes.
 
 See the Replicode [README.md](https://github.com/IIIM-IS/replicode/blob/master/README.md) for more information about AERA and Replicode.
+
+![screenshot](https://user-images.githubusercontent.com/1999543/85857926-07738500-b7bb-11ea-9828-a1d38a7f891f.png)
