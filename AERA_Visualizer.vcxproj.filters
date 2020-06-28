@@ -213,14 +213,14 @@
     <ClCompile Include="graphics-items\auto-focus-fact-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
-    <ClCompile Include="graphics-items\prediction-success-fact-item.cpp">
-      <Filter>graphics-items</Filter>
-    </ClCompile>
     <ClCompile Include="graphics-items\environment-inject-eject-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
     <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\xml_parser.cpp">
       <Filter>CoreLibrary</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics-items\prediction-result-item.cpp">
+      <Filter>graphics-items</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -427,14 +427,14 @@
     <ClInclude Include="graphics-items\auto-focus-fact-item.hpp">
       <Filter>graphics-items</Filter>
     </ClInclude>
-    <ClInclude Include="graphics-items\prediction-success-fact-item.hpp">
-      <Filter>graphics-items</Filter>
-    </ClInclude>
     <ClInclude Include="graphics-items\environment-inject-eject-item.hpp">
       <Filter>graphics-items</Filter>
     </ClInclude>
     <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\xml_parser.h">
       <Filter>CoreLibrary</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics-items\prediction-result-item.hpp">
+      <Filter>graphics-items</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

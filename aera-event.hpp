@@ -54,6 +54,7 @@
 
 #include <QPointF>
 #include "submodules/replicode/r_code/object.h"
+#include "submodules/replicode/r_exec/opcodes.h"
 
 namespace aera_visualizer {
 
@@ -278,11 +279,20 @@ public:
   std::vector<r_code::Code*> inputs_;
 };
 
-class NewPredictionSuccessEvent : public AeraEvent {
+/**
+ * Use NewPredictionResultEvent for both success and failure. Use the method isSuccess to distinguish.
+ */
+class NewPredictionResultEvent : public AeraEvent {
 public:
-  NewPredictionSuccessEvent(core::Timestamp time, r_code::Code* factSuccessFactPred)
+  NewPredictionResultEvent(core::Timestamp time, r_code::Code* factSuccessFactPred)
     : AeraEvent(EVENT_TYPE, time, factSuccessFactPred)
   {}
+
+  /**
+   * Check if this is for a prediction success.
+   * \return True for prediction success (fact) or false for prediction failure (anti-fact).
+   */
+  bool isSuccess() { return object_->code(0).asOpcode() == r_exec::Opcodes::Fact;  }
 
   static const int EVENT_TYPE = 10;
 };

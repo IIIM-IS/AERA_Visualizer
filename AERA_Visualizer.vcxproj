@@ -218,7 +218,7 @@
     <ClCompile Include="graphics-items\instantiated-composite-state-item.cpp" />
     <ClCompile Include="graphics-items\model-item.cpp" />
     <ClCompile Include="graphics-items\prediction-item.cpp" />
-    <ClCompile Include="graphics-items\prediction-success-fact-item.cpp" />
+    <ClCompile Include="graphics-items\prediction-result-item.cpp" />
     <ClCompile Include="graphics-items\program-output-fact-item.cpp" />
     <ClCompile Include="graphics-items\program-reduction-item.cpp" />
     <ClCompile Include="main.cpp" />
@@ -317,7 +317,7 @@
     <ClInclude Include="graphics-items\instantiated-composite-state-item.hpp" />
     <ClInclude Include="graphics-items\model-item.hpp" />
     <ClInclude Include="graphics-items\prediction-item.hpp" />
-    <ClInclude Include="graphics-items\prediction-success-fact-item.hpp" />
+    <ClInclude Include="graphics-items\prediction-result-item.hpp" />
     <ClInclude Include="graphics-items\program-output-fact-item.hpp" />
     <ClInclude Include="graphics-items\program-reduction-item.hpp" />
     <ClInclude Include="replicode-objects.hpp" />

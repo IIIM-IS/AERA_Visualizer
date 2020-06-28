@@ -49,8 +49,8 @@
 //_/_/
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-#ifndef PREDICTION_SUCCESS_FACT_ITEM_HPP
-#define PREDICTION_SUCCESS_FACT_ITEM_HPP
+#ifndef PREDICTION_RESULT_ITEM_HPP
+#define PREDICTION_RESULT_ITEM_HPP
 
 #include <QGraphicsPixmapItem>
 #include <QList>
@@ -61,11 +61,11 @@ namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
-class PredictionSuccessFactItem : public AeraGraphicsItem
+class PredictionResultItem : public AeraGraphicsItem
 {
 public:
-  PredictionSuccessFactItem(
-    NewPredictionSuccessEvent* newPredictionSuccessEvent, ReplicodeObjects& replicodeObjects,
+  PredictionResultItem(
+    NewPredictionResultEvent* newPredictionResultEvent, ReplicodeObjects& replicodeObjects,
     AeraVisualizerScene* parent);
 
 protected:
@@ -73,13 +73,13 @@ protected:
 
 private:
   /**
-   * Set factSuccessHtml_ to the HTML source code for the fact and success from
-   * newPredictionSuccessEvent_->object_.
+   * Set factOrAntiFactSuccessHtml_ to the HTML source code for the fact or |fact, and success from
+   * newPredictionResultEvent_->object_.
    */
-  void setFactSuccessHtml();
+  void setFactOrAntiFactSuccessHtml();
 
-  NewPredictionSuccessEvent* newPredictionSuccessEvent_;
-  QString factSuccessHtml_;
+  NewPredictionResultEvent* newPredictionResultEvent_;
+  QString factOrAntiFactSuccessHtml_;
 };
 
 }

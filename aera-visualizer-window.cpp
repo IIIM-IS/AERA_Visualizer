@@ -56,7 +56,7 @@
 #include "graphics-items/composite-state-item.hpp"
 #include "graphics-items/auto-focus-fact-item.hpp"
 #include "graphics-items/prediction-item.hpp"
-#include "graphics-items/prediction-success-fact-item.hpp"
+#include "graphics-items/prediction-result-item.hpp"
 #include "graphics-items/instantiated-composite-state-item.hpp"
 #include "graphics-items/environment-inject-eject-item.hpp"
 #include "graphics-items/aera-visualizer-scene.hpp"
@@ -141,6 +141,8 @@ void AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   regex newInstantiatedCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+) icst\\[\\d+\\]\\[([ \\d]+)\\]$");
   // 0s:300ms:0us fact 75 -> fact 79 success fact 60 pred
   regex newPredictionSuccessRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+) -> fact (\\d+) success fact \\d+ pred$");
+  // 0s:322ms:933us |fact 72 fact 59 pred failure
+  regex newPredictionFailureRegex("^(\\d+)s:(\\d+)ms:(\\d+)us \\|fact (\\d+) fact \\d+ pred failure$");
   // 0s:200ms:0us environment inject 46, ijt 0s:200ms:0us
   regex newEnvironmentInjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us environment inject (\\d+), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
   // 0s:100ms:0us mk.rdx(100): environment eject 39
@@ -240,8 +242,14 @@ void AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
     else if (regex_search(line, matches, newPredictionSuccessRegex)) {
       auto factSuccessFactPred = replicodeObjects_.getObject(stol(matches[5].str()));
       if (factSuccessFactPred)
-        events_.push_back(make_shared<NewPredictionSuccessEvent>(
+        events_.push_back(make_shared<NewPredictionResultEvent>(
           getTimestamp(matches), factSuccessFactPred));
+    }
+    else if (regex_search(line, matches, newPredictionFailureRegex)) {
+      auto antiFactSuccessFactPred = replicodeObjects_.getObject(stol(matches[4].str()));
+      if (antiFactSuccessFactPred)
+        events_.push_back(make_shared<NewPredictionResultEvent>(
+          getTimestamp(matches), antiFactSuccessFactPred));
     }
     else if (regex_search(line, matches, newEnvironmentInjectRegex)) {
       auto object = replicodeObjects_.getObject(stol(matches[4].str()));
@@ -362,7 +370,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
       event->eventType_ == ModelMkValPredictionReduction::EVENT_TYPE ||
-      event->eventType_ == NewPredictionSuccessEvent::EVENT_TYPE ||
+      event->eventType_ == NewPredictionResultEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
       event->eventType_ == EnvironmentEjectEvent::EVENT_TYPE) {
@@ -415,8 +423,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       if (causeItem)
         scene->addArrow(newItem, causeItem);
     }
-    else if (event->eventType_ == NewPredictionSuccessEvent::EVENT_TYPE)
-      newItem = new PredictionSuccessFactItem((NewPredictionSuccessEvent*)event, replicodeObjects_, scene);
+    else if (event->eventType_ == NewPredictionResultEvent::EVENT_TYPE)
+      newItem = new PredictionResultItem((NewPredictionResultEvent*)event, replicodeObjects_, scene);
     else if (event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
       auto newIcstEvent = (NewInstantiatedCompositeStateEvent*)event;
       newItem = new InstantiatedCompositeStateItem(newIcstEvent, replicodeObjects_, scene);
@@ -521,7 +529,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
       event->eventType_ == ModelMkValPredictionReduction::EVENT_TYPE ||
-      event->eventType_ == NewPredictionSuccessEvent::EVENT_TYPE ||
+      event->eventType_ == NewPredictionResultEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
       event->eventType_ == EnvironmentEjectEvent::EVENT_TYPE) {
