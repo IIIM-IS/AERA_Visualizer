@@ -56,7 +56,6 @@
 #include "graphics-items/aera-graphics-item.hpp"
 #include "aera-event.hpp"
 #include "aera-visualizer-window-base.hpp"
-#include "replicode-objects.hpp"
 
 #include <vector>
 #include <QIcon>
@@ -86,6 +85,9 @@ class AeraVisulizerWindow : public AeraVisulizerWindowBase
 public:
   /**
    * Create an AeraVisulizerWindow.
+   * \param replicodeObjects The ReplicodeObjects used to find objects.
+   * \param runtimeOutputFilePath The file path of the runtime output,
+   * typically ending in "runtime_out.txt".
    */
   AeraVisulizerWindow(ReplicodeObjects& replicodeObjects, const std::string& runtimeOutputFilePath);
 
@@ -191,7 +193,6 @@ private:
   QCheckBox* instantiatedCompositeStatesCheckBox_;
 
   size_t iNextEvent_;
-  ReplicodeObjects& replicodeObjects_;
   QPen itemBorderHighlightPen_;
   AeraGraphicsItem* hoverHighlightItem_;
   bool hoverHighlightItemWasVisible_;

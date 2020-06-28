@@ -74,8 +74,8 @@ namespace aera_visualizer {
 
 AeraVisulizerWindow::AeraVisulizerWindow(
     ReplicodeObjects& replicodeObjects, const string& runtimeOutputFilePath)
-: AeraVisulizerWindowBase(0),
-  replicodeObjects_(replicodeObjects), iNextEvent_(0), explanationLogWindow_(0),
+: AeraVisulizerWindowBase(0, replicodeObjects),
+  iNextEvent_(0), explanationLogWindow_(0),
   essencePropertyObject_(replicodeObjects_.getObject("essence")),
   hoverHighlightItem_(0),
   itemBorderHighlightPen_(Qt::blue, 3)

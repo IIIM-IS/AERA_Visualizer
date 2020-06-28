@@ -61,9 +61,10 @@ using namespace r_code;
 
 namespace aera_visualizer {
 
-AeraVisulizerWindowBase::AeraVisulizerWindowBase(AeraVisulizerWindow* mainWindow)
+AeraVisulizerWindowBase::AeraVisulizerWindowBase(AeraVisulizerWindow* mainWindow, ReplicodeObjects& replicodeObjects)
 : QMainWindow(mainWindow),
   mainWindow_(mainWindow),
+  replicodeObjects_(replicodeObjects),
   timeReference_(seconds(0)),
   playTime_(seconds(0)),
   showRelativeTime_(true),

@@ -60,6 +60,7 @@
 #include <QLabel>
 #include "aera-event.hpp"
 #include "submodules/replicode/r_code/utils.h"
+#include "replicode-objects.hpp"
 
 namespace aera_visualizer {
 
@@ -96,8 +97,10 @@ protected:
    * called by the derived class, which should add getPlayerControlPanel() to its window.
    * \param mainWindow The main parent window for this window, or 0 if this is already
    * The main window.
+   * \param runtimeOutputFilePath The file path of the runtime output,
+   * typically ending in "runtime_out.txt".
    */
-  AeraVisulizerWindowBase(AeraVisulizerWindow* mainWindow);
+  AeraVisulizerWindowBase(AeraVisulizerWindow* mainWindow, ReplicodeObjects& replicodeObjects);
 
   /**
    * Get the player control panel widget which has a play button, slider bar and time label.
@@ -139,6 +142,7 @@ protected:
   void timerEvent(QTimerEvent* event) override;
 
   AeraVisulizerWindow* mainWindow_;
+  ReplicodeObjects& replicodeObjects_;
   // Debug: This should be in the derived class.
   std::vector<std::shared_ptr<AeraEvent> > events_;
 
