@@ -235,8 +235,16 @@ void AeraVisulizerWindowBase::stepButtonClicked()
     return;
   // Debug: How to step the children also?
 
-  // Keep stepping remaining events at this same time.
-  while (stepEvent(newTime) != Utils_MaxTime);
+  // Keep stepping remaining events in this same frame.
+  auto relativeTime = duration_cast<microseconds>(newTime - replicodeObjects_.getTimeReference());
+  auto frameStartTime = newTime - (relativeTime % replicodeObjects_.getSamplingPeriod());
+  auto thisFrameMaxTime = frameStartTime + replicodeObjects_.getSamplingPeriod() - microseconds(1);
+  while (true) {
+    auto localNewTime = stepEvent(thisFrameMaxTime);
+    if (localNewTime == Utils_MaxTime)
+      break;
+    newTime = localNewTime;
+  }
 
   setPlayTime(newTime);
   setSliderToPlayTime();
@@ -256,8 +264,15 @@ void AeraVisulizerWindowBase::stepBackButtonClicked()
     return;
   // Debug: How to step the children also?
 
-  // Keep unstepping remaining events at this same time.
-  while (unstepEvent(newTime) != Utils_MaxTime);
+  // Keep unstepping remaining events in this same frame.
+  auto relativeTime = duration_cast<microseconds>(newTime - replicodeObjects_.getTimeReference());
+  auto frameStartTime = newTime - (relativeTime % replicodeObjects_.getSamplingPeriod());
+  while (true) {
+    auto localNewTime = unstepEvent(frameStartTime);
+    if (localNewTime == Utils_MaxTime)
+      break;
+    newTime = localNewTime;
+  }
 
   setPlayTime(max(newTime, timeReference_));
   setSliderToPlayTime();
