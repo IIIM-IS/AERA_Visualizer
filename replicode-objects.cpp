@@ -66,8 +66,11 @@ using namespace r_comp;
 
 namespace aera_visualizer {
 
-string ReplicodeObjects::init(const string& userClassesFilePath, const string& decompiledFilePath)
+string ReplicodeObjects::init(const string& userClassesFilePath, const string& decompiledFilePath,
+    microseconds basePeriod)
 {
+  basePeriod_ = basePeriod;
+
   // Run the proprocessor on the user operators (which includes std.replicode) just to
   // get the Metadata. The objects are repeated in the decompiled output.
   ifstream userClassesFile(userClassesFilePath);

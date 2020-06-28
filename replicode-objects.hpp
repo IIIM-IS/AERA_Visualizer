@@ -72,9 +72,17 @@ public:
    * in "user.classes.replicode".
    * \param decompiledFilePath The decompiled output, usually ending in
    * "decompiled_objects.txt".
+   * \param basePeriod The base_period from settings.xml, used for getSamplinePeriod().
    * \return An empty string for success, otherwise an error string.
    */
-  std::string init(const std::string& userClassesFilePath, const std::string& decompiledFilePath);
+  std::string init(const std::string& userClassesFilePath, const std::string& decompiledFilePath,
+    std::chrono::microseconds basePeriod);
+
+  /**
+   * Get the sampling period, which is 2 * base_period from settings.xml. This should
+   * match sampling_period in user.classes.replicode. This method follows Mem::get_sampling_period().
+   */
+  std::chrono::microseconds getSamplingPeriod() const { return 2 * basePeriod_; }
 
   /**
    * Get the time reference that was loaded from the decompiled output.
@@ -166,6 +174,7 @@ private:
     std::map<std::string, core::uint64>& objectDebugOids, std::map<uint64,
     std::string>& objectSourceCode);
 
+  std::chrono::microseconds basePeriod_;
   core::Timestamp timeReference_;
   // Key is the Code* object, value is the source code from the decompiled objects.
   std::map<r_code::Code*, std::string> objectSourceCode_;

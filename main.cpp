@@ -59,6 +59,8 @@
 #include <QFileDialog>
 #include <QScreen>
 
+using namespace std;
+using namespace std::chrono;
 using namespace aera_visualizer;
 
 int main(int argv, char *args[])
@@ -88,7 +90,8 @@ int main(int argv, char *args[])
   ReplicodeObjects replicodeObjects;
   string error = replicodeObjects.init(
     settingsFileDir.absoluteFilePath(settings.usr_class_path_.c_str()).toStdString(), 
-    settingsFileDir.absoluteFilePath(settings.decompilation_file_path_.c_str()).toStdString());
+    settingsFileDir.absoluteFilePath(settings.decompilation_file_path_.c_str()).toStdString(),
+    microseconds(settings.base_period_));
   if (error != "") {
     QMessageBox::information(NULL, "Compiler Error", error.c_str(), QMessageBox::Ok);
     return -1;

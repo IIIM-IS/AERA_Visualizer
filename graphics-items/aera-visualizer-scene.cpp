@@ -122,13 +122,12 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
   auto newObjectEvent = item->getAeraEvent();
   if (qIsNaN(newObjectEvent->itemTopLeftPosition_.x())) {
     // Assign an initial position.
-    microseconds samplingPeriod(100000);
     // Only update positions based on time for the main scehe.
-    if (isMainScene_ && newObjectEvent->time_ >= thisFrameTime_ + samplingPeriod) {
+    if (isMainScene_ && newObjectEvent->time_ >= thisFrameTime_ + replicodeObjects_.getSamplingPeriod()) {
       // Start a new frame (or the first frame).
       // TODO: Quantize thisFrameTime_ to a frame boundary from newObjectEvent->time_.
       auto relativeTime = duration_cast<microseconds>(newObjectEvent->time_ - replicodeObjects_.getTimeReference());
-      thisFrameTime_ = newObjectEvent->time_ - (relativeTime % samplingPeriod);
+      thisFrameTime_ = newObjectEvent->time_ - (relativeTime % replicodeObjects_.getSamplingPeriod());
       thisFrameLeft_ = nextFrameLeft_;
       // nextFrameLeft_ will be updated below.
       nextFrameLeft_ = 0;
