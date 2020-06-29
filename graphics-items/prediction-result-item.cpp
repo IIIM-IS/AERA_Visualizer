@@ -51,6 +51,7 @@
 
 #include <regex>
 #include <QMenu>
+#include "../submodules/replicode/r_exec/opcodes.h"
 #include "explanation-log-window.hpp"
 #include "aera-visualizer-scene.hpp"
 #include "prediction-item.hpp"
@@ -59,6 +60,7 @@
 using namespace std;
 using namespace core;
 using namespace r_code;
+using namespace r_exec;
 
 namespace aera_visualizer {
 
@@ -101,19 +103,28 @@ void PredictionResultItem::textItemLinkActivated(const QString& link)
     menu->addAction("What Made This?", [=]() {
       QString explanation;
       Code* factPrediction = newPredictionResultEvent_->object_->get_reference(0)->get_reference(0);
+      Code* input = newPredictionResultEvent_->object_->get_reference(0)->get_reference(1);
 
       if (newPredictionResultEvent_->isSuccess()) {
-        Code* input = newPredictionResultEvent_->object_->get_reference(0)->get_reference(1);
-
         explanation = "<b>Q: What made prediction success " +
           makeHtmlLink(newPredictionResultEvent_->object_) + " ?</b><br>Input " +
           makeHtmlLink(input) + " was matched against prediction " + makeHtmlLink(factPrediction) +
           " with success.<br><br>";
       }
       else {
-        explanation = "<b>Q: What made prediction failure " +
-          makeHtmlLink(newPredictionResultEvent_->object_) + " ?</b><br>Prediction " +
-          makeHtmlLink(factPrediction) + " did not match an input.<br><br>";
+        if (input->code(0).asOpcode() == Opcodes::Fact)
+          explanation = "<b>Q: What made prediction failure " +
+            makeHtmlLink(newPredictionResultEvent_->object_) + " ?</b><br>The value of input " +
+            makeHtmlLink(input) + " failed to match the value in prediction " + makeHtmlLink(factPrediction) +
+            ".<br><br>";
+        else if (input->code(0).asOpcode() == Opcodes::AntiFact)
+          explanation = "<b>Q: What made prediction failure " +
+            makeHtmlLink(newPredictionResultEvent_->object_) + " ?</b><br>Anti-fact " +
+            makeHtmlLink(input) + " asserts the absence of a fact to match prediction " + makeHtmlLink(factPrediction) +
+            ".<br><br>";
+        else
+          // We don't expect this.
+          return;
       }
 
       parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
