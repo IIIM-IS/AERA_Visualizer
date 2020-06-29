@@ -153,27 +153,27 @@ void AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
     smatch matches;
 
     if (regex_search(line, matches, newModelRegex)) {
-      auto model = replicodeObjects_.getObject(stol(matches[4].str()));
+      auto model = replicodeObjects_.getObject(stoul(matches[4].str()));
       if (model)
         // Assume the initial success rate is 1.
         events_.push_back(make_shared<NewModelEvent>(
           getTimestamp(matches), model, 1, 1, stoll(matches[5].str())));
     }
     else if (regex_search(line, matches, setEvidenceCountAndSuccessRateRegex)) {
-      auto model = replicodeObjects_.getObject(stol(matches[4].str()));
+      auto model = replicodeObjects_.getObject(stoul(matches[4].str()));
       if (model)
         events_.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(
           getTimestamp(matches), model, stol(matches[5].str()), stof(matches[6].str())));
     }
     else if (regex_search(line, matches, newCompositeStateRegex)) {
-      auto compositeState = replicodeObjects_.getObject(stol(matches[4].str()));
+      auto compositeState = replicodeObjects_.getObject(stoul(matches[4].str()));
       if (compositeState)
         events_.push_back(make_shared<NewCompositeStateEvent>(
           getTimestamp(matches), compositeState, stoll(matches[5].str())));
     }
     else if (regex_search(line, matches, autofocusNewObjectRegex)) {
-      auto fromObject = replicodeObjects_.getObject(stol(matches[4].str()));
-      auto toObject = replicodeObjects_.getObject(stol(matches[5].str()));
+      auto fromObject = replicodeObjects_.getObject(stoul(matches[4].str()));
+      auto toObject = replicodeObjects_.getObject(stoul(matches[5].str()));
       // Skip auto-focus of the same fact (such as eject facts).
       // But show auto-focus of the same anti-fact (such as prediction failure).
       if (fromObject && toObject && !(fromObject == toObject && fromObject->code(0).asOpcode() == Opcodes::Fact))
@@ -182,15 +182,15 @@ void AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
     }
     else if (regex_search(line, matches, modelImdlPredictionRegex)) {
       // TODO: When Replicode makes an mk.rdx for the prediction, use it.
-      auto predictingModel = replicodeObjects_.getObject(stol(matches[4].str()));
-      auto cause = replicodeObjects_.getObject(stol(matches[5].str()));
-      auto factPred = replicodeObjects_.getObjectByDebugOid(stol(matches[6].str()));
+      auto predictingModel = replicodeObjects_.getObject(stoul(matches[4].str()));
+      auto cause = replicodeObjects_.getObject(stoul(matches[5].str()));
+      auto factPred = replicodeObjects_.getObjectByDebugOid(stoul(matches[6].str()));
       if (predictingModel && cause && factPred)
         events_.push_back(make_shared<ModelImdlPredictionEvent>(
           getTimestamp(matches), factPred, predictingModel, cause));
     }
     else if (regex_search(line, matches, modelPredictionReductionRegex)) {
-      auto reduction = replicodeObjects_.getObject(stol(matches[4].str()));
+      auto reduction = replicodeObjects_.getObject(stoul(matches[4].str()));
       if (reduction) {
         // Check the type of prediction.
         auto factPred = ModelMkValPredictionReduction::getFirstProduction(reduction);
@@ -219,14 +219,14 @@ void AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
     }
     else if (regex_search(line, matches, newInstantiatedCompositeStateRegex)) {
       auto timestamp = getTimestamp(matches);
-      auto instantiatedCompositeState = replicodeObjects_.getObject(stol(matches[4].str()));
+      auto instantiatedCompositeState = replicodeObjects_.getObject(stoul(matches[4].str()));
 
       // Get the matching inputs.
       string inputOids = matches[5].str();
       std::vector<Code*> inputs;
       bool gotAllInputs = true;
       while (regex_search(inputOids, matches, regex("( \\d+)"))) {
-        auto input = replicodeObjects_.getObject(stol(matches[1].str()));
+        auto input = replicodeObjects_.getObject(stoul(matches[1].str()));
         if (!input) {
           gotAllInputs = false;
           break;
@@ -241,26 +241,26 @@ void AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
           timestamp, instantiatedCompositeState, inputs));
     }
     else if (regex_search(line, matches, newPredictionSuccessRegex)) {
-      auto factSuccessFactPred = replicodeObjects_.getObject(stol(matches[5].str()));
+      auto factSuccessFactPred = replicodeObjects_.getObject(stoul(matches[5].str()));
       if (factSuccessFactPred)
         events_.push_back(make_shared<NewPredictionResultEvent>(
           getTimestamp(matches), factSuccessFactPred));
     }
     else if (regex_search(line, matches, newPredictionFailureRegex)) {
-      auto antiFactSuccessFactPred = replicodeObjects_.getObject(stol(matches[4].str()));
+      auto antiFactSuccessFactPred = replicodeObjects_.getObject(stoul(matches[4].str()));
       if (antiFactSuccessFactPred)
         events_.push_back(make_shared<NewPredictionResultEvent>(
           getTimestamp(matches), antiFactSuccessFactPred));
     }
     else if (regex_search(line, matches, newEnvironmentInjectRegex)) {
-      auto object = replicodeObjects_.getObject(stol(matches[4].str()));
+      auto object = replicodeObjects_.getObject(stoul(matches[4].str()));
       if (object)
         events_.push_back(make_shared<EnvironmentInjectEvent>(
           getTimestamp(matches), object, getTimestamp(matches, 5)));
     }
     else if (regex_search(line, matches, newEnvironmentEjectRegex)) {
-      auto reduction = replicodeObjects_.getObjectByDebugOid(stol(matches[4].str()));
-      auto object = replicodeObjects_.getObject(stol(matches[5].str()));
+      auto reduction = replicodeObjects_.getObjectByDebugOid(stoul(matches[4].str()));
+      auto object = replicodeObjects_.getObject(stoul(matches[5].str()));
       if (object)
         events_.push_back(make_shared<EnvironmentEjectEvent>(
           getTimestamp(matches), object, reduction));
