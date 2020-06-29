@@ -174,8 +174,9 @@ void AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
     else if (regex_search(line, matches, autofocusNewObjectRegex)) {
       auto fromObject = replicodeObjects_.getObject(stol(matches[4].str()));
       auto toObject = replicodeObjects_.getObject(stol(matches[5].str()));
-      // Skip auto-focus of the same object (such as eject facts).
-      if (fromObject && toObject && fromObject != toObject)
+      // Skip auto-focus of the same fact (such as eject facts).
+      // But show auto-focus of the same anti-fact (such as prediction failure).
+      if (fromObject && toObject && !(fromObject == toObject && fromObject->code(0).asOpcode() == Opcodes::Fact))
         events_.push_back(make_shared<AutoFocusNewObjectEvent>(
           getTimestamp(matches), fromObject, toObject, matches[6].str()));
     }
