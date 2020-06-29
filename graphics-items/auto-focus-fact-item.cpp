@@ -99,13 +99,18 @@ void AutoFocusFactItem::textItemLinkActivated(const QString& link)
   if (link == "#this") {
     auto menu = new QMenu();
     menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
-    menu->addAction("What Made This?", [=]() {
-      auto fromObject = autoFocusNewObjectEvent_->fromObject_;
 
-      QString explanation = "<b>Q: What made auto focus " + makeHtmlLink(autoFocusNewObjectEvent_->object_) +
-        " ?</b><br>The auto focus controller made this from " + makeHtmlLink(fromObject) + "<br><br>";
-      parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
-    });
+    auto fromObject = autoFocusNewObjectEvent_->fromObject_;
+    // TODO: How to handle auto focus of the same fact?
+    if (autoFocusNewObjectEvent_->object_ != fromObject) {
+      menu->addAction("What Made This?", [=]() {
+
+        QString explanation = "<b>Q: What made auto focus " + makeHtmlLink(autoFocusNewObjectEvent_->object_) +
+          " ?</b><br>The auto focus controller made this from " + makeHtmlLink(fromObject) + "<br><br>";
+        parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
+      });
+    }
+
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
   }
