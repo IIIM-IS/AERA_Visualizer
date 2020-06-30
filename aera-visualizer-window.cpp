@@ -155,6 +155,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
 
   QProgressDialog progress("Reading " + QFileInfo(runtimeOutputFilePath.c_str()).fileName() + "...", "Cancel", 0, nLines, this);
   progress.setWindowModality(Qt::WindowModal);
+  // Remove the '?' in the title.
+  progress.setWindowFlags(progress.windowFlags() & ~Qt::WindowContextHelpButtonHint);
   progress.setWindowTitle("Initializing");
 
   ifstream debugStreamFile(runtimeOutputFilePath);
