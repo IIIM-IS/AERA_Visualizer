@@ -107,7 +107,6 @@ EnvironmentInjectEjectItem::EnvironmentInjectEjectItem(
 
 void EnvironmentInjectEjectItem::setLabelHtml()
 {
-  bool debug1 = (event_->eventType_ == EnvironmentInjectEvent::EVENT_TYPE);
   labelHtml_ = (event_->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ? DownWideArrowHtml : UpWideArrowHtml) +
     "<a href=\"#this\">" + replicodeObjects_.getLabel(event_->object_).c_str() + "</a>";
 }

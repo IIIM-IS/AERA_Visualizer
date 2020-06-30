@@ -50,6 +50,7 @@
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 #include <fstream>
+#include <algorithm>
 #include "submodules/replicode/r_exec/opcodes.h"
 #include "graphics-items/arrow.hpp"
 #include "graphics-items/model-item.hpp"
@@ -63,6 +64,7 @@
 #include "aera-visualizer-window.hpp"
 
 #include <QtWidgets>
+#include <QProgressDialog>
 
 using namespace std;
 using namespace std::chrono;
@@ -72,8 +74,7 @@ using namespace r_exec;
 
 namespace aera_visualizer {
 
-AeraVisulizerWindow::AeraVisulizerWindow(
-    ReplicodeObjects& replicodeObjects, const string& runtimeOutputFilePath)
+AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 : AeraVisulizerWindowBase(0, replicodeObjects),
   iNextEvent_(0), explanationLogWindow_(0),
   essencePropertyObject_(replicodeObjects_.getObject("essence")),
@@ -118,13 +119,10 @@ AeraVisulizerWindow::AeraVisulizerWindow(
 
   setWindowTitle(tr("AERA Visualizer"));
   setUnifiedTitleAndToolBarOnMac(true);
-
-  addEvents(runtimeOutputFilePath);
 }
 
-void AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
+bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
 {
-  ifstream debugStreamFile(runtimeOutputFilePath);
   // 0s:200ms:0us -> mdl 53, MDLController(389)
   regex newModelRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> mdl (\\d+), MDLController\\((\\d+)\\)$");
   // 0s:300ms:0us mdl 53 cnt:2 sr:1
@@ -148,8 +146,26 @@ void AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   // 0s:100ms:0us mk.rdx(100): environment eject 39
   regex newEnvironmentEjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mk.rdx\\((\\d+)\\): environment eject (\\d+)$");
 
+  // Count the number of lines, to use in the progress dialog.
+  int nLines;
+  {
+    ifstream fileForCount(runtimeOutputFilePath);
+    nLines = std::count(istreambuf_iterator<char>(fileForCount), istreambuf_iterator<char>(), '\n');
+  }
+
+  QProgressDialog progress("Reading " + QFileInfo(runtimeOutputFilePath.c_str()).fileName() + "...", "Cancel", 0, nLines, this);
+  progress.setWindowModality(Qt::WindowModal);
+  progress.setWindowTitle("Initializing");
+
+  ifstream debugStreamFile(runtimeOutputFilePath);
+  int lineNumber;
   string line;
   while (getline(debugStreamFile, line)) {
+    ++lineNumber;
+    progress.setValue(lineNumber);
+    if (progress.wasCanceled())
+      return false;
+
     smatch matches;
 
     if (regex_search(line, matches, newModelRegex)) {
@@ -266,6 +282,8 @@ void AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
           getTimestamp(matches), object, reduction));
     }
   }
+
+  return true;
 }
 
 Timestamp AeraVisulizerWindow::getTimestamp(const smatch& matches, int index)

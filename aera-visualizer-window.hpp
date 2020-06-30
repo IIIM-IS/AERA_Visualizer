@@ -84,12 +84,18 @@ class AeraVisulizerWindow : public AeraVisulizerWindowBase
 
 public:
   /**
-   * Create an AeraVisulizerWindow.
+   * Create an AeraVisulizerWindow. After creating the window, call addEvents().
    * \param replicodeObjects The ReplicodeObjects used to find objects.
+   */
+  AeraVisulizerWindow(ReplicodeObjects& replicodeObjects);
+
+  /**
+   * Scan the runtimeOutputFilePath and add to events_. Call this once after creating the window.
    * \param runtimeOutputFilePath The file path of the runtime output,
    * typically ending in "runtime_out.txt".
+   * \return True for success, false if canceled.
    */
-  AeraVisulizerWindow(ReplicodeObjects& replicodeObjects, const std::string& runtimeOutputFilePath);
+  bool addEvents(const std::string& runtimeOutputFilePath);
 
   void setExplanationLogWindow(ExplanationLogWindow* explanationLogWindow)
   {
@@ -163,12 +169,6 @@ private:
   void createActions();
   void createMenus();
   void createToolbars();
-  /**
-   * Scan the runtimeOutputFilePath and add to events_.
-   * \param runtimeOutputFilePath The file path of the runtime output,
-   * typically ending in "runtime_out.txt".
-   */
-  void addEvents(const std::string& runtimeOutputFilePath);
 
   /**
    * Get the time stamp from the decimal strings of seconds, milliseconds and

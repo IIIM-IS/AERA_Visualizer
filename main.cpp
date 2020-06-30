@@ -107,7 +107,10 @@ int main(int argv, char *args[])
       return -1;
     }
   }
-  AeraVisulizerWindow mainWindow(replicodeObjects, runtimeOutputFilePath);
+  AeraVisulizerWindow mainWindow(replicodeObjects);
+  if (!mainWindow.addEvents(runtimeOutputFilePath))
+    return -1;
+
   mainWindow.setWindowTitle(QString("AERA Visualizer - ") + QFileInfo(settings.source_file_name_.c_str()).fileName());
   QScreen* screen = QGuiApplication::primaryScreen();
   int availableHeight = screen->availableSize().height();
