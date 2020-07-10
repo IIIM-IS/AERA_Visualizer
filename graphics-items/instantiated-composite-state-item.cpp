@@ -89,6 +89,11 @@ void InstantiatedCompositeStateItem::getIcstOrImdlValues(
     exposedValues.push_back(matches[1].str());
     exposedValues.push_back(matches[2].str());
   }
+  else if (regex_search(source, matches, regex("^\\(i\\w+ \\w+ \\|\\[\\] \\[([:\\.\\w]+) ([:\\.\\w]+) ([:\\.\\w]+)\\] \\w+ \\w+\\)$"))) {
+    exposedValues.push_back(matches[1].str());
+    exposedValues.push_back(matches[2].str());
+    exposedValues.push_back(matches[3].str());
+  }
   else if (regex_search(source, matches, regex("^\\(i\\w+ \\w+ \\[([:\\.\\w]+) ([:\\.\\w]+) ([:\\.\\w]+)\\] \\[([:\\.\\w]+) ([:\\.\\w]+) ([:\\.\\w]+) ([:\\.\\w]+)\\] \\w+ \\w+\\)$"))) {
     templateValues.push_back(matches[1].str());
     templateValues.push_back(matches[2].str());
@@ -130,11 +135,13 @@ void InstantiatedCompositeStateItem::setBoundCstAndMembersHtml()
   std::vector<string> templateValues;
   std::vector<string> exposedValues;
   getIcstOrImdlValues(icstSource, templateValues, exposedValues);
+  // Debug: How to correctly get the timestamp variables.
+  int iAfterVariable = 2;
+  int iBeforeVariable = 3;
 
   string cstSource = CompositeStateItem::simplifyCstSource(replicodeObjects_.getSourceCode(cst));
   // Get just the set of members, which start on the third line and are indented by three spaces.
   string cstMembersSource;
-  // TODO: Handle any number of members.
   auto match = QRegularExpression("^.+\\n.+\\n((   .+\\n)+)").match(cstSource.c_str());
   if (match.hasMatch())
     // Strip the ending \n .
@@ -145,10 +152,15 @@ void InstantiatedCompositeStateItem::setBoundCstAndMembersHtml()
   size_t iTemplateValues = 0;
   size_t iExposedValues = 0;
   while (iTemplateValues < templateValues.size() || iExposedValues < exposedValues.size()) {
-    ++iVariable;
     // v0, v1, v2, etc. are split between templateValues and exposedValues.
     string boundValue = (iTemplateValues < templateValues.size() ? 
       templateValues[iTemplateValues] : exposedValues[iExposedValues]);
+
+    ++iVariable;
+    if (iVariable == iAfterVariable)
+      ++iVariable;
+    if (iVariable == iBeforeVariable)
+      ++iVariable;
 
     string variable = "v" + to_string(iVariable) + ":";
     cstSource = regex_replace(cstSource, regex(variable), variable + boundValue);
@@ -162,9 +174,8 @@ void InstantiatedCompositeStateItem::setBoundCstAndMembersHtml()
       ++iExposedValues;
   }
 
-  // Debug: How to correctly get the timestamp variables.
-  auto afterVariable = "v" + to_string(++iVariable) + ":";
-  auto beforeVariable = "v" + to_string(++iVariable) + ":";
+  auto afterVariable = "v" + to_string(iAfterVariable) + ":";
+  auto beforeVariable = "v" + to_string(iBeforeVariable) + ":";
   cstSource = regex_replace(cstSource, regex(afterVariable), replicodeObjects_.relativeTime(factIcst->get_after()));
   cstSource = regex_replace(cstSource, regex(beforeVariable), replicodeObjects_.relativeTime(factIcst->get_before()));
   cstMembersSource = regex_replace(cstMembersSource, regex(afterVariable), replicodeObjects_.relativeTime(factIcst->get_after()));
