@@ -144,7 +144,9 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   // 0s:200ms:0us environment inject 46, ijt 0s:200ms:0us
   regex newEnvironmentInjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us environment inject (\\d+), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
   // 0s:100ms:0us mk.rdx(100): environment eject 39
-  regex newEnvironmentEjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mk.rdx\\((\\d+)\\): environment eject (\\d+)$");
+  regex newEnvironmentEjectWithRdxRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mk.rdx\\((\\d+)\\): environment eject (\\d+)$");
+  // 0s:100ms:0us environment eject 39
+  regex newEnvironmentEjectWithoutRdxRegex("^(\\d+)s:(\\d+)ms:(\\d+)us environment eject (\\d+)$");
 
   // Count the number of lines, to use in the progress dialog.
   int nLines;
@@ -276,12 +278,18 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
         events_.push_back(make_shared<EnvironmentInjectEvent>(
           getTimestamp(matches), object, getTimestamp(matches, 5)));
     }
-    else if (regex_search(line, matches, newEnvironmentEjectRegex)) {
+    else if (regex_search(line, matches, newEnvironmentEjectWithRdxRegex)) {
       auto reduction = replicodeObjects_.getObjectByDebugOid(stoul(matches[4].str()));
       auto object = replicodeObjects_.getObject(stoul(matches[5].str()));
       if (object)
         events_.push_back(make_shared<EnvironmentEjectEvent>(
           getTimestamp(matches), object, reduction));
+    }
+    else if (regex_search(line, matches, newEnvironmentEjectWithoutRdxRegex)) {
+      auto object = replicodeObjects_.getObject(stoul(matches[4].str()));
+      if (object)
+        events_.push_back(make_shared<EnvironmentEjectEvent>(
+          getTimestamp(matches), object, (Code*)NULL));
     }
   }
 
