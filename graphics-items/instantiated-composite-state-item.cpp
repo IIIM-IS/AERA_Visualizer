@@ -85,7 +85,10 @@ void InstantiatedCompositeStateItem::getIcstOrImdlValues(
 
   // Debug: Generalize from these formats.
   smatch matches;
-  if (regex_search(source, matches, regex("^\\(i\\w+ \\w+ \\|\\[\\] \\[([:\\.\\w]+) ([:\\.\\w]+)\\] \\w+ \\w+\\)$"))) {
+  if (regex_search(source, matches, regex("^\\(i\\w+ \\w+ \\|\\[\\] \\[([:\\.\\w]+)\\] \\w+ \\w+\\)$"))) {
+    exposedValues.push_back(matches[1].str());
+  }
+  else if (regex_search(source, matches, regex("^\\(i\\w+ \\w+ \\|\\[\\] \\[([:\\.\\w]+) ([:\\.\\w]+)\\] \\w+ \\w+\\)$"))) {
     exposedValues.push_back(matches[1].str());
     exposedValues.push_back(matches[2].str());
   }
