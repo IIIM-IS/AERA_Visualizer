@@ -169,10 +169,13 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   int lineNumber;
   string line;
   while (getline(debugStreamFile, line)) {
-    ++lineNumber;
-    progress.setValue(lineNumber);
     if (progress.wasCanceled())
       return false;
+
+    ++lineNumber;
+    progress.setValue(lineNumber);
+    if (lineNumber % 100 == 0)
+      QApplication::processEvents();
 
     smatch matches;
 
