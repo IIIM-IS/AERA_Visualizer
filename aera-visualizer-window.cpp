@@ -123,6 +123,10 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 
 bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
 {
+  // load mdl 37, MDLController(113)
+  regex loadModelRegex("^load mdl (\\d+), MDLController\\((\\d+)\\)$");
+  // load cst 36, CSTController(98)
+  regex loadCompositeStateRegex("^load cst (\\d+), CSTController\\((\\d+)\\)$");
   // 0s:200ms:0us -> mdl 53, MDLController(389)
   regex newModelRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> mdl (\\d+), MDLController\\((\\d+)\\)$");
   // 0s:300ms:0us mdl 53 cnt:2 sr:1
@@ -172,7 +176,28 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
 
     smatch matches;
 
-    if (regex_search(line, matches, newModelRegex)) {
+    if (regex_search(line, matches, loadModelRegex)) {
+      auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
+      if (model) {
+        // Assume the initial success rate is 1.
+        auto event = new NewModelEvent(
+          replicodeObjects_.getTimeReference(), model, 1, 1, stoll(matches[2].str()));
+        // Assume it is loaded before run time starts, so show now.
+        modelsScene_->addAeraGraphicsItem(new ModelItem(event, replicodeObjects_, modelsScene_));
+        // TODO: Add arrows.
+      }
+    }
+    else if (regex_search(line, matches, loadCompositeStateRegex)) {
+      auto compositeState = replicodeObjects_.getObject(stoul(matches[1].str()));
+      if (compositeState) {
+        auto event = new NewCompositeStateEvent(
+          replicodeObjects_.getTimeReference(), compositeState, stoll(matches[2].str()));
+        // Assume it is loaded before run time starts, so show now.
+        modelsScene_->addAeraGraphicsItem(new CompositeStateItem(event, replicodeObjects_, modelsScene_));
+        // TODO: Add arrows.
+      }
+    }
+    else if (regex_search(line, matches, newModelRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[4].str()));
       if (model)
         // Assume the initial success rate is 1.
