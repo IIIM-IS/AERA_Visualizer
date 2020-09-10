@@ -63,6 +63,7 @@ using namespace std::chrono;
 using namespace core;
 using namespace r_code;
 using namespace r_comp;
+using namespace r_exec;
 
 namespace aera_visualizer {
 
@@ -76,7 +77,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
   ifstream userClassesFile(userClassesFilePath);
   if (!userClassesFile)
     return "Can't open user classes file: " + userClassesFilePath;
-  Metadata metadata;
+  r_comp::Metadata metadata;
   Preprocessor preprocessor;
   string error;
   // We won't compile the preprocessed user operators code.
@@ -310,21 +311,21 @@ string ReplicodeObjects::processDecompiledObjects(
   return decompiledOut.str();
 }
 
-r_code::Code* ReplicodeObjects::getObject(uint32 oid) const
+Code* ReplicodeObjects::getObject(uint32 oid) const
 {
-  for (auto i = objects_.begin(); i != objects_.end(); ++i) {
-    if ((*i)->get_oid() == oid)
-      return *i;
+  for (auto o = objects_.begin(); o != objects_.end(); ++o) {
+    if ((*o)->get_oid() == oid)
+      return *o;
   }
 
   return NULL;
 }
 
-r_code::Code* ReplicodeObjects::getObjectByDebugOid(uint64 debugOid) const
+Code* ReplicodeObjects::getObjectByDebugOid(uint64 debugOid) const
 {
-  for (auto i = objects_.begin(); i != objects_.end(); ++i) {
-    if ((*i)->get_debug_oid() == debugOid)
-      return *i;
+  for (auto o = objects_.begin(); o != objects_.end(); ++o) {
+    if ((*o)->get_debug_oid() == debugOid)
+      return *o;
   }
 
   return NULL;
