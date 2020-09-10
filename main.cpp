@@ -108,8 +108,6 @@ int main(int argv, char *args[])
     }
   }
   AeraVisulizerWindow mainWindow(replicodeObjects);
-  if (!mainWindow.addEvents(runtimeOutputFilePath))
-    return -1;
 
   mainWindow.setWindowTitle(QString("AERA Visualizer - ") + QFileInfo(settings.source_file_name_.c_str()).fileName());
   QScreen* screen = QGuiApplication::primaryScreen();
@@ -131,6 +129,8 @@ int main(int argv, char *args[])
   explanationLogWindow->show();
 
   mainWindow.show();
+  if (!mainWindow.addEvents(runtimeOutputFilePath))
+    return -1;
 
   return app.exec();
 }
