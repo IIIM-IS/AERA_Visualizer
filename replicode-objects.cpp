@@ -313,6 +313,9 @@ string ReplicodeObjects::processDecompiledObjects(
 
 Code* ReplicodeObjects::getObject(uint32 oid) const
 {
+  if (oid == UNDEFINED_OID)
+    return NULL;
+
   for (auto o = objects_.begin(); o != objects_.end(); ++o) {
     if ((*o)->get_oid() == oid)
       return *o;
