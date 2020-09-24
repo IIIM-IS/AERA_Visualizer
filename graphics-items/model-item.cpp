@@ -124,16 +124,9 @@ void ModelItem::highlightLhsAndRhs(QString& html)
 
 void ModelItem::highlightVariables(QString& html)
 {
-  // Debug: Use regluar expressions in case a label or string has "v1".
-  // First, do variables followed by a colon.
-  for (int i = 0; i <= 9; ++i) {
-    QString variable = "v" + QString::number(i) + ":";
-    html.replace(variable, "<font color=\"#c000c0\">" + variable + "</font>");
-  }
-  for (int i = 0; i <= 9; ++i) {
-    QString variable = "v" + QString::number(i);
-    html.replace(variable, "<font color=\"#c000c0\">" + variable + "</font>");
-  }
+  // This won't match if a variable is at the beginning of a string, but we don't expect that.
+  // Debug: We also want (\\W) at the end of the regex, but then the match would overlap in "v1 v2".
+  html.replace(QRegularExpression("(\\W)(v\\d+\\:?)"), "\\1<font color=\"#c000c0\">\\2</font>");
 }
 
 QString ModelItem::makeHtml()
