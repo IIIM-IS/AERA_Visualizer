@@ -250,12 +250,14 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
         if (valueOpcode == Opcodes::MkVal) {
           int imdlPredictionEventIndex = -1;
           auto requirement = ModelMkValPredictionReduction::getSecondInput(reduction);
-          // Search events_ backwards for the previous prediction whose object_ is this->getRequirement().
-          for (int i = events_.size() - 1; i >= 0; --i) {
-            if (events_[i]->eventType_ == ModelImdlPredictionEvent::EVENT_TYPE &&
-                ((ModelImdlPredictionEvent*)events_[i].get())->object_ == requirement) {
-              imdlPredictionEventIndex = i;
-              break;
+          if (requirement) {
+            // Search events_ backwards for the previous prediction whose object_ is this->getRequirement().
+            for (int i = events_.size() - 1; i >= 0; --i) {
+              if (events_[i]->eventType_ == ModelImdlPredictionEvent::EVENT_TYPE &&
+                  ((ModelImdlPredictionEvent*)events_[i].get())->object_ == requirement) {
+                imdlPredictionEventIndex = i;
+                break;
+              }
             }
           }
 
