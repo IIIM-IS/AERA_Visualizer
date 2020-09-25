@@ -91,20 +91,6 @@ QString ModelItem::simplifyModelSource(const string& modelSource)
   result.replace(QRegularExpression(" : :\\)"), ")");
   result.replace(QRegularExpression(" :\\)"), ")");
 
-  // Get the list of template variables and replace with wildcard as needed.
-  // TODO: Correctly get the set of template variables that are assigned.
-  set<QString> assignedTemplateVariables;
-  assignedTemplateVariables.insert("v2:");
-  auto match = QRegularExpression("^(\\(mdl )(\\[[ :\\w]+\\])").match(result);
-  if (match.hasMatch()) {
-    // match.captured(1) is "(mdl ". match.captured(2) is, e.g., "[v0: v1:]".
-    QString args = match.captured(2);
-    for (auto i = assignedTemplateVariables.begin(); i != assignedTemplateVariables.end(); ++i)
-      args.replace(*i, ":");
-
-    result = match.captured(1) + args + result.mid(match.captured(0).size());
-  }
-
   return result;
 }
 
