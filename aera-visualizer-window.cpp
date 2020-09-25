@@ -261,9 +261,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
             }
           }
 
-          if (imdlPredictionEventIndex >= 0)
-            events_.push_back(make_shared<ModelMkValPredictionReduction>(
-              getTimestamp(matches), reduction, imdlPredictionEventIndex));
+          events_.push_back(make_shared<ModelMkValPredictionReduction>(
+            getTimestamp(matches), reduction, imdlPredictionEventIndex));
         }
       }
     }

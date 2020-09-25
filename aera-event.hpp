@@ -206,7 +206,7 @@ public:
    * \param time The reduction time.
    * \param reduction The model reduction which points to the (fact (pred ...)) and the cause.
    * \param imdlPredictionEventIndex The index in the events_ list of the previous prediction whose 
-   * object_ is this->getRequirement().
+   * object_ is this->getRequirement(), or -1 if this->getRequirement() is NULL.
    * TODO: This should be the debug_oid of an mk.rdx, which Replicode currently doesn't make.
    */
   ModelMkValPredictionReduction(core::Timestamp time, r_code::Code* reduction, int imdlPredictionEventIndex)
