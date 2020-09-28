@@ -280,11 +280,11 @@ public:
 };
 
 /**
- * Use NewPredictionResultEvent for both success and failure. Use the method isSuccess to distinguish.
+ * Use PredictionResultEvent for both success and failure. Use the method isSuccess to distinguish.
  */
-class NewPredictionResultEvent : public AeraEvent {
+class PredictionResultEvent : public AeraEvent {
 public:
-  NewPredictionResultEvent(core::Timestamp time, r_code::Code* factSuccessFactPred)
+  PredictionResultEvent(core::Timestamp time, r_code::Code* factSuccessFactPred)
     : AeraEvent(EVENT_TYPE, time, factSuccessFactPred)
   {}
 

@@ -65,11 +65,11 @@ using namespace r_exec;
 namespace aera_visualizer {
 
 PredictionResultItem::PredictionResultItem(
-  NewPredictionResultEvent* newPredictionResultEvent, ReplicodeObjects& replicodeObjects, 
+  PredictionResultEvent* predictionResultEvent, ReplicodeObjects& replicodeObjects, 
   AeraVisualizerScene* parent)
-  : AeraGraphicsItem(newPredictionResultEvent, replicodeObjects, parent, 
-      newPredictionResultEvent->isSuccess() ? "Prediction Success" : "Prediction Failure"),
-  newPredictionResultEvent_(newPredictionResultEvent)
+  : AeraGraphicsItem(predictionResultEvent, replicodeObjects, parent, 
+      predictionResultEvent->isSuccess() ? "Prediction Success" : "Prediction Failure"),
+  predictionResultEvent_(predictionResultEvent)
 {
   setFactOrAntiFactSuccessHtml();
   setTextItemAndPolygon(factOrAntiFactSuccessHtml_, true);
@@ -77,13 +77,13 @@ PredictionResultItem::PredictionResultItem(
 
 void PredictionResultItem::setFactOrAntiFactSuccessHtml()
 {
-  auto success = newPredictionResultEvent_->object_->get_reference(0);
+  auto success = predictionResultEvent_->object_->get_reference(0);
 
   // Strip the ending confidence value and propagation of saliency threshold.
   regex saliencyRegex("\\s+[\\w\\:]+\\)$");
   regex confidenceAndSaliencyRegex("\\s+\\w+\\s+[\\w\\:]+\\)$");
   string factOrAntiFactSuccessSource = regex_replace(replicodeObjects_.getSourceCode(
-    newPredictionResultEvent_->object_), confidenceAndSaliencyRegex, ")");
+    predictionResultEvent_->object_), confidenceAndSaliencyRegex, ")");
   string successSource = regex_replace(replicodeObjects_.getSourceCode(success), saliencyRegex, ")");
 
   QString successLabel(replicodeObjects_.getLabel(success).c_str());
@@ -91,7 +91,7 @@ void PredictionResultItem::setFactOrAntiFactSuccessHtml()
   factOrAntiFactSuccessHtml_ = QString(factOrAntiFactSuccessSource.c_str()).replace(successLabel, DownArrowHtml);
   factOrAntiFactSuccessHtml_ += QString("\n      ") + successSource.c_str();
 
-  addSourceCodeHtmlLinks(newPredictionResultEvent_->object_->get_reference(0), factOrAntiFactSuccessHtml_);
+  addSourceCodeHtmlLinks(predictionResultEvent_->object_->get_reference(0), factOrAntiFactSuccessHtml_);
   factOrAntiFactSuccessHtml_ = htmlify(factOrAntiFactSuccessHtml_);
 }
 
@@ -102,24 +102,24 @@ void PredictionResultItem::textItemLinkActivated(const QString& link)
     menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
     menu->addAction("What Made This?", [=]() {
       QString explanation;
-      Code* factPrediction = newPredictionResultEvent_->object_->get_reference(0)->get_reference(0);
-      Code* input = newPredictionResultEvent_->object_->get_reference(0)->get_reference(1);
+      Code* factPrediction = predictionResultEvent_->object_->get_reference(0)->get_reference(0);
+      Code* input = predictionResultEvent_->object_->get_reference(0)->get_reference(1);
 
-      if (newPredictionResultEvent_->isSuccess()) {
+      if (predictionResultEvent_->isSuccess()) {
         explanation = "<b>Q: What made prediction success " +
-          makeHtmlLink(newPredictionResultEvent_->object_) + " ?</b><br>Input " +
+          makeHtmlLink(predictionResultEvent_->object_) + " ?</b><br>Input " +
           makeHtmlLink(input) + " was matched against prediction " + makeHtmlLink(factPrediction) +
           " with success.<br><br>";
       }
       else {
         if (input->code(0).asOpcode() == Opcodes::Fact)
           explanation = "<b>Q: What made prediction failure " +
-            makeHtmlLink(newPredictionResultEvent_->object_) + " ?</b><br>The value of input " +
+            makeHtmlLink(predictionResultEvent_->object_) + " ?</b><br>The value of input " +
             makeHtmlLink(input) + " failed to match the value in prediction " + makeHtmlLink(factPrediction) +
             ".<br><br>";
         else if (input->code(0).asOpcode() == Opcodes::AntiFact)
           explanation = "<b>Q: What made prediction failure " +
-            makeHtmlLink(newPredictionResultEvent_->object_) + " ?</b><br>Anti-fact " +
+            makeHtmlLink(predictionResultEvent_->object_) + " ?</b><br>Anti-fact " +
             makeHtmlLink(input) + " asserts the absence of a fact to match prediction " + makeHtmlLink(factPrediction) +
             ".<br><br>";
         else

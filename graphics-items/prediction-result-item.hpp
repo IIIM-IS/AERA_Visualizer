@@ -65,7 +65,7 @@ class PredictionResultItem : public AeraGraphicsItem
 {
 public:
   PredictionResultItem(
-    NewPredictionResultEvent* newPredictionResultEvent, ReplicodeObjects& replicodeObjects,
+    PredictionResultEvent* predictionResultEvent, ReplicodeObjects& replicodeObjects,
     AeraVisualizerScene* parent);
 
 protected:
@@ -74,11 +74,11 @@ protected:
 private:
   /**
    * Set factOrAntiFactSuccessHtml_ to the HTML source code for the fact or |fact, and success from
-   * newPredictionResultEvent_->object_.
+   * predictionResultEvent_->object_.
    */
   void setFactOrAntiFactSuccessHtml();
 
-  NewPredictionResultEvent* newPredictionResultEvent_;
+  PredictionResultEvent* predictionResultEvent_;
   QString factOrAntiFactSuccessHtml_;
 };
 

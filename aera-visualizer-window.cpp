@@ -292,13 +292,13 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
     else if (regex_search(line, matches, newPredictionSuccessRegex)) {
       auto factSuccessFactPred = replicodeObjects_.getObject(stoul(matches[5].str()));
       if (factSuccessFactPred)
-        events_.push_back(make_shared<NewPredictionResultEvent>(
+        events_.push_back(make_shared<PredictionResultEvent>(
           getTimestamp(matches), factSuccessFactPred));
     }
     else if (regex_search(line, matches, newPredictionFailureRegex)) {
       auto antiFactSuccessFactPred = replicodeObjects_.getObject(stoul(matches[4].str()));
       if (antiFactSuccessFactPred)
-        events_.push_back(make_shared<NewPredictionResultEvent>(
+        events_.push_back(make_shared<PredictionResultEvent>(
           getTimestamp(matches), antiFactSuccessFactPred));
     }
     else if (regex_search(line, matches, newEnvironmentInjectRegex)) {
@@ -428,7 +428,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
       event->eventType_ == ModelMkValPredictionReduction::EVENT_TYPE ||
-      event->eventType_ == NewPredictionResultEvent::EVENT_TYPE ||
+      event->eventType_ == PredictionResultEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
       event->eventType_ == EnvironmentEjectEvent::EVENT_TYPE) {
@@ -481,8 +481,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       if (causeItem)
         scene->addArrow(newItem, causeItem);
     }
-    else if (event->eventType_ == NewPredictionResultEvent::EVENT_TYPE)
-      newItem = new PredictionResultItem((NewPredictionResultEvent*)event, replicodeObjects_, scene);
+    else if (event->eventType_ == PredictionResultEvent::EVENT_TYPE)
+      newItem = new PredictionResultItem((PredictionResultEvent*)event, replicodeObjects_, scene);
     else if (event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
       auto newIcstEvent = (NewInstantiatedCompositeStateEvent*)event;
       newItem = new InstantiatedCompositeStateItem(newIcstEvent, replicodeObjects_, scene);
@@ -587,7 +587,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
       event->eventType_ == ModelMkValPredictionReduction::EVENT_TYPE ||
-      event->eventType_ == NewPredictionResultEvent::EVENT_TYPE ||
+      event->eventType_ == PredictionResultEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
       event->eventType_ == EnvironmentEjectEvent::EVENT_TYPE) {
