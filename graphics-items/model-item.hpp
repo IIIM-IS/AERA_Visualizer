@@ -103,6 +103,18 @@ public:
    */
   static void highlightVariables(QString& html);
 
+  /**
+   * Check that the timings are variables and return the variable indexes.
+   * \param fact The Fact with the timings.
+   * \param iAfterVariable Set this to the index of the after variable. If this
+   * method returns false, the value is undetermined.
+   * \param iAfterVariable Set this to the index of the before variable. If this
+   * method returns false, the value is undetermined.
+   * \return True for success, false if fact is not a Fact, or if the timings are
+   * not variables.
+   */
+  static bool getTimingVariables(r_code::Code* fact, int& iAfterVariable, int& iBeforeVariable);
+
   int evidenceCountFlashCountdown_;
   bool evidenceCountIncreased_;
   int successRateFlashCountdown_;

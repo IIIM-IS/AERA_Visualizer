@@ -115,6 +115,22 @@ void ModelItem::highlightVariables(QString& html)
   html.replace(QRegularExpression("(\\W)(v\\d+\\:?)"), "\\1<font color=\"#c000c0\">\\2</font>");
 }
 
+bool ModelItem::getTimingVariables(Code* fact, int& iAfterVariable, int& iBeforeVariable)
+{
+  if (fact->code(0).asOpcode() != r_exec::Opcodes::Fact ||
+    fact->code_size() <= FACT_BEFORE)
+    // We don't expect this, but check anyway.
+    return false;
+  if (!(fact->code(FACT_AFTER).getDescriptor() == Atom::VL_PTR &&
+    fact->code(FACT_BEFORE).getDescriptor() == Atom::VL_PTR))
+    // They aren't variables.
+    return false;
+
+  iAfterVariable = fact->code(FACT_AFTER).asIndex();
+  iBeforeVariable = fact->code(FACT_BEFORE).asIndex();
+  return true;
+}
+
 QString ModelItem::makeHtml()
 {
   auto model = newModelEvent_->object_;
