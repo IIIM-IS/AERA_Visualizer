@@ -78,7 +78,6 @@ AeraVisualizerScene::AeraVisualizerScene(
   didInitialFit_(false),
   thisFrameTime_(seconds(0)),
   thisFrameLeft_(0),
-  nextFrameLeft_(10),
   borderFlashPen_(Qt::green, 3),
   noFlashColor_("black"),
   valueUpFlashColor_("green"),
@@ -106,15 +105,38 @@ AeraVisualizerScene::AeraVisualizerScene(
 
 void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 {
+  const int frameWidth = 330;
+
   if (!didInitialFit_) {
     didInitialFit_ = true;
     // Set the height of the view. The width will be set accordingly.
     views().at(0)->fitInView(QRectF(0, 0, 1, 800), Qt::KeepAspectRatio);
 
-    // Separate the environment eject/inject region.
-    auto y = eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] - 5;
-    auto line = addLine(sceneRect().left(), y, sceneRect().right(), y, QPen(Qt::darkGray, 1));
-    line->setZValue(-100);
+    if (isMainScene_) {
+      // TODO: Adjust the position to align the first item to the left side.
+
+      // Separate the environment eject/inject region.
+      auto y = eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] - 5;
+      auto line = addLine(sceneRect().left(), y, sceneRect().right(), y, QPen(Qt::darkGray, 1));
+      line->setZValue(-100);
+
+      // Add all the frame boundary lines and timestamps.
+      for (auto frameTime = replicodeObjects_.getTimeReference(); true; frameTime += replicodeObjects_.getSamplingPeriod()) {
+        auto relativeTime = duration_cast<microseconds>(frameTime - replicodeObjects_.getTimeReference());
+        int frameNumber = relativeTime.count() / replicodeObjects_.getSamplingPeriod().count();
+        int frameLeft = frameWidth * frameNumber;
+        if (frameLeft > sceneRect().right())
+          break;
+
+        auto line = addLine(frameLeft, sceneRect().top(), frameLeft, sceneRect().bottom(),
+          QPen(Qt::darkGray, 1, Qt::DashLine));
+        line->setZValue(-100);
+        auto text = addText(replicodeObjects_.relativeTime(frameTime).c_str());
+        text->setZValue(-100);
+        text->setDefaultTextColor(Qt::darkGray);
+        text->setPos(frameLeft, 0);
+      }
+    }
   }
 
   item->setBrush(itemColor_);
@@ -128,20 +150,10 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       // TODO: Quantize thisFrameTime_ to a frame boundary from newObjectEvent->time_.
       auto relativeTime = duration_cast<microseconds>(newObjectEvent->time_ - replicodeObjects_.getTimeReference());
       thisFrameTime_ = newObjectEvent->time_ - (relativeTime % replicodeObjects_.getSamplingPeriod());
-      thisFrameLeft_ = nextFrameLeft_;
-      // nextFrameLeft_ will be updated below.
-      nextFrameLeft_ = 0;
+      int frameNumber = relativeTime.count() / replicodeObjects_.getSamplingPeriod().count();
+      thisFrameLeft_ = frameWidth * frameNumber;
       // Reset the top.
       eventTypeNextTop_.clear();
-
-      // Add the frame boundary line and timestamp.
-      auto line = addLine(thisFrameLeft_, sceneRect().top(), 
-                          thisFrameLeft_, sceneRect().bottom(), QPen(Qt::darkGray, 1, Qt::DashLine));
-      line->setZValue(-100);
-      auto text = addText(replicodeObjects_.relativeTime(thisFrameTime_).c_str());
-      text->setZValue(-100);
-      text->setDefaultTextColor(Qt::darkGray);
-      text->setPos(thisFrameLeft_, 0);
     }
 
     int eventType = 0;
@@ -173,7 +185,6 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 
     // Set up eventTypeNextTop_ for the next item.
     eventTypeNextTop_[eventType] = top + item->boundingRect().height() + verticalMargin;
-    nextFrameLeft_ = max(nextFrameLeft_, thisFrameLeft_ + item->boundingRect().width() + 14);
   }
 
   addItem(item);

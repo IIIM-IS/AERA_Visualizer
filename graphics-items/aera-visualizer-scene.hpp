@@ -143,7 +143,6 @@ private:
   std::map<int, qreal> eventTypeNextTop_;
   Timestamp thisFrameTime_;
   qreal thisFrameLeft_;
-  qreal nextFrameLeft_;
   QColor itemColor_;
   QColor lineColor_;
   QPen borderFlashPen_;
