@@ -94,10 +94,10 @@ AeraVisualizerScene::AeraVisualizerScene(
     eventTypeFirstTop_[EnvironmentEjectEvent::EVENT_TYPE] = 20;
     eventTypeFirstTop_[EnvironmentInjectEvent::EVENT_TYPE] = 45;
     eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] = 120;
-    eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 385;
-    eventTypeFirstTop_[ModelMkValPredictionReduction::EVENT_TYPE] = 503;
-    eventTypeFirstTop_[PredictionResultEvent::EVENT_TYPE] = 640;
-    eventTypeFirstTop_[0] = 760;
+    eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 315;
+    eventTypeFirstTop_[ModelMkValPredictionReduction::EVENT_TYPE] = 433;
+    eventTypeFirstTop_[PredictionResultEvent::EVENT_TYPE] = 570;
+    eventTypeFirstTop_[0] = 690;
   }
   else
     // The default, which is used for the models scene.
