@@ -106,14 +106,24 @@ AeraVisualizerScene::AeraVisualizerScene(
 void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 {
   const int frameWidth = 330;
+  auto newObjectEvent = item->getAeraEvent();
 
   if (!didInitialFit_) {
     didInitialFit_ = true;
     // Set the height of the view. The width will be set accordingly.
-    views().at(0)->fitInView(QRectF(0, 0, 1, 800), Qt::KeepAspectRatio);
+    QGraphicsView* view = views().at(0);
+    view->fitInView(QRectF(0, 0, 1, 800), Qt::KeepAspectRatio);
 
     if (isMainScene_) {
-      // TODO: Adjust the position to align the first item to the left side.
+      // Adjust the position to align the first item to the left side.
+      int firstFrameNumber = duration_cast<microseconds>(newObjectEvent->time_ - replicodeObjects_.getTimeReference()).count() /
+        replicodeObjects_.getSamplingPeriod().count();
+      int firstFrameLeft = frameWidth * firstFrameNumber;
+      // Temporarily set to NoAnchor to override other controls.
+      auto saveAnchor = view->transformationAnchor();
+      view->setTransformationAnchor(QGraphicsView::NoAnchor);
+      view->translate(10 - firstFrameLeft, 0);
+      view->setTransformationAnchor(saveAnchor);
 
       // Separate the environment eject/inject region.
       auto y = eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] - 5;
@@ -141,7 +151,6 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 
   item->setBrush(itemColor_);
 
-  auto newObjectEvent = item->getAeraEvent();
   if (qIsNaN(newObjectEvent->itemTopLeftPosition_.x())) {
     // Assign an initial position.
     // Only update positions based on time for the main scehe.
