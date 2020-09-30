@@ -52,9 +52,6 @@
 #ifndef PREDICTION_ITEM_HPP
 #define PREDICTION_ITEM_HPP
 
-#include <QGraphicsPixmapItem>
-#include <QList>
-#include <QPen>
 #include "aera-graphics-item.hpp"
 
 namespace aera_visualizer {
