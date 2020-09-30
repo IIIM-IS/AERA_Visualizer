@@ -84,6 +84,7 @@ AeraVisualizerScene::AeraVisualizerScene(
   valueDownFlashColor_("red")
 {
   itemColor_ = Qt::white;
+  simulatedItemColor_ = QColor(255, 255, 235);
   lineColor_ = Qt::black;
   setBackgroundBrush(QColor(245, 245, 245));
   flashTimerId_ = 0;
