@@ -285,6 +285,20 @@ void AeraGraphicsItem::setItemAndArrowsVisible(bool visible)
   setVisible(visible);
 }
 
+bool AeraGraphicsItem::is_sim()
+{
+  if (aeraEvent_->object_->references_size() < 1)
+    return false;
+
+  auto obj = aeraEvent_->object_->get_reference(0);
+  if (obj->code(0).asOpcode() == Opcodes::Goal)
+    return ((Goal*)obj)->is_simulation();
+  else if (obj->code(0).asOpcode() == Opcodes::Pred)
+    return ((Pred*)obj)->is_simulation();
+
+  return false;
+}
+
 void AeraGraphicsItem::textItemLinkActivated(const QString& link)
 {
   if (link == "#this") {

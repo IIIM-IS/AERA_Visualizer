@@ -157,6 +157,13 @@ public:
 
   const QPen& getBorderNoHighlightPen() { return borderNoHighlightPen_;  }
 
+  /**
+   * Check if getAeraEvent()->object_ is a simulated goal or prediction. This is meant
+   * to imitate the Replicode is_sim operator.
+   * \return True if the object is simulated.
+   */
+  bool is_sim();
+
   static const QString DownArrowHtml;
   static const QString SelectedRadioButtonHtml;
   static const QString UnselectedRadioButtonHtml;
