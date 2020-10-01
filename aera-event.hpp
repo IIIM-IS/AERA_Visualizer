@@ -67,6 +67,30 @@ public:
     itemTopLeftPosition_(qQNaN(), qQNaN())
   {}
 
+  /**
+   * A helper method to get the first item in the reduction's set of productions.
+   * \param reduction The mk.rdx reduction.
+   * \return The first production.
+   */
+  static r_code::Code* getFirstProduction(r_code::Code* reduction)
+  {
+    return reduction->get_reference(
+      reduction->code(reduction->code(MK_RDX_PRODS).asIndex() + 1).asIndex());
+  }
+
+  /**
+   * A helper method to get the second item in the reduction's set of inputs.
+   * \param reduction The mk.rdx reduction.
+   * \return The second input, or NULL if the set of inputs size is less than two.
+   */
+  static r_code::Code* getSecondInput(r_code::Code* reduction)
+  {
+    uint16 input_set_index = reduction->code(MK_RDX_INPUTS).asIndex();
+    if (reduction->code(input_set_index).getAtomCount() < 2)
+      return NULL;
+    return reduction->get_reference(reduction->code(input_set_index + 2).asIndex());
+  }
+
   int eventType_;
   core::Timestamp time_;
   r_code::Code* object_;
@@ -224,7 +248,6 @@ public:
    * \return The cause.
    */
   r_code::Code* getCause() {
-    // The cause is the 
     return reduction_->get_reference(
       reduction_->code(reduction_->code(MK_RDX_INPUTS).asIndex() + 1).asIndex());
   }
@@ -237,32 +260,43 @@ public:
 
   r_code::Code* getFactPred() { return object_; }
 
-  /**
-   * A helper method to get the first item in the reduction's set of productions.
-   * \param reduction The mk.rdx reduction.
-   * \return The first production.
-   */
-  static r_code::Code* getFirstProduction(r_code::Code* reduction)
-  {
-    return reduction->get_reference(
-      reduction->code(reduction->code(MK_RDX_PRODS).asIndex() + 1).asIndex());
-  }
-
-  /**
-   * A helper method to get the second item in the reduction's set of inputs.
-   * \param reduction The mk.rdx reduction.
-   * \return The second input, or NULL if the set of inputs size is less than two.
-   */
-  static r_code::Code* getSecondInput(r_code::Code* reduction)
-  {
-    uint16 input_set_index = reduction->code(MK_RDX_INPUTS).asIndex();
-    if (reduction->code(input_set_index).getAtomCount() < 2)
-      return NULL;
-    return reduction->get_reference(reduction->code(input_set_index + 2).asIndex());
-  }
-
   r_code::Code* reduction_;
   int imdlPredictionEventIndex_;
+};
+
+/**
+ * ModelGoalReduction is a reduction event of a model abduction to a goal.
+ */
+class ModelGoalReduction : public AeraEvent {
+public:
+  /**
+   * Create a ModelGoalReduction, but set object_ to the (fact (goal ...)).
+   * (mk.rdx fact_imdl [fact_super_goal] [fact_goal]) .
+   * \param time The reduction time.
+   * \param reduction The model reduction which points to the (fact (goal ...)) and the super goal.
+   */
+  ModelGoalReduction(core::Timestamp time, r_code::Code* reduction)
+    // The goal is the first (only) item in the set of productions.
+    : AeraEvent(EVENT_TYPE, time, getFirstProduction(reduction)),
+      reduction_(reduction)
+  {}
+
+  static const int EVENT_TYPE = 9;
+
+  r_code::Code* getFactImdl() { return reduction_->get_reference(MK_RDX_IHLP_REF); }
+
+  /**
+   * Get the fact super goal from the reduction_, which is the first item in the set of inputs.
+   * \return The fact super goal.
+   */
+  r_code::Code* getFactSuperGoal() {
+    return reduction_->get_reference(
+      reduction_->code(reduction_->code(MK_RDX_INPUTS).asIndex() + 1).asIndex());
+  }
+
+  r_code::Code* getFactGoal() { return object_; }
+
+  r_code::Code* reduction_;
 };
 
 class NewInstantiatedCompositeStateEvent : public AeraEvent {
@@ -274,7 +308,7 @@ public:
     inputs_(inputs)
   {}
 
-  static const int EVENT_TYPE = 9;
+  static const int EVENT_TYPE = 10;
 
   std::vector<r_code::Code*> inputs_;
 };
@@ -294,7 +328,7 @@ public:
    */
   bool isSuccess() { return object_->code(0).asOpcode() == r_exec::Opcodes::Fact;  }
 
-  static const int EVENT_TYPE = 10;
+  static const int EVENT_TYPE = 11;
 };
 
 class EnvironmentInjectEvent : public AeraEvent {
@@ -305,7 +339,7 @@ public:
     injectionTime_(injectionTime)
   {}
 
-  static const int EVENT_TYPE = 11;
+  static const int EVENT_TYPE = 12;
 
   core::Timestamp injectionTime_;
 };
@@ -317,7 +351,7 @@ public:
     reduction_(reduction)
   {}
 
-  static const int EVENT_TYPE = 12;
+  static const int EVENT_TYPE = 13;
 
   r_code::Code* reduction_;
 };
