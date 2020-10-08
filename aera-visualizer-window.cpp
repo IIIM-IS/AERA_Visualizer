@@ -57,6 +57,7 @@
 #include "graphics-items/composite-state-item.hpp"
 #include "graphics-items/auto-focus-fact-item.hpp"
 #include "graphics-items/prediction-item.hpp"
+#include "graphics-items/goal-item.hpp"
 #include "graphics-items/prediction-result-item.hpp"
 #include "graphics-items/instantiated-composite-state-item.hpp"
 #include "graphics-items/environment-inject-eject-item.hpp"
@@ -139,18 +140,24 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   regex modelImdlPredictionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact \\(\\d+\\) imdl mdl (\\d+): (\\d+) -> fact \\((\\d+)\\) pred fact \\(\\d+\\) imdl mdl \\d+$");
   // 0s:300ms:0us mdl 63 predict -> mk.rdx 68
   regex modelPredictionReductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl \\d+ predict -> mk.rdx (\\d+)$");
+  // 0s:510ms:0us mdl 41 abduce -> mk.rdx 97
+  regex modelAbductionReductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl \\d+ abduce -> mk.rdx (\\d+)$");
+  // 0s:510ms:0us mdl 64: fact 96 super_goal -> fact 98 simulated goal
+  regex modelSimulatedAbductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl (\\d+): fact (\\d+) super_goal -> fact (\\d+) simulated goal$");
   // 0s:200ms:0us fact 59 icst[52][ 50 55]
   regex newInstantiatedCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+) icst\\[\\d+\\]\\[([ \\d]+)\\]$");
   // 0s:300ms:0us fact 75 -> fact 79 success fact 60 pred
-  regex newPredictionSuccessRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+) -> fact (\\d+) success fact \\d+ pred$");
+  regex predictionSuccessRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+) -> fact (\\d+) success fact \\d+ pred$");
   // 0s:322ms:933us |fact 72 fact 59 pred failure
-  regex newPredictionFailureRegex("^(\\d+)s:(\\d+)ms:(\\d+)us \\|fact (\\d+) fact \\d+ pred failure$");
+  regex predictionFailureRegex("^(\\d+)s:(\\d+)ms:(\\d+)us \\|fact (\\d+) fact \\d+ pred failure$");
+  // 0s:600ms:0us fact 121: 96 goal success (TopLevel)
+  regex topLevelGoalSuccessRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+): (\\d+) goal success \\(TopLevel\\)$");
   // 0s:200ms:0us environment inject 46, ijt 0s:200ms:0us
-  regex newEnvironmentInjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us environment inject (\\d+), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
+  regex environmentInjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us environment inject (\\d+), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
   // 0s:100ms:0us mk.rdx(100): environment eject 39
-  regex newEnvironmentEjectWithRdxRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mk.rdx\\((\\d+)\\): environment eject (\\d+)$");
+  regex environmentEjectWithRdxRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mk.rdx\\((\\d+)\\): environment eject (\\d+)$");
   // 0s:100ms:0us environment eject 39
-  regex newEnvironmentEjectWithoutRdxRegex("^(\\d+)s:(\\d+)ms:(\\d+)us environment eject (\\d+)$");
+  regex environmentEjectWithoutRdxRegex("^(\\d+)s:(\\d+)ms:(\\d+)us environment eject (\\d+)$");
 
   // Count the number of lines, to use in the progress dialog.
   int nLines;
@@ -241,7 +248,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
       auto reduction = replicodeObjects_.getObject(stoul(matches[4].str()));
       if (reduction) {
         // Check the type of prediction.
-        auto factPred = ModelMkValPredictionReduction::getFirstProduction(reduction);
+        auto factPred = AeraEvent::getFirstProduction(reduction);
         auto pred = factPred->get_reference(0);
         auto factValue = pred->get_reference(0);
         auto value = factValue->get_reference(0);
@@ -249,7 +256,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
 
         if (valueOpcode == Opcodes::MkVal) {
           int imdlPredictionEventIndex = -1;
-          auto requirement = ModelMkValPredictionReduction::getSecondInput(reduction);
+          auto requirement = AeraEvent::getSecondInput(reduction);
           if (requirement) {
             // Search events_ backwards for the previous prediction whose object_ is this->getRequirement().
             for (int i = events_.size() - 1; i >= 0; --i) {
@@ -265,6 +272,28 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
             getTimestamp(matches), reduction, imdlPredictionEventIndex));
         }
       }
+    }
+    else if (regex_search(line, matches, modelAbductionReductionRegex)) {
+      auto reduction = replicodeObjects_.getObject(stoul(matches[4].str()));
+      if (reduction) {
+        auto factImdl = reduction->get_reference(MK_RDX_IHLP_REF);
+        auto model = factImdl->get_reference(0)->get_reference(0);
+        // The goal is the first (only) item in the set of productions.
+        auto factGoal = AeraEvent::getFirstProduction(reduction);
+        // The super goal is the first item in the set of inputs.
+        auto factSuperGoal = reduction->get_reference(
+          reduction->code(reduction->code(MK_RDX_INPUTS).asIndex() + 1).asIndex());
+        events_.push_back(make_shared<ModelGoalReduction>(
+          getTimestamp(matches), model, factGoal, factSuperGoal));
+      }
+    }
+    else if (regex_search(line, matches, modelSimulatedAbductionRegex)) {
+      auto model = replicodeObjects_.getObject(stoul(matches[4].str()));
+      auto factGoal = replicodeObjects_.getObject(stoul(matches[6].str()));
+      auto factSuperGoal = replicodeObjects_.getObject(stoul(matches[5].str()));
+      if (model && factGoal && factSuperGoal)
+        events_.push_back(make_shared<ModelGoalReduction>(
+          getTimestamp(matches), model, factGoal, factSuperGoal));
     }
     else if (regex_search(line, matches, newInstantiatedCompositeStateRegex)) {
       auto timestamp = getTimestamp(matches);
@@ -289,32 +318,35 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
         events_.push_back(make_shared<NewInstantiatedCompositeStateEvent>(
           timestamp, instantiatedCompositeState, inputs));
     }
-    else if (regex_search(line, matches, newPredictionSuccessRegex)) {
+    else if (regex_search(line, matches, predictionSuccessRegex)) {
       auto factSuccessFactPred = replicodeObjects_.getObject(stoul(matches[5].str()));
       if (factSuccessFactPred)
         events_.push_back(make_shared<PredictionResultEvent>(
           getTimestamp(matches), factSuccessFactPred));
     }
-    else if (regex_search(line, matches, newPredictionFailureRegex)) {
+    else if (regex_search(line, matches, predictionFailureRegex)) {
       auto antiFactSuccessFactPred = replicodeObjects_.getObject(stoul(matches[4].str()));
       if (antiFactSuccessFactPred)
         events_.push_back(make_shared<PredictionResultEvent>(
           getTimestamp(matches), antiFactSuccessFactPred));
     }
-    else if (regex_search(line, matches, newEnvironmentInjectRegex)) {
+    else if (regex_search(line, matches, topLevelGoalSuccessRegex)) {
+      auto factSuccessFactGoal = replicodeObjects_.getObject(stoul(matches[4].str()));
+    }
+    else if (regex_search(line, matches, environmentInjectRegex)) {
       auto object = replicodeObjects_.getObject(stoul(matches[4].str()));
       if (object)
         events_.push_back(make_shared<EnvironmentInjectEvent>(
           getTimestamp(matches), object, getTimestamp(matches, 5)));
     }
-    else if (regex_search(line, matches, newEnvironmentEjectWithRdxRegex)) {
+    else if (regex_search(line, matches, environmentEjectWithRdxRegex)) {
       auto reduction = replicodeObjects_.getObjectByDebugOid(stoul(matches[4].str()));
       auto object = replicodeObjects_.getObject(stoul(matches[5].str()));
       if (object)
         events_.push_back(make_shared<EnvironmentEjectEvent>(
           getTimestamp(matches), object, reduction));
     }
-    else if (regex_search(line, matches, newEnvironmentEjectWithoutRdxRegex)) {
+    else if (regex_search(line, matches, environmentEjectWithoutRdxRegex)) {
       auto object = replicodeObjects_.getObject(stoul(matches[4].str()));
       if (object)
         events_.push_back(make_shared<EnvironmentEjectEvent>(
@@ -428,6 +460,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
       event->eventType_ == ModelMkValPredictionReduction::EVENT_TYPE ||
+      event->eventType_ == ModelGoalReduction::EVENT_TYPE ||
       event->eventType_ == PredictionResultEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
@@ -480,6 +513,10 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       auto causeItem = scene->getAeraGraphicsItem(reductionEvent->getCause());
       if (causeItem)
         scene->addArrow(newItem, causeItem);
+    }
+    else if (event->eventType_ == ModelGoalReduction::EVENT_TYPE) {
+      auto reductionEvent = (ModelGoalReduction*)event;
+      newItem = new GoalItem(reductionEvent, replicodeObjects_, scene);
     }
     else if (event->eventType_ == PredictionResultEvent::EVENT_TYPE)
       newItem = new PredictionResultItem((PredictionResultEvent*)event, replicodeObjects_, scene);
@@ -587,6 +624,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
       event->eventType_ == ModelMkValPredictionReduction::EVENT_TYPE ||
+      event->eventType_ == ModelGoalReduction::EVENT_TYPE ||
       event->eventType_ == PredictionResultEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||

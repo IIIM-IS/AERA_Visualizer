@@ -55,6 +55,7 @@
 #include <QPointF>
 #include "submodules/replicode/r_code/object.h"
 #include "submodules/replicode/r_exec/opcodes.h"
+#include "submodules/replicode/r_exec/factory.h"
 
 namespace aera_visualizer {
 
@@ -270,33 +271,24 @@ public:
 class ModelGoalReduction : public AeraEvent {
 public:
   /**
-   * Create a ModelGoalReduction, but set object_ to the (fact (goal ...)).
-   * (mk.rdx fact_imdl [fact_super_goal] [fact_goal]) .
+   * Create a ModelGoalReduction, but set object_ to the (fact (goal...)).
    * \param time The reduction time.
-   * \param reduction The model reduction which points to the (fact (goal ...)) and the super goal.
+   * \param model The model which did the reduction.
+   * \param factGoal The (fact (goal...)) (production).
+   * \param factSuperGoal The (fact (goal...)) super goal (input).
    */
-  ModelGoalReduction(core::Timestamp time, r_code::Code* reduction)
-    // The goal is the first (only) item in the set of productions.
-    : AeraEvent(EVENT_TYPE, time, getFirstProduction(reduction)),
-      reduction_(reduction)
+  ModelGoalReduction(core::Timestamp time, r_code::Code* model, 
+      r_code::Code* factGoal, r_code::Code* factSuperGoal)
+    : AeraEvent(EVENT_TYPE, time, factGoal),
+      model_(model), factGoal_((r_exec::_Fact*)factGoal), 
+      factSuperGoal_((r_exec::_Fact*)factSuperGoal)
   {}
 
   static const int EVENT_TYPE = 9;
 
-  r_code::Code* getFactImdl() { return reduction_->get_reference(MK_RDX_IHLP_REF); }
-
-  /**
-   * Get the fact super goal from the reduction_, which is the first item in the set of inputs.
-   * \return The fact super goal.
-   */
-  r_code::Code* getFactSuperGoal() {
-    return reduction_->get_reference(
-      reduction_->code(reduction_->code(MK_RDX_INPUTS).asIndex() + 1).asIndex());
-  }
-
-  r_code::Code* getFactGoal() { return object_; }
-
-  r_code::Code* reduction_;
+  r_code::Code* model_;
+  r_exec::_Fact* factGoal_;
+  r_exec::_Fact* factSuperGoal_;
 };
 
 class NewInstantiatedCompositeStateEvent : public AeraEvent {
