@@ -84,6 +84,18 @@ public:
 
   void zoomToItem(QGraphicsItem* item);
 
+  /**
+   * Get the X position on the timeline for the given timestamp.
+   * \param timestamp The timestamp.
+   * \return The X position.
+   */
+  qreal getTimelineX(core::Timestamp timestamp)
+  {
+    double microsecondsPerPixel = (double)replicodeObjects_.getSamplingPeriod().count() / frameWidth_;
+    auto relativeTime = std::chrono::duration_cast<std::chrono::microseconds>(timestamp - replicodeObjects_.getTimeReference());
+    return relativeTime.count() / microsecondsPerPixel;
+  }
+
   // The initial value for the flash countdown;
   static const int FLASH_COUNT = 6;
 
@@ -141,6 +153,7 @@ private:
   std::map<int, qreal> eventTypeFirstTop_;
   // key: The AeraEvent eventType_, or 0 for "other". value: The top to use for the next item added for that event type.
   std::map<int, qreal> eventTypeNextTop_;
+  qreal simulationNextTop_;
   Timestamp thisFrameTime_;
   qreal thisFrameLeft_;
   QColor itemColor_;
@@ -151,6 +164,7 @@ private:
   QString valueUpFlashColor_;
   QString valueDownFlashColor_;
   int flashTimerId_;
+  static const int frameWidth_ = 330;
 };
 
 }

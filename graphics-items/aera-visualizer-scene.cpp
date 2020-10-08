@@ -50,6 +50,7 @@
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 #include <algorithm>
+#include "../submodules/replicode/r_exec/factory.h"
 #include "aera-visualizer-window.hpp"
 #include "arrow.hpp"
 #include "model-item.hpp"
@@ -64,6 +65,7 @@ using namespace std;
 using namespace std::chrono;
 using namespace core;
 using namespace r_code;
+using namespace r_exec;
 
 namespace aera_visualizer {
 
@@ -84,7 +86,7 @@ AeraVisualizerScene::AeraVisualizerScene(
   valueDownFlashColor_("red")
 {
   itemColor_ = Qt::white;
-  simulatedItemColor_ = QColor(255, 255, 235);
+  simulatedItemColor_ = QColor(255, 255, 220);
   lineColor_ = Qt::black;
   setBackgroundBrush(QColor(245, 245, 245));
   flashTimerId_ = 0;
@@ -97,7 +99,7 @@ AeraVisualizerScene::AeraVisualizerScene(
     eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 315;
     eventTypeFirstTop_[ModelMkValPredictionReduction::EVENT_TYPE] = 433;
     eventTypeFirstTop_[PredictionResultEvent::EVENT_TYPE] = 570;
-    eventTypeFirstTop_[0] = 690;
+    eventTypeFirstTop_[0] = 700;
   }
   else
     // The default, which is used for the models scene.
@@ -106,8 +108,7 @@ AeraVisualizerScene::AeraVisualizerScene(
 
 void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 {
-  const int frameWidth = 330;
-  auto newObjectEvent = item->getAeraEvent();
+  auto aeraEvent = item->getAeraEvent();
 
   if (!didInitialFit_) {
     didInitialFit_ = true;
@@ -117,9 +118,9 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 
     if (isMainScene_) {
       // Adjust the position to align the first item to the left side.
-      int firstFrameNumber = duration_cast<microseconds>(newObjectEvent->time_ - replicodeObjects_.getTimeReference()).count() /
+      int firstFrameNumber = duration_cast<microseconds>(aeraEvent->time_ - replicodeObjects_.getTimeReference()).count() /
         replicodeObjects_.getSamplingPeriod().count();
-      int firstFrameLeft = frameWidth * firstFrameNumber;
+      int firstFrameLeft = frameWidth_ * firstFrameNumber;
       // Temporarily set to NoAnchor to override other controls.
       auto saveAnchor = view->transformationAnchor();
       view->setTransformationAnchor(QGraphicsView::NoAnchor);
@@ -133,9 +134,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 
       // Add all the frame boundary lines and timestamps.
       for (auto frameTime = replicodeObjects_.getTimeReference(); true; frameTime += replicodeObjects_.getSamplingPeriod()) {
-        auto relativeTime = duration_cast<microseconds>(frameTime - replicodeObjects_.getTimeReference());
-        int frameNumber = relativeTime.count() / replicodeObjects_.getSamplingPeriod().count();
-        int frameLeft = frameWidth * frameNumber;
+        int frameLeft = getTimelineX(frameTime);
         if (frameLeft > sceneRect().right())
           break;
 
@@ -150,56 +149,74 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     }
   }
 
-  item->setBrush(itemColor_);
+  bool isSimulation = item->is_sim();
+  item->setBrush(isSimulation ? simulatedItemColor_ : itemColor_);
 
-  if (qIsNaN(newObjectEvent->itemTopLeftPosition_.x())) {
+  if (qIsNaN(aeraEvent->itemTopLeftPosition_.x())) {
     // Assign an initial position.
     // Only update positions based on time for the main scehe.
-    if (isMainScene_ && newObjectEvent->time_ >= thisFrameTime_ + replicodeObjects_.getSamplingPeriod()) {
+    if (isMainScene_ && aeraEvent->time_ >= thisFrameTime_ + replicodeObjects_.getSamplingPeriod()) {
       // Start a new frame (or the first frame).
-      // TODO: Quantize thisFrameTime_ to a frame boundary from newObjectEvent->time_.
-      auto relativeTime = duration_cast<microseconds>(newObjectEvent->time_ - replicodeObjects_.getTimeReference());
-      thisFrameTime_ = newObjectEvent->time_ - (relativeTime % replicodeObjects_.getSamplingPeriod());
-      int frameNumber = relativeTime.count() / replicodeObjects_.getSamplingPeriod().count();
-      thisFrameLeft_ = frameWidth * frameNumber;
+      auto relativeTime = duration_cast<microseconds>(aeraEvent->time_ - replicodeObjects_.getTimeReference());
+      thisFrameTime_ = aeraEvent->time_ - (relativeTime % replicodeObjects_.getSamplingPeriod());
+      thisFrameLeft_ = getTimelineX(thisFrameTime_);
       // Reset the top.
       eventTypeNextTop_.clear();
+      simulationNextTop_ = eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
     }
 
     int eventType = 0;
-    if (eventTypeFirstTop_.find(newObjectEvent->eventType_) != eventTypeFirstTop_.end())
+    if (eventTypeFirstTop_.find(aeraEvent->eventType_) != eventTypeFirstTop_.end())
       // This is a recognized event type.
-      eventType = newObjectEvent->eventType_;
+      eventType = aeraEvent->eventType_;
 
     qreal top;
-    if (eventTypeNextTop_.find(eventType) != eventTypeNextTop_.end())
-      top = eventTypeNextTop_[eventType];
-    else
-      top = eventTypeFirstTop_[eventType];
+    if (isSimulation)
+      // Ignore eventType and stack the simulated items in order.
+      top = simulationNextTop_;
+    else {
+      if (eventTypeNextTop_.find(eventType) != eventTypeNextTop_.end())
+        top = eventTypeNextTop_[eventType];
+      else {
+        top = eventTypeFirstTop_[eventType];
 
-    if (thisFrameTime_ - replicodeObjects_.getTimeReference() < milliseconds(150) &&
-        eventType == AutoFocusNewObjectEvent::EVENT_TYPE &&
-        newObjectEvent->object_->get_reference(0)->get_reference(1) == replicodeObjects_.getObject("essence"))
-      // Debug: The first essence item. Override to make the same types of values line up. Should use a layout algorithm.
-      top = 296;
-
-    int verticalMargin = 15;
-    if (newObjectEvent->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
-      newObjectEvent->eventType_ == EnvironmentEjectEvent::EVENT_TYPE) {
-      // Allow inject/eject items to be on the frame boundary.
-      newObjectEvent->itemTopLeftPosition_ = QPointF(thisFrameLeft_ + item->boundingRect().left(), top);
-      verticalMargin = 5;
+        if (thisFrameTime_ - replicodeObjects_.getTimeReference() < milliseconds(150) &&
+            eventType == AutoFocusNewObjectEvent::EVENT_TYPE &&
+            aeraEvent->object_->get_reference(0)->get_reference(1) == replicodeObjects_.getObject("essence"))
+          // Debug: The first essence item. Override to make the same types of values line up. Should use a layout algorithm.
+          top = 296;
+      }
     }
-    else
-      newObjectEvent->itemTopLeftPosition_ = QPointF(thisFrameLeft_ + 5, top);
 
-    // Set up eventTypeNextTop_ for the next item.
-    eventTypeNextTop_[eventType] = top + item->boundingRect().height() + verticalMargin;
+    qreal left;
+    int verticalMargin = 15;
+    if (isSimulation)
+      // Position simulated items exactly.
+      // We know that a simulated item's object has the form (fact (goal_or_pred (fact ...)))
+      left = getTimelineX(((_Fact*)aeraEvent->object_->get_reference(0)->get_reference(0))->get_after());
+    else {
+      if (aeraEvent->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
+        aeraEvent->eventType_ == EnvironmentEjectEvent::EVENT_TYPE) {
+        // Allow inject/eject items to be on the frame boundary.
+        left = thisFrameLeft_ + item->boundingRect().left();
+        verticalMargin = 5;
+      }
+      else
+        left = thisFrameLeft_ + 5;
+    }
+    aeraEvent->itemTopLeftPosition_ = QPointF(left, top);
+
+    // Set up eventTypeNextTop_ or simulationNextTop_ for the next item.
+    qreal nextTop = top + item->boundingRect().height() + verticalMargin;
+    if (isSimulation)
+      simulationNextTop_ = nextTop;
+    else
+      eventTypeNextTop_[eventType] = nextTop;
   }
 
   addItem(item);
   // Adjust the position from the topLeft.
-  item->setPos(newObjectEvent->itemTopLeftPosition_ - item->boundingRect().topLeft());
+  item->setPos(aeraEvent->itemTopLeftPosition_ - item->boundingRect().topLeft());
 }
 
 void AeraVisualizerScene::mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent)
