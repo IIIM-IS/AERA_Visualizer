@@ -200,8 +200,10 @@ protected:
    * \param prependHeaderHtml If false, use html as-is. If true, first set the text 
    * to html and adjust the size, then set the text to headerHtml_+html. We do this because
    * the header has a right-aligned table cell which needs to "know" the width of the text.
+   * \param targetWidth (optional) The target screen width of the item. If omitted of if this is 
+   * less than the default width based on the item contents, then it is ignored.
    */
-  void setTextItemAndPolygon(QString html, bool prependHeaderHtml);
+  void setTextItemAndPolygon(QString html, bool prependHeaderHtml, qreal targetWidth = 0);
 
   virtual void textItemLinkActivated(const QString& link);
 

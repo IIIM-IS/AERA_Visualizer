@@ -87,14 +87,20 @@ AeraGraphicsItem::AeraGraphicsItem(
   setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
   setAcceptHoverEvents(true);
 
+  Timestamp eventTime;
+  if (is_sim())
+    // We know that a simulated item's object has the form (fact (goal_or_pred (fact ...)))
+    eventTime = ((_Fact*)aeraEvent->object_->get_reference(0)->get_reference(0))->get_after();
+  else
+    eventTime = aeraEvent_->time_;
   headerHtml_ = QString("<table width=\"100%\"><tr>") + 
     "<td style=\"white-space:nowrap\"><font size=\"+1\"><b><font color=\"darkred\">" + headerPrefix +
     "</font> <a href=\"#this""\">" + replicodeObjects_.getLabel(aeraEvent_->object_).c_str() + "</a></b></font></td>" +
     "<td style=\"white-space:nowrap\" align=\"right\"><font style=\"color:gray\"> " + 
-    replicodeObjects_.relativeTime(aeraEvent_->time_).c_str() + "</font></td>" + "</tr></table><br>";
+    replicodeObjects_.relativeTime(eventTime).c_str() + "</font></td>" + "</tr></table><br>";
 }
 
-void AeraGraphicsItem::setTextItemAndPolygon(QString html, bool prependHeaderHtml)
+void AeraGraphicsItem::setTextItemAndPolygon(QString html, bool prependHeaderHtml, qreal targetWidth)
 {
   // Set up the textItem_ first to get its size.
   if (textItem_)
@@ -116,7 +122,10 @@ void AeraGraphicsItem::setTextItemAndPolygon(QString html, bool prependHeaderHtm
   QObject::connect(textItem_, &QGraphicsTextItem::linkActivated,
     [this](const QString& link) { textItemLinkActivated(link); });
 
-  qreal right = textItem_->boundingRect().width() / 2 + 15;
+  qreal width = (textItem_->boundingRect().width() / 2 + 15) - left;
+  if (targetWidth > width)
+    width = targetWidth;
+  qreal right = left + width;
   qreal bottom = textItem_->boundingRect().height() / 2 + 5;
   const qreal diameter = 20;
 
