@@ -215,6 +215,7 @@
     <ClCompile Include="graphics-items\auto-focus-fact-item.cpp" />
     <ClCompile Include="graphics-items\composite-state-item.cpp" />
     <ClCompile Include="graphics-items\environment-inject-eject-item.cpp" />
+    <ClCompile Include="graphics-items\goal-item.cpp" />
     <ClCompile Include="graphics-items\instantiated-composite-state-item.cpp" />
     <ClCompile Include="graphics-items\model-item.cpp" />
     <ClCompile Include="graphics-items\prediction-item.cpp" />
@@ -314,6 +315,7 @@
     <ClInclude Include="graphics-items\auto-focus-fact-item.hpp" />
     <ClInclude Include="graphics-items\composite-state-item.hpp" />
     <ClInclude Include="graphics-items\environment-inject-eject-item.hpp" />
+    <ClInclude Include="graphics-items\goal-item.hpp" />
     <ClInclude Include="graphics-items\instantiated-composite-state-item.hpp" />
     <ClInclude Include="graphics-items\model-item.hpp" />
     <ClInclude Include="graphics-items\prediction-item.hpp" />
