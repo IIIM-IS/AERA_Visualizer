@@ -138,9 +138,12 @@ void InstantiatedCompositeStateItem::setBoundCstAndMembersHtml()
   std::vector<string> templateValues;
   std::vector<string> exposedValues;
   getIcstOrImdlValues(icstSource, templateValues, exposedValues);
-  // Debug: How to correctly get the timestamp variables.
-  int iAfterVariable = 2;
-  int iBeforeVariable = 3;
+  int iAfterVariable;
+  int iBeforeVariable;
+  auto unpackedCst = cst->get_reference(cst->references_size() - CST_HIDDEN_REFS);
+  if (!ModelItem::getTimingVariables(unpackedCst->get_reference(0), iAfterVariable, iBeforeVariable))
+    // We don't expect this.
+    return;
 
   string cstSource = CompositeStateItem::simplifyCstSource(replicodeObjects_.getSourceCode(cst));
   // Get just the set of members, which start on the third line and are indented by three spaces.

@@ -157,9 +157,12 @@ void PredictionItem::setBoundAndUnboundModelHtml()
   std::vector<string> templateValues;
   std::vector<string> exposedValues;
   InstantiatedCompositeStateItem::getIcstOrImdlValues(imdlSource, templateValues, exposedValues);
-  // Debug: How to correctly get the timestamp variables.
-  int iAfterVariable = 5;
-  int iBeforeVariable = 6;
+  int iAfterVariable;
+  int iBeforeVariable;
+  auto unpackedMdl = mdl->get_reference(mdl->references_size() - MDL_HIDDEN_REFS);
+  if (!ModelItem::getTimingVariables(unpackedMdl->get_reference(0), iAfterVariable, iBeforeVariable))
+    // We don't expect this.
+    return;
 
   QString unboundModelSource = ModelItem::simplifyModelSource(replicodeObjects_.getSourceCode(mdl));
   ModelItem::highlightLhsAndRhs(unboundModelSource);
