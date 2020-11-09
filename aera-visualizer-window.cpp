@@ -172,10 +172,10 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   progress.setWindowFlags(progress.windowFlags() & ~Qt::WindowContextHelpButtonHint);
   progress.setWindowTitle("Initializing");
 
-  ifstream debugStreamFile(runtimeOutputFilePath);
+  ifstream runtimeOutputFile(runtimeOutputFilePath);
   int lineNumber;
   string line;
-  while (getline(debugStreamFile, line)) {
+  while (getline(runtimeOutputFile, line)) {
     if (progress.wasCanceled())
       return false;
 
