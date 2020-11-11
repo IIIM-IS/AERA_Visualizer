@@ -54,6 +54,7 @@
 
 #include <string>
 #include <map>
+#include <regex>
 #include "submodules/replicode/r_exec/mem.h"
 
 namespace aera_visualizer {
@@ -64,6 +65,18 @@ namespace aera_visualizer {
  */
 class ReplicodeObjects {
 public:
+  ReplicodeObjects()
+  : blankLineRegex_("^\\s*$"),
+    timeReferenceRegex_("^> DECOMPILATION. TimeReference (\\d+)s:(\\d+)ms:(\\d+)us"),
+    debugOidRegex_("^\\((\\d+)\\) ([\\w\\.]+)(:)(.+)$"),
+    oidAndDebugOidRegex_("^(\\d+)\\((\\d+)\\) (\\w+)(:)(.+)$"),
+    // This matches anything (including newlines) ending in " |[]".
+    emptyViewRegex_("^(.+) \\|\\[\\]$"),
+    // This matches anything ending in "\n   [view]".
+    // (We actually use \x01 as the newline character.)
+    viewSetTailRegex_("^(.+)\\x01   \\[[^\\x01]+\\]$"),
+    viewSetStartRegex_("^(.+) \\[\\]$")
+  {}
   /**
    * Compile and load the metadata from the user operators file, then compile
    * the decompiled file and set up the list of Replicode objects. This
@@ -183,6 +196,14 @@ private:
   // Key is the label from the decompiled objects, value is the Code* object.
   std::map<std::string, r_code::Code*> labelObject_;
   r_code::list<P<r_code::Code> > objects_;
+
+  std::regex blankLineRegex_;
+  std::regex timeReferenceRegex_;
+  std::regex debugOidRegex_;
+  std::regex oidAndDebugOidRegex_;
+  std::regex emptyViewRegex_;
+  std::regex viewSetTailRegex_;
+  std::regex viewSetStartRegex_;
 };
 
 }

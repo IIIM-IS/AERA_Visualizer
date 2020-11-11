@@ -51,10 +51,10 @@
 
 #include <fstream>
 #include <sstream>
-#include <regex>
 #include <algorithm>
 #include "submodules/replicode/r_comp/preprocessor.h"
 #include "submodules/replicode/r_comp/compiler.h"
+#include "submodules/replicode/r_comp/decompiler.h"
 #include "submodules/replicode/r_exec/model_base.h"
 #include "replicode-objects.hpp"
 
@@ -109,8 +109,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
       &decompiledIn, decompiledFilePath, &preprocessedOut, error, NULL))
     return error;
 
-  auto preprocessedOutString = preprocessedOut.str();
-  istringstream preprocessedIn(preprocessedOutString);
+  istringstream preprocessedIn(preprocessedOut.str());
   Compiler compiler(true);
   r_comp::Image image;
   if (!compiler.compile(&preprocessedIn, &image, &metadata, error, false)) {
@@ -122,13 +121,14 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     return codeBefore + "\n<< " + error + "\n" + codeAfter;
   }
 
-  // Get the the objects from the compiler image.
+  // Transfer objects from the compiler image to imageObjects.
   r_code::vector<Code*> imageObjects;
   // tempMem is only used internally for calling build_object.
   r_exec::Mem<r_exec::LObject, r_exec::MemStatic> tempMem;
   image.get_objects(&tempMem, imageObjects);
 
-  // Set the OIDs and debug OIDs based on the decompiled output.
+  // Set the OIDs and debug OIDs of objects in imageObjects based on the decompiled output.
+  // Set up objectLabel_ and labelObject_ based on the object in imageObjects.
   for (auto i = 0; i < imageObjects.size(); ++i) {
     string label = compiler.getObjectName(i);
     if (label != "") {
@@ -149,7 +149,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     }
   }
 
-  // Transfer imageObjects to objects_, processing as needed.
+  // Transfer imageObjects to objects_, unpacking and processing as needed.
   // Imitate _Mem::load.
   for (uint32 i = 0; i < imageObjects.size(); ++i) {
     Code* object = imageObjects[i];
@@ -204,10 +204,6 @@ string ReplicodeObjects::processDecompiledObjects(
   objectSourceCode.clear();
 
   ifstream rawDecompiledFile(decompiledFilePath);
-  regex blankLineRegex("^\\s*$");
-  regex timeReferenceRegex("^> DECOMPILATION. TimeReference (\\d+)s:(\\d+)ms:(\\d+)us");
-  regex debugOidRegex("^\\((\\d+)\\) ([\\w\\.]+)(:)(.+)$");
-  regex oidAndDebugOidRegex("^(\\d+)\\((\\d+)\\) (\\w+)(:)(.+)$");
 
   // Scan the input and fill decompiledOut.
   uint64 currentDebugOid = 0;
@@ -216,10 +212,10 @@ string ReplicodeObjects::processDecompiledObjects(
   while (getline(rawDecompiledFile, line)) {
     smatch matches;
 
-    if (regex_search(line, matches, blankLineRegex))
+    if (regex_search(line, matches, blankLineRegex_))
       // Skip blank lines.
       decompiledOut << endl;
-    if (regex_search(line, matches, timeReferenceRegex)) {
+    if (regex_search(line, matches, timeReferenceRegex_)) {
       microseconds us(1000000 * stoll(matches[1].str()) +
         1000 * stoll(matches[2].str()) +
         stoll(matches[3].str()));
@@ -231,7 +227,7 @@ string ReplicodeObjects::processDecompiledObjects(
     else if (line.size() > 0 && line[0] == '>')
       // Skip other decompiler messages starting with '>'.
       decompiledOut << endl;
-    else if (regex_search(line, matches, debugOidRegex)) {
+    else if (regex_search(line, matches, debugOidRegex_)) {
       auto debugOid = stoull(matches[1].str());
       auto name = matches[2].str();
       auto sourceCodeStart = matches[4].str();
@@ -245,7 +241,7 @@ string ReplicodeObjects::processDecompiledObjects(
       currentDebugOid = debugOid;
       objectSourceCode[currentDebugOid] = sourceCodeStart;
     }
-    else if (regex_search(line, matches, oidAndDebugOidRegex)) {
+    else if (regex_search(line, matches, oidAndDebugOidRegex_)) {
       auto oid = stoul(matches[1].str());
       auto debugOid = stoul(matches[2].str());
       auto name = matches[3].str();
@@ -272,33 +268,27 @@ string ReplicodeObjects::processDecompiledObjects(
 
   // Strip the view from the end of each source code.
   // TODO: The source may have comments, so need to skip these.
-  // This matches anything (including newlines) ending in " |[]".
-  regex emptyViewRegex("^(.+) \\|\\[\\]$");
-  // This matches anything ending in "\n   [view]".
-  // (We actually use \x01 as the newline character.)
-  regex viewSetTailRegex("^(.+)\\x01   \\[[^\\x01]+\\]$");
-  regex viewSetStart("^(.+) \\[\\]$");
   for (auto entry = objectSourceCode.begin(); entry != objectSourceCode.end(); ++entry) {
     smatch matches;
     string sourceCode = entry->second;
     // Temporarily replace \n with \x01 so that we match the entire string, not by line.
     replace(sourceCode.begin(), sourceCode.end(), '\n', '\x01');
 
-    if (regex_search(sourceCode, matches, emptyViewRegex))
+    if (regex_search(sourceCode, matches, emptyViewRegex_))
       sourceCode = matches[1].str();
-    else if (regex_search(sourceCode, matches, viewSetTailRegex)) {
+    else if (regex_search(sourceCode, matches, viewSetTailRegex_)) {
       // Strip the view set element.
       sourceCode = matches[1].str();
 
       // Look for the start of the view set, or more elements.
       while (true) {
-        if (regex_search(sourceCode, matches, viewSetStart)) {
+        if (regex_search(sourceCode, matches, viewSetStartRegex_)) {
           sourceCode = matches[1].str();
           break;
         }
 
         // This should match.
-        if (regex_search(sourceCode, matches, viewSetTailRegex))
+        if (regex_search(sourceCode, matches, viewSetTailRegex_))
           sourceCode = matches[1].str();
       }
     }
