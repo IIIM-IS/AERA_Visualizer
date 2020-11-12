@@ -93,14 +93,13 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
 
   map<string, uint32> objectOids;
   map<string, uint64> objectDebugOids;
-  map<uint64, string> objectSourceCodeByDebugOid;
+
   {
     ifstream testOpen(decompiledFilePath);
     if (!testOpen)
       return "Can't open decompiled objects file: " + decompiledFilePath;
   }
-  auto decompiledOut = processDecompiledObjects(
-    decompiledFilePath, objectOids, objectDebugOids, objectSourceCodeByDebugOid);
+  auto decompiledOut = processDecompiledObjects(decompiledFilePath, objectOids, objectDebugOids);
 
   // Preprocess and compile the processed decompiler output, using the metadata we got above.
   istringstream decompiledIn(decompiledOut);
@@ -140,12 +139,8 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
         imageObjects[i]->set_oid(oidEntry->second);
 
       auto debugOidEntry = objectDebugOids.find(label);
-      if (debugOidEntry != objectDebugOids.end()) {
+      if (debugOidEntry != objectDebugOids.end())
         imageObjects[i]->set_debug_oid(debugOidEntry->second);
-
-        // Transfer objectSourceCodeByDebugOid to objectSourceCode_.
-        objectSourceCode_[imageObjects[i]] = objectSourceCodeByDebugOid[debugOidEntry->second];
-      }
     }
   }
 
@@ -192,18 +187,50 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
 
   r_exec::_Mem::init_timings(timeReference_, objects_);
 
+  // We have to get the source code by decompiling the packet objects in objects_ (not from
+  // the original decompiled code in decompiledFilePath) because variable names can be different.
+  r_comp::Image packedImage;
+  packedImage.object_names_.symbols_ = image.object_names_.symbols_;
+  packedImage.add_objects(objects_, true);
+
+  Decompiler decompiler;
+  decompiler.init(&metadata);
+
+  // Fill the objectNames map from the image and use it in decompile_references.
+  UNORDERED_MAP<uint16, std::string> objectNames;
+  for (auto i = 0; i < packedImage.code_segment_.objects_.size(); ++i)
+    objectNames[i] = compiler.getObjectName(i);
+  decompiler.decompile_references(&packedImage, &objectNames);
+
+  Timestamp::duration timeOffset = duration_cast<microseconds>(timeReference_.time_since_epoch());
+  for (uint16 i = 0; i < packedImage.code_segment_.objects_.size(); ++i) {
+    auto object = getObjectByDebugOid(packedImage.code_segment_.objects_[i]->debug_oid_);
+    if (object) {
+      std::ostringstream decompiledCode;
+      decompiler.decompile_object(i, &decompiledCode, timeOffset, false, false);
+      auto source = decompiledCode.str();
+
+      // Strip ending newlines.
+      while (source[source.size() - 1] == '\n')
+        source = source.substr(0, source.size() - 1);
+      objectSourceCode_[object] = source;
+    }
+  }
+
   return "";
 }
 
 string ReplicodeObjects::processDecompiledObjects(
-  string decompiledFilePath, map<string, uint32>& objectOids, map<string, uint64>& objectDebugOids,
-  map<uint64, string>& objectSourceCode)
+  string decompiledFilePath, map<string, uint32>& objectOids, map<string, uint64>& objectDebugOids)
 {
   objectOids.clear();
   objectDebugOids.clear();
-  objectSourceCode.clear();
 
   ifstream rawDecompiledFile(decompiledFilePath);
+  regex blankLineRegex("^\\s*$");
+  regex timeReferenceRegex("^> DECOMPILATION. TimeReference (\\d+)s:(\\d+)ms:(\\d+)us");
+  regex debugOidRegex("^\\((\\d+)\\) ([\\w\\.]+)(:)(.+)$");
+  regex oidAndDebugOidRegex("^(\\d+)\\((\\d+)\\) (\\w+)(:)(.+)$");
 
   // Scan the input and fill decompiledOut.
   uint64 currentDebugOid = 0;
@@ -212,10 +239,10 @@ string ReplicodeObjects::processDecompiledObjects(
   while (getline(rawDecompiledFile, line)) {
     smatch matches;
 
-    if (regex_search(line, matches, blankLineRegex_))
+    if (regex_search(line, matches, blankLineRegex))
       // Skip blank lines.
       decompiledOut << endl;
-    if (regex_search(line, matches, timeReferenceRegex_)) {
+    if (regex_search(line, matches, timeReferenceRegex)) {
       microseconds us(1000000 * stoll(matches[1].str()) +
         1000 * stoll(matches[2].str()) +
         stoll(matches[3].str()));
@@ -227,7 +254,7 @@ string ReplicodeObjects::processDecompiledObjects(
     else if (line.size() > 0 && line[0] == '>')
       // Skip other decompiler messages starting with '>'.
       decompiledOut << endl;
-    else if (regex_search(line, matches, debugOidRegex_)) {
+    else if (regex_search(line, matches, debugOidRegex)) {
       auto debugOid = stoull(matches[1].str());
       auto name = matches[2].str();
       auto sourceCodeStart = matches[4].str();
@@ -239,9 +266,8 @@ string ReplicodeObjects::processDecompiledObjects(
 
       // We are starting a new object.
       currentDebugOid = debugOid;
-      objectSourceCode[currentDebugOid] = sourceCodeStart;
     }
-    else if (regex_search(line, matches, oidAndDebugOidRegex_)) {
+    else if (regex_search(line, matches, oidAndDebugOidRegex)) {
       auto oid = stoul(matches[1].str());
       auto debugOid = stoul(matches[2].str());
       auto name = matches[3].str();
@@ -254,48 +280,10 @@ string ReplicodeObjects::processDecompiledObjects(
 
       // We are starting a new object.
       currentDebugOid = debugOid;
-      objectSourceCode[currentDebugOid] = sourceCodeStart;
     }
-    else {
+    else
       // Use the line as-is.
       decompiledOut << line << endl;
-
-      // Append to the source code of the current object
-      if (line != "" && currentDebugOid != 0)
-        objectSourceCode[currentDebugOid] += "\n" + line;
-    }
-  }
-
-  // Strip the view from the end of each source code.
-  // TODO: The source may have comments, so need to skip these.
-  for (auto entry = objectSourceCode.begin(); entry != objectSourceCode.end(); ++entry) {
-    smatch matches;
-    string sourceCode = entry->second;
-    // Temporarily replace \n with \x01 so that we match the entire string, not by line.
-    replace(sourceCode.begin(), sourceCode.end(), '\n', '\x01');
-
-    if (regex_search(sourceCode, matches, emptyViewRegex_))
-      sourceCode = matches[1].str();
-    else if (regex_search(sourceCode, matches, viewSetTailRegex_)) {
-      // Strip the view set element.
-      sourceCode = matches[1].str();
-
-      // Look for the start of the view set, or more elements.
-      while (true) {
-        if (regex_search(sourceCode, matches, viewSetStartRegex_)) {
-          sourceCode = matches[1].str();
-          break;
-        }
-
-        // This should match.
-        if (regex_search(sourceCode, matches, viewSetTailRegex_))
-          sourceCode = matches[1].str();
-      }
-    }
-
-    // Restore \n and update.
-    replace(sourceCode.begin(), sourceCode.end(), '\x01', '\n');
-    objectSourceCode[entry->first] = sourceCode;
   }
 
   return decompiledOut.str();

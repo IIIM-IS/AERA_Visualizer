@@ -65,18 +65,6 @@ namespace aera_visualizer {
  */
 class ReplicodeObjects {
 public:
-  ReplicodeObjects()
-  : blankLineRegex_("^\\s*$"),
-    timeReferenceRegex_("^> DECOMPILATION. TimeReference (\\d+)s:(\\d+)ms:(\\d+)us"),
-    debugOidRegex_("^\\((\\d+)\\) ([\\w\\.]+)(:)(.+)$"),
-    oidAndDebugOidRegex_("^(\\d+)\\((\\d+)\\) (\\w+)(:)(.+)$"),
-    // This matches anything (including newlines) ending in " |[]".
-    emptyViewRegex_("^(.+) \\|\\[\\]$"),
-    // This matches anything ending in "\n   [view]".
-    // (We actually use \x01 as the newline character.)
-    viewSetTailRegex_("^(.+)\\x01   \\[[^\\x01]+\\]$"),
-    viewSetStartRegex_("^(.+) \\[\\]$")
-  {}
   /**
    * Compile and load the metadata from the user operators file, then compile
    * the decompiled file and set up the list of Replicode objects. This
@@ -178,14 +166,11 @@ private:
    * \param decompiledFilePath The path of the decompiled objects file.
    * \param objectOids Fill this map of label to OID. This first clears the map.
    * \param objectDebugOids Fill this map of label to debug OID. This first clears the map.
-   * \param objectSourceCode Fill this map of debugOID to source code. This will be stored in
-   * objectSourceCode_ once we have the Code* for the object. This first clears the map.
    * \return A string of the decompiled objects file with removed OIDs and debug OIDs.
    */
   std::string processDecompiledObjects(
     std::string decompiledFilePath, std::map<std::string, core::uint32>& objectOids,
-    std::map<std::string, core::uint64>& objectDebugOids, std::map<uint64,
-    std::string>& objectSourceCode);
+    std::map<std::string, core::uint64>& objectDebugOids);
 
   std::chrono::microseconds basePeriod_;
   core::Timestamp timeReference_;
@@ -196,14 +181,6 @@ private:
   // Key is the label from the decompiled objects, value is the Code* object.
   std::map<std::string, r_code::Code*> labelObject_;
   r_code::list<P<r_code::Code> > objects_;
-
-  std::regex blankLineRegex_;
-  std::regex timeReferenceRegex_;
-  std::regex debugOidRegex_;
-  std::regex oidAndDebugOidRegex_;
-  std::regex emptyViewRegex_;
-  std::regex viewSetTailRegex_;
-  std::regex viewSetStartRegex_;
 };
 
 }
