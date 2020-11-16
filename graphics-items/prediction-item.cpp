@@ -154,9 +154,9 @@ void PredictionItem::setBoundAndUnboundModelHtml()
   auto mdl = imdl->get_reference(0);
 
   string imdlSource = replicodeObjects_.getSourceCode(imdl);
-  std::vector<string> templateValues;
-  std::vector<string> exposedValues;
-  InstantiatedCompositeStateItem::getIcstOrImdlValues(imdlSource, templateValues, exposedValues);
+  QStringList templateValues;
+  QStringList exposedValues;
+  InstantiatedCompositeStateItem::getIcstOrImdlValues(imdlSource.c_str(), templateValues, exposedValues);
   int iAfterVariable;
   int iBeforeVariable;
   auto unpackedMdl = mdl->get_reference(mdl->references_size() - MDL_HIDDEN_REFS);
@@ -183,7 +183,7 @@ void PredictionItem::setBoundAndUnboundModelHtml()
   size_t iExposedValues = 0;
   while (iTemplateValues < templateValues.size() || iExposedValues < exposedValues.size()) {
     // v0, v1, v2, etc. are split between templateValues and exposedValues.
-    string boundValue = (iTemplateValues < templateValues.size() ?
+    QString boundValue = (iTemplateValues < templateValues.size() ?
       templateValues[iTemplateValues] : exposedValues[iExposedValues]);
 
     ++iVariable;
@@ -193,7 +193,7 @@ void PredictionItem::setBoundAndUnboundModelHtml()
       ++iVariable;
 
     string variable = "v" + to_string(iVariable) + ":";
-    modelSource = regex_replace(modelSource, regex(variable), variable + boundValue);
+    modelSource = regex_replace(modelSource, regex(variable), variable + boundValue.toStdString());
 
     if (iTemplateValues < templateValues.size())
       // Still looking at templateValues.

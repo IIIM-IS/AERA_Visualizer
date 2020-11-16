@@ -78,33 +78,20 @@ InstantiatedCompositeStateItem::InstantiatedCompositeStateItem(
 }
 
 void InstantiatedCompositeStateItem::getIcstOrImdlValues(
-  string source, std::vector<string>& templateValues, std::vector<string>& exposedValues)
+  const QString& source, QStringList& templateValues, QStringList& exposedValues)
 {
-  templateValues.clear();
-  exposedValues.clear();
+  templateValues = QStringList();
+  exposedValues = QStringList();
 
-  // Debug: Generalize from these formats.
   smatch matches;
-  if (regex_search(source, matches, regex("^\\(i\\w+ \\w+ \\|\\[\\] \\[([:\\.\\w]+)\\] \\w+ \\w+\\)$"))) {
-    exposedValues.push_back(matches[1].str());
-  }
-  else if (regex_search(source, matches, regex("^\\(i\\w+ \\w+ \\|\\[\\] \\[([:\\.\\w]+) ([:\\.\\w]+)\\] \\w+ \\w+\\)$"))) {
-    exposedValues.push_back(matches[1].str());
-    exposedValues.push_back(matches[2].str());
-  }
-  else if (regex_search(source, matches, regex("^\\(i\\w+ \\w+ \\|\\[\\] \\[([:\\.\\w]+) ([:\\.\\w]+) ([:\\.\\w]+)\\] \\w+ \\w+\\)$"))) {
-    exposedValues.push_back(matches[1].str());
-    exposedValues.push_back(matches[2].str());
-    exposedValues.push_back(matches[3].str());
-  }
-  else if (regex_search(source, matches, regex("^\\(i\\w+ \\w+ \\[([:\\.\\w]+) ([:\\.\\w]+) ([:\\.\\w]+)\\] \\[([:\\.\\w]+) ([:\\.\\w]+) ([:\\.\\w]+) ([:\\.\\w]+)\\] \\w+ \\w+\\)$"))) {
-    templateValues.push_back(matches[1].str());
-    templateValues.push_back(matches[2].str());
-    templateValues.push_back(matches[3].str());
-    exposedValues.push_back(matches[4].str());
-    exposedValues.push_back(matches[5].str());
-    exposedValues.push_back(matches[6].str());
-    exposedValues.push_back(matches[7].str());
+  // Debug: Handle the case when a value is also an array or has a string with space or '[' or ']'.
+  // (icst cst_61 |[] [b 20] false 1)
+  QRegExp ihlpRegEx("^\\(i\\w+ \\w+ \\|?\\[([^\\]]*)\\] \\|?\\[([^\\]]*)\\] \\w+ \\w+\\)$");
+  if (source.indexOf(ihlpRegEx) >= 0) {
+    if (ihlpRegEx.capturedTexts()[1] != "")
+      templateValues = ihlpRegEx.capturedTexts()[1].split(' ');
+    if (ihlpRegEx.capturedTexts()[2] != "")
+      exposedValues = ihlpRegEx.capturedTexts()[2].split(' ');
   }
 }
 
@@ -135,9 +122,9 @@ void InstantiatedCompositeStateItem::setBoundCstAndMembersHtml()
   auto cst = icst->get_reference(0);
 
   string icstSource = replicodeObjects_.getSourceCode(icst);
-  std::vector<string> templateValues;
-  std::vector<string> exposedValues;
-  getIcstOrImdlValues(icstSource, templateValues, exposedValues);
+  QStringList templateValues;
+  QStringList exposedValues;
+  getIcstOrImdlValues(icstSource.c_str(), templateValues, exposedValues);
   int iAfterVariable;
   int iBeforeVariable;
   auto unpackedCst = cst->get_reference(cst->references_size() - CST_HIDDEN_REFS);
@@ -159,7 +146,7 @@ void InstantiatedCompositeStateItem::setBoundCstAndMembersHtml()
   size_t iExposedValues = 0;
   while (iTemplateValues < templateValues.size() || iExposedValues < exposedValues.size()) {
     // v0, v1, v2, etc. are split between templateValues and exposedValues.
-    string boundValue = (iTemplateValues < templateValues.size() ? 
+    QString boundValue = (iTemplateValues < templateValues.size() ? 
       templateValues[iTemplateValues] : exposedValues[iExposedValues]);
 
     ++iVariable;
@@ -169,9 +156,9 @@ void InstantiatedCompositeStateItem::setBoundCstAndMembersHtml()
       ++iVariable;
 
     string variable = "v" + to_string(iVariable) + ":";
-    cstSource = regex_replace(cstSource, regex(variable), variable + boundValue);
+    cstSource = regex_replace(cstSource, regex(variable), variable + boundValue.toStdString());
     // For boundCstMemberHtml_, don't include the variable.
-    cstMembersSource = regex_replace(cstMembersSource, regex(variable), boundValue);
+    cstMembersSource = regex_replace(cstMembersSource, regex(variable), boundValue.toStdString());
 
     if (iTemplateValues < templateValues.size())
       // Still looking at templateValues.
