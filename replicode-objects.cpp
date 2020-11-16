@@ -207,7 +207,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     auto object = getObjectByDebugOid(packedImage.code_segment_.objects_[i]->debug_oid_);
     if (object) {
       std::ostringstream decompiledCode;
-      decompiler.decompile_object(i, &decompiledCode, timeOffset, false, false);
+      decompiler.decompile_object(i, &decompiledCode, timeOffset, false, false, false);
       auto source = decompiledCode.str();
 
       // Strip ending newlines.
