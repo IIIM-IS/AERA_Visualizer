@@ -69,6 +69,7 @@ using namespace r_exec;
 namespace aera_visualizer {
 
 const QString AeraGraphicsItem::DownArrowHtml = "<sub><font size=\"+2\"><b>&#129047;</b></font></sub>";
+const QString AeraGraphicsItem::RightArrowHtml = "<font size=\"+1\"><b>&#129050;</b></font>";
 const QString AeraGraphicsItem::SelectedRadioButtonHtml = "<font size=\"+2\">&#x25C9;</font>";
 const QString AeraGraphicsItem::UnselectedRadioButtonHtml = "<font size=\"+3\">&#x25CB;</font>";
 
