@@ -103,15 +103,16 @@ void ModelGoalItem::setFactGoalFactMkValHtml()
   QString factGoalHtml = QString(factGoalSource.c_str()).replace(goalLabel, goalHtml);
   QString factMkValHtml = QString(factMkValSource.c_str()).replace(mkValLabel, DownArrowHtml);
   QString mkValHtml(mkValSource.c_str());
-
+  
+  factGoalFactMkValHtml_ = "Model " + makeHtmlLink(modelReduction_->model_) + " " + RightArrowHtml + "\n";
   if (is_sim()) {
     // All outer facts in a simulation have the same time, so don't show it.
-    factGoalFactMkValHtml_ = goalHtml;
+    factGoalFactMkValHtml_ += goalHtml;
     factGoalFactMkValHtml_ += "\n      " + factMkValHtml;
     factGoalFactMkValHtml_ += "\n          " + mkValHtml;
   }
   else {
-    factGoalFactMkValHtml_ = factGoalHtml;
+    factGoalFactMkValHtml_ += factGoalHtml;
     factGoalFactMkValHtml_ += "\n              " + factMkValHtml;
     factGoalFactMkValHtml_ += "\n                  " + mkValHtml;
   }
