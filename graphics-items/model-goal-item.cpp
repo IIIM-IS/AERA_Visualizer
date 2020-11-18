@@ -55,7 +55,7 @@
 #include "../aera-visualizer-window.hpp"
 #include "../submodules/replicode/r_exec/factory.h"
 #include "aera-visualizer-scene.hpp"
-#include "goal-item.hpp"
+#include "model-goal-item.hpp"
 
 using namespace std;
 using namespace core;
@@ -64,7 +64,7 @@ using namespace r_exec;
 
 namespace aera_visualizer {
 
-GoalItem::GoalItem(
+ModelGoalItem::ModelGoalItem(
   ModelGoalReduction* modelReduction, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
   : AeraGraphicsItem(modelReduction, replicodeObjects, parent, "Goal"),
@@ -72,7 +72,7 @@ GoalItem::GoalItem(
 {
   setFactGoalFactMkValHtml();
 
-  _Fact* goalFact = (_Fact*)modelReduction->object_->get_reference(0)->get_reference(0);
+  _Fact* goalFact = (_Fact*)modelReduction_->object_->get_reference(0)->get_reference(0);
   qreal targetWidth = 0;
   if (is_sim())
     // Make the width span the full duration of the goal.
@@ -81,7 +81,7 @@ GoalItem::GoalItem(
   setTextItemAndPolygon(factGoalFactMkValHtml_, true, targetWidth);
 }
 
-void GoalItem::setFactGoalFactMkValHtml()
+void ModelGoalItem::setFactGoalFactMkValHtml()
 {
   auto goal = modelReduction_->object_->get_reference(0);
   auto factMkVal = goal->get_reference(0);
@@ -120,7 +120,7 @@ void GoalItem::setFactGoalFactMkValHtml()
   factGoalFactMkValHtml_ = htmlify(factGoalFactMkValHtml_);
 }
 
-void GoalItem::textItemLinkActivated(const QString& link)
+void ModelGoalItem::textItemLinkActivated(const QString& link)
 {
   if (link == "#this") {
     auto menu = new QMenu();

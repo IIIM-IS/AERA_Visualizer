@@ -291,6 +291,32 @@ public:
   r_exec::_Fact* factSuperGoal_;
 };
 
+/**
+ * CompositeStateGoalReduction is a reduction event of a composite statue abduction to a goal.
+ */
+class CompositeStateGoalReduction : public AeraEvent {
+public:
+  /**
+   * Create a CompositeStateGoalReduction, but set object_ to the (fact (goal...)).
+   * \param time The reduction time.
+   * \param compositeState The composite state which did the reduction.
+   * \param factGoal The (fact (goal...)) (production).
+   * \param factSuperGoal The (fact (goal...)) super goal (input).
+   */
+  CompositeStateGoalReduction(core::Timestamp time, r_code::Code* compositeState,
+    r_code::Code* factGoal, r_code::Code* factSuperGoal)
+    : AeraEvent(EVENT_TYPE, time, factGoal),
+    compositeState_(compositeState), factGoal_((r_exec::_Fact*)factGoal),
+    factSuperGoal_((r_exec::_Fact*)factSuperGoal)
+  {}
+
+  static const int EVENT_TYPE = 10;
+
+  r_code::Code* compositeState_;
+  r_exec::_Fact* factGoal_;
+  r_exec::_Fact* factSuperGoal_;
+};
+
 class NewInstantiatedCompositeStateEvent : public AeraEvent {
 public:
   NewInstantiatedCompositeStateEvent(
@@ -300,7 +326,7 @@ public:
     inputs_(inputs)
   {}
 
-  static const int EVENT_TYPE = 10;
+  static const int EVENT_TYPE = 11;
 
   std::vector<r_code::Code*> inputs_;
 };
@@ -320,7 +346,7 @@ public:
    */
   bool isSuccess() { return object_->code(0).asOpcode() == r_exec::Opcodes::Fact;  }
 
-  static const int EVENT_TYPE = 11;
+  static const int EVENT_TYPE = 12;
 };
 
 class EnvironmentInjectEvent : public AeraEvent {
@@ -331,7 +357,7 @@ public:
     injectionTime_(injectionTime)
   {}
 
-  static const int EVENT_TYPE = 12;
+  static const int EVENT_TYPE = 13;
 
   core::Timestamp injectionTime_;
 };
@@ -343,7 +369,7 @@ public:
     reduction_(reduction)
   {}
 
-  static const int EVENT_TYPE = 13;
+  static const int EVENT_TYPE = 14;
 
   r_code::Code* reduction_;
 };

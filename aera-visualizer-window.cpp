@@ -57,7 +57,8 @@
 #include "graphics-items/composite-state-item.hpp"
 #include "graphics-items/auto-focus-fact-item.hpp"
 #include "graphics-items/prediction-item.hpp"
-#include "graphics-items/goal-item.hpp"
+#include "graphics-items/model-goal-item.hpp"
+#include "graphics-items/composite-state-goal-item.hpp"
 #include "graphics-items/prediction-result-item.hpp"
 #include "graphics-items/instantiated-composite-state-item.hpp"
 #include "graphics-items/environment-inject-eject-item.hpp"
@@ -144,6 +145,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   regex modelAbductionReductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl \\d+ abduce -> mk.rdx (\\d+)$");
   // 0s:510ms:0us mdl 64: fact 96 super_goal -> fact 98 simulated goal
   regex modelSimulatedAbductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl (\\d+): fact (\\d+) super_goal -> fact (\\d+) simulated goal$");
+  // 0s:510ms:0us cst 64: fact 96 super_goal -> fact 98 simulated goal
+  regex compositeStateSimulatedAbductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us cst (\\d+): fact (\\d+) super_goal -> fact (\\d+) simulated goal$");
   // 0s:200ms:0us fact 59 icst[52][ 50 55]
   regex newInstantiatedCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+) icst\\[\\d+\\]\\[([ \\d]+)\\]$");
   // 0s:300ms:0us fact 75 -> fact 79 success fact 60 pred
@@ -294,6 +297,14 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
       if (model && factGoal && factSuperGoal)
         events_.push_back(make_shared<ModelGoalReduction>(
           getTimestamp(matches), model, factGoal, factSuperGoal));
+    }
+    else if (regex_search(line, matches, compositeStateSimulatedAbductionRegex)) {
+      auto compositeState = replicodeObjects_.getObject(stoul(matches[4].str()));
+      auto factGoal = replicodeObjects_.getObject(stoul(matches[6].str()));
+      auto factSuperGoal = replicodeObjects_.getObject(stoul(matches[5].str()));
+      if (compositeState && factGoal && factSuperGoal)
+        events_.push_back(make_shared<CompositeStateGoalReduction>(
+          getTimestamp(matches), compositeState, factGoal, factSuperGoal));
     }
     else if (regex_search(line, matches, newInstantiatedCompositeStateRegex)) {
       auto timestamp = getTimestamp(matches);
@@ -461,6 +472,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
       event->eventType_ == ModelMkValPredictionReduction::EVENT_TYPE ||
       event->eventType_ == ModelGoalReduction::EVENT_TYPE ||
+      event->eventType_ == CompositeStateGoalReduction::EVENT_TYPE ||
       event->eventType_ == PredictionResultEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
@@ -516,7 +528,11 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     }
     else if (event->eventType_ == ModelGoalReduction::EVENT_TYPE) {
       auto reductionEvent = (ModelGoalReduction*)event;
-      newItem = new GoalItem(reductionEvent, replicodeObjects_, scene);
+      newItem = new ModelGoalItem(reductionEvent, replicodeObjects_, scene);
+    }
+    else if (event->eventType_ == CompositeStateGoalReduction::EVENT_TYPE) {
+      auto reductionEvent = (CompositeStateGoalReduction*)event;
+      newItem = new CompositeStateGoalItem(reductionEvent, replicodeObjects_, scene);
     }
     else if (event->eventType_ == PredictionResultEvent::EVENT_TYPE)
       newItem = new PredictionResultItem((PredictionResultEvent*)event, replicodeObjects_, scene);
@@ -625,6 +641,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
       event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
       event->eventType_ == ModelMkValPredictionReduction::EVENT_TYPE ||
       event->eventType_ == ModelGoalReduction::EVENT_TYPE ||
+      event->eventType_ == CompositeStateGoalReduction::EVENT_TYPE ||
       event->eventType_ == PredictionResultEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||

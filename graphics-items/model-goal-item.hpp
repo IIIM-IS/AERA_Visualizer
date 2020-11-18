@@ -49,8 +49,8 @@
 //_/_/
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-#ifndef GOAL_ITEM_HPP
-#define GOAL_ITEM_HPP
+#ifndef MODEL_GOAL_ITEM_HPP
+#define MODEL_GOAL_ITEM_HPP
 
 #include "aera-graphics-item.hpp"
 
@@ -58,10 +58,10 @@ namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
-class GoalItem : public AeraGraphicsItem
+class ModelGoalItem : public AeraGraphicsItem
 {
 public:
-  GoalItem(
+  ModelGoalItem(
     ModelGoalReduction* modelReduction, ReplicodeObjects& replicodeObjects,
     AeraVisualizerScene* parent);
 
