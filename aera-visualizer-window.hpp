@@ -191,6 +191,7 @@ private:
 
   QCheckBox* essenceFactsCheckBox_;
   QCheckBox* instantiatedCompositeStatesCheckBox_;
+  QCheckBox* simulationsCheckBox_;
 
   size_t iNextEvent_;
   QPen itemBorderHighlightPen_;

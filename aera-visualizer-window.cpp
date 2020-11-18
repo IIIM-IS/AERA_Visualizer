@@ -531,18 +531,24 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       newItem = new ModelGoalItem(reductionEvent, replicodeObjects_, scene);
 
       // Add an arrow to the fact super goal.
-      auto faceSuperGoalItem = scene->getAeraGraphicsItem(reductionEvent->factSuperGoal_);
-      if (faceSuperGoalItem)
-        scene->addArrow(newItem, faceSuperGoalItem);
+      auto factSuperGoalItem = scene->getAeraGraphicsItem(reductionEvent->factSuperGoal_);
+      if (factSuperGoalItem)
+        scene->addArrow(newItem, factSuperGoalItem);
+
+      if (newItem->is_sim())
+        visible = (simulationsCheckBox_->checkState() == Qt::Checked);
     }
     else if (event->eventType_ == CompositeStateGoalReduction::EVENT_TYPE) {
       auto reductionEvent = (CompositeStateGoalReduction*)event;
       newItem = new CompositeStateGoalItem(reductionEvent, replicodeObjects_, scene);
 
       // Add an arrow to the fact super goal.
-      auto faceSuperGoalItem = scene->getAeraGraphicsItem(reductionEvent->factSuperGoal_);
-      if (faceSuperGoalItem)
-        scene->addArrow(newItem, faceSuperGoalItem);
+      auto factSuperGoalItem = scene->getAeraGraphicsItem(reductionEvent->factSuperGoal_);
+      if (factSuperGoalItem)
+        scene->addArrow(newItem, factSuperGoalItem);
+
+      if (newItem->is_sim())
+        visible = (simulationsCheckBox_->checkState() == Qt::Checked);
     }
     else if (event->eventType_ == PredictionResultEvent::EVENT_TYPE)
       newItem = new PredictionResultItem((PredictionResultEvent*)event, replicodeObjects_, scene);
@@ -773,6 +779,15 @@ void AeraVisulizerWindow::createToolbars()
   connect(instantiatedCompositeStatesCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     mainScene_->setItemsVisible(NewInstantiatedCompositeStateEvent::EVENT_TYPE, state == Qt::Checked);  });
   toolbar->addWidget(instantiatedCompositeStatesCheckBox_);
+
+  simulationsCheckBox_ = new QCheckBox("Simulations", this);
+  // Show simulations by default.
+  simulationsCheckBox_->setCheckState(Qt::Checked);
+  connect(simulationsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
+    // Debug: Check if the goal is simulated.
+    mainScene_->setItemsVisible(ModelGoalReduction::EVENT_TYPE, state == Qt::Checked);
+    mainScene_->setItemsVisible(CompositeStateGoalReduction::EVENT_TYPE, state == Qt::Checked);  });
+  toolbar->addWidget(simulationsCheckBox_);
 }
 
 }
