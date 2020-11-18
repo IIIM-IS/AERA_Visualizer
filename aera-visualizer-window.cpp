@@ -529,10 +529,20 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     else if (event->eventType_ == ModelGoalReduction::EVENT_TYPE) {
       auto reductionEvent = (ModelGoalReduction*)event;
       newItem = new ModelGoalItem(reductionEvent, replicodeObjects_, scene);
+
+      // Add an arrow to the fact super goal.
+      auto faceSuperGoalItem = scene->getAeraGraphicsItem(reductionEvent->factSuperGoal_);
+      if (faceSuperGoalItem)
+        scene->addArrow(newItem, faceSuperGoalItem);
     }
     else if (event->eventType_ == CompositeStateGoalReduction::EVENT_TYPE) {
       auto reductionEvent = (CompositeStateGoalReduction*)event;
       newItem = new CompositeStateGoalItem(reductionEvent, replicodeObjects_, scene);
+
+      // Add an arrow to the fact super goal.
+      auto faceSuperGoalItem = scene->getAeraGraphicsItem(reductionEvent->factSuperGoal_);
+      if (faceSuperGoalItem)
+        scene->addArrow(newItem, faceSuperGoalItem);
     }
     else if (event->eventType_ == PredictionResultEvent::EVENT_TYPE)
       newItem = new PredictionResultItem((PredictionResultEvent*)event, replicodeObjects_, scene);
