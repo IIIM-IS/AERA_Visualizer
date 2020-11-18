@@ -139,7 +139,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
           break;
 
         auto line = addLine(frameLeft, sceneRect().top(), frameLeft, sceneRect().bottom(),
-          QPen(Qt::darkGray, 1, Qt::DashLine));
+          QPen(Qt::lightGray, 1, Qt::DashLine));
         line->setZValue(-100);
         auto text = addText(replicodeObjects_.relativeTime(frameTime).c_str());
         text->setZValue(-100);
