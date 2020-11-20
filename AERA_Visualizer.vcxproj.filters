@@ -213,9 +213,6 @@
     <ClCompile Include="graphics-items\auto-focus-fact-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
-    <ClCompile Include="graphics-items\environment-inject-eject-item.cpp">
-      <Filter>graphics-items</Filter>
-    </ClCompile>
     <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\xml_parser.cpp">
       <Filter>CoreLibrary</Filter>
     </ClCompile>
@@ -226,6 +223,9 @@
       <Filter>graphics-items</Filter>
     </ClCompile>
     <ClCompile Include="graphics-items\composite-state-goal-item.cpp">
+      <Filter>graphics-items</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics-items\io-device-inject-eject-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
   </ItemGroup>
@@ -433,9 +433,6 @@
     <ClInclude Include="graphics-items\auto-focus-fact-item.hpp">
       <Filter>graphics-items</Filter>
     </ClInclude>
-    <ClInclude Include="graphics-items\environment-inject-eject-item.hpp">
-      <Filter>graphics-items</Filter>
-    </ClInclude>
     <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\xml_parser.h">
       <Filter>CoreLibrary</Filter>
     </ClInclude>
@@ -446,6 +443,9 @@
       <Filter>graphics-items</Filter>
     </ClInclude>
     <ClInclude Include="graphics-items\composite-state-goal-item.hpp">
+      <Filter>graphics-items</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics-items\io-device-inject-eject-item.hpp">
       <Filter>graphics-items</Filter>
     </ClInclude>
   </ItemGroup>

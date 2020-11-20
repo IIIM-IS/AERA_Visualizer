@@ -54,7 +54,7 @@
 #include "explanation-log-window.hpp"
 #include "../aera-visualizer-window.hpp"
 #include "aera-visualizer-scene.hpp"
-#include "environment-inject-eject-item.hpp"
+#include "io-device-inject-eject-item.hpp"
 
 using namespace std;
 using namespace core;
@@ -62,10 +62,10 @@ using namespace r_code;
 
 namespace aera_visualizer {
 
-const QString EnvironmentInjectEjectItem::UpWideArrowHtml("<b>&#129093;</b>");
-const QString EnvironmentInjectEjectItem::DownWideArrowHtml("<b>&#129095;</b>");
+const QString IoDeviceInjectEjectItem::UpWideArrowHtml("<b>&#129093;</b>");
+const QString IoDeviceInjectEjectItem::DownWideArrowHtml("<b>&#129095;</b>");
 
-EnvironmentInjectEjectItem::EnvironmentInjectEjectItem(
+IoDeviceInjectEjectItem::IoDeviceInjectEjectItem(
   AeraEvent* event, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
 : AeraGraphicsItem(event, replicodeObjects, parent, "Eject"),
   event_(event)
@@ -105,13 +105,13 @@ EnvironmentInjectEjectItem::EnvironmentInjectEjectItem(
   borderNoHighlightPen_ = QPen(parent_->backgroundBrush().color(), 1);
 }
 
-void EnvironmentInjectEjectItem::setLabelHtml()
+void IoDeviceInjectEjectItem::setLabelHtml()
 {
-  labelHtml_ = (event_->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ? DownWideArrowHtml : UpWideArrowHtml) +
+  labelHtml_ = (event_->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ? DownWideArrowHtml : UpWideArrowHtml) +
     "<a href=\"#this\">" + replicodeObjects_.getLabel(event_->object_).c_str() + "</a>";
 }
 
-void EnvironmentInjectEjectItem::setFactValHtml()
+void IoDeviceInjectEjectItem::setFactValHtml()
 {
   auto val = event_->object_->get_reference(0);
 
@@ -131,19 +131,19 @@ void EnvironmentInjectEjectItem::setFactValHtml()
   factValHtml_ = htmlify(factValHtml_);
 }
 
-void EnvironmentInjectEjectItem::textItemLinkActivated(const QString& link)
+void IoDeviceInjectEjectItem::textItemLinkActivated(const QString& link)
 {
   if (link == "#this") {
     auto menu = new QMenu();
     menu->addAction("What Is This?", [=]() {
       QString explanation;
-      if (event_->eventType_ == EnvironmentInjectEvent::EVENT_TYPE)
+      if (event_->eventType_ == IoDeviceInjectEvent::EVENT_TYPE)
         explanation = "<b>Q: What is inject " + makeHtmlLink(event_->object_) +
-          " ?</b><br>This fact was injected from the environment:<br>" + factValHtml_ + "<br><br>";
+          " ?</b><br>This fact was injected from the I/O device:<br>" + factValHtml_ + "<br><br>";
       else {
-        auto ejectEvent = (EnvironmentEjectEvent*)event_;
+        auto ejectEvent = (IoDeviceEjectEvent*)event_;
         explanation = "<b>Q: What is eject " + makeHtmlLink(ejectEvent->object_) +
-          " ?</b><br>A command was ejected to the environment:<br>" + factValHtml_;
+          " ?</b><br>A command was ejected to the I/O device:<br>" + factValHtml_;
         if (ejectEvent->reduction_)
           explanation += QString("<br><br>It was ejected by instantiated program <b>") + 
             replicodeObjects_.getLabel(ejectEvent->reduction_->get_reference(0)).c_str() +
@@ -159,7 +159,7 @@ void EnvironmentInjectEjectItem::textItemLinkActivated(const QString& link)
   }
 }
 
-void EnvironmentInjectEjectItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+void IoDeviceInjectEjectItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
   // TODO: Why can't we just set the brush in the constructor?
   setBrush(parent_->backgroundBrush());

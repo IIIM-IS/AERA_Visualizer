@@ -349,9 +349,9 @@ public:
   static const int EVENT_TYPE = 12;
 };
 
-class EnvironmentInjectEvent : public AeraEvent {
+class IoDeviceInjectEvent : public AeraEvent {
 public:
-  EnvironmentInjectEvent(
+  IoDeviceInjectEvent(
     core::Timestamp time, r_code::Code* object, core::Timestamp injectionTime)
     : AeraEvent(EVENT_TYPE, time, object),
     injectionTime_(injectionTime)
@@ -362,9 +362,9 @@ public:
   core::Timestamp injectionTime_;
 };
 
-class EnvironmentEjectEvent : public AeraEvent {
+class IoDeviceEjectEvent : public AeraEvent {
 public:
-  EnvironmentEjectEvent(core::Timestamp time, r_code::Code* object, r_code::Code* reduction)
+  IoDeviceEjectEvent(core::Timestamp time, r_code::Code* object, r_code::Code* reduction)
     : AeraEvent(EVENT_TYPE, time, object),
     reduction_(reduction)
   {}

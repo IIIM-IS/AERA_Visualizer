@@ -61,7 +61,7 @@
 #include "graphics-items/composite-state-goal-item.hpp"
 #include "graphics-items/prediction-result-item.hpp"
 #include "graphics-items/instantiated-composite-state-item.hpp"
-#include "graphics-items/environment-inject-eject-item.hpp"
+#include "graphics-items/io-device-inject-eject-item.hpp"
 #include "graphics-items/aera-visualizer-scene.hpp"
 #include "aera-visualizer-window.hpp"
 
@@ -155,12 +155,12 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   regex predictionFailureRegex("^(\\d+)s:(\\d+)ms:(\\d+)us \\|fact (\\d+) fact \\d+ pred failure$");
   // 0s:600ms:0us fact 121: 96 goal success (TopLevel)
   regex topLevelGoalSuccessRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+): (\\d+) goal success \\(TopLevel\\)$");
-  // 0s:200ms:0us environment inject 46, ijt 0s:200ms:0us
-  regex environmentInjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us environment inject (\\d+), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
-  // 0s:100ms:0us mk.rdx(100): environment eject 39
-  regex environmentEjectWithRdxRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mk.rdx\\((\\d+)\\): environment eject (\\d+)$");
-  // 0s:100ms:0us environment eject 39
-  regex environmentEjectWithoutRdxRegex("^(\\d+)s:(\\d+)ms:(\\d+)us environment eject (\\d+)$");
+  // 0s:200ms:0us I/O device inject 46, ijt 0s:200ms:0us
+  regex ioDeviceInjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us I/O device inject (\\d+), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
+  // 0s:100ms:0us mk.rdx(100): I/O device eject 39
+  regex ioDeviceEjectWithRdxRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mk.rdx\\((\\d+)\\): I/O device eject (\\d+)$");
+  // 0s:100ms:0us I/O device eject 39
+  regex ioDeviceEjectWithoutRdxRegex("^(\\d+)s:(\\d+)ms:(\\d+)us I/O device eject (\\d+)$");
 
   // Count the number of lines, to use in the progress dialog.
   int nLines;
@@ -344,23 +344,23 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
     else if (regex_search(line, matches, topLevelGoalSuccessRegex)) {
       auto factSuccessFactGoal = replicodeObjects_.getObject(stoul(matches[4].str()));
     }
-    else if (regex_search(line, matches, environmentInjectRegex)) {
+    else if (regex_search(line, matches, ioDeviceInjectRegex)) {
       auto object = replicodeObjects_.getObject(stoul(matches[4].str()));
       if (object)
-        events_.push_back(make_shared<EnvironmentInjectEvent>(
+        events_.push_back(make_shared<IoDeviceInjectEvent>(
           getTimestamp(matches), object, getTimestamp(matches, 5)));
     }
-    else if (regex_search(line, matches, environmentEjectWithRdxRegex)) {
+    else if (regex_search(line, matches, ioDeviceEjectWithRdxRegex)) {
       auto reduction = replicodeObjects_.getObjectByDebugOid(stoul(matches[4].str()));
       auto object = replicodeObjects_.getObject(stoul(matches[5].str()));
       if (object)
-        events_.push_back(make_shared<EnvironmentEjectEvent>(
+        events_.push_back(make_shared<IoDeviceEjectEvent>(
           getTimestamp(matches), object, reduction));
     }
-    else if (regex_search(line, matches, environmentEjectWithoutRdxRegex)) {
+    else if (regex_search(line, matches, ioDeviceEjectWithoutRdxRegex)) {
       auto object = replicodeObjects_.getObject(stoul(matches[4].str()));
       if (object)
-        events_.push_back(make_shared<EnvironmentEjectEvent>(
+        events_.push_back(make_shared<IoDeviceEjectEvent>(
           getTimestamp(matches), object, (Code*)NULL));
     }
   }
@@ -475,8 +475,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       event->eventType_ == CompositeStateGoalReduction::EVENT_TYPE ||
       event->eventType_ == PredictionResultEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
-      event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
-      event->eventType_ == EnvironmentEjectEvent::EVENT_TYPE) {
+      event->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
+      event->eventType_ == IoDeviceEjectEvent::EVENT_TYPE) {
     AeraGraphicsItem* newItem;
     bool visible = true;
 
@@ -565,10 +565,10 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 
       visible = (instantiatedCompositeStatesCheckBox_->checkState() == Qt::Checked);
     }
-    else if (event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
-             event->eventType_ == EnvironmentEjectEvent::EVENT_TYPE)
-      // TODO: Position the EnvironmentInjectEvent at its injectionTime?
-      newItem = new EnvironmentInjectEjectItem(event, replicodeObjects_, scene);
+    else if (event->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
+             event->eventType_ == IoDeviceEjectEvent::EVENT_TYPE)
+      // TODO: Position the IoDeviceInjectEvent at its injectionTime?
+      newItem = new IoDeviceInjectEjectItem(event, replicodeObjects_, scene);
 
     // Add the new item.
     scene->addAeraGraphicsItem(newItem);
@@ -660,8 +660,8 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
       event->eventType_ == CompositeStateGoalReduction::EVENT_TYPE ||
       event->eventType_ == PredictionResultEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
-      event->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
-      event->eventType_ == EnvironmentEjectEvent::EVENT_TYPE) {
+      event->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
+      event->eventType_ == IoDeviceEjectEvent::EVENT_TYPE) {
     AeraVisualizerScene* scene;
     if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)

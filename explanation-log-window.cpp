@@ -52,7 +52,7 @@
 #include <QtWidgets>
 #include "submodules/replicode/r_exec/opcodes.h"
 #include "graphics-items/program-reduction-item.hpp"
-#include "graphics-items/environment-inject-eject-item.hpp"
+#include "graphics-items/io-device-inject-eject-item.hpp"
 #include "aera-visualizer-window.hpp"
 #include "explanation-log-window.hpp"
 
@@ -140,7 +140,7 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
       auto item = parent_->getAeraGraphicsItem(object);
       if (!item)
         return;
-      if (dynamic_cast<EnvironmentInjectEjectItem*>(item))
+      if (dynamic_cast<IoDeviceInjectEjectItem*>(item))
         // The inject/eject items are too small to zoom to.
         return;
 

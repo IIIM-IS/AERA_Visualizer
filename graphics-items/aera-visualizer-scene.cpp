@@ -93,8 +93,8 @@ AeraVisualizerScene::AeraVisualizerScene(
   setSceneRect(QRectF(0, 0, 15000, 5000));
 
   if (isMainScene_) {
-    eventTypeFirstTop_[EnvironmentEjectEvent::EVENT_TYPE] = 20;
-    eventTypeFirstTop_[EnvironmentInjectEvent::EVENT_TYPE] = 45;
+    eventTypeFirstTop_[IoDeviceEjectEvent::EVENT_TYPE] = 20;
+    eventTypeFirstTop_[IoDeviceInjectEvent::EVENT_TYPE] = 45;
     eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] = 120;
     eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 315;
     eventTypeFirstTop_[ModelMkValPredictionReduction::EVENT_TYPE] = 433;
@@ -127,7 +127,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       view->translate(10 - firstFrameLeft, 0);
       view->setTransformationAnchor(saveAnchor);
 
-      // Separate the environment eject/inject region.
+      // Separate from the region of I/O device eject/inject events.
       auto y = eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] - 5;
       auto line = addLine(sceneRect().left(), y, sceneRect().right(), y, QPen(Qt::darkGray, 1));
       line->setZValue(-100);
@@ -195,8 +195,8 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       // We know that a simulated item's object has the form (fact (goal_or_pred (fact ...)))
       left = getTimelineX(((_Fact*)aeraEvent->object_->get_reference(0)->get_reference(0))->get_after());
     else {
-      if (aeraEvent->eventType_ == EnvironmentInjectEvent::EVENT_TYPE ||
-        aeraEvent->eventType_ == EnvironmentEjectEvent::EVENT_TYPE) {
+      if (aeraEvent->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
+        aeraEvent->eventType_ == IoDeviceEjectEvent::EVENT_TYPE) {
         // Allow inject/eject items to be on the frame boundary.
         left = thisFrameLeft_ + item->boundingRect().left();
         verticalMargin = 5;

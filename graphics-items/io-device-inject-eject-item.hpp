@@ -49,8 +49,8 @@
 //_/_/
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-#ifndef ENVIRONMENT_INJECT_EJECT_ITEM_HPP
-#define ENVIRONMENT_INJECT_EJECT_ITEM_HPP
+#ifndef IO_DEVICE_INJECT_EJECT_ITEM_HPP
+#define IO_DEVICE_INJECT_EJECT_ITEM_HPP
 
 #include <QGraphicsPixmapItem>
 #include <QList>
@@ -61,16 +61,16 @@ namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
-class EnvironmentInjectEjectItem : public AeraGraphicsItem
+class IoDeviceInjectEjectItem : public AeraGraphicsItem
 {
 public:
   /**
-   * Create an EnvironmentInjectEjectItem.
-   * \param event This may be EnvironmentInjectEvent or EnvironmentEjectEvent.
+   * Create an IoDeviceInjectEjectItem.
+   * \param event This may be IoDeviceInjectEvent or IoDeviceEjectEvent.
    * \param replicodeObjects
    * \param parent
    */
-  EnvironmentInjectEjectItem(
+  IoDeviceInjectEjectItem(
     AeraEvent* event, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 
   static const QString UpWideArrowHtml;
