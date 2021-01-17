@@ -183,6 +183,11 @@
       </DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <WarningLevel>Level4</WarningLevel>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -253,9 +258,7 @@
     <ClCompile Include="submodules\replicode\r_exec\cst_controller.cpp" />
     <ClCompile Include="submodules\replicode\r_exec\factory.cpp" />
     <ClCompile Include="submodules\replicode\r_exec\group.cpp" />
-    <ClCompile Include="submodules\replicode\r_exec\group.inline.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="submodules\replicode\r_exec\group.inline.cpp" />
     <ClCompile Include="submodules\replicode\r_exec\guard_builder.cpp" />
     <ClCompile Include="submodules\replicode\r_exec\g_monitor.cpp" />
     <ClCompile Include="submodules\replicode\r_exec\hlp_context.cpp" />
