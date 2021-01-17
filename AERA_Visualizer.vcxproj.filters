@@ -228,6 +228,12 @@
     <ClCompile Include="graphics-items\io-device-inject-eject-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
+    <ClCompile Include="submodules\replicode\r_code\atom.inline.cpp">
+      <Filter>r_code</Filter>
+    </ClCompile>
+    <ClCompile Include="submodules\replicode\r_code\image.tpl.cpp">
+      <Filter>r_code</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aera-event.hpp" />
@@ -447,6 +453,9 @@
     </ClInclude>
     <ClInclude Include="graphics-items\io-device-inject-eject-item.hpp">
       <Filter>graphics-items</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\pipe.h">
+      <Filter>CoreLibrary</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

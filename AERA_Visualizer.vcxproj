@@ -232,8 +232,16 @@
     <ClCompile Include="aera-visualizer-window.cpp" />
     <ClCompile Include="replicode-objects.cpp" />
     <ClCompile Include="submodules\replicode\r_code\atom.cpp" />
+    <ClCompile Include="submodules\replicode\r_code\atom.inline.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="submodules\replicode\r_code\code_utils.cpp" />
     <ClCompile Include="submodules\replicode\r_code\image.cpp" />
+    <ClCompile Include="submodules\replicode\r_code\image.tpl.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="submodules\replicode\r_code\image_impl.cpp" />
     <ClCompile Include="submodules\replicode\r_code\object.cpp" />
     <ClCompile Include="submodules\replicode\r_code\r_code.cpp" />
@@ -249,6 +257,7 @@
     <ClCompile Include="submodules\replicode\r_exec\ast_controller.cpp" />
     <ClCompile Include="submodules\replicode\r_exec\ast_controller.tpl.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="submodules\replicode\r_exec\auto_focus.cpp" />
     <ClCompile Include="submodules\replicode\r_exec\binding_map.cpp" />
@@ -258,7 +267,10 @@
     <ClCompile Include="submodules\replicode\r_exec\cst_controller.cpp" />
     <ClCompile Include="submodules\replicode\r_exec\factory.cpp" />
     <ClCompile Include="submodules\replicode\r_exec\group.cpp" />
-    <ClCompile Include="submodules\replicode\r_exec\group.inline.cpp" />
+    <ClCompile Include="submodules\replicode\r_exec\group.inline.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="submodules\replicode\r_exec\guard_builder.cpp" />
     <ClCompile Include="submodules\replicode\r_exec\g_monitor.cpp" />
     <ClCompile Include="submodules\replicode\r_exec\hlp_context.cpp" />
@@ -269,11 +281,13 @@
     <ClCompile Include="submodules\replicode\r_exec\mem.cpp" />
     <ClCompile Include="submodules\replicode\r_exec\mem.tpl.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="submodules\replicode\r_exec\model_base.cpp" />
     <ClCompile Include="submodules\replicode\r_exec\monitor.cpp" />
     <ClCompile Include="submodules\replicode\r_exec\object.tpl.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="submodules\replicode\r_exec\opcodes.cpp" />
     <ClCompile Include="submodules\replicode\r_exec\operator.cpp" />
@@ -283,6 +297,7 @@
     <ClCompile Include="submodules\replicode\r_exec\pgm_overlay.cpp" />
     <ClCompile Include="submodules\replicode\r_exec\pgm_overlay.inline.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="submodules\replicode\r_exec\p_monitor.cpp" />
     <ClCompile Include="submodules\replicode\r_exec\reduction_core.cpp" />
@@ -292,18 +307,22 @@
     <ClCompile Include="submodules\replicode\r_exec\view.cpp" />
     <ClCompile Include="submodules\replicode\r_exec\view.inline.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="submodules\replicode\r_exec\_context.cpp" />
     <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\base.cpp" />
     <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\base.tpl.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\pipe.tpl.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\utils.cpp" />
     <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\utils.tpl.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\xml_parser.cpp" />
     <ClCompile Include="submodules\replicode\usr_operators\auto_focus_callback.cpp" />
@@ -382,6 +401,7 @@
     <ClInclude Include="submodules\replicode\r_exec\view.h" />
     <ClInclude Include="submodules\replicode\r_exec\_context.h" />
     <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\base.h" />
+    <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\pipe.h" />
     <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\types.h" />
     <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\utils.h" />
     <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\xml_parser.h" />
