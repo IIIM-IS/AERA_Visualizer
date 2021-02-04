@@ -70,7 +70,7 @@ CompositeStateGoalItem::CompositeStateGoalItem(
   : AeraGraphicsItem(compositeStateReduction, replicodeObjects, parent, "Goal"),
   compositeStateReduction_(compositeStateReduction)
 {
-  setFactGoalFactMkValHtml();
+  setFactGoalFactValueHtml();
 
   _Fact* goalFact = (_Fact*)compositeStateReduction_->object_->get_reference(0)->get_reference(0);
   qreal targetWidth = 0;
@@ -78,48 +78,48 @@ CompositeStateGoalItem::CompositeStateGoalItem(
     // Make the width span the full duration of the goal.
     targetWidth = parent->getTimelineX(goalFact->get_before()) - parent->getTimelineX(goalFact->get_after());
 
-  setTextItemAndPolygon(factGoalFactMkValHtml_, true, targetWidth);
+  setTextItemAndPolygon(factGoalFactValueHtml_, true, targetWidth);
 }
 
-void CompositeStateGoalItem::setFactGoalFactMkValHtml()
+void CompositeStateGoalItem::setFactGoalFactValueHtml()
 {
   // TODO: Reuse code from ModelGoalItem.
   auto goal = compositeStateReduction_->object_->get_reference(0);
-  auto factMkVal = goal->get_reference(0);
-  auto mkVal = factMkVal->get_reference(0);
+  auto factValue = goal->get_reference(0);
+  auto value = factValue->get_reference(0);
 
   // Strip the ending confidence value and propagation of saliency threshold.
   regex saliencyRegex("\\s+[\\w\\:]+\\)$");
   regex confidenceAndSaliencyRegex("\\s+\\w+\\s+[\\w\\:]+\\)$");
   string factGoalSource = regex_replace(replicodeObjects_.getSourceCode(compositeStateReduction_->object_), confidenceAndSaliencyRegex, ")");
   string goalSource = regex_replace(replicodeObjects_.getSourceCode(goal), saliencyRegex, ")");
-  string factMkValSource = regex_replace(replicodeObjects_.getSourceCode(factMkVal), confidenceAndSaliencyRegex, ")");
-  string mkValSource = regex_replace(replicodeObjects_.getSourceCode(mkVal), saliencyRegex, ")");
+  string factValueSource = regex_replace(replicodeObjects_.getSourceCode(factValue), confidenceAndSaliencyRegex, ")");
+  string valueSource = regex_replace(replicodeObjects_.getSourceCode(value), saliencyRegex, ")");
 
   QString goalLabel(replicodeObjects_.getLabel(goal).c_str());
-  QString factMkValLabel(replicodeObjects_.getLabel(factMkVal).c_str());
-  QString mkValLabel(replicodeObjects_.getLabel(mkVal).c_str());
+  QString factValueLabel(replicodeObjects_.getLabel(factValue).c_str());
+  QString valueLabel(replicodeObjects_.getLabel(value).c_str());
 
-  QString goalHtml = QString(goalSource.c_str()).replace(factMkValLabel, DownArrowHtml);
+  QString goalHtml = QString(goalSource.c_str()).replace(factValueLabel, DownArrowHtml);
   QString factGoalHtml = QString(factGoalSource.c_str()).replace(goalLabel, goalHtml);
-  QString factMkValHtml = QString(factMkValSource.c_str()).replace(mkValLabel, DownArrowHtml);
-  QString mkValHtml(mkValSource.c_str());
+  QString factValueHtml = QString(factValueSource.c_str()).replace(valueLabel, DownArrowHtml);
+  QString valueHtml(valueSource.c_str());
 
-  factGoalFactMkValHtml_ = "Comp. State " + makeHtmlLink(compositeStateReduction_->compositeState_) + " " + RightArrowHtml + "\n";
+  factGoalFactValueHtml_ = "Comp. State " + makeHtmlLink(compositeStateReduction_->compositeState_) + " " + RightArrowHtml + "\n";
   if (is_sim()) {
     // All outer facts in a simulation have the same time, so don't show it.
-    factGoalFactMkValHtml_ += goalHtml;
-    factGoalFactMkValHtml_ += "\n      " + factMkValHtml;
-    factGoalFactMkValHtml_ += "\n          " + mkValHtml;
+    factGoalFactValueHtml_ += goalHtml;
+    factGoalFactValueHtml_ += "\n      " + factValueHtml;
+    factGoalFactValueHtml_ += "\n          " + valueHtml;
   }
   else {
-    factGoalFactMkValHtml_ += factGoalHtml;
-    factGoalFactMkValHtml_ += "\n              " + factMkValHtml;
-    factGoalFactMkValHtml_ += "\n                  " + mkValHtml;
+    factGoalFactValueHtml_ += factGoalHtml;
+    factGoalFactValueHtml_ += "\n              " + factValueHtml;
+    factGoalFactValueHtml_ += "\n                  " + valueHtml;
   }
 
-  addSourceCodeHtmlLinks(compositeStateReduction_->object_, factGoalFactMkValHtml_);
-  factGoalFactMkValHtml_ = htmlify(factGoalFactMkValHtml_);
+  addSourceCodeHtmlLinks(compositeStateReduction_->object_, factGoalFactValueHtml_);
+  factGoalFactValueHtml_ = htmlify(factGoalFactValueHtml_);
 }
 
 }
