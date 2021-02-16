@@ -153,7 +153,8 @@ private:
   std::map<int, qreal> eventTypeFirstTop_;
   // key: The AeraEvent eventType_, or 0 for "other". value: The top to use for the next item added for that event type.
   std::map<int, qreal> eventTypeNextTop_;
-  qreal simulationNextTop_;
+  qreal selectedSimulationNextTop_;
+  qreal otherSimulationNextTop_;
   Timestamp thisFrameTime_;
   qreal thisFrameLeft_;
   QColor itemColor_;

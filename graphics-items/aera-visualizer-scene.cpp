@@ -106,6 +106,10 @@ AeraVisualizerScene::AeraVisualizerScene(
     eventTypeFirstTop_[0] = 5;
 }
 
+// TODO: Infer these.
+static std::set<int> selectedSimulationOids = 
+  { 134, 139, 145, 155, 178 };
+
 void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 {
   auto aeraEvent = item->getAeraEvent();
@@ -151,6 +155,8 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 
   bool isSimulation = item->is_sim();
   item->setBrush(isSimulation ? simulatedItemColor_ : itemColor_);
+  bool isFocusSimulation = (selectedSimulationOids.find(item->getAeraEvent()->object_->get_oid()) 
+                            != selectedSimulationOids.end());
 
   if (qIsNaN(aeraEvent->itemTopLeftPosition_.x())) {
     // Assign an initial position.
@@ -162,7 +168,8 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       thisFrameLeft_ = getTimelineX(thisFrameTime_);
       // Reset the top.
       eventTypeNextTop_.clear();
-      simulationNextTop_ = eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
+      selectedSimulationNextTop_ = eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
+      otherSimulationNextTop_ = 300 + eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
     }
 
     int eventType = 0;
@@ -173,7 +180,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     qreal top;
     if (isSimulation)
       // Ignore eventType and stack the simulated items in order.
-      top = simulationNextTop_;
+      top = (isFocusSimulation ? selectedSimulationNextTop_ : otherSimulationNextTop_);
     else {
       if (eventTypeNextTop_.find(eventType) != eventTypeNextTop_.end())
         top = eventTypeNextTop_[eventType];
@@ -206,10 +213,14 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     }
     aeraEvent->itemTopLeftPosition_ = QPointF(left, top);
 
-    // Set up eventTypeNextTop_ or simulationNextTop_ for the next item.
+    // Set up eventTypeNextTop_ or simulation next top for the next item.
     qreal nextTop = top + item->boundingRect().height() + verticalMargin;
-    if (isSimulation)
-      simulationNextTop_ = nextTop;
+    if (isSimulation) {
+      if (isFocusSimulation)
+        selectedSimulationNextTop_ = nextTop;
+      else
+        otherSimulationNextTop_ = nextTop;
+    }
     else
       eventTypeNextTop_[eventType] = nextTop;
   }
