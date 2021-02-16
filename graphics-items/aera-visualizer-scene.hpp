@@ -138,6 +138,14 @@ private:
   void setItemsVisible(int eventType, bool visible);
 
   /**
+   * Find all items where the event type is not any of the given values, and call setItemAndArrowsVisible.
+   * \param notEventType1 Call setItemAndArrowsVisible if the event type of the item's getAeraEvent() is not this value.
+   * \param notEventType2 Call setItemAndArrowsVisible if the event type of the item's getAeraEvent() is not this value.
+   * \param visible The visible state for setItemAndArrowsVisible.
+   */
+  void setNonItemsVisible(int notEventType1, int notEventType2, bool visible);
+
+  /**
    * Find all AutoFocusFactItem whose object_ is (fact (mk.val X property Y)), and call setItemAndArrowsVisible.
    * \param property The event type of the item's object_ mk.val.
    * \param visible The visible state for setItemAndArrowsVisible.

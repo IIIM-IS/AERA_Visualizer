@@ -324,6 +324,17 @@ void AeraVisualizerScene::setItemsVisible(int eventType, bool visible)
   }
 }
 
+void AeraVisualizerScene::setNonItemsVisible(int notEventType1, int notEventType2, bool visible)
+{
+  foreach(QGraphicsItem * item, items()) {
+    auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
+    if (aeraGraphicsItem && 
+        !(aeraGraphicsItem->getAeraEvent()->eventType_ == notEventType1 ||
+          aeraGraphicsItem->getAeraEvent()->eventType_ == notEventType2))
+      aeraGraphicsItem->setItemAndArrowsVisible(visible);
+  }
+}
+
 void AeraVisualizerScene::setAutoFocusItemsVisible(const string& property, bool visible)
 {
   auto propertyObject = replicodeObjects_.getObject(property);
