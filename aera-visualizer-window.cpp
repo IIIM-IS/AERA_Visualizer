@@ -770,17 +770,8 @@ void AeraVisulizerWindow::createToolbars()
   toolbar->addSeparator();
   toolbar->addWidget(new QLabel("Show/Hide: ", this));
 
-  essenceFactsCheckBox_ = new QCheckBox("Essence Facts", this);
-  connect(essenceFactsCheckBox_, &QCheckBox::stateChanged, [=](int state) { 
-    mainScene_->setAutoFocusItemsVisible("essence", state == Qt::Checked);  });
-  toolbar->addWidget(essenceFactsCheckBox_);
-
-  instantiatedCompositeStatesCheckBox_ = new QCheckBox("Instantiated Comp. States", this);
-  connect(instantiatedCompositeStatesCheckBox_, &QCheckBox::stateChanged, [=](int state) {
-    mainScene_->setItemsVisible(NewInstantiatedCompositeStateEvent::EVENT_TYPE, state == Qt::Checked);  });
-  toolbar->addWidget(instantiatedCompositeStatesCheckBox_);
-
   simulationsCheckBox_ = new QCheckBox("Simulations", this);
+  simulationsCheckBox_->setStyleSheet("background-color:#ffffdc");
   // Show simulations by default.
   simulationsCheckBox_->setCheckState(Qt::Checked);
   connect(simulationsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
@@ -788,6 +779,44 @@ void AeraVisulizerWindow::createToolbars()
     mainScene_->setItemsVisible(ModelGoalReduction::EVENT_TYPE, state == Qt::Checked);
     mainScene_->setItemsVisible(CompositeStateGoalReduction::EVENT_TYPE, state == Qt::Checked);  });
   toolbar->addWidget(simulationsCheckBox_);
+
+  // Separate the non-simulations check boxes.
+  toolbar->addWidget(new QLabel("    ", this));
+
+  nonSimulationsCheckBox_ = new QCheckBox("Non-Simulations", this);
+  nonSimulationsCheckBox_->setStyleSheet("background-color:#ffffff");
+  // Show non-simulations by default.
+  nonSimulationsCheckBox_->setCheckState(Qt::Checked);
+  connect(nonSimulationsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
+    essenceFactsCheckBox_->setEnabled(state == Qt::Checked);
+    instantiatedCompositeStatesCheckBox_->setEnabled(state == Qt::Checked);
+
+    // Do the opposite of simulationsCheckBox_ .
+    // Debug: Check if the goal is simulated.
+    mainScene_->setNonItemsVisible(
+      ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE, state == Qt::Checked);
+
+    if (state == Qt::Checked) {
+      // Make specific non-simulation items visible, if needed.
+      if (essenceFactsCheckBox_->checkState() == Qt::Checked)
+        mainScene_->setAutoFocusItemsVisible("essence", true);
+      if (instantiatedCompositeStatesCheckBox_->checkState() == Qt::Checked)
+        mainScene_->setItemsVisible(NewInstantiatedCompositeStateEvent::EVENT_TYPE, true);
+    }
+  });
+  toolbar->addWidget(nonSimulationsCheckBox_);
+
+  essenceFactsCheckBox_ = new QCheckBox("Essence Facts", this);
+  essenceFactsCheckBox_->setStyleSheet("background-color:#ffffff");
+  connect(essenceFactsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
+    mainScene_->setAutoFocusItemsVisible("essence", state == Qt::Checked);  });
+  toolbar->addWidget(essenceFactsCheckBox_);
+
+  instantiatedCompositeStatesCheckBox_ = new QCheckBox("Instantiated Comp. States", this);
+  instantiatedCompositeStatesCheckBox_->setStyleSheet("background-color:#ffffff");
+  connect(instantiatedCompositeStatesCheckBox_, &QCheckBox::stateChanged, [=](int state) {
+    mainScene_->setItemsVisible(NewInstantiatedCompositeStateEvent::EVENT_TYPE, state == Qt::Checked);  });
+  toolbar->addWidget(instantiatedCompositeStatesCheckBox_);
 }
 
 }
