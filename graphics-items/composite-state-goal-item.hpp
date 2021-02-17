@@ -68,12 +68,13 @@ public:
 private:
   /**
    * Set factGoalFactValueHtml_ to the HTML source code for the fact, goal, fact and value
-   * from modelReduction_->object_.
+   * from compositeStateReduction_->object_. Also set valueHtml_ to the HTML source code for the value.
    */
   void setFactGoalFactValueHtml();
 
   CompositeStateGoalReduction* compositeStateReduction_;
   QString factGoalFactValueHtml_;
+  QString valueHtml_;
 };
 
 }

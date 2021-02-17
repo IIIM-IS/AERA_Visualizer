@@ -78,7 +78,7 @@ CompositeStateGoalItem::CompositeStateGoalItem(
     // Make the width span the full duration of the goal.
     targetWidth = parent->getTimelineX(goalFact->get_before()) - parent->getTimelineX(goalFact->get_after());
 
-  setTextItemAndPolygon(factGoalFactValueHtml_, true, targetWidth);
+  setTextItemAndPolygon(valueHtml_, false, SHAPE_GOAL);
 }
 
 void CompositeStateGoalItem::setFactGoalFactValueHtml()
@@ -103,7 +103,7 @@ void CompositeStateGoalItem::setFactGoalFactValueHtml()
   QString goalHtml = QString(goalSource.c_str()).replace(factValueLabel, DownArrowHtml);
   QString factGoalHtml = QString(factGoalSource.c_str()).replace(goalLabel, goalHtml);
   QString factValueHtml = QString(factValueSource.c_str()).replace(valueLabel, DownArrowHtml);
-  QString valueHtml(valueSource.c_str());
+  QString valueHtml = valueSource.c_str();
 
   factGoalFactValueHtml_ = "Comp. State " + makeHtmlLink(compositeStateReduction_->compositeState_) + " " + RightArrowHtml + "\n";
   if (is_sim()) {
@@ -120,6 +120,8 @@ void CompositeStateGoalItem::setFactGoalFactValueHtml()
 
   addSourceCodeHtmlLinks(compositeStateReduction_->object_, factGoalFactValueHtml_);
   factGoalFactValueHtml_ = htmlify(factGoalFactValueHtml_);
+
+  valueHtml_ = "<div style=\"white-space: nowrap;\">" + htmlify(valueHtml) + "</div>";
 }
 
 }
