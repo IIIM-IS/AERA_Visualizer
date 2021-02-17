@@ -139,11 +139,10 @@ private:
 
   /**
    * Find all items where the event type is not any of the given values, and call setItemAndArrowsVisible.
-   * \param notEventType1 Call setItemAndArrowsVisible if the event type of the item's getAeraEvent() is not this value.
-   * \param notEventType2 Call setItemAndArrowsVisible if the event type of the item's getAeraEvent() is not this value.
+   * \param notEventTypes Call setItemAndArrowsVisible if the event type of the item's getAeraEvent() is not any of these values.
    * \param visible The visible state for setItemAndArrowsVisible.
    */
-  void setNonItemsVisible(int notEventType1, int notEventType2, bool visible);
+  void setNonItemsVisible(const std::set<int>& notEventTypes, bool visible);
 
   /**
    * Find all AutoFocusFactItem whose object_ is (fact (mk.val X property Y)), and call setItemAndArrowsVisible.

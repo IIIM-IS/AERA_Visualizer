@@ -99,7 +99,7 @@ AeraVisualizerScene::AeraVisualizerScene(
     eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 315;
     eventTypeFirstTop_[ModelMkValPredictionReduction::EVENT_TYPE] = 433;
     eventTypeFirstTop_[PredictionResultEvent::EVENT_TYPE] = 570;
-    eventTypeFirstTop_[0] = 700;
+    eventTypeFirstTop_[0] = 780;
   }
   else
     // The default, which is used for the models scene.
@@ -108,7 +108,7 @@ AeraVisualizerScene::AeraVisualizerScene(
 
 // TODO: Infer these.
 static std::set<int> selectedSimulationOids = 
-  { 134, 139, 145, 155, 178 };
+  { 134, 139, 145, 155, 178, 202, 227, 241, 256, 264, 269, 275, 281, 287, 292 };
 
 void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 {
@@ -169,7 +169,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       // Reset the top.
       eventTypeNextTop_.clear();
       selectedSimulationNextTop_ = eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
-      otherSimulationNextTop_ = 300 + eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
+      otherSimulationNextTop_ = 850 + eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
     }
 
     int eventType = 0;
@@ -324,13 +324,12 @@ void AeraVisualizerScene::setItemsVisible(int eventType, bool visible)
   }
 }
 
-void AeraVisualizerScene::setNonItemsVisible(int notEventType1, int notEventType2, bool visible)
+void AeraVisualizerScene::setNonItemsVisible(const set<int>& notEventTypes, bool visible)
 {
   foreach(QGraphicsItem * item, items()) {
     auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
     if (aeraGraphicsItem && 
-        !(aeraGraphicsItem->getAeraEvent()->eventType_ == notEventType1 ||
-          aeraGraphicsItem->getAeraEvent()->eventType_ == notEventType2))
+        notEventTypes.find(aeraGraphicsItem->getAeraEvent()->eventType_) == notEventTypes.end())
       aeraGraphicsItem->setItemAndArrowsVisible(visible);
   }
 }
