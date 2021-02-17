@@ -78,7 +78,7 @@ ModelGoalItem::ModelGoalItem(
     // Make the width span the full duration of the goal.
     targetWidth = parent->getTimelineX(goalFact->get_before()) - parent->getTimelineX(goalFact->get_after());
 
-  setTextItemAndPolygon(factGoalFactValueHtml_, true, targetWidth);
+  setTextItemAndPolygon(valueHtml_, false, SHAPE_GOAL);
 }
 
 void ModelGoalItem::setFactGoalFactValueHtml()
@@ -102,23 +102,25 @@ void ModelGoalItem::setFactGoalFactValueHtml()
   QString goalHtml = QString(goalSource.c_str()).replace(factValueLabel, DownArrowHtml);
   QString factGoalHtml = QString(factGoalSource.c_str()).replace(goalLabel, goalHtml);
   QString factValueHtml = QString(factValueSource.c_str()).replace(valueLabel, DownArrowHtml);
-  QString valueHtml(valueSource.c_str());
+  valueHtml_ = valueSource.c_str();
   
   factGoalFactValueHtml_ = "Model " + makeHtmlLink(modelReduction_->model_) + " " + RightArrowHtml + "\n";
   if (is_sim()) {
     // All outer facts in a simulation have the same time, so don't show it.
     factGoalFactValueHtml_ += goalHtml;
     factGoalFactValueHtml_ += "\n      " + factValueHtml;
-    factGoalFactValueHtml_ += "\n          " + valueHtml;
+    factGoalFactValueHtml_ += "\n          " + valueHtml_;
   }
   else {
     factGoalFactValueHtml_ += factGoalHtml;
     factGoalFactValueHtml_ += "\n              " + factValueHtml;
-    factGoalFactValueHtml_ += "\n                  " + valueHtml;
+    factGoalFactValueHtml_ += "\n                  " + valueHtml_;
   }
 
   addSourceCodeHtmlLinks(modelReduction_->object_, factGoalFactValueHtml_);
   factGoalFactValueHtml_ = htmlify(factGoalFactValueHtml_);
+  // TODO: Maybe use nowrap everywhere?
+  valueHtml_ = "<div style=\"white-space: nowrap;\">" + htmlify(valueHtml_) + "</div>";
 }
 
 void ModelGoalItem::textItemLinkActivated(const QString& link)
