@@ -317,6 +317,58 @@ public:
   r_exec::_Fact* factSuperGoal_;
 };
 
+/**
+ * ModelSimulatedPredictionReduction is a reduction event of a model to a simulated prediction.
+ */
+class ModelSimulatedPredictionReduction : public AeraEvent {
+public:
+  /**
+   * Create a ModelSimulatedPredictionReduction.
+   * \param time The reduction time.
+   * \param model The model which did the reduction.
+   * \param factPred The (fact (pred...)) (production).
+   * \param input The input fact triggering the reduction.
+   */
+  ModelSimulatedPredictionReduction(core::Timestamp time, r_code::Code* model,
+      r_code::Code* factPred, r_code::Code* input)
+    : AeraEvent(EVENT_TYPE, time, factPred),
+      model_(model), factPred_((r_exec::_Fact*)factPred),
+      input_((r_exec::_Fact*)input)
+  {}
+
+  static const int EVENT_TYPE = 11;
+
+  r_code::Code* model_;
+  r_exec::_Fact* factPred_;
+  r_exec::_Fact* input_;
+};
+
+/**
+ * CompositeStateSimulatedPredictionReduction is a reduction event of a composite state to a simulated prediction.
+ */
+class CompositeStateSimulatedPredictionReduction : public AeraEvent {
+public:
+  /**
+   * Create a CompositeStateSimulatedPredictionReduction.
+   * \param time The reduction time.
+   * \param compositeState The composite state which did the reduction.
+   * \param factPred The (fact (pred...)) (production).
+   * \param input The input fact triggering the reduction.
+   */
+  CompositeStateSimulatedPredictionReduction(core::Timestamp time, r_code::Code* compositeState,
+    r_code::Code* factPred, r_code::Code* input)
+    : AeraEvent(EVENT_TYPE, time, factPred),
+    compositeState_(compositeState), factPred_((r_exec::_Fact*)factPred),
+    input_((r_exec::_Fact*)input)
+  {}
+
+  static const int EVENT_TYPE = 12;
+
+  r_code::Code* compositeState_;
+  r_exec::_Fact* factPred_;
+  r_exec::_Fact* input_;
+};
+
 class NewInstantiatedCompositeStateEvent : public AeraEvent {
 public:
   NewInstantiatedCompositeStateEvent(
@@ -326,7 +378,7 @@ public:
     inputs_(inputs)
   {}
 
-  static const int EVENT_TYPE = 11;
+  static const int EVENT_TYPE = 13;
 
   std::vector<r_code::Code*> inputs_;
 };
@@ -346,7 +398,7 @@ public:
    */
   bool isSuccess() { return object_->code(0).asOpcode() == r_exec::Opcodes::Fact;  }
 
-  static const int EVENT_TYPE = 12;
+  static const int EVENT_TYPE = 14;
 };
 
 class IoDeviceInjectEvent : public AeraEvent {
@@ -357,7 +409,7 @@ public:
     injectionTime_(injectionTime)
   {}
 
-  static const int EVENT_TYPE = 13;
+  static const int EVENT_TYPE = 15;
 
   core::Timestamp injectionTime_;
 };
@@ -369,7 +421,7 @@ public:
     reduction_(reduction)
   {}
 
-  static const int EVENT_TYPE = 14;
+  static const int EVENT_TYPE = 16;
 
   r_code::Code* reduction_;
 };
