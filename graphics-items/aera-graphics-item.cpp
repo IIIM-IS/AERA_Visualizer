@@ -101,7 +101,7 @@ AeraGraphicsItem::AeraGraphicsItem(
     replicodeObjects_.relativeTime(eventTime).c_str() + "</font></td>" + "</tr></table><br>";
 }
 
-void AeraGraphicsItem::setTextItemAndPolygon(QString html, bool prependHeaderHtml, qreal targetWidth)
+void AeraGraphicsItem::setTextItemAndPolygon(QString html, bool prependHeaderHtml, Shape shape, qreal targetWidth)
 {
   // Set up the textItem_ first to get its size.
   if (textItem_)
@@ -131,11 +131,27 @@ void AeraGraphicsItem::setTextItemAndPolygon(QString html, bool prependHeaderHtm
   const qreal diameter = 20;
 
   QPainterPath path;
-  path.moveTo(right, diameter / 2);
-  path.arcTo(right - diameter, top, diameter, diameter, 0, 90);
-  path.arcTo(left, top, diameter, diameter, 90, 90);
-  path.arcTo(left, bottom - diameter, diameter, diameter, 180, 90);
-  path.arcTo(right - diameter, bottom - diameter, diameter, diameter, 270, 90);
+  if (shape == SHAPE_GOAL) {
+    path.moveTo(right, top);
+    path.lineTo(left + diameter / 2, top);
+    path.lineTo(left, (top + bottom) / 2);
+    path.lineTo(left + diameter / 2, bottom);
+    path.lineTo(right, bottom);
+  }
+  else if (shape == SHAPE_PRED) {
+    path.moveTo(left, top);
+    path.lineTo(right - diameter / 2, top);
+    path.lineTo(right, (top + bottom) / 2);
+    path.lineTo(right - diameter / 2, bottom);
+    path.lineTo(left, bottom);
+  }
+  else {
+    path.moveTo(right, top + diameter / 2);
+    path.arcTo(right - diameter, top, diameter, diameter, 0, 90);
+    path.arcTo(left, top, diameter, diameter, 90, 90);
+    path.arcTo(left, bottom - diameter, diameter, diameter, 180, 90);
+    path.arcTo(right - diameter, bottom - diameter, diameter, diameter, 270, 90);
+  }
 
   auto saveRect = boundingRect();
   setPolygon(path.toFillPolygon());
