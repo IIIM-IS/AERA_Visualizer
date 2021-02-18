@@ -100,7 +100,7 @@ AeraVisualizerScene::AeraVisualizerScene(
     eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 315;
     eventTypeFirstTop_[ModelMkValPredictionReduction::EVENT_TYPE] = 555;
     eventTypeFirstTop_[PredictionResultEvent::EVENT_TYPE] = 830;
-    eventTypeFirstTop_[0] = 360;
+    eventTypeFirstTop_[0] = 440;
   }
   else
     // The default, which is used for the models scene.
@@ -170,7 +170,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       // Reset the top.
       eventTypeNextTop_.clear();
       selectedSimulationNextTop_ = eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
-      otherSimulationNextTop_ = 850 + eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
+      otherSimulationNextTop_ = 880 + eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
     }
 
     int eventType = 0;
