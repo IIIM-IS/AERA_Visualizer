@@ -184,6 +184,63 @@ void InstantiatedCompositeStateItem::setBoundCstAndMembersHtml()
   boundCstMembersHtml_ = htmlify(boundCstMembersHtml_);
 }
 
+QString InstantiatedCompositeStateItem::makeIcstMembersSource(Code* icst, ReplicodeObjects& replicodeObjects)
+{
+  // TODO: Combine with setBoundCstAndMembersHtml.
+  auto cst = icst->get_reference(0);
+
+  string icstSource = replicodeObjects.getSourceCode(icst);
+  QStringList templateValues;
+  QStringList exposedValues;
+  getIcstOrImdlValues(icstSource.c_str(), templateValues, exposedValues);
+  int iAfterVariable;
+  int iBeforeVariable;
+  auto unpackedCst = cst->get_reference(cst->references_size() - CST_HIDDEN_REFS);
+  if (!ModelItem::getTimingVariables(unpackedCst->get_reference(0), iAfterVariable, iBeforeVariable))
+    // We don't expect this.
+    return "";
+
+  string cstSource = CompositeStateItem::simplifyCstSource(replicodeObjects.getSourceCode(cst));
+  // Get just the members, which are indented by three spaces. Get the value inside the (fact value ...).
+  string cstMembersSource;
+  auto i = QRegularExpression("   \\(fact (\\([^\\)]+\\))[^\\)]+\\)\\n").globalMatch(cstSource.c_str());
+  while (i.hasNext()) {
+    auto match = i.next();
+    if (cstMembersSource != "")
+      cstMembersSource += "\n";
+    cstMembersSource += match.captured(1).toStdString();
+  }
+
+  // Substitute variables.
+  int iVariable = -1;
+  size_t iTemplateValues = 0;
+  size_t iExposedValues = 0;
+  while (iTemplateValues < templateValues.size() || iExposedValues < exposedValues.size()) {
+    // v0, v1, v2, etc. are split between templateValues and exposedValues.
+    QString boundValue = (iTemplateValues < templateValues.size() ?
+      templateValues[iTemplateValues] : exposedValues[iExposedValues]);
+
+    ++iVariable;
+    if (iVariable == iAfterVariable)
+      ++iVariable;
+    if (iVariable == iBeforeVariable)
+      ++iVariable;
+
+    string variable = "v" + to_string(iVariable) + ":";
+    cstSource = regex_replace(cstSource, regex(variable), variable + boundValue.toStdString());
+    // For boundCstMemberHtml_, don't include the variable.
+    cstMembersSource = regex_replace(cstMembersSource, regex(variable), boundValue.toStdString());
+
+    if (iTemplateValues < templateValues.size())
+      // Still looking at templateValues.
+      ++iTemplateValues;
+    else
+      ++iExposedValues;
+  }
+
+  return QString(cstMembersSource.c_str());
+}
+
 QString InstantiatedCompositeStateItem::makeHtml()
 {
   QString html = "";

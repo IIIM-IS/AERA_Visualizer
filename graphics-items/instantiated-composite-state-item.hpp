@@ -77,6 +77,8 @@ public:
   static void getIcstOrImdlValues(
     const QString& source, QStringList& templateValues, QStringList& exposedValues);
 
+  static QString makeIcstMembersSource(r_code::Code* icst, ReplicodeObjects& replicodeObjects);
+
 protected:
   void textItemLinkActivated(const QString& link) override;
 
