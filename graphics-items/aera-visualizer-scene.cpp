@@ -77,6 +77,7 @@ AeraVisualizerScene::AeraVisualizerScene(
   replicodeObjects_(replicodeObjects),
   isMainScene_(isMainScene),
   onSceneSelected_(onSceneSelected),
+  essencePropertyObject_(replicodeObjects.getObject("essence")),
   didInitialFit_(false),
   thisFrameTime_(seconds(0)),
   thisFrameLeft_(0),
@@ -97,8 +98,8 @@ AeraVisualizerScene::AeraVisualizerScene(
     eventTypeFirstTop_[IoDeviceInjectEvent::EVENT_TYPE] = 45;
     eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] = 120;
     eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 315;
-    eventTypeFirstTop_[ModelMkValPredictionReduction::EVENT_TYPE] = 475;
-    eventTypeFirstTop_[PredictionResultEvent::EVENT_TYPE] = 750;
+    eventTypeFirstTop_[ModelMkValPredictionReduction::EVENT_TYPE] = 555;
+    eventTypeFirstTop_[PredictionResultEvent::EVENT_TYPE] = 830;
     eventTypeFirstTop_[0] = 360;
   }
   else
@@ -176,6 +177,13 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     if (eventTypeFirstTop_.find(aeraEvent->eventType_) != eventTypeFirstTop_.end())
       // This is a recognized event type.
       eventType = aeraEvent->eventType_;
+
+    if (aeraEvent->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE) {
+      auto mkVal = aeraEvent->object_->get_reference(0);
+      if (essencePropertyObject_ && mkVal->references_size() >= 2 && mkVal->get_reference(1) == essencePropertyObject_)
+        // Override to group essence facts with non-assigned types at the bottom.
+        eventType = 0;
+    }
 
     qreal top;
     if (isSimulation)

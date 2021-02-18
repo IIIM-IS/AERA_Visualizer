@@ -155,6 +155,7 @@ private:
   ReplicodeObjects& replicodeObjects_;
   bool isMainScene_;
   OnSceneSelected onSceneSelected_;
+  r_code::Code* essencePropertyObject_;
   bool didInitialFit_;
   // key: The AeraEvent eventType_, or 0 for "other". value: The top of the first item for that event type.
   std::map<int, qreal> eventTypeFirstTop_;
