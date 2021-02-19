@@ -449,7 +449,7 @@ void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, 
     if (hoverHighlightItem_) {
       // Clear the previous highlighting and restore the visible state.
       hoverHighlightItem_->setPen(hoverHighlightItem_->getBorderNoHighlightPen());
-      hoverHighlightItem_->setItemAndArrowsVisible(hoverHighlightItemWasVisible_);
+      hoverHighlightItem_->setItemAndArrowsAndHorizontalLinesVisible(hoverHighlightItemWasVisible_);
       hoverHighlightItem_ = 0;
     }
 
@@ -469,7 +469,7 @@ void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, 
       if (hoverHighlightItem_) {
         // Unhighlight a previous object.
         hoverHighlightItem_->setPen(hoverHighlightItem_->getBorderNoHighlightPen());
-        hoverHighlightItem_->setItemAndArrowsVisible(hoverHighlightItemWasVisible_);
+        hoverHighlightItem_->setItemAndArrowsAndHorizontalLinesVisible(hoverHighlightItemWasVisible_);
         hoverHighlightItem_ = 0;
       }
 
@@ -478,7 +478,7 @@ void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, 
         hoverHighlightItemWasVisible_ = hoverHighlightItem_->isVisible();
         if (!hoverHighlightItemWasVisible_)
           // Make the item visible while we hover.
-          hoverHighlightItem_->setItemAndArrowsVisible(true);
+          hoverHighlightItem_->setItemAndArrowsAndHorizontalLinesVisible(true);
 
         hoverHighlightItem_->setPen(itemBorderHighlightPen_);
       }
@@ -569,6 +569,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       if (factSuperGoalItem)
         scene->addArrow(newItem, factSuperGoalItem);
 
+      scene->addHorizontalLine(newItem);
+
       // Show all ModelGoalReduction events along with simulations, even if not simulated.
       visible = (simulationsCheckBox_->checkState() == Qt::Checked);
     }
@@ -581,6 +583,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       if (factSuperGoalItem)
         scene->addArrow(newItem, factSuperGoalItem);
 
+      scene->addHorizontalLine(newItem);
+
       // Show all CompositeStateGoalReduction events along with simulations, even if not simulated.
       visible = (simulationsCheckBox_->checkState() == Qt::Checked);
     }
@@ -592,6 +596,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       auto inputItem = scene->getAeraGraphicsItem(reductionEvent->input_);
       if (inputItem)
         scene->addArrow(newItem, inputItem);
+
+      scene->addHorizontalLine(newItem);
 
       if (newItem->is_sim())
         visible = (simulationsCheckBox_->checkState() == Qt::Checked);
@@ -606,6 +612,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       auto inputItem = scene->getAeraGraphicsItem(reductionEvent->input_);
       if (inputItem)
         scene->addArrow(newItem, inputItem);
+
+      scene->addHorizontalLine(newItem);
 
       if (newItem->is_sim())
         visible = (simulationsCheckBox_->checkState() == Qt::Checked);
@@ -657,8 +665,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       }
     }
 
-    // Call setItemAndArrowsVisible, even if visible is true because we need to hide arrows to non-visible items.
-    newItem->setItemAndArrowsVisible(visible);
+    // Call setItemAndArrowsAndHorizontalLinesVisible, even if visible is true because we need to hide arrows to non-visible items.
+    newItem->setItemAndArrowsAndHorizontalLinesVisible(visible);
 
     if (visible)
       // Only flash if visible.
@@ -740,7 +748,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
     // Note that the event saves the updated item position and will use it when recreating the item.
     auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(scene->getAeraGraphicsItem(event->object_));
     if (aeraGraphicsItem) {
-      aeraGraphicsItem->removeArrows();
+      aeraGraphicsItem->removeArrowsAndHorizontalLines();
       scene->removeItem(aeraGraphicsItem);
       delete aeraGraphicsItem;
     }
