@@ -168,21 +168,23 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   // 0s:100ms:0us I/O device eject 39
   regex ioDeviceEjectWithoutRdxRegex("^(\\d+)s:(\\d+)ms:(\\d+)us I/O device eject (\\d+)$");
 
+  QProgressDialog progress("Reading " + QFileInfo(runtimeOutputFilePath.c_str()).fileName() + "...", "Cancel", 0, 100, this);
+  progress.setWindowModality(Qt::WindowModal);
+  // Remove the '?' in the title.
+  progress.setWindowFlags(progress.windowFlags() & ~Qt::WindowContextHelpButtonHint);
+  progress.setWindowTitle("Initializing");
+  QApplication::processEvents();
+
   // Count the number of lines, to use in the progress dialog.
   int nLines;
   {
     ifstream fileForCount(runtimeOutputFilePath);
     nLines = std::count(istreambuf_iterator<char>(fileForCount), istreambuf_iterator<char>(), '\n');
   }
-
-  QProgressDialog progress("Reading " + QFileInfo(runtimeOutputFilePath.c_str()).fileName() + "...", "Cancel", 0, nLines, this);
-  progress.setWindowModality(Qt::WindowModal);
-  // Remove the '?' in the title.
-  progress.setWindowFlags(progress.windowFlags() & ~Qt::WindowContextHelpButtonHint);
-  progress.setWindowTitle("Initializing");
+  progress.setMaximum(nLines);
 
   ifstream runtimeOutputFile(runtimeOutputFilePath);
-  int lineNumber;
+  int lineNumber = 0;
   string line;
   while (getline(runtimeOutputFile, line)) {
     if (progress.wasCanceled())
