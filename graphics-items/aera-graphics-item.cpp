@@ -57,6 +57,7 @@
 #include <QRegularExpression>
 #include "submodules/replicode/r_exec/opcodes.h"
 #include "arrow.hpp"
+#include "anchored-horizontal-line.hpp"
 #include "aera-visualizer-scene.hpp"
 #include "../aera-visualizer-window.hpp"
 #include "aera-graphics-item.hpp"
@@ -162,13 +163,25 @@ void AeraGraphicsItem::setTextItemAndPolygon(QString html, bool prependHeaderHtm
   }
 }
 
-void AeraGraphicsItem::removeArrows()
+void AeraGraphicsItem::removeArrowsAndHorizontalLines()
 {
   foreach(Arrow* arrow, arrows_) {
-    dynamic_cast<AeraGraphicsItem*>(arrow->startItem())->removeArrow(arrow);
-    dynamic_cast<AeraGraphicsItem*>(arrow->endItem())->removeArrow(arrow);
+    auto startItem = dynamic_cast<AeraGraphicsItem*>(arrow->startItem());
+    if (startItem)
+      startItem->removeArrow(arrow);
+    auto endItem = dynamic_cast<AeraGraphicsItem*>(arrow->endItem());
+    if (endItem)
+      endItem->removeArrow(arrow);
     scene()->removeItem(arrow);
     delete arrow;
+  }
+
+  foreach(AnchoredHorizontalLine* line, horizontalLines_) {
+    auto item = dynamic_cast<AeraGraphicsItem*>(line->item());
+    if (item)
+      item->removeHorizontalLine(line);
+    scene()->removeItem(line);
+    delete line;
   }
 }
 
@@ -177,6 +190,13 @@ void AeraGraphicsItem::removeArrow(Arrow* arrow)
   int index = arrows_.indexOf(arrow);
   if (index != -1)
     arrows_.removeAt(index);
+}
+
+void AeraGraphicsItem::removeHorizontalLine(AnchoredHorizontalLine* line)
+{
+  int index = horizontalLines_.indexOf(line);
+  if (index != -1)
+    horizontalLines_.removeAt(index);
 }
 
 void AeraGraphicsItem::bringToFront()
@@ -216,6 +236,8 @@ QVariant AeraGraphicsItem::itemChange(GraphicsItemChange change, const QVariant&
 
     foreach(Arrow * arrow, arrows_)
       arrow->updatePosition();
+    foreach(AnchoredHorizontalLine * line, horizontalLines_)
+      line->updatePosition();
   }
 
   return value;
@@ -293,7 +315,7 @@ void AeraGraphicsItem::addSourceCodeHtmlLinks(
   }
 }
 
-void AeraGraphicsItem::setItemAndArrowsVisible(bool visible)
+void AeraGraphicsItem::setItemAndArrowsAndHorizontalLinesVisible(bool visible)
 {
   foreach(Arrow* arrow, arrows_) {
     if (visible) {
@@ -308,6 +330,9 @@ void AeraGraphicsItem::setItemAndArrowsVisible(bool visible)
       arrow->setVisible(false);
   }
 
+  foreach(AnchoredHorizontalLine* line, horizontalLines_)
+    line->setVisible(visible);
+  
   setVisible(visible);
 }
 
@@ -351,10 +376,14 @@ void AeraGraphicsItem::textItemLinkActivated(const QString& link)
 
 void AeraGraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
-  // Highlight connected arrows.
+  // Highlight connected arrows and horizontal lines.
   foreach(Arrow * arrow, arrows_) {
     arrow->setPen(Arrow::HighlightedPen);
     arrow->update();
+  }
+  foreach(AnchoredHorizontalLine* line, horizontalLines_) {
+    line->setPen(AnchoredHorizontalLine::HighlightedPen);
+    line->update();
   }
 
   QGraphicsPolygonItem::hoverEnterEvent(event);
@@ -362,10 +391,14 @@ void AeraGraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 
 void AeraGraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
-  // Reset highlighting of connected arrows.
+  // Reset highlighting of connected arrows and horizontal lines.
   foreach(Arrow * arrow, arrows_) {
     arrow->setPen(Arrow::DefaultPen);
     arrow->update();
+  }
+  foreach(AnchoredHorizontalLine* line, horizontalLines_) {
+    line->setPen(AnchoredHorizontalLine::DefaultPen);
+    line->update();
   }
 
   QGraphicsPolygonItem::hoverLeaveEvent(event);

@@ -118,6 +118,7 @@ private:
   void zoomViewHome();
   void addAeraGraphicsItem(AeraGraphicsItem* item);
   void addArrow(AeraGraphicsItem* startItem, AeraGraphicsItem* endItem);
+  void addHorizontalLine(AeraGraphicsItem* item);
   /**
    * Get the AeraGraphicsItem whose getAeraEvent() has the given object.
    * \param object The Code* object to search for.
@@ -131,23 +132,23 @@ private:
   }
 
   /**
-   * Find all items with the given event type, and call setItemAndArrowsVisible.
+   * Find all items with the given event type, and call setItemAndArrowsAndHorizontalLinesVisible.
    * \param eventType The event type of the item's getAeraEvent().
-   * \param visible The visible state for setItemAndArrowsVisible.
+   * \param visible The visible state for setItemAndArrowsAndHorizontalLinesVisible.
    */
   void setItemsVisible(int eventType, bool visible);
 
   /**
-   * Find all items where the event type is not any of the given values, and call setItemAndArrowsVisible.
-   * \param notEventTypes Call setItemAndArrowsVisible if the event type of the item's getAeraEvent() is not any of these values.
-   * \param visible The visible state for setItemAndArrowsVisible.
+   * Find all items where the event type is not any of the given values, and call setItemAndArrowsAndHorizontalLinesVisible.
+   * \param notEventTypes Call setItemAndArrowsAndHorizontalLinesVisible if the event type of the item's getAeraEvent() is not any of these values.
+   * \param visible The visible state for setItemAndArrowsAndHorizontalLinesVisible.
    */
   void setNonItemsVisible(const std::set<int>& notEventTypes, bool visible);
 
   /**
-   * Find all AutoFocusFactItem whose object_ is (fact (mk.val X property Y)), and call setItemAndArrowsVisible.
+   * Find all AutoFocusFactItem whose object_ is (fact (mk.val X property Y)), and call setItemAndArrowsAndHorizontalLinesVisible.
    * \param property The event type of the item's object_ mk.val.
-   * \param visible The visible state for setItemAndArrowsVisible.
+   * \param visible The visible state for setItemAndArrowsAndHorizontalLinesVisible.
    */
   void setAutoFocusItemsVisible(const std::string& property, bool visible);
 

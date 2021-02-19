@@ -73,6 +73,7 @@ class QGraphicsSimpleTextItem;
 namespace aera_visualizer {
 
 class Arrow;
+class AnchoredHorizontalLine;
 class AeraVisualizerScene;
 
 /**
@@ -93,8 +94,9 @@ public:
     AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects,
     AeraVisualizerScene* parent, const QString& headerPrefix = "");
 
-  void removeArrows();
+  void removeArrowsAndHorizontalLines();
   void addArrow(Arrow* arrow) { arrows_.append(arrow); }
+  void addHorizontalLine(AnchoredHorizontalLine* line) { horizontalLines_.append(line); }
   AeraEvent* getAeraEvent() { return aeraEvent_; }
 
   /**
@@ -150,10 +152,10 @@ public:
   }
 
   /**
-   * Set the the visible state of this item and the connected arrows.
+   * Set the the visible state of this item and the connected arrows and anchored horizontal lines.
    * \param visible The visible state.
    */
-  void setItemAndArrowsVisible(bool visible);
+  void setItemAndArrowsAndHorizontalLinesVisible(bool visible);
 
   const QPen& getBorderNoHighlightPen() { return borderNoHighlightPen_;  }
 
@@ -219,9 +221,11 @@ protected:
 
 private:
   void removeArrow(Arrow* arrow);
+  void removeHorizontalLine(AnchoredHorizontalLine* line);
 
   AeraEvent* aeraEvent_;
   QList<Arrow*> arrows_;
+  QList<AnchoredHorizontalLine*> horizontalLines_;
 };
 
 }

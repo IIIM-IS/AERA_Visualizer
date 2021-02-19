@@ -53,6 +53,7 @@
 #include "../submodules/replicode/r_exec/factory.h"
 #include "aera-visualizer-window.hpp"
 #include "arrow.hpp"
+#include "anchored-horizontal-line.hpp"
 #include "model-item.hpp"
 #include "auto-focus-fact-item.hpp"
 #include "aera-visualizer-scene.hpp"
@@ -135,7 +136,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       // Separate from the region of I/O device eject/inject events.
       auto y = eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] - 5;
       auto line = addLine(sceneRect().left(), y, sceneRect().right(), y, QPen(Qt::darkGray, 1));
-      line->setZValue(-100);
+      line->setZValue(-2000);
 
       // Add all the frame boundary lines and timestamps.
       for (auto frameTime = replicodeObjects_.getTimeReference(); true; frameTime += replicodeObjects_.getSamplingPeriod()) {
@@ -145,7 +146,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 
         auto line = addLine(frameLeft, sceneRect().top(), frameLeft, sceneRect().bottom(),
           QPen(Qt::lightGray, 1, Qt::DashLine));
-        line->setZValue(-100);
+        line->setZValue(-2000);
         auto text = addText(replicodeObjects_.relativeTime(frameTime).c_str());
         text->setZValue(-100);
         text->setDefaultTextColor(Qt::darkGray);
@@ -262,12 +263,45 @@ void AeraVisualizerScene::addArrow(AeraGraphicsItem* startItem, AeraGraphicsItem
   if (startItem == endItem)
     return;
 
-  Arrow* arrow = new Arrow(startItem, endItem);
+  auto arrow = new Arrow(startItem, endItem);
   startItem->addArrow(arrow);
   endItem->addArrow(arrow);
   arrow->setZValue(-1000.0);
   addItem(arrow);
   arrow->updatePosition();
+}
+
+void AeraVisualizerScene::addHorizontalLine(AeraGraphicsItem* item)
+{
+  if (item->getAeraEvent()->object_->code(0).asOpcode() == r_exec::Opcodes::Fact) {
+    auto fact = (_Fact*)item->getAeraEvent()->object_;
+    Timestamp after, before;
+
+    auto goal = fact->get_goal();
+    if (goal) {
+      // Use the timings of the goal target.
+      after = goal->get_target()->get_after();
+      before = goal->get_target()->get_before();
+    }
+    else {
+      auto pred = fact->get_pred();
+      if (pred) {
+        // Use the timings of the prediction target.
+        after = pred->get_target()->get_after();
+        before = pred->get_target()->get_before();
+      }
+      else {
+        after = fact->get_after();
+        before = fact->get_before();
+      }
+    }
+
+    auto line = new AnchoredHorizontalLine(item, getTimelineX(after), getTimelineX(before));
+    item->addHorizontalLine(line);
+    line->setZValue(-1001.0);
+    addItem(line);
+    line->updatePosition();
+  }
 }
 
 AeraGraphicsItem* AeraVisualizerScene::getAeraGraphicsItem(Code* object)
@@ -318,7 +352,7 @@ void AeraVisualizerScene::zoomToItem(QGraphicsItem* item)
   auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
   if (aeraGraphicsItem) {
     if (!aeraGraphicsItem->isVisible())
-      aeraGraphicsItem->setItemAndArrowsVisible(true);
+      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(true);
     aeraGraphicsItem->bringToFront();
   }
 }
@@ -328,7 +362,7 @@ void AeraVisualizerScene::setItemsVisible(int eventType, bool visible)
   foreach(QGraphicsItem * item, items()) {
     auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
     if (aeraGraphicsItem && aeraGraphicsItem->getAeraEvent()->eventType_ == eventType)
-      aeraGraphicsItem->setItemAndArrowsVisible(visible);
+      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(visible);
   }
 }
 
@@ -338,7 +372,7 @@ void AeraVisualizerScene::setNonItemsVisible(const set<int>& notEventTypes, bool
     auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
     if (aeraGraphicsItem && 
         notEventTypes.find(aeraGraphicsItem->getAeraEvent()->eventType_) == notEventTypes.end())
-      aeraGraphicsItem->setItemAndArrowsVisible(visible);
+      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(visible);
   }
 }
 
@@ -358,7 +392,7 @@ void AeraVisualizerScene::setAutoFocusItemsVisible(const string& property, bool 
 
       auto mkValProperty = mkVal->get_reference(1);
       if (mkValProperty == propertyObject)
-        autoFocusItem->setItemAndArrowsVisible(visible);
+        autoFocusItem->setItemAndArrowsAndHorizontalLinesVisible(visible);
     }
   }
 }
