@@ -57,7 +57,7 @@
 
 namespace aera_visualizer {
 
-const QPen AnchoredHorizontalLine::DefaultPen(Qt::gray, 1, Qt::SolidLine, Qt::SquareCap);
+const QPen AnchoredHorizontalLine::DefaultPen(Qt::gray, 1, Qt::DashLine, Qt::SquareCap);
 const QPen AnchoredHorizontalLine::HighlightedPen(QColor(240, 240, 0), 3, Qt::SolidLine, Qt::SquareCap);
 
 AnchoredHorizontalLine::AnchoredHorizontalLine(
