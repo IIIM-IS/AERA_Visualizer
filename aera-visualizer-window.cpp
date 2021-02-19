@@ -2,7 +2,7 @@
 //_/_/
 //_/_/ AERA VISUALIZER
 //_/_/
-//_/_/ Copyright(c)2020 Icelandic Institute for Intelligent Machines ses
+//_/_/ Copyright(c)2020-2021 Icelandic Institute for Intelligent Machines ses
 //_/_/ Vitvelastofnun Islands ses, kt. 571209-0390
 //_/_/ Author: Jeffrey Thompson <jeff@iiim.is>
 //_/_/
@@ -59,6 +59,8 @@
 #include "graphics-items/prediction-item.hpp"
 #include "graphics-items/model-goal-item.hpp"
 #include "graphics-items/composite-state-goal-item.hpp"
+#include "graphics-items/model-prediction-item.hpp"
+#include "graphics-items/composite-state-prediction-item.hpp"
 #include "graphics-items/prediction-result-item.hpp"
 #include "graphics-items/instantiated-composite-state-item.hpp"
 #include "graphics-items/io-device-inject-eject-item.hpp"
@@ -147,6 +149,10 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   regex modelSimulatedAbductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl (\\d+): fact (\\d+) super_goal -> fact (\\d+) simulated goal$");
   // 0s:510ms:0us cst 64: fact 96 super_goal -> fact 98 simulated goal
   regex compositeStateSimulatedAbductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us cst (\\d+): fact (\\d+) super_goal -> fact (\\d+) simulated goal$");
+  // 0s:210ms:0us mdl 57: fact 202 pred -> fact 227 simulated pred
+  regex modelSimulatedPredictionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl (\\d+): fact (\\d+) (?:pred|super_goal) -> fact (\\d+) simulated pred$");
+  // 0s:210ms:0us cst 60: fact 195 -> fact 218 simulated pred
+  regex compositeStateSimulatedPredictionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us cst (\\d+): fact (\\d+) -> fact (\\d+) simulated pred$");
   // 0s:200ms:0us fact 59 icst[52][ 50 55]
   regex newInstantiatedCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+) icst\\[\\d+\\]\\[([ \\d]+)\\]$");
   // 0s:300ms:0us fact 75 -> fact 79 success fact 60 pred
@@ -305,6 +311,29 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
       if (compositeState && factGoal && factSuperGoal)
         events_.push_back(make_shared<CompositeStateGoalReduction>(
           getTimestamp(matches), compositeState, factGoal, factSuperGoal));
+    }
+    else if (regex_search(line, matches, modelSimulatedPredictionRegex)) {
+      auto model = replicodeObjects_.getObject(stoul(matches[4].str()));
+      auto factPred = replicodeObjects_.getObject(stoul(matches[6].str()));
+      auto input = replicodeObjects_.getObject(stoul(matches[5].str()));
+      if (factPred->get_oid() == 264)
+        // TODO: We need check_simulated_imdl to know the input which triggered the signal.
+        input = replicodeObjects_.getObject(256);
+      else if (factPred->get_oid() == 281)
+        // TODO: We need check_simulated_imdl to know the input which triggered the signal.
+        input = replicodeObjects_.getObject(275);
+
+      if (model && factPred && input)
+        events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
+          getTimestamp(matches), model, factPred, input));
+    }
+    else if (regex_search(line, matches, compositeStateSimulatedPredictionRegex)) {
+      auto compositeState = replicodeObjects_.getObject(stoul(matches[4].str()));
+      auto factPred = replicodeObjects_.getObject(stoul(matches[6].str()));
+      auto input = replicodeObjects_.getObject(stoul(matches[5].str()));
+      if (compositeState && factPred && input)
+        events_.push_back(make_shared<CompositeStateSimulatedPredictionReduction>(
+          getTimestamp(matches), compositeState, factPred, input));
     }
     else if (regex_search(line, matches, newInstantiatedCompositeStateRegex)) {
       auto timestamp = getTimestamp(matches);
@@ -473,6 +502,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       event->eventType_ == ModelMkValPredictionReduction::EVENT_TYPE ||
       event->eventType_ == ModelGoalReduction::EVENT_TYPE ||
       event->eventType_ == CompositeStateGoalReduction::EVENT_TYPE ||
+      event->eventType_ == ModelSimulatedPredictionReduction::EVENT_TYPE ||
+      event->eventType_ == CompositeStateSimulatedPredictionReduction::EVENT_TYPE ||
       event->eventType_ == PredictionResultEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
@@ -515,7 +546,9 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 
       auto mkVal = autoFocusEvent->fromObject_->get_reference(0);
       if (essencePropertyObject_ && mkVal->references_size() >= 2 && mkVal->get_reference(1) == essencePropertyObject_)
-        visible = (essenceFactsCheckBox_->checkState() == Qt::Checked);
+        visible = ((nonSimulationsCheckBox_->checkState() == Qt::Checked) && (essenceFactsCheckBox_->checkState() == Qt::Checked));
+      else
+        visible = (nonSimulationsCheckBox_->checkState() == Qt::Checked);
     }
     else if (event->eventType_ == ModelMkValPredictionReduction::EVENT_TYPE) {
       auto reductionEvent = (ModelMkValPredictionReduction*)event;
@@ -525,6 +558,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       auto causeItem = scene->getAeraGraphicsItem(reductionEvent->getCause());
       if (causeItem)
         scene->addArrow(newItem, causeItem);
+      visible = (nonSimulationsCheckBox_->checkState() == Qt::Checked);
     }
     else if (event->eventType_ == ModelGoalReduction::EVENT_TYPE) {
       auto reductionEvent = (ModelGoalReduction*)event;
@@ -535,8 +569,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       if (factSuperGoalItem)
         scene->addArrow(newItem, factSuperGoalItem);
 
-      if (newItem->is_sim())
-        visible = (simulationsCheckBox_->checkState() == Qt::Checked);
+      // Show all ModelGoalReduction events along with simulations, even if not simulated.
+      visible = (simulationsCheckBox_->checkState() == Qt::Checked);
     }
     else if (event->eventType_ == CompositeStateGoalReduction::EVENT_TYPE) {
       auto reductionEvent = (CompositeStateGoalReduction*)event;
@@ -547,11 +581,41 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       if (factSuperGoalItem)
         scene->addArrow(newItem, factSuperGoalItem);
 
+      // Show all CompositeStateGoalReduction events along with simulations, even if not simulated.
+      visible = (simulationsCheckBox_->checkState() == Qt::Checked);
+    }
+    else if (event->eventType_ == ModelSimulatedPredictionReduction::EVENT_TYPE) {
+      auto reductionEvent = (ModelSimulatedPredictionReduction*)event;
+      newItem = new ModelPredictionItem(reductionEvent, replicodeObjects_, scene);
+
+      // Add an arrow to the input fact.
+      auto inputItem = scene->getAeraGraphicsItem(reductionEvent->input_);
+      if (inputItem)
+        scene->addArrow(newItem, inputItem);
+
       if (newItem->is_sim())
         visible = (simulationsCheckBox_->checkState() == Qt::Checked);
+      else
+        visible = (nonSimulationsCheckBox_->checkState() == Qt::Checked);
     }
-    else if (event->eventType_ == PredictionResultEvent::EVENT_TYPE)
+    else if (event->eventType_ == CompositeStateSimulatedPredictionReduction::EVENT_TYPE) {
+      auto reductionEvent = (CompositeStateSimulatedPredictionReduction*)event;
+      newItem = new CompositeStatePredictionItem(reductionEvent, replicodeObjects_, scene);
+
+      // Add an arrow to the input fact.
+      auto inputItem = scene->getAeraGraphicsItem(reductionEvent->input_);
+      if (inputItem)
+        scene->addArrow(newItem, inputItem);
+
+      if (newItem->is_sim())
+        visible = (simulationsCheckBox_->checkState() == Qt::Checked);
+      else
+        visible = (nonSimulationsCheckBox_->checkState() == Qt::Checked);
+    }
+    else if (event->eventType_ == PredictionResultEvent::EVENT_TYPE) {
       newItem = new PredictionResultItem((PredictionResultEvent*)event, replicodeObjects_, scene);
+      visible = (nonSimulationsCheckBox_->checkState() == Qt::Checked);
+    }
     else if (event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE) {
       auto newIcstEvent = (NewInstantiatedCompositeStateEvent*)event;
       newItem = new InstantiatedCompositeStateItem(newIcstEvent, replicodeObjects_, scene);
@@ -563,7 +627,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
           scene->addArrow(newItem, referencedItem);
       }
 
-      visible = (instantiatedCompositeStatesCheckBox_->checkState() == Qt::Checked);
+      visible = ((nonSimulationsCheckBox_->checkState() == Qt::Checked) && 
+                 (instantiatedCompositeStatesCheckBox_->checkState() == Qt::Checked));
     }
     else if (event->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
              event->eventType_ == IoDeviceEjectEvent::EVENT_TYPE)
@@ -658,6 +723,8 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
       event->eventType_ == ModelMkValPredictionReduction::EVENT_TYPE ||
       event->eventType_ == ModelGoalReduction::EVENT_TYPE ||
       event->eventType_ == CompositeStateGoalReduction::EVENT_TYPE ||
+      event->eventType_ == ModelSimulatedPredictionReduction::EVENT_TYPE ||
+      event->eventType_ == CompositeStateSimulatedPredictionReduction::EVENT_TYPE ||
       event->eventType_ == PredictionResultEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
@@ -760,6 +827,10 @@ void AeraVisulizerWindow::createMenus()
   viewMenu->addAction(zoomHomeAction_);
 }
 
+static set<int> simulationEventTypes =
+  { ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,
+    ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE};
+
 void AeraVisulizerWindow::createToolbars()
 {
   QToolBar* toolbar = addToolBar(tr("Main"));
@@ -772,12 +843,12 @@ void AeraVisulizerWindow::createToolbars()
 
   simulationsCheckBox_ = new QCheckBox("Simulations", this);
   simulationsCheckBox_->setStyleSheet("background-color:#ffffdc");
-  // Show simulations by default.
-  simulationsCheckBox_->setCheckState(Qt::Checked);
   connect(simulationsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     // Debug: Check if the goal is simulated.
     mainScene_->setItemsVisible(ModelGoalReduction::EVENT_TYPE, state == Qt::Checked);
-    mainScene_->setItemsVisible(CompositeStateGoalReduction::EVENT_TYPE, state == Qt::Checked);  });
+    mainScene_->setItemsVisible(CompositeStateGoalReduction::EVENT_TYPE, state == Qt::Checked);
+    mainScene_->setItemsVisible(ModelSimulatedPredictionReduction::EVENT_TYPE, state == Qt::Checked);
+    mainScene_->setItemsVisible(CompositeStateSimulatedPredictionReduction::EVENT_TYPE, state == Qt::Checked); });
   toolbar->addWidget(simulationsCheckBox_);
 
   // Separate the non-simulations check boxes.
@@ -793,16 +864,11 @@ void AeraVisulizerWindow::createToolbars()
 
     // Do the opposite of simulationsCheckBox_ .
     // Debug: Check if the goal is simulated.
-    mainScene_->setNonItemsVisible(
-      ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE, state == Qt::Checked);
-
-    if (state == Qt::Checked) {
-      // Make specific non-simulation items visible, if needed.
-      if (essenceFactsCheckBox_->checkState() == Qt::Checked)
-        mainScene_->setAutoFocusItemsVisible("essence", true);
-      if (instantiatedCompositeStatesCheckBox_->checkState() == Qt::Checked)
-        mainScene_->setItemsVisible(NewInstantiatedCompositeStateEvent::EVENT_TYPE, true);
-    }
+    mainScene_->setNonItemsVisible(simulationEventTypes, state == Qt::Checked);
+    // Make specific non-simulation items visible or not, if needed.
+    mainScene_->setAutoFocusItemsVisible("essence", essenceFactsCheckBox_->checkState() == Qt::Checked);
+    mainScene_->setItemsVisible(
+      NewInstantiatedCompositeStateEvent::EVENT_TYPE, instantiatedCompositeStatesCheckBox_->checkState() == Qt::Checked);
   });
   toolbar->addWidget(nonSimulationsCheckBox_);
 
