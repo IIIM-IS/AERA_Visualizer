@@ -2,7 +2,7 @@
 //_/_/
 //_/_/ AERA VISUALIZER
 //_/_/
-//_/_/ Copyright(c)2020 Icelandic Institute for Intelligent Machines ses
+//_/_/ Copyright(c)2021 Icelandic Institute for Intelligent Machines ses
 //_/_/ Vitvelastofnun Islands ses, kt. 571209-0390
 //_/_/ Author: Jeffrey Thompson <jeff@iiim.is>
 //_/_/
@@ -55,6 +55,7 @@
 #include "../aera-visualizer-window.hpp"
 #include "../submodules/replicode/r_exec/factory.h"
 #include "aera-visualizer-scene.hpp"
+#include "instantiated-composite-state-item.hpp"
 #include "model-goal-item.hpp"
 
 using namespace std;
@@ -102,25 +103,28 @@ void ModelGoalItem::setFactGoalFactValueHtml()
   QString goalHtml = QString(goalSource.c_str()).replace(factValueLabel, DownArrowHtml);
   QString factGoalHtml = QString(factGoalSource.c_str()).replace(goalLabel, goalHtml);
   QString factValueHtml = QString(factValueSource.c_str()).replace(valueLabel, DownArrowHtml);
-  valueHtml_ = valueSource.c_str();
+  QString valueHtml = valueSource.c_str();
   
   factGoalFactValueHtml_ = "Model " + makeHtmlLink(modelReduction_->model_) + " " + RightArrowHtml + "\n";
   if (is_sim()) {
     // All outer facts in a simulation have the same time, so don't show it.
     factGoalFactValueHtml_ += goalHtml;
     factGoalFactValueHtml_ += "\n      " + factValueHtml;
-    factGoalFactValueHtml_ += "\n          " + valueHtml_;
+    factGoalFactValueHtml_ += "\n          " + valueHtml;
   }
   else {
     factGoalFactValueHtml_ += factGoalHtml;
     factGoalFactValueHtml_ += "\n              " + factValueHtml;
-    factGoalFactValueHtml_ += "\n                  " + valueHtml_;
+    factGoalFactValueHtml_ += "\n                  " + valueHtml;
   }
 
   addSourceCodeHtmlLinks(modelReduction_->object_, factGoalFactValueHtml_);
   factGoalFactValueHtml_ = htmlify(factGoalFactValueHtml_);
+
+  if (value->code(0).asOpcode() == Opcodes::ICst)
+    valueHtml = InstantiatedCompositeStateItem::makeIcstMembersSource(value, replicodeObjects_);
   // TODO: Maybe use nowrap everywhere?
-  valueHtml_ = "<div style=\"white-space: nowrap;\">" + htmlify(valueHtml_) + "</div>";
+  valueHtml_ = "<div style=\"white-space: nowrap;\">" + htmlify(valueHtml) + "</div>";
 }
 
 void ModelGoalItem::textItemLinkActivated(const QString& link)

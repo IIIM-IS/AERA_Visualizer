@@ -2,7 +2,7 @@
 //_/_/
 //_/_/ AERA VISUALIZER
 //_/_/
-//_/_/ Copyright(c)2020 Icelandic Institute for Intelligent Machines ses
+//_/_/ Copyright(c)2021 Icelandic Institute for Intelligent Machines ses
 //_/_/ Vitvelastofnun Islands ses, kt. 571209-0390
 //_/_/ Author: Jeffrey Thompson <jeff@iiim.is>
 //_/_/
@@ -55,6 +55,7 @@
 #include "../aera-visualizer-window.hpp"
 #include "../submodules/replicode/r_exec/factory.h"
 #include "aera-visualizer-scene.hpp"
+#include "instantiated-composite-state-item.hpp"
 #include "composite-state-goal-item.hpp"
 
 using namespace std;
@@ -121,6 +122,9 @@ void CompositeStateGoalItem::setFactGoalFactValueHtml()
   addSourceCodeHtmlLinks(compositeStateReduction_->object_, factGoalFactValueHtml_);
   factGoalFactValueHtml_ = htmlify(factGoalFactValueHtml_);
 
+  if (value->code(0).asOpcode() == Opcodes::ICst)
+    valueHtml = InstantiatedCompositeStateItem::makeIcstMembersSource(value, replicodeObjects_);
+  // TODO: Maybe use nowrap everywhere?
   valueHtml_ = "<div style=\"white-space: nowrap;\">" + htmlify(valueHtml) + "</div>";
 }
 
