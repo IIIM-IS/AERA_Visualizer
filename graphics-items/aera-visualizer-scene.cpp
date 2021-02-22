@@ -101,7 +101,7 @@ AeraVisualizerScene::AeraVisualizerScene(
     eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 315;
     eventTypeFirstTop_[ModelMkValPredictionReduction::EVENT_TYPE] = 555;
     eventTypeFirstTop_[PredictionResultEvent::EVENT_TYPE] = 830;
-    eventTypeFirstTop_[0] = 440;
+    eventTypeFirstTop_[0] = 580;
   }
   else
     // The default, which is used for the models scene.
@@ -110,7 +110,7 @@ AeraVisualizerScene::AeraVisualizerScene(
 
 // TODO: Infer these.
 static std::set<int> selectedSimulationOids = 
-  { 134, 139, 145, 155, 178, 202, 227, 241, 256, 264, 269, 275, 281, 287, 292 };
+  { 134, 139, 145, 154, 155, 158, 176, 178, 202, 227, 241, 256, 264, 269, 275, 281, 287, 292 };
 
 void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 {
@@ -171,7 +171,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       // Reset the top.
       eventTypeNextTop_.clear();
       selectedSimulationNextTop_ = eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
-      otherSimulationNextTop_ = 880 + eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
+      otherSimulationNextTop_ = 1010 + eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
     }
 
     int eventType = 0;
