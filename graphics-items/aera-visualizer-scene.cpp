@@ -206,10 +206,16 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 
     qreal left;
     int verticalMargin = 15;
-    if (isSimulation)
+    if (isSimulation) {
       // Position simulated items exactly.
       // We know that a simulated item's object has the form (fact (goal_or_pred (fact ...)))
-      left = getTimelineX(((_Fact*)aeraEvent->object_->get_reference(0)->get_reference(0))->get_after());
+      if (((_Fact*)aeraEvent->object_)->get_goal())
+        // Position a goal at the time it needs to be achieved by.
+        left = getTimelineX(((_Fact*)aeraEvent->object_->get_reference(0)->get_reference(0))->get_before()) -
+          item->boundingRect().width();
+      else
+        left = getTimelineX(((_Fact*)aeraEvent->object_->get_reference(0)->get_reference(0))->get_after());
+    }
     else {
       if (aeraEvent->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
         aeraEvent->eventType_ == IoDeviceEjectEvent::EVENT_TYPE) {
