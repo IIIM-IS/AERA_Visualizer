@@ -544,7 +544,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       // Add an arrow to the "from object".
       auto fromObjectItem = scene->getAeraGraphicsItem(autoFocusEvent->fromObject_);
       if (fromObjectItem)
-        scene->addArrow(newItem, fromObjectItem);
+        scene->addArrow(fromObjectItem, newItem);
 
       auto mkVal = autoFocusEvent->fromObject_->get_reference(0);
       if (essencePropertyObject_ && mkVal->references_size() >= 2 && mkVal->get_reference(1) == essencePropertyObject_)
@@ -559,7 +559,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       // Add an arrow to the cause.
       auto causeItem = scene->getAeraGraphicsItem(reductionEvent->getCause());
       if (causeItem)
-        scene->addArrow(newItem, causeItem);
+        scene->addArrow(causeItem, newItem);
       visible = (nonSimulationsCheckBox_->checkState() == Qt::Checked);
     }
     else if (event->eventType_ == ModelGoalReduction::EVENT_TYPE) {
@@ -569,7 +569,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       // Add an arrow to the fact super goal.
       auto factSuperGoalItem = scene->getAeraGraphicsItem(reductionEvent->factSuperGoal_);
       if (factSuperGoalItem)
-        scene->addArrow(newItem, factSuperGoalItem);
+        scene->addArrow(factSuperGoalItem, newItem);
 
       scene->addHorizontalLine(newItem);
 
@@ -583,7 +583,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       // Add an arrow to the fact super goal.
       auto factSuperGoalItem = scene->getAeraGraphicsItem(reductionEvent->factSuperGoal_);
       if (factSuperGoalItem)
-        scene->addArrow(newItem, factSuperGoalItem);
+        scene->addArrow(factSuperGoalItem, newItem);
 
       scene->addHorizontalLine(newItem);
 
@@ -597,7 +597,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       // Add an arrow to the input fact.
       auto inputItem = scene->getAeraGraphicsItem(reductionEvent->input_);
       if (inputItem)
-        scene->addArrow(newItem, inputItem);
+        scene->addArrow(inputItem, newItem);
 
       scene->addHorizontalLine(newItem);
 
@@ -613,7 +613,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       // Add an arrow to the input fact.
       auto inputItem = scene->getAeraGraphicsItem(reductionEvent->input_);
       if (inputItem)
-        scene->addArrow(newItem, inputItem);
+        scene->addArrow(inputItem, newItem);
 
       scene->addHorizontalLine(newItem);
 
@@ -634,7 +634,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       for (int i = 0; i < newIcstEvent->inputs_.size(); ++i) {
         auto referencedItem = scene->getAeraGraphicsItem(newIcstEvent->inputs_[i]);
         if (referencedItem)
-          scene->addArrow(newItem, referencedItem);
+          scene->addArrow(referencedItem, newItem);
       }
 
       visible = ((nonSimulationsCheckBox_->checkState() == Qt::Checked) && 
@@ -652,7 +652,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     for (int i = 0; i < event->object_->references_size(); ++i) {
       auto referencedItem = scene->getAeraGraphicsItem(event->object_->get_reference(i));
       if (referencedItem)
-        scene->addArrow(newItem, referencedItem);
+        scene->addArrow(referencedItem, newItem);
     }
     if (event->object_->code(0).asOpcode() == Opcodes::Fact ||
         event->object_->code(0).asOpcode() == Opcodes::AntiFact) {
@@ -662,7 +662,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
         for (int i = 0; i < value->references_size(); ++i) {
           auto referencedItem = scene->getAeraGraphicsItem(value->get_reference(i));
           if (referencedItem)
-            scene->addArrow(newItem, referencedItem);
+            scene->addArrow(referencedItem, newItem);
         }
       }
     }
