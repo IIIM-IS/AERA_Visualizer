@@ -65,6 +65,7 @@ public:
   : eventType_(eventType),
     time_(time),
     object_(object),
+    itemInitialTopLeftPosition_(qQNaN(), qQNaN()),
     itemTopLeftPosition_(qQNaN(), qQNaN())
   {}
 
@@ -95,6 +96,8 @@ public:
   int eventType_;
   core::Timestamp time_;
   r_code::Code* object_;
+  // itemOriginalTopLeftPosition_ is used by "Reset Position" to restore the initial placement.
+  QPointF itemInitialTopLeftPosition_;
   // itemTopLeftPosition_ is used by "New" events to remember the screen position after undoing.
   QPointF itemTopLeftPosition_;
 };
