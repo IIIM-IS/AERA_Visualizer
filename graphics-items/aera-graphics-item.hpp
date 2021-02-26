@@ -110,6 +110,11 @@ public:
   void sendToBack();
 
   /**
+   * Reset the position to aeraEvent_->itemInitialTopLeftPosition_.
+   */
+  void resetPosition();
+
+  /**
    * Replace all "\n" or "\x01" with "<br>" and extra " " with "&nbsp;".
    * \param input The input string to htmlify.
    * \return The HTML string.

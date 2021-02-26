@@ -219,12 +219,19 @@ void AeraGraphicsItem::sendToBack()
   setZValue(zValue);
 }
 
+void AeraGraphicsItem::resetPosition()
+{
+  if (!qIsNaN(aeraEvent_->itemInitialTopLeftPosition_.x()))
+    setPos(aeraEvent_->itemInitialTopLeftPosition_ - boundingRect().topLeft());
+}
+
 void AeraGraphicsItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
   auto menu = new QMenu();
   menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
   menu->addAction("Bring To Front", [=]() { bringToFront(); });
   menu->addAction("Send To Back", [=]() { sendToBack(); });
+  menu->addAction("Reset Position", [=]() { resetPosition(); });
   menu->exec(QCursor::pos() - QPoint(10, 10));
   delete menu;
 }

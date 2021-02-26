@@ -240,6 +240,10 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       eventTypeNextTop_[eventType] = nextTop;
   }
 
+  if (qIsNaN(aeraEvent->itemInitialTopLeftPosition_.x()))
+    // Save the initial position for "Reset Position".
+    aeraEvent->itemInitialTopLeftPosition_ = aeraEvent->itemTopLeftPosition_;
+
   addItem(item);
   // Adjust the position from the topLeft.
   item->setPos(aeraEvent->itemTopLeftPosition_ - item->boundingRect().topLeft());
