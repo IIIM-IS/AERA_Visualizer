@@ -175,6 +175,7 @@ public:
 
   static const QString DownArrowHtml;
   static const QString RightArrowHtml;
+  static const QString RightDoubleArrowHtml;
   static const QString SelectedRadioButtonHtml;
   static const QString UnselectedRadioButtonHtml;
 
