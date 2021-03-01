@@ -58,6 +58,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QScreen>
+#include <QProxyStyle>
 
 using namespace std;
 using namespace std::chrono;
@@ -68,6 +69,19 @@ int main(int argv, char *args[])
   Q_INIT_RESOURCE(aera_visualizer);
 
   QApplication app(argv, args);
+
+  // Override the tool tip style with 0 delay.
+  class MyProxyStyle : public QProxyStyle
+  {
+  public:
+    using QProxyStyle::QProxyStyle;
+    int styleHint(StyleHint hint, const QStyleOption* option = nullptr, const QWidget* widget = nullptr, QStyleHintReturn* returnData = nullptr) const override {
+      if (hint == QStyle::SH_ToolTip_WakeUpDelay) { return 0; }
+      else if (hint == QStyle::SH_ToolTip_FallAsleepDelay) { return 0; }
+      return QProxyStyle::styleHint(hint, option, widget, returnData);
+    }
+  };
+  app.setStyle(new MyProxyStyle(qApp->style()));
 
   QSettings preferences("IIIM", "AERA_Visualizer");
   QString settingsFilePath0 = preferences.value("settingsFilePath").toString();
