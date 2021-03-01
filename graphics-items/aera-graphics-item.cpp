@@ -250,7 +250,7 @@ QVariant AeraGraphicsItem::itemChange(GraphicsItemChange change, const QVariant&
   return value;
 }
 
-QString AeraGraphicsItem::htmlify(const QString& input)
+QString AeraGraphicsItem::htmlify(const QString& input, bool useNowrap)
 {
   QString result = input;
 
@@ -277,6 +277,10 @@ QString AeraGraphicsItem::htmlify(const QString& input)
   result.replace("|pgm", "<font color=\"red\">|pgm</font>");
   result.replace("\n", "<br>");
   result.replace("\x01", "<br>");
+
+  if (useNowrap)
+    result = "<div style=\"white-space: nowrap;\">" + htmlify(result) + "</div>";
+
   return result;
 }
 

@@ -117,11 +117,13 @@ public:
   /**
    * Replace all "\n" or "\x01" with "<br>" and extra " " with "&nbsp;".
    * \param input The input string to htmlify.
+   * \param useNowrap (optional) If true, put the HTMl inside <div style="white-space: nowrap;">.
+   * If omitted, use false.
    * \return The HTML string.
    */
-  static QString htmlify(const QString& input);
+  static QString htmlify(const QString& input, bool useNowrap = false);
 
-  static QString htmlify(const std::string& input) { return htmlify(QString(input.c_str())); }
+  static QString htmlify(const std::string& input, bool useNowrap = false) { return htmlify(QString(input.c_str()), useNowrap); }
 
   /**
    * Make an HTML string with <a href="#debug_oid-XXX"></a> around the label the object. 
