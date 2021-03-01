@@ -107,7 +107,8 @@ void CompositeStateGoalItem::setFactGoalFactValueHtml()
   QString factValueHtml = QString(factValueSource.c_str()).replace(valueLabel, DownArrowHtml);
   QString valueHtml = valueSource.c_str();
 
-  factGoalFactValueHtml_ = "Comp. State " + makeHtmlLink(compositeStateReduction_->compositeState_) + " " + RightArrowHtml + "\n";
+  factGoalFactValueHtml_ = "Comp. State " + makeHtmlLink(compositeStateReduction_->compositeState_) + " " + RightDoubleArrowHtml + 
+    " <b>" + replicodeObjects_.getLabel(compositeStateReduction_->object_).c_str() + "</b>\n";
   if (is_sim()) {
     // All outer facts in a simulation have the same time, so don't show it.
     factGoalFactValueHtml_ += goalHtml;

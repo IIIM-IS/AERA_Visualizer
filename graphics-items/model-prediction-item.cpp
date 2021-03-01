@@ -106,7 +106,8 @@ void ModelPredictionItem::setFactPredFactValueHtml()
   QString factValueHtml = QString(factValueSource.c_str()).replace(valueLabel, DownArrowHtml);
   QString valueHtml = valueSource.c_str();
   
-  factPredFactValueHtml_ = "Model " + makeHtmlLink(modelReduction_->model_) + " " + RightArrowHtml + "\n";
+  factPredFactValueHtml_ = "Model " + makeHtmlLink(modelReduction_->model_) + " " + RightDoubleArrowHtml + 
+    " <b>" + replicodeObjects_.getLabel(modelReduction_->object_).c_str() + "</b>\n";
   if (is_sim()) {
     // All outer facts in a simulation have the same time, so don't show it.
     factPredFactValueHtml_ += predHtml;
