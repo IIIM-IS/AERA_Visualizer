@@ -80,6 +80,7 @@ ModelPredictionItem::ModelPredictionItem(
     targetWidth = parent->getTimelineX(predFact->get_before()) - parent->getTimelineX(predFact->get_after());
 
   setTextItemAndPolygon(valueHtml_, false, SHAPE_PRED);
+  setToolTip(factPredFactValueHtml_);
 }
 
 void ModelPredictionItem::setFactPredFactValueHtml()
@@ -119,12 +120,11 @@ void ModelPredictionItem::setFactPredFactValueHtml()
   }
 
   addSourceCodeHtmlLinks(modelReduction_->object_, factPredFactValueHtml_);
-  factPredFactValueHtml_ = htmlify(factPredFactValueHtml_);
+  factPredFactValueHtml_ = htmlify(factPredFactValueHtml_, true);
 
   if (value->code(0).asOpcode() == Opcodes::ICst)
     valueHtml = InstantiatedCompositeStateItem::makeIcstMembersSource(value, replicodeObjects_);
-  // TODO: Maybe use nowrap everywhere?
-  valueHtml_ = "<div style=\"white-space: nowrap;\">" + htmlify(valueHtml) + "</div>";
+  valueHtml_ = htmlify(valueHtml, true);
 }
 
 void ModelPredictionItem::textItemLinkActivated(const QString& link)

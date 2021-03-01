@@ -80,6 +80,7 @@ ModelGoalItem::ModelGoalItem(
     targetWidth = parent->getTimelineX(goalFact->get_before()) - parent->getTimelineX(goalFact->get_after());
 
   setTextItemAndPolygon(valueHtml_, false, SHAPE_GOAL);
+  setToolTip(factGoalFactValueHtml_);
 }
 
 void ModelGoalItem::setFactGoalFactValueHtml()
@@ -119,12 +120,11 @@ void ModelGoalItem::setFactGoalFactValueHtml()
   }
 
   addSourceCodeHtmlLinks(modelReduction_->object_, factGoalFactValueHtml_);
-  factGoalFactValueHtml_ = htmlify(factGoalFactValueHtml_);
+  factGoalFactValueHtml_ = htmlify(factGoalFactValueHtml_, true);
 
   if (value->code(0).asOpcode() == Opcodes::ICst)
     valueHtml = InstantiatedCompositeStateItem::makeIcstMembersSource(value, replicodeObjects_);
-  // TODO: Maybe use nowrap everywhere?
-  valueHtml_ = "<div style=\"white-space: nowrap;\">" + htmlify(valueHtml) + "</div>";
+  valueHtml_ = htmlify(valueHtml, true);
 }
 
 void ModelGoalItem::textItemLinkActivated(const QString& link)
