@@ -151,6 +151,8 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
         text->setZValue(-100);
         text->setDefaultTextColor(Qt::darkGray);
         text->setPos(frameLeft, 0);
+        // Save the text so that we can adjust to position.
+        timestampTexts_.push_back(text);
       }
     }
   }
@@ -247,6 +249,16 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
   addItem(item);
   // Adjust the position from the topLeft.
   item->setPos(aeraEvent->itemTopLeftPosition_ - item->boundingRect().topLeft());
+}
+
+void AeraVisualizerScene::onViewMoved()
+{
+  if (views().size() >= 1) {
+    // Always position the timestamps at the top of the screen.
+    qreal sceneY = views().at(0)->mapToScene(0, 0).y();
+    foreach(QGraphicsTextItem * text, timestampTexts_)
+      text->setPos(text->x(), sceneY);
+  }
 }
 
 void AeraVisualizerScene::mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent)

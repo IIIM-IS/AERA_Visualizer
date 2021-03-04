@@ -96,6 +96,11 @@ public:
     return relativeTime.count() / microsecondsPerPixel;
   }
 
+  /**
+   * This is called by the QGraphicsView instance when the view is moved.
+   */
+  void onViewMoved();
+
   // The initial value for the flash countdown;
   static const int FLASH_COUNT = 6;
 
@@ -158,6 +163,7 @@ private:
   OnSceneSelected onSceneSelected_;
   r_code::Code* essencePropertyObject_;
   bool didInitialFit_;
+  QList<QGraphicsTextItem*> timestampTexts_;
   // key: The AeraEvent eventType_, or 0 for "other". value: The top of the first item for that event type.
   std::map<int, qreal> eventTypeFirstTop_;
   // key: The AeraEvent eventType_, or 0 for "other". value: The top to use for the next item added for that event type.
