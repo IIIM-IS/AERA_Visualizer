@@ -355,7 +355,7 @@ void AeraVisualizerScene::zoomViewHome()
   // Get the bounding rect of all AeraGraphicsItem. This excludes lines such as frame boundaries.
   QRectF boundingRect;
   foreach(QGraphicsItem* item, items()) {
-    if (dynamic_cast<AeraGraphicsItem*>(item)) {
+    if (dynamic_cast<AeraGraphicsItem*>(item) && item->isVisible()) {
       if (boundingRect.width() == 0)
         boundingRect = item->sceneBoundingRect();
       else
