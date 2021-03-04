@@ -78,6 +78,27 @@ using namespace r_exec;
 
 namespace aera_visualizer {
 
+/**
+ * A MyQGraphicsView extends QGraphicsView so that we can override scrollContentsBy to
+ * call scene_->onViewMoved().
+ */
+class MyQGraphicsView : public QGraphicsView {
+public:
+  MyQGraphicsView(AeraVisualizerScene* scene, QWidget* parent)
+  : QGraphicsView(scene, parent),
+    scene_(scene)
+  {}
+
+protected:
+  void scrollContentsBy(int dx, int dy) override
+  {
+    QGraphicsView::scrollContentsBy(dx, dy);
+    scene_->onViewMoved();
+  }
+
+  AeraVisualizerScene* scene_;
+};
+
 AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 : AeraVisulizerWindowBase(0, replicodeObjects),
   iNextEvent_(0), explanationLogWindow_(0),
@@ -100,7 +121,8 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 
   mainScene_ = new AeraVisualizerScene(replicodeObjects_, this, true,
     [=]() { selectedScene_ = mainScene_; });
-  auto mainSceneView = new QGraphicsView(mainScene_, this);
+  // Use a MyQGraphicsView so that we can track movements to the scene view.
+  auto mainSceneView = new MyQGraphicsView(mainScene_, this);
   mainSceneView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   mainSceneView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   // Set a default selected scene.
