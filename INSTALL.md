@@ -25,9 +25,9 @@ To install Qt Framework:
   "Launch Qt Creator" since we don't need it. 
 * With Visual Studio closed, download and install the Qt Visual Studio Tools from
   https://marketplace.visualstudio.com/items?itemName=TheQtCompany.QtVisualStudioTools2019 .
-* Launch Visual Studio. On the Extensions menu, click "Qt VS Tools" then "Qt Options". On the "Qt Version"
-  tab, click Add. In "Path", click the "..." button and select the installed path, e.g. 
-  `C:\Qt\5.15.0\msvc2019_64` . Click "OK".
+* Launch Visual Studio. On the "splash" screen, click "continue without code". On the Extensions menu, click 
+  "Qt VS Tools" then "Qt Options". On the "Qt Version" tab, click Add. In "Path", click the "..." button and 
+  select the installed path, e.g. `C:\Qt\5.15.0\msvc2019_64` . Click "OK".
 
 To get the AERA Visualizer code repository, launch GitHub for Desktop and sign in to GitHub. In the File menu, 
 click "Clone a Repository". Click the URL tab and enter `https://github.com/IIIM-IS/AERA_Visualizer` . 
