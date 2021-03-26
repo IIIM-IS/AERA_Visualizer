@@ -164,6 +164,7 @@ private slots:
   void zoomIn();
   void zoomOut();
   void zoomHome();
+  void undoHome(AeraGraphicsItem* item);
 
 private:
   void createActions();
@@ -188,6 +189,7 @@ private:
   QAction* zoomInAction_;
   QAction* zoomOutAction_;
   QAction* zoomHomeAction_;
+  QAction* UndoAction_;
 
   QCheckBox* simulationsCheckBox_;
   QCheckBox* nonSimulationsCheckBox_;

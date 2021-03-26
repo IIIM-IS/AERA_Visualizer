@@ -66,6 +66,7 @@
 #include "graphics-items/io-device-inject-eject-item.hpp"
 #include "graphics-items/aera-visualizer-scene.hpp"
 #include "aera-visualizer-window.hpp"
+#include "aera-event.hpp"
 
 #include <QtWidgets>
 #include <QProgressDialog>
@@ -75,6 +76,7 @@ using namespace std::chrono;
 using namespace core;
 using namespace r_code;
 using namespace r_exec;
+using namespace aera_visualizer;
 
 namespace aera_visualizer {
 
@@ -829,6 +831,16 @@ void AeraVisulizerWindow::zoomHome()
   selectedScene_->zoomViewHome();
 }
 
+void AeraVisulizerWindow::undoHome(AeraGraphicsItem* item)
+{
+
+  auto aeraEvent2 = item->getAeraEvent();
+
+  if (!qIsNaN(aeraEvent2->itemInitialTopLeftPosition_.x()))
+    item->setPos(aeraEvent2->itemInitialTopLeftPosition_ - item->boundingRect().topLeft());
+
+}
+
 void AeraVisulizerWindow::createActions()
 {
   exitAction_ = new QAction(tr("E&xit"), this);
@@ -846,6 +858,10 @@ void AeraVisulizerWindow::createActions()
   zoomHomeAction_ = new QAction(QIcon(":/images/zoom-home.png"), tr("Zoom Home"), this);
   zoomHomeAction_->setStatusTip(tr("Zoom to show all"));
   connect(zoomHomeAction_, SIGNAL(triggered()), this, SLOT(zoomHome()));
+
+  UndoAction_ = new QAction(QIcon(":/images/resetIcon.png"), tr(" Undo "), this);
+  UndoAction_->setStatusTip(tr("Undo everything"));
+  connect(UndoAction_, SIGNAL(triggered()), this, SLOT(undoHome()));
 }
 
 void AeraVisulizerWindow::createMenus()
@@ -857,6 +873,7 @@ void AeraVisulizerWindow::createMenus()
   viewMenu->addAction(zoomInAction_);
   viewMenu->addAction(zoomOutAction_);
   viewMenu->addAction(zoomHomeAction_);
+  viewMenu->addAction(UndoAction_);
 }
 
 static set<int> simulationEventTypes =
@@ -869,6 +886,7 @@ void AeraVisulizerWindow::createToolbars()
   toolbar->addAction(zoomInAction_);
   toolbar->addAction(zoomOutAction_);
   toolbar->addAction(zoomHomeAction_);
+  toolbar->addAction(UndoAction_);
 
   toolbar->addSeparator();
   toolbar->addWidget(new QLabel("Show/Hide: ", this));
