@@ -8,7 +8,7 @@ Prerequisites
 
 * Required: Replicode
 * Required: Qt Framework, version 4.9 or greater
-* Required: The AERA Visualizer code repository from https://github.com/IIIM-IS/AERA_Visualizer . Do a "recursive" clone to get submodueles, e.g.:
+* Required: The AERA Visualizer code repository from https://github.com/IIIM-IS/AERA_Visualizer . Do a "recursive" clone to get submodules, e.g.:
 
     git clone --recursive https://github.com/IIIM-IS/AERA_Visualizer
 
@@ -22,7 +22,7 @@ To install Qt Framework:
 
 * Download and install from https://www.qt.io/download-qt-installer . In the
   installer, select "Custom installation". Expand "Qt" and expand the latest version 5 release,
-  e.g. "5.15.2". Select your MSVC 64-bit version, e.g. "MSVC 2019 64.bit" When the installer if 
+  e.g. "5.15.2". Select your MSVC 64-bit version, e.g. "MSVC 2019 64.bit" When the installer is
   finished, you can uncheck "Launch Qt Creator" since we don't need it. 
 * With Visual Studio closed, download and install the Qt Visual Studio Tools from
   https://marketplace.visualstudio.com/items?itemName=TheQtCompany.QtVisualStudioTools2019 .
