@@ -340,10 +340,10 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
       auto model = replicodeObjects_.getObject(stoul(matches[4].str()));
       auto factPred = replicodeObjects_.getObject(stoul(matches[6].str()));
       auto input = replicodeObjects_.getObject(stoul(matches[5].str()));
-      if (factPred->get_oid() == 264)
+      if (factPred && factPred->get_oid() == 264)
         // TODO: We need check_simulated_imdl to know the input which triggered the signal.
         input = replicodeObjects_.getObject(256);
-      else if (factPred->get_oid() == 281)
+      else if (factPred && factPred->get_oid() == 281)
         // TODO: We need check_simulated_imdl to know the input which triggered the signal.
         input = replicodeObjects_.getObject(275);
 
