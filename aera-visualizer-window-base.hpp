@@ -108,17 +108,6 @@ protected:
    */
   QWidget* getPlayerControlPanel() { return playerControlPanel_;  }
 
-  /**
-   * Set the time reference for the event time stamps (typically the events start time).
-   * This resets the play time to the timeReference.
-   * \param timeReference The time reference.
-   */
-  void setTimeReference(core::Timestamp timeReference)
-  {
-    timeReference_ = timeReference;
-    setPlayTime(timeReference_);
-  }
-
   virtual bool haveMoreEvents() = 0;
 
   /**
@@ -187,9 +176,6 @@ private:
 
   std::vector<AeraVisulizerWindowBase*> children_;
   QWidget* playerControlPanel_;
-
-  // These are only used in the main window.
-  core::Timestamp timeReference_;
 };
 
 static const std::chrono::milliseconds AeraVisulizer_playTimerTick(100);

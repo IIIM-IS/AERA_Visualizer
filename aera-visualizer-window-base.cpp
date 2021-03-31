@@ -64,8 +64,7 @@ namespace aera_visualizer {
 AeraVisulizerWindowBase::AeraVisulizerWindowBase(AeraVisulizerWindow* mainWindow, ReplicodeObjects& replicodeObjects)
 : QMainWindow(mainWindow),
   mainWindow_(mainWindow),
-  replicodeObjects_(replicodeObjects),
-  timeReference_(seconds(0))
+  replicodeObjects_(replicodeObjects)
 {
   simulationEventTypes_ = { 
     ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,

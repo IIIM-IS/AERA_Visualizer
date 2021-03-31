@@ -113,7 +113,7 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
   createActions();
   createMenus();
 
-  setTimeReference(replicodeObjects_.getTimeReference());
+  setPlayTime(replicodeObjects_.getTimeReference());
 
   createToolbars();
 
@@ -851,7 +851,7 @@ void AeraVisulizerWindow::setPlayTimeImpl(Timestamp time)
 
   uint64 total_us;
   if (showRelativeTime_)
-    total_us = duration_cast<microseconds>(time - timeReference_).count();
+    total_us = duration_cast<microseconds>(time - replicodeObjects_.getTimeReference()).count();
   else
     total_us = duration_cast<microseconds>(time.time_since_epoch()).count();
   uint64 us = total_us % 1000;
@@ -885,8 +885,9 @@ void AeraVisulizerWindow::setSliderToPlayTimeImpl()
   }
 
   auto maximumEventTime = events_.back()->time_;
-  int value = playSlider_->maximum() * ((double)duration_cast<microseconds>(playTime_ - timeReference_).count() /
-    duration_cast<microseconds>(maximumEventTime - timeReference_).count());
+  int value = playSlider_->maximum() * 
+    ((double)duration_cast<microseconds>(playTime_ - replicodeObjects_.getTimeReference()).count() /
+     duration_cast<microseconds>(maximumEventTime - replicodeObjects_.getTimeReference()).count());
   playSlider_->setValue(value);
   for (size_t i = 0; i < children_.size(); ++i)
     children_[i]->playSlider_->setValue(value);
@@ -926,7 +927,7 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
 void AeraVisulizerWindow::stepBackButtonClickedImpl()
 {
   stopPlay();
-  auto newTime = max(unstepEvent(Timestamp(seconds(0))), timeReference_);
+  auto newTime = max(unstepEvent(Timestamp(seconds(0))), replicodeObjects_.getTimeReference());
   if (newTime == Utils_MaxTime)
     return;
   // Debug: How to step the children also?
@@ -941,7 +942,7 @@ void AeraVisulizerWindow::stepBackButtonClickedImpl()
     newTime = localNewTime;
   }
 
-  setPlayTime(max(newTime, timeReference_));
+  setPlayTime(max(newTime, replicodeObjects_.getTimeReference()));
   setSliderToPlayTime();
 }
 
