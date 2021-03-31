@@ -155,6 +155,7 @@ private slots:
   void playTimeLabelClicked();
 
 private:
+  friend class AeraVisulizerWindow;
   void createPlayerControlPanel();
 
   /**

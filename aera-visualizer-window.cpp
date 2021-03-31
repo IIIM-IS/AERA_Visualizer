@@ -814,6 +814,139 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
     return Timestamp(seconds(0));
 }
 
+void AeraVisulizerWindow::startPlayImpl()
+{
+  if (isPlaying_)
+    // Already playing.
+    return;
+
+  playPauseButton_->setIcon(pauseIcon_);
+  for (size_t i = 0; i < children_.size(); ++i)
+    children_[i]->playPauseButton_->setIcon(pauseIcon_);
+  isPlaying_ = true;
+  if (playTimerId_ == 0)
+    playTimerId_ = startTimer(AeraVisulizer_playTimerTick.count());
+}
+
+void AeraVisulizerWindow::stopPlayImpl()
+{
+  if (playTimerId_ != 0) {
+    killTimer(playTimerId_);
+    playTimerId_ = 0;
+  }
+
+  playPauseButton_->setIcon(playIcon_);
+  for (size_t i = 0; i < children_.size(); ++i)
+    children_[i]->playPauseButton_->setIcon(playIcon_);
+  isPlaying_ = false;
+}
+
+void AeraVisulizerWindow::setPlayTimeImpl(Timestamp time)
+{
+  playTime_ = time;
+
+  uint64 total_us;
+  if (showRelativeTime_)
+    total_us = duration_cast<microseconds>(time - timeReference_).count();
+  else
+    total_us = duration_cast<microseconds>(time.time_since_epoch()).count();
+  uint64 us = total_us % 1000;
+  uint64 ms = total_us / 1000;
+  uint64 s = ms / 1000;
+  ms = ms % 1000;
+
+  char buffer[100];
+  if (showRelativeTime_)
+    sprintf(buffer, "%03ds:%03dms:%03dus", (int)s, (int)ms, (int)us);
+  else {
+    // Get the UTC time.
+    time_t gmtTime = s;
+    struct tm* t = gmtime(&gmtTime);
+    sprintf(buffer, "%04d-%02d-%02d   UTC\n%02d:%02d:%02d:%03d:%03d",
+      t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
+      t->tm_hour, t->tm_min, t->tm_sec, (int)ms, (int)us);
+  }
+  playTimeLabel_->setText(buffer);
+  for (size_t i = 0; i < children_.size(); ++i)
+    children_[i]->playTimeLabel_->setText(buffer);
+}
+
+void AeraVisulizerWindow::setSliderToPlayTimeImpl()
+{
+  if (events_.size() == 0) {
+    playSlider_->setValue(0);
+    for (size_t i = 0; i < children_.size(); ++i)
+      children_[i]->playSlider_->setValue(0);
+    return;
+  }
+
+  auto maximumEventTime = events_.back()->time_;
+  int value = playSlider_->maximum() * ((double)duration_cast<microseconds>(playTime_ - timeReference_).count() /
+    duration_cast<microseconds>(maximumEventTime - timeReference_).count());
+  playSlider_->setValue(value);
+  for (size_t i = 0; i < children_.size(); ++i)
+    children_[i]->playSlider_->setValue(value);
+}
+
+void AeraVisulizerWindow::playPauseButtonClickedImpl()
+{
+  if (isPlaying_)
+    stopPlay();
+  else
+    startPlay();
+}
+
+void AeraVisulizerWindow::stepButtonClickedImpl()
+{
+  stopPlay();
+  auto newTime = stepEvent(Utils_MaxTime);
+  if (newTime == Utils_MaxTime)
+    return;
+  // Debug: How to step the children also?
+
+  // Keep stepping remaining events in this same frame.
+  auto relativeTime = duration_cast<microseconds>(newTime - replicodeObjects_.getTimeReference());
+  auto frameStartTime = newTime - (relativeTime % replicodeObjects_.getSamplingPeriod());
+  auto thisFrameMaxTime = frameStartTime + replicodeObjects_.getSamplingPeriod() - microseconds(1);
+  while (true) {
+    auto localNewTime = stepEvent(thisFrameMaxTime);
+    if (localNewTime == Utils_MaxTime)
+      break;
+    newTime = localNewTime;
+  }
+
+  setPlayTime(newTime);
+  setSliderToPlayTime();
+}
+
+void AeraVisulizerWindow::stepBackButtonClickedImpl()
+{
+  stopPlay();
+  auto newTime = max(unstepEvent(Timestamp(seconds(0))), timeReference_);
+  if (newTime == Utils_MaxTime)
+    return;
+  // Debug: How to step the children also?
+
+  // Keep unstepping remaining events in this same frame.
+  auto relativeTime = duration_cast<microseconds>(newTime - replicodeObjects_.getTimeReference());
+  auto frameStartTime = newTime - (relativeTime % replicodeObjects_.getSamplingPeriod());
+  while (true) {
+    auto localNewTime = unstepEvent(frameStartTime);
+    if (localNewTime == Utils_MaxTime)
+      break;
+    newTime = localNewTime;
+  }
+
+  setPlayTime(max(newTime, timeReference_));
+  setSliderToPlayTime();
+}
+
+void AeraVisulizerWindow::playTimeLabelClickedImpl()
+{
+  showRelativeTime_ = !showRelativeTime_;
+  setPlayTime(playTime_);
+}
+
 void AeraVisulizerWindow::zoomIn()
 {
   selectedScene_->scaleViewBy(1.09);

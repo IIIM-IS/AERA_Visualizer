@@ -115,171 +115,65 @@ void AeraVisulizerWindowBase::createPlayerControlPanel()
 
 void AeraVisulizerWindowBase::startPlay()
 {
-  if (mainWindow_) {
-    // Only do this from the main window.
-    mainWindow_->startPlay();
-    return;
-  }
-
-  if (isPlaying_)
-    // Already playing.
-    return;
-
-  playPauseButton_->setIcon(pauseIcon_);
-  for (size_t i = 0; i < children_.size(); ++i)
-    children_[i]->playPauseButton_->setIcon(pauseIcon_);
-  isPlaying_ = true;
-  if (playTimerId_ == 0)
-    playTimerId_ = startTimer(AeraVisulizer_playTimerTick.count());
+  if (mainWindow_)
+    mainWindow_->startPlayImpl();
+  else
+    // This is the main window.
+    ((AeraVisulizerWindow*)this)->startPlayImpl();
 }
 
 void AeraVisulizerWindowBase::stopPlay()
 {
-  if (mainWindow_) {
-    // Only do this from the main window.
-    mainWindow_->stopPlay();
-    return;
-  }
-
-  if (playTimerId_ != 0) {
-    killTimer(playTimerId_);
-    playTimerId_ = 0;
-  }
-
-  playPauseButton_->setIcon(playIcon_);
-  for (size_t i = 0; i < children_.size(); ++i)
-    children_[i]->playPauseButton_->setIcon(playIcon_);
-  isPlaying_ = false;
+  if (mainWindow_)
+    mainWindow_->stopPlayImpl();
+  else
+    // This is the main window.
+    ((AeraVisulizerWindow*)this)->stopPlayImpl();
 }
 
 void AeraVisulizerWindowBase::setPlayTime(Timestamp time)
 {
-  if (mainWindow_) {
-    // Only do this from the main window.
-    mainWindow_->setPlayTime(time);
-    return;
-  }
-
-  playTime_ = time;
-
-  uint64 total_us;
-  if (showRelativeTime_)
-    total_us = duration_cast<microseconds>(time - timeReference_).count();
+  if (mainWindow_)
+    mainWindow_->setPlayTimeImpl(time);
   else
-    total_us = duration_cast<microseconds>(time.time_since_epoch()).count();
-  uint64 us = total_us % 1000;
-  uint64 ms = total_us / 1000;
-  uint64 s = ms / 1000;
-  ms = ms % 1000;
-
-  char buffer[100];
-  if (showRelativeTime_)
-    sprintf(buffer, "%03ds:%03dms:%03dus", (int)s, (int)ms, (int)us);
-  else {
-    // Get the UTC time.
-    time_t gmtTime = s;
-    struct tm* t = gmtime(&gmtTime);
-    sprintf(buffer, "%04d-%02d-%02d   UTC\n%02d:%02d:%02d:%03d:%03d", 
-      t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, 
-      t->tm_hour, t->tm_min, t->tm_sec, (int)ms, (int)us);
-  }
-  playTimeLabel_->setText(buffer);
-  for (size_t i = 0; i < children_.size(); ++i)
-    children_[i]->playTimeLabel_->setText(buffer);
+    // This is the main window.
+    ((AeraVisulizerWindow*)this)->setPlayTimeImpl(time);
 }
 
 void AeraVisulizerWindowBase::setSliderToPlayTime()
 {
-  if (mainWindow_) {
-    // Only do this from the main window.
-    mainWindow_->setSliderToPlayTime();
-    return;
-  }
-
-  if (events_.size() == 0) {
-    playSlider_->setValue(0);
-    for (size_t i = 0; i < children_.size(); ++i)
-      children_[i]->playSlider_->setValue(0);
-    return;
-  }
-
-  auto maximumEventTime = events_.back()->time_;
-  int value = playSlider_->maximum() * ((double)duration_cast<microseconds>(playTime_ - timeReference_).count() / 
-                                                duration_cast<microseconds>(maximumEventTime - timeReference_).count());
-  playSlider_->setValue(value);
-  for (size_t i = 0; i < children_.size(); ++i)
-    children_[i]->playSlider_->setValue(value);
+  if (mainWindow_)
+    mainWindow_->setSliderToPlayTimeImpl();
+  else
+    // This is the main window.
+    ((AeraVisulizerWindow*)this)->setSliderToPlayTimeImpl();
 }
 
 void AeraVisulizerWindowBase::playPauseButtonClicked()
 {
-  if (mainWindow_) {
-    // Only do this from the main window.
-    mainWindow_->playPauseButtonClicked();
-    return;
-  }
-
-  if (isPlaying_)
-    stopPlay();
+  if (mainWindow_)
+    mainWindow_->playPauseButtonClickedImpl();
   else
-    startPlay();
+    // This is the main window.
+    ((AeraVisulizerWindow*)this)->playPauseButtonClickedImpl();
 }
 
 void AeraVisulizerWindowBase::stepButtonClicked()
 {
-  if (mainWindow_) {
-    // Only do this from the main window.
-    mainWindow_->stepButtonClicked();
-    return;
-  }
-
-  stopPlay();
-  auto newTime = stepEvent(Utils_MaxTime);
-  if (newTime == Utils_MaxTime)
-    return;
-  // Debug: How to step the children also?
-
-  // Keep stepping remaining events in this same frame.
-  auto relativeTime = duration_cast<microseconds>(newTime - replicodeObjects_.getTimeReference());
-  auto frameStartTime = newTime - (relativeTime % replicodeObjects_.getSamplingPeriod());
-  auto thisFrameMaxTime = frameStartTime + replicodeObjects_.getSamplingPeriod() - microseconds(1);
-  while (true) {
-    auto localNewTime = stepEvent(thisFrameMaxTime);
-    if (localNewTime == Utils_MaxTime)
-      break;
-    newTime = localNewTime;
-  }
-
-  setPlayTime(newTime);
-  setSliderToPlayTime();
+  if (mainWindow_)
+    mainWindow_->stepButtonClickedImpl();
+  else
+    // This is the main window.
+    ((AeraVisulizerWindow*)this)->stepButtonClickedImpl();
 }
 
 void AeraVisulizerWindowBase::stepBackButtonClicked()
 {
-  if (mainWindow_) {
-    // Only do this from the main window.
-    mainWindow_->stepBackButtonClicked();
-    return;
-  }
-
-  stopPlay();
-  auto newTime = max(unstepEvent(Timestamp(seconds(0))), timeReference_);
-  if (newTime == Utils_MaxTime)
-    return;
-  // Debug: How to step the children also?
-
-  // Keep unstepping remaining events in this same frame.
-  auto relativeTime = duration_cast<microseconds>(newTime - replicodeObjects_.getTimeReference());
-  auto frameStartTime = newTime - (relativeTime % replicodeObjects_.getSamplingPeriod());
-  while (true) {
-    auto localNewTime = unstepEvent(frameStartTime);
-    if (localNewTime == Utils_MaxTime)
-      break;
-    newTime = localNewTime;
-  }
-
-  setPlayTime(max(newTime, timeReference_));
-  setSliderToPlayTime();
+  if (mainWindow_)
+    mainWindow_->stepBackButtonClickedImpl();
+  else
+    // This is the main window.
+    ((AeraVisulizerWindow*)this)->stepBackButtonClickedImpl();
 }
 
 void AeraVisulizerWindowBase::playSliderValueChanged(int value)
@@ -290,14 +184,11 @@ void AeraVisulizerWindowBase::playSliderValueChanged(int value)
 
 void AeraVisulizerWindowBase::playTimeLabelClicked()
 {
-  if (mainWindow_) {
-    // Only do this from the main window.
-    mainWindow_->playTimeLabelClicked();
-    return;
-  }
-
-  showRelativeTime_ = !showRelativeTime_;
-  setPlayTime(playTime_);
+  if (mainWindow_)
+    mainWindow_->playTimeLabelClickedImpl();
+  else
+    // This is the main window.
+    ((AeraVisulizerWindow*)this)->playTimeLabelClickedImpl();
 }
 
 void AeraVisulizerWindowBase::timerEvent(QTimerEvent* event)

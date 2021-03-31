@@ -166,6 +166,7 @@ private slots:
   void zoomHome();
 
 private:
+  friend class AeraVisulizerWindowBase;
   void createActions();
   void createMenus();
   void createToolbars();
@@ -179,6 +180,15 @@ private:
    * \return The timestamp.
    */
   core::Timestamp getTimestamp(const smatch& matches, int index = 1);
+
+  void startPlayImpl();
+  void stopPlayImpl();
+  void setPlayTimeImpl(core::Timestamp time);
+  void setSliderToPlayTimeImpl();
+  void playPauseButtonClickedImpl();
+  void stepButtonClickedImpl();
+  void stepBackButtonClickedImpl();
+  void playTimeLabelClickedImpl();
 
   AeraVisualizerScene* modelsScene_;
   AeraVisualizerScene* mainScene_;
