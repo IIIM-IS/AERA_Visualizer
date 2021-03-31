@@ -139,8 +139,6 @@ protected:
    */
   virtual core::Timestamp unstepEvent(core::Timestamp minimumTime) = 0;
 
-  void timerEvent(QTimerEvent* event) override;
-
   AeraVisulizerWindow* mainWindow_;
   ReplicodeObjects& replicodeObjects_;
   // Debug: This should be in the derived class.
@@ -186,16 +184,12 @@ private:
   QToolButton* stepButton_;
   QSlider* playSlider_;
   ClickableLabel* playTimeLabel_;
-  bool showRelativeTime_;
 
   std::vector<AeraVisulizerWindowBase*> children_;
   QWidget* playerControlPanel_;
 
   // These are only used in the main window.
   core::Timestamp timeReference_;
-  core::Timestamp playTime_;
-  int playTimerId_;
-  bool isPlaying_;
 };
 
 static const std::chrono::milliseconds AeraVisulizer_playTimerTick(100);

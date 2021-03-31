@@ -189,6 +189,7 @@ private:
   void stepButtonClickedImpl();
   void stepBackButtonClickedImpl();
   void playTimeLabelClickedImpl();
+  void timerEvent(QTimerEvent* event) override;
 
   AeraVisualizerScene* modelsScene_;
   AeraVisualizerScene* mainScene_;
@@ -210,6 +211,11 @@ private:
   bool hoverHighlightItemWasVisible_;
   QString hoverPreviousUrl_;
   r_code::Code* essencePropertyObject_;
+
+  bool showRelativeTime_;
+  core::Timestamp playTime_;
+  int playTimerId_;
+  bool isPlaying_;
 };
 
 }

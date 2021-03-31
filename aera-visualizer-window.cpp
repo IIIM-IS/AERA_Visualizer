@@ -104,6 +104,10 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
   iNextEvent_(0), explanationLogWindow_(0),
   essencePropertyObject_(replicodeObjects_.getObject("essence")),
   hoverHighlightItem_(0),
+  showRelativeTime_(true),
+  playTime_(seconds(0)),
+  playTimerId_(0),
+  isPlaying_(false),
   itemBorderHighlightPen_(Qt::blue, 3)
 {
   createActions();
@@ -945,6 +949,37 @@ void AeraVisulizerWindow::playTimeLabelClickedImpl()
 {
   showRelativeTime_ = !showRelativeTime_;
   setPlayTime(playTime_);
+}
+
+void AeraVisulizerWindow::timerEvent(QTimerEvent* event)
+{
+  // TODO: Make sure we don't re-enter.
+
+  if (event->timerId() != playTimerId_)
+    // This timer event is not for us.
+    return;
+
+  if (events_.size() == 0) {
+    stopPlay();
+    return;
+  }
+
+  auto maximumEventTime = events_.back()->time_;
+  // TODO: Make this track the passage of real clock time.
+  auto playTime = playTime_ + AeraVisulizer_playTimerTick;
+
+  // Step events while events_[iNextEvent_] is less than or equal to the playTime.
+  // Debug: How to step the children also?
+  while (stepEvent(playTime) != Utils_MaxTime);
+
+  if (!haveMoreEvents()) {
+    // We have played all events.
+    playTime = maximumEventTime;
+    stopPlay();
+  }
+
+  setPlayTime(playTime);
+  setSliderToPlayTime();
 }
 
 void AeraVisulizerWindow::zoomIn()
