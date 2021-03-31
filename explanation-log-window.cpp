@@ -63,8 +63,7 @@ using namespace r_exec;
 namespace aera_visualizer {
 
 ExplanationLogWindow::ExplanationLogWindow(AeraVisulizerWindow* mainWindow, ReplicodeObjects& replicodeObjects)
-  : AeraVisulizerWindowBase(mainWindow, replicodeObjects),
-  parent_(mainWindow)
+  : AeraVisulizerWindowBase(mainWindow, replicodeObjects)
 {
   auto centralLayout = new QVBoxLayout();
   textBrowser_ = new TextBrowser(this);
@@ -86,7 +85,7 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
     // There is no item for a requirement prediction, so show a menu for a "What Is" explanation.
     // TODO: This should be the debug_oid of an mk.rdx, which Replicode currently doesn't make. 
     int imdlPredictionEventIndex = url.url().mid(24).toULongLong();
-    auto imdlPredictionEvent = (ModelImdlPredictionEvent*)parent_->getAeraEvent(imdlPredictionEventIndex);
+    auto imdlPredictionEvent = (ModelImdlPredictionEvent*)mainWindow_->getAeraEvent(imdlPredictionEventIndex);
     Code* predictingModel = imdlPredictionEvent->predictingModel_;
     Code* cause = imdlPredictionEvent->cause_;
     Code* requirementFactPred = imdlPredictionEvent->object_;
@@ -137,7 +136,7 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
       delete menu;
     }
     else {
-      auto item = parent_->getAeraGraphicsItem(object);
+      auto item = mainWindow_->getAeraGraphicsItem(object);
       if (!item)
         return;
       if (dynamic_cast<IoDeviceInjectEjectItem*>(item))
@@ -147,7 +146,7 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
       // Show the menu.
       auto menu = new QMenu();
       menu->addAction(QString("Zoom to ") + replicodeObjects_.getLabel(object).c_str(),
-        [=]() { parent_->zoomToAeraGraphicsItem(object); });
+        [=]() { mainWindow_->zoomToAeraGraphicsItem(object); });
       menu->exec(QCursor::pos() - QPoint(10, 10));
       delete menu;
     }
@@ -156,7 +155,7 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
 
 void ExplanationLogWindow::TextBrowser::mouseMoveEvent(QMouseEvent* event)
 {
-  parent_->parent_->textItemHoverMoveEvent(document(), event->pos());
+  parent_->mainWindow_->textItemHoverMoveEvent(document(), event->pos());
 
   QTextBrowser::mouseMoveEvent(event);
 }

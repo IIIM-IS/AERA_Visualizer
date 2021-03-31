@@ -102,7 +102,6 @@ private:
   };
   friend TextBrowser;
 
-  AeraVisulizerWindow* parent_;
   // TODO: We should be able to use textBrowser_ to append HTML.
   QString html_;
   TextBrowser* textBrowser_;
