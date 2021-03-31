@@ -110,6 +110,10 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
   isPlaying_(false),
   itemBorderHighlightPen_(Qt::blue, 3)
 {
+  simulationEventTypes_ = {
+    ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,
+    ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE };
+
   createActions();
   createMenus();
 
@@ -973,7 +977,7 @@ void AeraVisulizerWindow::timerEvent(QTimerEvent* event)
   // Debug: How to step the children also?
   while (stepEvent(playTime) != Utils_MaxTime);
 
-  if (!haveMoreEvents()) {
+  if (iNextEvent_ >= events_.size()) {
     // We have played all events.
     playTime = maximumEventTime;
     stopPlay();

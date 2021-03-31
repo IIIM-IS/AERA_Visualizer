@@ -66,10 +66,6 @@ AeraVisulizerWindowBase::AeraVisulizerWindowBase(AeraVisulizerWindow* mainWindow
   mainWindow_(mainWindow),
   replicodeObjects_(replicodeObjects)
 {
-  simulationEventTypes_ = { 
-    ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,
-    ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE };
-
   createPlayerControlPanel();
 
   if (mainWindow_)

@@ -81,14 +81,6 @@ public:
 
   void appendHtml(const std::string& html) { appendHtml(QString(html.c_str())); }
 
-protected:
-  // TODO: Implement.
-  bool haveMoreEvents() override { return false; }
-  // TODO: Implement.
-  core::Timestamp stepEvent(core::Timestamp maximumTime) override { return r_code::Utils_MaxTime; }
-  // TODO: Implement.
-  core::Timestamp unstepEvent(core::Timestamp minimumTime) override { return r_code::Utils_MaxTime; }
-
 private slots:
   void textBrowserAnchorClicked(const QUrl& url);
 

@@ -58,7 +58,6 @@
 #include <QToolButton>
 #include <QSlider>
 #include <QLabel>
-#include "aera-event.hpp"
 #include "submodules/replicode/r_code/utils.h"
 #include "replicode-objects.hpp"
 
@@ -108,31 +107,8 @@ protected:
    */
   QWidget* getPlayerControlPanel() { return playerControlPanel_;  }
 
-  virtual bool haveMoreEvents() = 0;
-
-  /**
-   * Perform the event at events_[iNextEvent_] and then increment iNextEvent_.
-   * \param maximumTime if the time of next event is greater than maximumTime, don't perform the
-   * event, and return Utils_MaxTime.
-   * \return The time of the next event. If there is no next event, then
-   * return Utils_MaxTime.
-   */
-  virtual core::Timestamp stepEvent(core::Timestamp maximumTime) = 0;
-
-  /**
-   * Decrement iNextEvent_ and undo the event at events_[iNextEvent_].
-   * \param minimumTime if the time of previous event is less than minimumTime, don't 
-   * decrement iNextEvent_ and don't undo, and return Utils_MaxTime.
-   * \return The time of the previous event. If there is no previous event, then
-   * return Utils_MaxTime.
-   */
-  virtual core::Timestamp unstepEvent(core::Timestamp minimumTime) = 0;
-
   AeraVisulizerWindow* mainWindow_;
   ReplicodeObjects& replicodeObjects_;
-  // Debug: This should be in the derived class.
-  std::vector<std::shared_ptr<AeraEvent> > events_;
-  set<int> simulationEventTypes_;
 
 private slots:
   void playPauseButtonClicked();

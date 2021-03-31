@@ -138,8 +138,6 @@ public:
   const AeraEvent* getAeraEvent(size_t i) const { return events_[i].get(); }
 
 protected:
-  bool haveMoreEvents() override { return iNextEvent_ < events_.size(); }
-
   /**
    * Perform the event at events_[iNextEvent_] and then increment iNextEvent_.
    * \param maximumTime if the time of next event is greater than maximumTime, don't perform the
@@ -147,7 +145,7 @@ protected:
    * \return The time of the next event. If there is no next event, then
    * return Utils_MaxTime.
    */
-  core::Timestamp stepEvent(core::Timestamp maximumTime) override;
+  core::Timestamp stepEvent(core::Timestamp maximumTime);
 
   /**
    * Decrement iNextEvent_ and undo the event at events_[iNextEvent_].
@@ -156,7 +154,7 @@ protected:
    * \return The time of the previous event. If there is no previous event, then
    * return Utils_MaxTime.
    */
-  core::Timestamp unstepEvent(core::Timestamp minimumTime) override;
+  core::Timestamp unstepEvent(core::Timestamp minimumTime);
 
   ExplanationLogWindow* explanationLogWindow_;
 
@@ -222,7 +220,9 @@ private:
   QCheckBox* essenceFactsCheckBox_;
   QCheckBox* instantiatedCompositeStatesCheckBox_;
 
+  std::vector<std::shared_ptr<AeraEvent> > events_;
   size_t iNextEvent_;
+  set<int> simulationEventTypes_;
   QPen itemBorderHighlightPen_;
   AeraGraphicsItem* hoverHighlightItem_;
   bool hoverHighlightItemWasVisible_;
