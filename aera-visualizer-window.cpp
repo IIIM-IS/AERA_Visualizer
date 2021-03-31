@@ -818,7 +818,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
     return Timestamp(seconds(0));
 }
 
-void AeraVisulizerWindow::startPlayImpl()
+void AeraVisulizerWindow::startPlay()
 {
   if (isPlaying_)
     // Already playing.
@@ -832,7 +832,7 @@ void AeraVisulizerWindow::startPlayImpl()
     playTimerId_ = startTimer(AeraVisulizer_playTimerTick.count());
 }
 
-void AeraVisulizerWindow::stopPlayImpl()
+void AeraVisulizerWindow::stopPlay()
 {
   if (playTimerId_ != 0) {
     killTimer(playTimerId_);
@@ -845,7 +845,7 @@ void AeraVisulizerWindow::stopPlayImpl()
   isPlaying_ = false;
 }
 
-void AeraVisulizerWindow::setPlayTimeImpl(Timestamp time)
+void AeraVisulizerWindow::setPlayTime(Timestamp time)
 {
   playTime_ = time;
 
@@ -875,7 +875,7 @@ void AeraVisulizerWindow::setPlayTimeImpl(Timestamp time)
     children_[i]->playTimeLabel_->setText(buffer);
 }
 
-void AeraVisulizerWindow::setSliderToPlayTimeImpl()
+void AeraVisulizerWindow::setSliderToPlayTime()
 {
   if (events_.size() == 0) {
     playSlider_->setValue(0);

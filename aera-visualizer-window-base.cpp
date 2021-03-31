@@ -108,42 +108,6 @@ void AeraVisulizerWindowBase::createPlayerControlPanel()
   playerControlPanel_->setLayout(playerLayout);
 }
 
-void AeraVisulizerWindowBase::startPlay()
-{
-  if (mainWindow_)
-    mainWindow_->startPlayImpl();
-  else
-    // This is the main window.
-    ((AeraVisulizerWindow*)this)->startPlayImpl();
-}
-
-void AeraVisulizerWindowBase::stopPlay()
-{
-  if (mainWindow_)
-    mainWindow_->stopPlayImpl();
-  else
-    // This is the main window.
-    ((AeraVisulizerWindow*)this)->stopPlayImpl();
-}
-
-void AeraVisulizerWindowBase::setPlayTime(Timestamp time)
-{
-  if (mainWindow_)
-    mainWindow_->setPlayTimeImpl(time);
-  else
-    // This is the main window.
-    ((AeraVisulizerWindow*)this)->setPlayTimeImpl(time);
-}
-
-void AeraVisulizerWindowBase::setSliderToPlayTime()
-{
-  if (mainWindow_)
-    mainWindow_->setSliderToPlayTimeImpl();
-  else
-    // This is the main window.
-    ((AeraVisulizerWindow*)this)->setSliderToPlayTimeImpl();
-}
-
 void AeraVisulizerWindowBase::playPauseButtonClicked()
 {
   if (mainWindow_)

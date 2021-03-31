@@ -145,27 +145,6 @@ private:
   friend class AeraVisulizerWindow;
   void createPlayerControlPanel();
 
-  /**
-   * Enable the play timer to play events and set the playPauseButton_ icon.
-   * If isPlaying_ is already true, do nothing.
-   */
-  void startPlay();
-
-  /**
-   * Disable the play timer, set the playPauseButton_ icon and set isPlaying_ false.
-   */
-  void stopPlay();
-
-  /**
-   * Set playTime_ and update the playTimeLabel_.
-   */
-  void setPlayTime(core::Timestamp time);
-
-  /**
-   * Set the playSlider_ position based on playTime_.
-   */
-  void setSliderToPlayTime();
-
   QIcon playIcon_;
   QIcon pauseIcon_;
   QToolButton* playPauseButton_;
