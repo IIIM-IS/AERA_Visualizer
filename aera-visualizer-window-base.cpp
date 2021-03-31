@@ -71,6 +71,10 @@ AeraVisulizerWindowBase::AeraVisulizerWindowBase(AeraVisulizerWindow* mainWindow
   playTimerId_(0),
   isPlaying_(false)
 {
+  simulationEventTypes_ = { 
+    ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,
+    ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE };
+
   createPlayerControlPanel();
 
   if (mainWindow_)

@@ -859,10 +859,6 @@ void AeraVisulizerWindow::createMenus()
   viewMenu->addAction(zoomHomeAction_);
 }
 
-static set<int> simulationEventTypes =
-  { ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,
-    ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE};
-
 void AeraVisulizerWindow::createToolbars()
 {
   QToolBar* toolbar = addToolBar(tr("Main"));
@@ -876,11 +872,9 @@ void AeraVisulizerWindow::createToolbars()
   simulationsCheckBox_ = new QCheckBox("Simulations", this);
   simulationsCheckBox_->setStyleSheet("background-color:#ffffdc");
   connect(simulationsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
-    // Debug: Check if the goal is simulated.
-    mainScene_->setItemsVisible(ModelGoalReduction::EVENT_TYPE, state == Qt::Checked);
-    mainScene_->setItemsVisible(CompositeStateGoalReduction::EVENT_TYPE, state == Qt::Checked);
-    mainScene_->setItemsVisible(ModelSimulatedPredictionReduction::EVENT_TYPE, state == Qt::Checked);
-    mainScene_->setItemsVisible(CompositeStateSimulatedPredictionReduction::EVENT_TYPE, state == Qt::Checked); });
+    for (auto i = simulationEventTypes_.begin(); i != simulationEventTypes_.end(); ++i)
+      mainScene_->setItemsVisible(*i, state == Qt::Checked);
+    });
   toolbar->addWidget(simulationsCheckBox_);
 
   // Separate the non-simulations check boxes.
@@ -895,8 +889,7 @@ void AeraVisulizerWindow::createToolbars()
     instantiatedCompositeStatesCheckBox_->setEnabled(state == Qt::Checked);
 
     // Do the opposite of simulationsCheckBox_ .
-    // Debug: Check if the goal is simulated.
-    mainScene_->setNonItemsVisible(simulationEventTypes, state == Qt::Checked);
+    mainScene_->setNonItemsVisible(simulationEventTypes_, state == Qt::Checked);
     // Make specific non-simulation items visible or not, if needed.
     mainScene_->setAutoFocusItemsVisible("essence", essenceFactsCheckBox_->checkState() == Qt::Checked);
     mainScene_->setItemsVisible(

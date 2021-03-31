@@ -145,6 +145,7 @@ protected:
   ReplicodeObjects& replicodeObjects_;
   // Debug: This should be in the derived class.
   std::vector<std::shared_ptr<AeraEvent> > events_;
+  set<int> simulationEventTypes_;
 
 private slots:
   void playPauseButtonClicked();
