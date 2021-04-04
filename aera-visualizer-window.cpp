@@ -916,7 +916,26 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
   auto relativeTime = duration_cast<microseconds>(eventTime - replicodeObjects_.getTimeReference());
   auto frameStartTime = eventTime - (relativeTime % replicodeObjects_.getSamplingPeriod());
   auto thisFrameMaxTime = frameStartTime + replicodeObjects_.getSamplingPeriod() - microseconds(1);
+  bool isNewFrame = (iNextEvent_ <= 1 || frameStartTime > events_[iNextEvent_ - 2]->time_);
+  auto firstEventTime = eventTime;
+  bool firstEventIsSimulation = (simulationEventTypes_.count(events_[iNextEvent_ - 1]->eventType_) > 0);
+
   while (true) {
+    if (simulationsCheckBox_->isChecked()) {
+      if (isNewFrame) {
+        // In a new frame, advance until the next item would be a simulation item that is not at the first event time.
+        if (iNextEvent_ < events_.size() && simulationEventTypes_.count(events_[iNextEvent_]->eventType_) > 0 &&
+            events_[iNextEvent_]->time_ > firstEventTime)
+          break;
+      }
+      else {
+        // If not a new frame and the first event is a simulation, keep stepping until the next item would be a non-simulation.
+        if (firstEventIsSimulation && iNextEvent_ < events_.size() && 
+            simulationEventTypes_.count(events_[iNextEvent_]->eventType_) == 0)
+          break;
+      }
+    }
+
     if (stepEvent(thisFrameMaxTime) == Utils_MaxTime)
       break;
     eventTime = events_[iNextEvent_ - 1]->time_;
@@ -1042,6 +1061,8 @@ void AeraVisulizerWindow::createToolbars()
 
   simulationsCheckBox_ = new QCheckBox("Simulations", this);
   simulationsCheckBox_->setStyleSheet("background-color:#ffffdc");
+  // Show simulations by default.
+  simulationsCheckBox_->setCheckState(Qt::Checked);
   connect(simulationsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     for (auto i = simulationEventTypes_.begin(); i != simulationEventTypes_.end(); ++i)
       mainScene_->setItemsVisible(*i, state == Qt::Checked);
