@@ -920,6 +920,11 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
   auto firstEventTime = eventTime;
   bool firstEventIsSimulation = (simulationEventTypes_.count(events_[iNextEvent_ - 1]->eventType_) > 0);
 
+  if (isNewFrame)
+    // Remove the simulation items from the previous frame.
+    // TODO: We don't expect it, but if the first event in the frame is simulated then this will erase it.
+    mainScene_->removeAllItemsByEventType(simulationEventTypes_);
+
   while (true) {
     if (simulationsCheckBox_->isChecked()) {
       if (isNewFrame) {
