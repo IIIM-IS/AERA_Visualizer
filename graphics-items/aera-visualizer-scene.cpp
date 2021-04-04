@@ -109,7 +109,7 @@ AeraVisualizerScene::AeraVisualizerScene(
 }
 
 // TODO: Infer these.
-static std::set<int> selectedSimulationOids = 
+static std::set<int> selectedSimulationOids =
   { 134, 139, 145, 154, 155, 158, 176, 178, 202, 227, 241, 256, 264, 269, 275, 281, 287, 292 };
 
 void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
@@ -415,6 +415,19 @@ void AeraVisualizerScene::setAutoFocusItemsVisible(const string& property, bool 
       auto mkValProperty = mkVal->get_reference(1);
       if (mkValProperty == propertyObject)
         autoFocusItem->setItemAndArrowsAndHorizontalLinesVisible(visible);
+    }
+  }
+}
+
+void AeraVisualizerScene::removeAllItemsByEventType(const set<int>& eventTypes)
+{
+  foreach(QGraphicsItem * item, items()) {
+    auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
+    if (aeraGraphicsItem &&
+        eventTypes.find(aeraGraphicsItem->getAeraEvent()->eventType_) != eventTypes.end()) {
+      aeraGraphicsItem->removeArrowsAndHorizontalLines();
+      removeItem(aeraGraphicsItem);
+      delete aeraGraphicsItem;
     }
   }
 }

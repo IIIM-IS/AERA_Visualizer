@@ -156,6 +156,13 @@ private:
    * \param visible The visible state for setItemAndArrowsAndHorizontalLinesVisible.
    */
   void setAutoFocusItemsVisible(const std::string& property, bool visible);
+  
+  /**
+   * Find all items where the event type is any of the given values, and call removeArrowsAndHorizontalLines,
+   * removeItem and delete the item.
+   * \param eventTypes Remove if the event type of the item's getAeraEvent() is any of these values.
+   */
+  void removeAllItemsByEventType(const std::set<int>& eventTypes);
 
   AeraVisulizerWindow* parent_;
   ReplicodeObjects& replicodeObjects_;
