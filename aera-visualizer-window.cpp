@@ -908,23 +908,21 @@ void AeraVisulizerWindow::playPauseButtonClickedImpl()
 void AeraVisulizerWindow::stepButtonClickedImpl()
 {
   stopPlay();
-  auto newTime = stepEvent(Utils_MaxTime);
-  if (newTime == Utils_MaxTime)
+  if (stepEvent(Utils_MaxTime) == Utils_MaxTime)
     return;
-  // Debug: How to step the children also?
+  auto eventTime = events_[iNextEvent_ - 1]->time_;
 
   // Keep stepping remaining events in this same frame.
-  auto relativeTime = duration_cast<microseconds>(newTime - replicodeObjects_.getTimeReference());
-  auto frameStartTime = newTime - (relativeTime % replicodeObjects_.getSamplingPeriod());
+  auto relativeTime = duration_cast<microseconds>(eventTime - replicodeObjects_.getTimeReference());
+  auto frameStartTime = eventTime - (relativeTime % replicodeObjects_.getSamplingPeriod());
   auto thisFrameMaxTime = frameStartTime + replicodeObjects_.getSamplingPeriod() - microseconds(1);
   while (true) {
-    auto localNewTime = stepEvent(thisFrameMaxTime);
-    if (localNewTime == Utils_MaxTime)
+    if (stepEvent(thisFrameMaxTime) == Utils_MaxTime)
       break;
-    newTime = localNewTime;
+    eventTime = events_[iNextEvent_ - 1]->time_;
   }
 
-  setPlayTime(newTime);
+  setPlayTime(eventTime);
   setSliderToPlayTime();
 }
 
