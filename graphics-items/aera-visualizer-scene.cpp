@@ -110,7 +110,8 @@ AeraVisualizerScene::AeraVisualizerScene(
 
 // TODO: Infer these.
 static std::set<int> selectedSimulationOids =
-  { 134, 139, 145, 154, 155, 158, 176, 178, 202, 227, 241, 256, 264, 269, 275, 281, 287, 292 };
+  { 137, 142, 148, 157, 158, 158, 180, 182, 205, 232, 246, 269, 274, 280, 286, 292, 301
+    /*, 884, 886, 890, 896, 903, 919, 932 */ };
 
 void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 {
