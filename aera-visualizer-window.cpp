@@ -918,7 +918,8 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
   auto thisFrameMaxTime = frameStartTime + replicodeObjects_.getSamplingPeriod() - microseconds(1);
   bool isNewFrame = (iNextEvent_ <= 1 || frameStartTime > events_[iNextEvent_ - 2]->time_);
   auto firstEventTime = eventTime;
-  bool firstEventIsSimulation = (simulationEventTypes_.count(events_[iNextEvent_ - 1]->eventType_) > 0);
+  bool firstEventIsSimulation = 
+    (simulationEventTypes_.find(events_[iNextEvent_ - 1]->eventType_) != simulationEventTypes_.end());
 
   if (isNewFrame)
     // Remove the simulation items from the previous frame.
@@ -929,14 +930,15 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
     if (simulationsCheckBox_->isChecked()) {
       if (isNewFrame) {
         // In a new frame, advance until the next item would be a simulation item that is not at the first event time.
-        if (iNextEvent_ < events_.size() && simulationEventTypes_.count(events_[iNextEvent_]->eventType_) > 0 &&
+        if (iNextEvent_ < events_.size() &&
+            simulationEventTypes_.find(events_[iNextEvent_]->eventType_) != simulationEventTypes_.end() &&
             events_[iNextEvent_]->time_ > firstEventTime)
           break;
       }
       else {
         // If not a new frame and the first event is a simulation, keep stepping until the next item would be a non-simulation.
         if (firstEventIsSimulation && iNextEvent_ < events_.size() && 
-            simulationEventTypes_.count(events_[iNextEvent_]->eventType_) == 0)
+            simulationEventTypes_.find(events_[iNextEvent_]->eventType_) == simulationEventTypes_.end())
           break;
       }
     }
