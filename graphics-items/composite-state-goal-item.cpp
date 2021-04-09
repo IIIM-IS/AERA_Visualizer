@@ -127,6 +127,8 @@ void CompositeStateGoalItem::setFactGoalFactValueHtml()
   if (value->code(0).asOpcode() == Opcodes::ICst)
     valueHtml = InstantiatedCompositeStateItem::makeIcstMembersSource(value, replicodeObjects_);
   valueHtml_ = htmlify(valueHtml, true);
+  if (((_Fact*)factValue)->is_anti_fact())
+    valueHtml_ = "<font color=\"red\">" + valueHtml_ + "</font>";
 }
 
 }
