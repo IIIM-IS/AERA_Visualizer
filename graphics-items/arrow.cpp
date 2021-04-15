@@ -114,8 +114,8 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
   setArrowPointer(arrowHead_, line().p1(), angle);
   // The tip of the pointer is at the base of the line, moved a little toward the head.
   setArrowPointer(arrowBase_, 
-    QPointF(line().p2() + QPointF(sin(angle + -M_PI / 2) * arrowSize_ * 1.5, 
-                                  cos(angle + -M_PI / 2) * arrowSize_ * 1.5)),
+    QPointF(line().p2() + QPointF(sin(angle + -M_PI / 2) * arrowSize_ * 1.7, 
+                                  cos(angle + -M_PI / 2) * arrowSize_ * 1.7)),
     angle);
 
   painter->drawLine(line());
