@@ -161,42 +161,46 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   regex loadModelRegex("^load mdl (\\d+), MDLController\\((\\d+)\\)$");
   // load cst 36, CSTController(98)
   regex loadCompositeStateRegex("^load cst (\\d+), CSTController\\((\\d+)\\)$");
-  // 0s:200ms:0us -> mdl 53, MDLController(389)
-  regex newModelRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> mdl (\\d+), MDLController\\((\\d+)\\)$");
-  // 0s:300ms:0us mdl 53 cnt:2 sr:1
-  regex setEvidenceCountAndSuccessRateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl (\\d+) cnt:(\\d+) sr:([\\d\\.]+)$");
-  // 0s:200ms:0us -> cst 52, CSTController(375)
-  regex newCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us -> cst (\\d+), CSTController\\((\\d+)\\)$");
-  // 0s:0ms:0us A/F -> 35|40 (AXIOM)
-  regex autofocusNewObjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us A/F -> (\\d+)\\|(\\d+) \\((\\w+)\\)$");
-  // 0s:300ms:0us fact (1022) imdl mdl 59: 60 -> fact (1029) pred fact (1025) imdl mdl 58
-  regex modelImdlPredictionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact \\(\\d+\\) imdl mdl (\\d+): (\\d+) -> fact \\((\\d+)\\) pred fact \\(\\d+\\) imdl mdl \\d+$");
-  // 0s:300ms:0us mdl 63 predict -> mk.rdx 68
-  regex modelPredictionReductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl \\d+ predict -> mk.rdx (\\d+)$");
-  // 0s:510ms:0us mdl 41 abduce -> mk.rdx 97
-  regex modelAbductionReductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl \\d+ abduce -> mk.rdx (\\d+)$");
-  // 0s:510ms:0us mdl 64: fact 96 super_goal -> fact 98 simulated goal
-  regex modelSimulatedAbductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl (\\d+): fact (\\d+) super_goal -> fact (\\d+) simulated goal$");
-  // 0s:510ms:0us cst 64: fact 96 super_goal -> fact 98 simulated goal
-  regex compositeStateSimulatedAbductionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us cst (\\d+): fact (\\d+) super_goal -> fact (\\d+) simulated goal$");
-  // 0s:210ms:0us mdl 57: fact 202 pred -> fact 227 simulated pred
-  regex modelSimulatedPredictionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mdl (\\d+): fact (\\d+) (?:pred|super_goal) -> fact (\\d+) simulated pred$");
-  // 0s:210ms:0us cst 60: fact 195 -> fact 218 simulated pred
-  regex compositeStateSimulatedPredictionRegex("^(\\d+)s:(\\d+)ms:(\\d+)us cst (\\d+): fact (\\d+) -> fact (\\d+) simulated pred$");
-  // 0s:200ms:0us fact 59 icst[52][ 50 55]
-  regex newInstantiatedCompositeStateRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+) icst\\[\\d+\\]\\[([ \\d]+)\\]$");
-  // 0s:300ms:0us fact 75 -> fact 79 success fact 60 pred
-  regex predictionSuccessRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+) -> fact (\\d+) success fact \\d+ pred$");
-  // 0s:322ms:933us |fact 72 fact 59 pred failure
-  regex predictionFailureRegex("^(\\d+)s:(\\d+)ms:(\\d+)us \\|fact (\\d+) fact \\d+ pred failure$");
-  // 0s:600ms:0us fact 121: 96 goal success (TopLevel)
-  regex topLevelGoalSuccessRegex("^(\\d+)s:(\\d+)ms:(\\d+)us fact (\\d+): (\\d+) goal success \\(TopLevel\\)$");
-  // 0s:200ms:0us I/O device inject 46, ijt 0s:200ms:0us
-  regex ioDeviceInjectRegex("^(\\d+)s:(\\d+)ms:(\\d+)us I/O device inject (\\d+), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
-  // 0s:100ms:0us mk.rdx(100): I/O device eject 39
-  regex ioDeviceEjectWithRdxRegex("^(\\d+)s:(\\d+)ms:(\\d+)us mk.rdx\\((\\d+)\\): I/O device eject (\\d+)$");
-  // 0s:100ms:0us I/O device eject 39
-  regex ioDeviceEjectWithoutRdxRegex("^(\\d+)s:(\\d+)ms:(\\d+)us I/O device eject (\\d+)$");
+
+  // The remaining regex expressions all start with a timestamp.
+  regex timestampRegex("^(\\d+)s:(\\d+)ms:(\\d+)us (.+)$");
+
+  // -> mdl 53, MDLController(389)
+  regex newModelRegex("^-> mdl (\\d+), MDLController\\((\\d+)\\)$");
+  // mdl 53 cnt:2 sr:1
+  regex setEvidenceCountAndSuccessRateRegex("^mdl (\\d+) cnt:(\\d+) sr:([\\d\\.]+)$");
+  // -> cst 52, CSTController(375)
+  regex newCompositeStateRegex("^-> cst (\\d+), CSTController\\((\\d+)\\)$");
+  // A/F -> 35|40 (AXIOM)
+  regex autofocusNewObjectRegex("^A/F -> (\\d+)\\|(\\d+) \\((\\w+)\\)$");
+  // fact (1022) imdl mdl 59: 60 -> fact (1029) pred fact (1025) imdl mdl 58
+  regex modelImdlPredictionRegex("^fact \\(\\d+\\) imdl mdl (\\d+): (\\d+) -> fact \\((\\d+)\\) pred fact \\(\\d+\\) imdl mdl \\d+$");
+  // mdl 63 predict -> mk.rdx 68
+  regex modelPredictionReductionRegex("^mdl \\d+ predict -> mk.rdx (\\d+)$");
+  // mdl 41 abduce -> mk.rdx 97
+  regex modelAbductionReductionRegex("^mdl \\d+ abduce -> mk.rdx (\\d+)$");
+  // mdl 64: fact 96 super_goal -> fact 98 simulated goal
+  regex modelSimulatedAbductionRegex("^mdl (\\d+): fact (\\d+) super_goal -> fact (\\d+) simulated goal$");
+  // cst 64: fact 96 super_goal -> fact 98 simulated goal
+  regex compositeStateSimulatedAbductionRegex("^cst (\\d+): fact (\\d+) super_goal -> fact (\\d+) simulated goal$");
+  // mdl 57: fact 202 pred -> fact 227 simulated pred
+  regex modelSimulatedPredictionRegex("^mdl (\\d+): fact (\\d+) (?:pred|super_goal) -> fact (\\d+) simulated pred$");
+  // cst 60: fact 195 -> fact 218 simulated pred
+  regex compositeStateSimulatedPredictionRegex("^cst (\\d+): fact (\\d+) -> fact (\\d+) simulated pred$");
+  // fact 59 icst[52][ 50 55]
+  regex newInstantiatedCompositeStateRegex("^fact (\\d+) icst\\[\\d+\\]\\[([ \\d]+)\\]$");
+  // fact 75 -> fact 79 success fact 60 pred
+  regex predictionSuccessRegex("^fact (\\d+) -> fact (\\d+) success fact \\d+ pred$");
+  // |fact 72 fact 59 pred failure
+  regex predictionFailureRegex("^\\|fact (\\d+) fact \\d+ pred failure$");
+  // fact 121: 96 goal success (TopLevel)
+  regex topLevelGoalSuccessRegex("^fact (\\d+): (\\d+) goal success \\(TopLevel\\)$");
+  // I/O device inject 46, ijt 0s:200ms:0us
+  regex ioDeviceInjectRegex("^I/O device inject (\\d+), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
+  // mk.rdx(100): I/O device eject 39
+  regex ioDeviceEjectWithRdxRegex("^mk.rdx\\((\\d+)\\): I/O device eject (\\d+)$");
+  // I/O device eject 39
+  regex ioDeviceEjectWithoutRdxRegex("^I/O device eject (\\d+)$");
 
   QProgressDialog progress("Reading " + QFileInfo(runtimeOutputFilePath.c_str()).fileName() + "...", "Cancel", 0, 100, this);
   progress.setWindowModality(Qt::WindowModal);
@@ -237,6 +241,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
         modelsScene_->addAeraGraphicsItem(new ModelItem(event, replicodeObjects_, modelsScene_));
         // TODO: Add arrows.
       }
+
+      continue;
     }
     else if (regex_search(line, matches, loadCompositeStateRegex)) {
       auto compositeState = replicodeObjects_.getObject(stoul(matches[1].str()));
@@ -247,46 +253,55 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
         modelsScene_->addAeraGraphicsItem(new CompositeStateItem(event, replicodeObjects_, modelsScene_));
         // TODO: Add arrows.
       }
+
+      continue;
     }
-    else if (regex_search(line, matches, newModelRegex)) {
-      auto model = replicodeObjects_.getObject(stoul(matches[4].str()));
+
+    // The remaining regex expressions all start with a timestamp.
+    if (!regex_search(line, matches, timestampRegex))
+      continue;
+    core::Timestamp timestamp = getTimestamp(matches);
+    string lineAfterTimestamp = matches[4].str();
+
+    if (regex_search(lineAfterTimestamp, matches, newModelRegex)) {
+      auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
       if (model)
         // Assume the initial success rate is 1.
         events_.push_back(make_shared<NewModelEvent>(
-          getTimestamp(matches), model, 1, 1, stoll(matches[5].str())));
+          timestamp, model, 1, 1, stoll(matches[2].str())));
     }
-    else if (regex_search(line, matches, setEvidenceCountAndSuccessRateRegex)) {
-      auto model = replicodeObjects_.getObject(stoul(matches[4].str()));
+    else if (regex_search(lineAfterTimestamp, matches, setEvidenceCountAndSuccessRateRegex)) {
+      auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
       if (model)
         events_.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(
-          getTimestamp(matches), model, stol(matches[5].str()), stof(matches[6].str())));
+          timestamp, model, stol(matches[2].str()), stof(matches[3].str())));
     }
-    else if (regex_search(line, matches, newCompositeStateRegex)) {
-      auto compositeState = replicodeObjects_.getObject(stoul(matches[4].str()));
+    else if (regex_search(lineAfterTimestamp, matches, newCompositeStateRegex)) {
+      auto compositeState = replicodeObjects_.getObject(stoul(matches[1].str()));
       if (compositeState)
         events_.push_back(make_shared<NewCompositeStateEvent>(
-          getTimestamp(matches), compositeState, stoll(matches[5].str())));
+          timestamp, compositeState, stoll(matches[2].str())));
     }
-    else if (regex_search(line, matches, autofocusNewObjectRegex)) {
-      auto fromObject = replicodeObjects_.getObject(stoul(matches[4].str()));
-      auto toObject = replicodeObjects_.getObject(stoul(matches[5].str()));
+    else if (regex_search(lineAfterTimestamp, matches, autofocusNewObjectRegex)) {
+      auto fromObject = replicodeObjects_.getObject(stoul(matches[1].str()));
+      auto toObject = replicodeObjects_.getObject(stoul(matches[2].str()));
       // Skip auto-focus of the same fact (such as eject facts).
       // But show auto-focus of the same anti-fact (such as prediction failure).
       if (fromObject && toObject && !(fromObject == toObject && fromObject->code(0).asOpcode() == Opcodes::Fact))
         events_.push_back(make_shared<AutoFocusNewObjectEvent>(
-          getTimestamp(matches), fromObject, toObject, matches[6].str()));
+          timestamp, fromObject, toObject, matches[3].str()));
     }
-    else if (regex_search(line, matches, modelImdlPredictionRegex)) {
+    else if (regex_search(lineAfterTimestamp, matches, modelImdlPredictionRegex)) {
       // TODO: When Replicode makes an mk.rdx for the prediction, use it.
-      auto predictingModel = replicodeObjects_.getObject(stoul(matches[4].str()));
-      auto cause = replicodeObjects_.getObject(stoul(matches[5].str()));
-      auto factPred = replicodeObjects_.getObjectByDebugOid(stoul(matches[6].str()));
+      auto predictingModel = replicodeObjects_.getObject(stoul(matches[1].str()));
+      auto cause = replicodeObjects_.getObject(stoul(matches[2].str()));
+      auto factPred = replicodeObjects_.getObjectByDebugOid(stoul(matches[3].str()));
       if (predictingModel && cause && factPred)
         events_.push_back(make_shared<ModelImdlPredictionEvent>(
-          getTimestamp(matches), factPred, predictingModel, cause));
+          timestamp, factPred, predictingModel, cause));
     }
-    else if (regex_search(line, matches, modelPredictionReductionRegex)) {
-      auto reduction = replicodeObjects_.getObject(stoul(matches[4].str()));
+    else if (regex_search(lineAfterTimestamp, matches, modelPredictionReductionRegex)) {
+      auto reduction = replicodeObjects_.getObject(stoul(matches[1].str()));
       if (reduction) {
         // Check the type of prediction.
         auto factPred = AeraEvent::getFirstProduction(reduction);
@@ -310,12 +325,12 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
           }
 
           events_.push_back(make_shared<ModelMkValPredictionReduction>(
-            getTimestamp(matches), reduction, imdlPredictionEventIndex));
+            timestamp, reduction, imdlPredictionEventIndex));
         }
       }
     }
-    else if (regex_search(line, matches, modelAbductionReductionRegex)) {
-      auto reduction = replicodeObjects_.getObject(stoul(matches[4].str()));
+    else if (regex_search(lineAfterTimestamp, matches, modelAbductionReductionRegex)) {
+      auto reduction = replicodeObjects_.getObject(stoul(matches[1].str()));
       if (reduction) {
         auto factImdl = reduction->get_reference(MK_RDX_IHLP_REF);
         auto model = factImdl->get_reference(0)->get_reference(0);
@@ -325,29 +340,29 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
         auto factSuperGoal = reduction->get_reference(
           reduction->code(reduction->code(MK_RDX_INPUTS).asIndex() + 1).asIndex());
         events_.push_back(make_shared<ModelGoalReduction>(
-          getTimestamp(matches), model, factGoal, factSuperGoal));
+          timestamp, model, factGoal, factSuperGoal));
       }
     }
-    else if (regex_search(line, matches, modelSimulatedAbductionRegex)) {
-      auto model = replicodeObjects_.getObject(stoul(matches[4].str()));
-      auto factGoal = replicodeObjects_.getObject(stoul(matches[6].str()));
-      auto factSuperGoal = replicodeObjects_.getObject(stoul(matches[5].str()));
+    else if (regex_search(lineAfterTimestamp, matches, modelSimulatedAbductionRegex)) {
+      auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
+      auto factGoal = replicodeObjects_.getObject(stoul(matches[3].str()));
+      auto factSuperGoal = replicodeObjects_.getObject(stoul(matches[2].str()));
       if (model && factGoal && factSuperGoal)
         events_.push_back(make_shared<ModelGoalReduction>(
-          getTimestamp(matches), model, factGoal, factSuperGoal));
+          timestamp, model, factGoal, factSuperGoal));
     }
-    else if (regex_search(line, matches, compositeStateSimulatedAbductionRegex)) {
-      auto compositeState = replicodeObjects_.getObject(stoul(matches[4].str()));
-      auto factGoal = replicodeObjects_.getObject(stoul(matches[6].str()));
-      auto factSuperGoal = replicodeObjects_.getObject(stoul(matches[5].str()));
+    else if (regex_search(lineAfterTimestamp, matches, compositeStateSimulatedAbductionRegex)) {
+      auto compositeState = replicodeObjects_.getObject(stoul(matches[1].str()));
+      auto factGoal = replicodeObjects_.getObject(stoul(matches[3].str()));
+      auto factSuperGoal = replicodeObjects_.getObject(stoul(matches[2].str()));
       if (compositeState && factGoal && factSuperGoal)
         events_.push_back(make_shared<CompositeStateGoalReduction>(
-          getTimestamp(matches), compositeState, factGoal, factSuperGoal));
+          timestamp, compositeState, factGoal, factSuperGoal));
     }
-    else if (regex_search(line, matches, modelSimulatedPredictionRegex)) {
-      auto model = replicodeObjects_.getObject(stoul(matches[4].str()));
-      auto factPred = replicodeObjects_.getObject(stoul(matches[6].str()));
-      auto input = replicodeObjects_.getObject(stoul(matches[5].str()));
+    else if (regex_search(lineAfterTimestamp, matches, modelSimulatedPredictionRegex)) {
+      auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
+      auto factPred = replicodeObjects_.getObject(stoul(matches[3].str()));
+      auto input = replicodeObjects_.getObject(stoul(matches[2].str()));
       if (factPred && factPred->get_oid() == 264)
         // TODO: We need check_simulated_imdl to know the input which triggered the signal.
         input = replicodeObjects_.getObject(256);
@@ -357,22 +372,21 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
 
       if (model && factPred && input)
         events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
-          getTimestamp(matches), model, factPred, input));
+          timestamp, model, factPred, input));
     }
-    else if (regex_search(line, matches, compositeStateSimulatedPredictionRegex)) {
-      auto compositeState = replicodeObjects_.getObject(stoul(matches[4].str()));
-      auto factPred = replicodeObjects_.getObject(stoul(matches[6].str()));
-      auto input = replicodeObjects_.getObject(stoul(matches[5].str()));
+    else if (regex_search(lineAfterTimestamp, matches, compositeStateSimulatedPredictionRegex)) {
+      auto compositeState = replicodeObjects_.getObject(stoul(matches[1].str()));
+      auto factPred = replicodeObjects_.getObject(stoul(matches[3].str()));
+      auto input = replicodeObjects_.getObject(stoul(matches[2].str()));
       if (compositeState && factPred && input)
         events_.push_back(make_shared<CompositeStateSimulatedPredictionReduction>(
-          getTimestamp(matches), compositeState, factPred, input));
+          timestamp, compositeState, factPred, input));
     }
-    else if (regex_search(line, matches, newInstantiatedCompositeStateRegex)) {
-      auto timestamp = getTimestamp(matches);
-      auto instantiatedCompositeState = replicodeObjects_.getObject(stoul(matches[4].str()));
+    else if (regex_search(lineAfterTimestamp, matches, newInstantiatedCompositeStateRegex)) {
+      auto instantiatedCompositeState = replicodeObjects_.getObject(stoul(matches[1].str()));
 
       // Get the matching inputs.
-      string inputOids = matches[5].str();
+      string inputOids = matches[2].str();
       std::vector<Code*> inputs;
       bool gotAllInputs = true;
       while (regex_search(inputOids, matches, regex("( \\d+)"))) {
@@ -390,39 +404,39 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
         events_.push_back(make_shared<NewInstantiatedCompositeStateEvent>(
           timestamp, instantiatedCompositeState, inputs));
     }
-    else if (regex_search(line, matches, predictionSuccessRegex)) {
-      auto factSuccessFactPred = replicodeObjects_.getObject(stoul(matches[5].str()));
+    else if (regex_search(lineAfterTimestamp, matches, predictionSuccessRegex)) {
+      auto factSuccessFactPred = replicodeObjects_.getObject(stoul(matches[2].str()));
       if (factSuccessFactPred)
         events_.push_back(make_shared<PredictionResultEvent>(
-          getTimestamp(matches), factSuccessFactPred));
+          timestamp, factSuccessFactPred));
     }
-    else if (regex_search(line, matches, predictionFailureRegex)) {
-      auto antiFactSuccessFactPred = replicodeObjects_.getObject(stoul(matches[4].str()));
+    else if (regex_search(lineAfterTimestamp, matches, predictionFailureRegex)) {
+      auto antiFactSuccessFactPred = replicodeObjects_.getObject(stoul(matches[1].str()));
       if (antiFactSuccessFactPred)
         events_.push_back(make_shared<PredictionResultEvent>(
-          getTimestamp(matches), antiFactSuccessFactPred));
+          timestamp, antiFactSuccessFactPred));
     }
-    else if (regex_search(line, matches, topLevelGoalSuccessRegex)) {
-      auto factSuccessFactGoal = replicodeObjects_.getObject(stoul(matches[4].str()));
+    else if (regex_search(lineAfterTimestamp, matches, topLevelGoalSuccessRegex)) {
+      auto factSuccessFactGoal = replicodeObjects_.getObject(stoul(matches[1].str()));
     }
-    else if (regex_search(line, matches, ioDeviceInjectRegex)) {
-      auto object = replicodeObjects_.getObject(stoul(matches[4].str()));
+    else if (regex_search(lineAfterTimestamp, matches, ioDeviceInjectRegex)) {
+      auto object = replicodeObjects_.getObject(stoul(matches[1].str()));
       if (object)
         events_.push_back(make_shared<IoDeviceInjectEvent>(
-          getTimestamp(matches), object, getTimestamp(matches, 5)));
+          timestamp, object, getTimestamp(matches, 2)));
     }
-    else if (regex_search(line, matches, ioDeviceEjectWithRdxRegex)) {
-      auto reduction = replicodeObjects_.getObjectByDebugOid(stoul(matches[4].str()));
-      auto object = replicodeObjects_.getObject(stoul(matches[5].str()));
+    else if (regex_search(lineAfterTimestamp, matches, ioDeviceEjectWithRdxRegex)) {
+      auto reduction = replicodeObjects_.getObjectByDebugOid(stoul(matches[1].str()));
+      auto object = replicodeObjects_.getObject(stoul(matches[2].str()));
       if (object)
         events_.push_back(make_shared<IoDeviceEjectEvent>(
-          getTimestamp(matches), object, reduction));
+          timestamp, object, reduction));
     }
-    else if (regex_search(line, matches, ioDeviceEjectWithoutRdxRegex)) {
-      auto object = replicodeObjects_.getObject(stoul(matches[4].str()));
+    else if (regex_search(lineAfterTimestamp, matches, ioDeviceEjectWithoutRdxRegex)) {
+      auto object = replicodeObjects_.getObject(stoul(matches[1].str()));
       if (object)
         events_.push_back(make_shared<IoDeviceEjectEvent>(
-          getTimestamp(matches), object, (Code*)NULL));
+          timestamp, object, (Code*)NULL));
     }
   }
 
