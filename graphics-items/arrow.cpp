@@ -58,16 +58,22 @@ namespace aera_visualizer {
 
 const QPen Arrow::DefaultPen(Qt::gray, 1, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin);
 const QPen Arrow::HighlightedPen(QColor(0, 128, 255), 2, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin);
-const QPen Arrow::GreenArrowHeadPen(QColor(0, 220, 0), 2, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin);
-const QPen Arrow::RedArrowHeadPen(QColor(255, 0, 0), 2, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin);
+const QPen Arrow::GreenArrowheadPen(QColor(0, 220, 0), 2, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin);
+const QPen Arrow::RedArrowheadPen(QColor(255, 0, 0), 2, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin);
 
-Arrow::Arrow(QGraphicsPolygonItem* startItem, QGraphicsPolygonItem* endItem, QGraphicsItem* parent)
-  : QGraphicsLineItem(parent)
+Arrow::Arrow(
+  QGraphicsPolygonItem* startItem, QGraphicsPolygonItem* endItem,
+   const QPen& highlightArrowBasePen, const QPen& highlightArrowTipPen, QGraphicsItem* parent)
+: QGraphicsLineItem(parent),
+  highlightArrowBasePen_(highlightArrowBasePen),
+  highlightArrowTipPen_(highlightArrowTipPen)
 {
   startItem_ = startItem;
   endItem_ = endItem;
   setFlag(QGraphicsItem::ItemIsSelectable, true);
   setPen(DefaultPen);
+  arrowBasePen_ = DefaultPen;
+  arrowTipPen_ = DefaultPen;
 }
 
 QRectF Arrow::boundingRect() const
@@ -125,7 +131,13 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
   painter->setPen(pen());
   painter->setBrush(pen().color());
   painter->drawLine(line());
+
+  painter->setPen(arrowBasePen_);
+  painter->setBrush(arrowBasePen_.color());
   painter->drawPolygon(arrowBase_);
+
+  painter->setPen(arrowTipPen_);
+  painter->setBrush(arrowTipPen_.color());
   painter->drawPolygon(arrowTip_);
 
   if (isSelected()) {

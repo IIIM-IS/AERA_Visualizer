@@ -70,8 +70,30 @@ class Arrow : public QGraphicsLineItem
 public:
   enum { Type = UserType + 4 };
 
+  /**
+   * Create an arrow from the startItem to the endItem.
+   * \param startItem The Item for the start of the arrow.
+   * \param endItem The Item for the end of the arrow.
+   * \param highlightArrowBasePen This pen is retrieved by getHighlightArrowBasePen(),
+   * but is not otherwise used.
+   * \param highlightArrowTipPen This pen is retrieved by getHighlightArrowTipPen(),
+   * but is not otherwise used.
+   * \param parent (optional) The parent QGraphicsItem. If omitted, use null.
+   */
   Arrow(QGraphicsPolygonItem* startItem, QGraphicsPolygonItem* endItem,
+    const QPen& highlightArrowBasePen, const QPen& highlightArrowTipPen,
     QGraphicsItem* parent = 0);
+
+  /**
+   * Create an arrow from the startItem to the endItem.
+   * getHighlightArrowBasePen( and getHighlightArrowTipPen() will return HighlightedPen.
+   * \param startItem The Item for the start of the arrow.
+   * \param endItem The Item for the end of the arrow.
+   * \param parent (optional) The parent QGraphicsItem. If omitted, use null.
+   */
+  Arrow(QGraphicsPolygonItem* startItem, QGraphicsPolygonItem* endItem,
+    QGraphicsItem* parent = 0)
+  : Arrow(startItem, endItem, HighlightedPen, HighlightedPen, parent) {};
 
   int type() const override { return Type; }
   QRectF boundingRect() const override;
@@ -81,10 +103,31 @@ public:
 
   void updatePosition();
 
+  /**
+   * Set the pens for the arrow body, base arrowhead and tip arrowhead.
+   * You can use getHighlightArrowBasePen() and getHighlightArrowTipPen() as needed.
+   */
+  void setPens(const QPen& bodyPen, const QPen& arrowBasePen, const QPen& arrowTipPen)
+  {
+    setPen(bodyPen);
+    arrowBasePen_ = arrowBasePen;
+    arrowTipPen_ = arrowTipPen;
+  }
+
+  /**
+   * Get the highlightArrowBasePen given to the constructor.
+   */
+  const QPen& getHighlightArrowBasePen() { return highlightArrowBasePen_; }
+
+  /**
+   * Get the highlightArrowTipPen given to the constructor.
+   */
+  const QPen& getHighlightArrowTipPen() { return highlightArrowTipPen_; }
+
   static const QPen DefaultPen;
   static const QPen HighlightedPen;
-  static const QPen GreenArrowHeadPen;
-  static const QPen RedArrowHeadPen;
+  static const QPen GreenArrowheadPen;
+  static const QPen RedArrowheadPen;
 
 protected:
   void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = 0) override;
@@ -109,8 +152,12 @@ private:
   static const int arrowSize_ = 6;
   QGraphicsPolygonItem* startItem_;
   QGraphicsPolygonItem* endItem_;
+  QPen highlightArrowBasePen_;
+  QPen highlightArrowTipPen_;
   QPolygonF arrowBase_;
   QPolygonF arrowTip_;
+  QPen arrowBasePen_;
+  QPen arrowTipPen_;
 };
 
 }
