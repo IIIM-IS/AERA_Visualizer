@@ -390,7 +390,9 @@ void AeraGraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
   // Highlight connected arrows and horizontal lines.
   foreach(Arrow * arrow, arrows_) {
-    arrow->setPen(Arrow::HighlightedPen);
+    // The arrow base and tip pens were given to the Arrow constructor as needed.
+    arrow->setPens(
+      Arrow::HighlightedPen, arrow->getHighlightArrowBasePen(), arrow->getHighlightArrowTipPen());
     arrow->update();
   }
   foreach(AnchoredHorizontalLine* line, horizontalLines_) {
@@ -405,7 +407,7 @@ void AeraGraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
   // Reset highlighting of connected arrows and horizontal lines.
   foreach(Arrow * arrow, arrows_) {
-    arrow->setPen(Arrow::DefaultPen);
+    arrow->setPens(Arrow::DefaultPen, Arrow::DefaultPen, Arrow::DefaultPen);
     arrow->update();
   }
   foreach(AnchoredHorizontalLine* line, horizontalLines_) {
