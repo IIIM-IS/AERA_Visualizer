@@ -54,6 +54,7 @@
 
 #include <QGraphicsLineItem>
 #include <QGraphicsPolygonItem>
+#include <QPen>
 
 class QGraphicsPolygonItem;
 class QGraphicsLineItem;
@@ -82,6 +83,8 @@ public:
 
   static const QPen DefaultPen;
   static const QPen HighlightedPen;
+  static const QPen GreenArrowHeadPen;
+  static const QPen RedArrowHeadPen;
 
 protected:
   void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = 0) override;
@@ -96,18 +99,18 @@ private:
   static QPointF intersectItem(const QLineF& line, const QGraphicsPolygonItem& item);
 
   /**
-   * Clear polygon and set it to a polygon with the three points of an arrow pointer. 
+   * Clear polygon and set it to a polygon with the three points of an arrowhead. 
    * \param polygon The QPolygonF to set. This first clears the polygon.
-   * \param point The tip of the arrow pointer.
-   * \param angle The angle of the arrow pointer.
+   * \param point The tip of the arrowhead.
+   * \param tip The angle of the arrowhead.
    */
-  static void setArrowPointer(QPolygonF& polygon, const QPointF& point, double angle);
+  static void setArrowhead(QPolygonF& polygon, const QPointF& tip, double angle);
 
   static const int arrowSize_ = 6;
   QGraphicsPolygonItem* startItem_;
   QGraphicsPolygonItem* endItem_;
-  QPolygonF arrowHead_;
   QPolygonF arrowBase_;
+  QPolygonF arrowTip_;
 };
 
 }

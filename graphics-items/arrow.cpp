@@ -52,13 +52,14 @@
 #include "arrow.hpp"
 
 #include <qmath.h>
-#include <QPen>
 #include <QPainter>
 
 namespace aera_visualizer {
 
-const QPen Arrow::DefaultPen(Qt::gray, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
-const QPen Arrow::HighlightedPen(QColor(0, 128, 255), 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+const QPen Arrow::DefaultPen(Qt::gray, 1, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin);
+const QPen Arrow::HighlightedPen(QColor(0, 128, 255), 2, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin);
+const QPen Arrow::GreenArrowHeadPen(QColor(0, 220, 0), 2, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin);
+const QPen Arrow::RedArrowHeadPen(QColor(255, 0, 0), 2, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin);
 
 Arrow::Arrow(QGraphicsPolygonItem* startItem, QGraphicsPolygonItem* endItem, QGraphicsItem* parent)
   : QGraphicsLineItem(parent)
@@ -82,7 +83,7 @@ QRectF Arrow::boundingRect() const
 QPainterPath Arrow::shape() const
 {
   QPainterPath path = QGraphicsLineItem::shape();
-  path.addPolygon(arrowHead_);
+  path.addPolygon(arrowTip_);
   path.addPolygon(arrowBase_);
   return path;
 }
@@ -99,9 +100,6 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
   if (startItem_->collidesWithItem(endItem_))
     return;
 
-  painter->setPen(pen());
-  painter->setBrush(pen().color());
-
   // Add the boundingRect().center() so the arrow points to the center of the item.
   QLineF centerLine(startItem_->pos() + startItem_->boundingRect().center(), 
                     endItem_->pos() +   endItem_->boundingRect().center());
@@ -111,16 +109,25 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
   setLine(QLineF(endIntersectPoint, startIntersectPoint));
 
   double angle = std::atan2(-line().dy(), line().dx());
-  setArrowPointer(arrowHead_, line().p1(), angle);
-  // The tip of the pointer is at the base of the line, moved a little toward the head.
-  setArrowPointer(arrowBase_, 
-    QPointF(line().p2() + QPointF(sin(angle + -M_PI / 2) * arrowSize_ * 1.7, 
-                                  cos(angle + -M_PI / 2) * arrowSize_ * 1.7)),
+  // The tip of the arrowhead goes into the item a little, so move a little toward the base.
+  setArrowhead(
+    arrowTip_,
+    line().p1() - QPointF(sin(angle + -M_PI / 2),
+                          cos(angle + -M_PI / 2)),
+    angle);
+  // The tip of the arrowhead is at the base of the line, so move a little toward the tip.
+  setArrowhead(
+    arrowBase_, 
+    line().p2() + 10 * QPointF(sin(angle + -M_PI / 2), 
+                               cos(angle + -M_PI / 2)),
     angle);
 
+  painter->setPen(pen());
+  painter->setBrush(pen().color());
   painter->drawLine(line());
-  painter->drawPolygon(arrowHead_);
   painter->drawPolygon(arrowBase_);
+  painter->drawPolygon(arrowTip_);
+
   if (isSelected()) {
     painter->setPen(QPen(DefaultPen.color(), 1, Qt::DashLine));
     QLineF myLine = line();
@@ -154,15 +161,15 @@ QPointF Arrow::intersectItem(const QLineF& line, const QGraphicsPolygonItem& ite
   return QPointF();
 }
 
-void Arrow::setArrowPointer(QPolygonF& polygon, const QPointF& point, double angle)
+void Arrow::setArrowhead(QPolygonF& polygon, const QPointF& tip, double angle)
 {
-  QPointF arrowP1 = point + QPointF(sin(angle + M_PI / 3) * arrowSize_,
+  QPointF arrowP1 = tip + QPointF(sin(angle + M_PI / 3) * arrowSize_,
     cos(angle + M_PI / 3) * arrowSize_);
-  QPointF arrowP2 = point + QPointF(sin(angle + M_PI - M_PI / 3) * arrowSize_,
+  QPointF arrowP2 = tip + QPointF(sin(angle + M_PI - M_PI / 3) * arrowSize_,
     cos(angle + M_PI - M_PI / 3) * arrowSize_);
 
   polygon.clear();
-  polygon << point << arrowP1 << arrowP2;
+  polygon << tip << arrowP1 << arrowP2;
 }
 
 }
