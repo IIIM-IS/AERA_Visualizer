@@ -184,7 +184,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   // cst 64: fact 96 super_goal -> fact 98 simulated goal
   regex compositeStateSimulatedAbductionRegex("^cst (\\d+): fact (\\d+) super_goal -> fact (\\d+) simulated goal$");
   // mdl 57: fact 202 pred -> fact 227 simulated pred
-  regex modelSimulatedPredictionRegex("^mdl (\\d+): fact (\\d+) (?:pred|super_goal) -> fact (\\d+) simulated pred$");
+  regex modelSimulatedPredictionRegex("^mdl (\\d+): fact (\\d+) (pred|super_goal) -> fact (\\d+) simulated pred$");
   // cst 60: fact 195 -> fact 218 simulated pred
   regex compositeStateSimulatedPredictionRegex("^cst (\\d+): fact (\\d+) -> fact (\\d+) simulated pred$");
   // fact 59 icst[52][ 50 55]
@@ -361,18 +361,12 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
     }
     else if (regex_search(lineAfterTimestamp, matches, modelSimulatedPredictionRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
-      auto factPred = replicodeObjects_.getObject(stoul(matches[3].str()));
+      auto factPred = replicodeObjects_.getObject(stoul(matches[4].str()));
       auto input = replicodeObjects_.getObject(stoul(matches[2].str()));
-      if (factPred && factPred->get_oid() == 264)
-        // TODO: We need check_simulated_imdl to know the input which triggered the signal.
-        input = replicodeObjects_.getObject(256);
-      else if (factPred && factPred->get_oid() == 281)
-        // TODO: We need check_simulated_imdl to know the input which triggered the signal.
-        input = replicodeObjects_.getObject(275);
 
       if (model && factPred && input)
         events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
-          timestamp, model, factPred, input));
+          timestamp, model, factPred, input, matches[3] == "super_goal"));
     }
     else if (regex_search(lineAfterTimestamp, matches, compositeStateSimulatedPredictionRegex)) {
       auto compositeState = replicodeObjects_.getObject(stoul(matches[1].str()));
@@ -643,8 +637,9 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       // Add an arrow to the input fact.
       auto inputItem = scene->getAeraGraphicsItem(reductionEvent->input_);
       if (inputItem)
-        // The inputItem of the prediction is the LHS.
-        scene->addArrow(inputItem, newItem, inputItem);
+        // If the input is a super goal, then the inputItem is the RHS, otherwose,
+        // the input of the prediction is the LHS.
+        scene->addArrow(inputItem, newItem, reductionEvent->inputIsSuperGoal_ ? newItem : inputItem);
 
       scene->addHorizontalLine(newItem);
 
