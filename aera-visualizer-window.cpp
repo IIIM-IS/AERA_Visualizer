@@ -613,7 +613,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       // Add an arrow to the fact super goal.
       auto factSuperGoalItem = scene->getAeraGraphicsItem(reductionEvent->factSuperGoal_);
       if (factSuperGoalItem)
-        scene->addArrow(factSuperGoalItem, newItem);
+        // The output of the abduction is the LHS.
+        scene->addArrow(factSuperGoalItem, newItem, newItem);
 
       scene->addHorizontalLine(newItem);
 
@@ -627,7 +628,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       // Add an arrow to the fact super goal.
       auto factSuperGoalItem = scene->getAeraGraphicsItem(reductionEvent->factSuperGoal_);
       if (factSuperGoalItem)
-        scene->addArrow(factSuperGoalItem, newItem);
+        // The output of the abduction is the LHS.
+        scene->addArrow(factSuperGoalItem, newItem, newItem);
 
       scene->addHorizontalLine(newItem);
 
@@ -641,7 +643,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       // Add an arrow to the input fact.
       auto inputItem = scene->getAeraGraphicsItem(reductionEvent->input_);
       if (inputItem)
-        scene->addArrow(inputItem, newItem);
+        // The inputItem of the prediction is the LHS.
+        scene->addArrow(inputItem, newItem, inputItem);
 
       scene->addHorizontalLine(newItem);
 
@@ -657,7 +660,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       // Add an arrow to the input fact.
       auto inputItem = scene->getAeraGraphicsItem(reductionEvent->input_);
       if (inputItem)
-        scene->addArrow(inputItem, newItem);
+        // The inputItem of the prediction is the LHS.
+        scene->addArrow(inputItem, newItem, inputItem);
 
       scene->addHorizontalLine(newItem);
 
