@@ -122,7 +122,16 @@ private:
   void scaleViewBy(double factor);
   void zoomViewHome();
   void addAeraGraphicsItem(AeraGraphicsItem* item);
-  void addArrow(AeraGraphicsItem* startItem, AeraGraphicsItem* endItem);
+  /**
+   * Add an Arrow to the scene.
+   * \param startItem The Item for the start of the arrow.
+   * \param endItem The Item for the end of the arrow.
+   * \param lhsItem (optional) This is either startItem or endItem:The arrowhead 
+   * next to lhsItem will have highlight pen RedArrowheadPen and the other item
+   * will have highlight pen Green.ArrowheadPen . If omitted, both arrowheads will
+   * have highlight pens HighlightedPen.
+   */
+  void addArrow(AeraGraphicsItem* startItem, AeraGraphicsItem* endItem, AeraGraphicsItem* lhsItem = 0);
   void addHorizontalLine(AeraGraphicsItem* item);
   /**
    * Get the AeraGraphicsItem whose getAeraEvent() has the given object.

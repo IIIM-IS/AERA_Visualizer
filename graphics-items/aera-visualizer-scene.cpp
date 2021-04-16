@@ -281,12 +281,24 @@ void AeraVisualizerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* mouseEvent
   QGraphicsScene::mouseReleaseEvent(mouseEvent);
 }
 
-void AeraVisualizerScene::addArrow(AeraGraphicsItem* startItem, AeraGraphicsItem* endItem)
+void AeraVisualizerScene::addArrow(
+  AeraGraphicsItem* startItem, AeraGraphicsItem* endItem, AeraGraphicsItem* lhsItem)
 {
   if (startItem == endItem)
     return;
 
-  auto arrow = new Arrow(startItem, endItem);
+  QPen hightlighArrowBasePen = Arrow::HighlightedPen;
+  QPen hightlighArrowTipPen = Arrow::HighlightedPen;
+  if (lhsItem == startItem) {
+    hightlighArrowBasePen = Arrow::RedArrowheadPen;
+    hightlighArrowTipPen = Arrow::GreenArrowheadPen;
+  }
+  else if (lhsItem == endItem) {
+    hightlighArrowBasePen = Arrow::GreenArrowheadPen;
+    hightlighArrowTipPen = Arrow::RedArrowheadPen;
+  }
+  auto arrow = new Arrow(startItem, endItem, hightlighArrowBasePen, hightlighArrowTipPen);
+
   startItem->addArrow(arrow);
   endItem->addArrow(arrow);
   arrow->setZValue(-1000.0);
