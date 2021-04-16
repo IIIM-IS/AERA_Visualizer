@@ -433,6 +433,19 @@ public:
   r_code::Code* reduction_;
 };
 
+class DriveInjectEvent : public AeraEvent {
+public:
+  DriveInjectEvent(
+    core::Timestamp time, r_code::Code* object, core::Timestamp injectionTime)
+    : AeraEvent(EVENT_TYPE, time, object),
+    injectionTime_(injectionTime)
+  {}
+
+  static const int EVENT_TYPE = 17;
+
+  core::Timestamp injectionTime_;
+};
+
 }
 
 #endif
