@@ -73,12 +73,6 @@ ModelGoalItem::ModelGoalItem(
 {
   setFactGoalFactValueHtml();
 
-  _Fact* goalFact = (_Fact*)modelReduction_->object_->get_reference(0)->get_reference(0);
-  qreal targetWidth = 0;
-  if (is_sim())
-    // Make the width span the full duration of the goal.
-    targetWidth = parent->getTimelineX(goalFact->get_before()) - parent->getTimelineX(goalFact->get_after());
-
   setTextItemAndPolygon(valueHtml_, false, SHAPE_GOAL);
   setToolTip(factGoalFactValueHtml_);
 }
