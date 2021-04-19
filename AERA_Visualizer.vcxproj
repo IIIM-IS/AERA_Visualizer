@@ -223,6 +223,7 @@
     <ClCompile Include="graphics-items\composite-state-goal-item.cpp" />
     <ClCompile Include="graphics-items\composite-state-item.cpp" />
     <ClCompile Include="graphics-items\composite-state-prediction-item.cpp" />
+    <ClCompile Include="graphics-items\drive-item.cpp" />
     <ClCompile Include="graphics-items\instantiated-composite-state-item.cpp" />
     <ClCompile Include="graphics-items\io-device-inject-eject-item.cpp" />
     <ClCompile Include="graphics-items\model-goal-item.cpp" />
@@ -344,6 +345,7 @@
     <ClInclude Include="graphics-items\composite-state-goal-item.hpp" />
     <ClInclude Include="graphics-items\composite-state-item.hpp" />
     <ClInclude Include="graphics-items\composite-state-prediction-item.hpp" />
+    <ClInclude Include="graphics-items\drive-item.hpp" />
     <ClInclude Include="graphics-items\instantiated-composite-state-item.hpp" />
     <ClInclude Include="graphics-items\io-device-inject-eject-item.hpp" />
     <ClInclude Include="graphics-items\model-goal-item.hpp" />

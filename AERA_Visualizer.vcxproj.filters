@@ -243,6 +243,9 @@
     <ClCompile Include="graphics-items\anchored-horizontal-line.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
+    <ClCompile Include="graphics-items\drive-item.cpp">
+      <Filter>graphics-items</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aera-event.hpp" />
@@ -473,6 +476,9 @@
       <Filter>graphics-items</Filter>
     </ClInclude>
     <ClInclude Include="graphics-items\anchored-horizontal-line.hpp">
+      <Filter>graphics-items</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics-items\drive-item.hpp">
       <Filter>graphics-items</Filter>
     </ClInclude>
   </ItemGroup>

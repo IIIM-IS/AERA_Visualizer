@@ -64,6 +64,7 @@
 #include "graphics-items/prediction-result-item.hpp"
 #include "graphics-items/instantiated-composite-state-item.hpp"
 #include "graphics-items/io-device-inject-eject-item.hpp"
+#include "graphics-items/drive-item.hpp"
 #include "graphics-items/aera-visualizer-scene.hpp"
 #include "aera-visualizer-window.hpp"
 
@@ -111,7 +112,7 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
   itemBorderHighlightPen_(Qt::blue, 3)
 {
   simulationEventTypes_ = {
-    ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,
+    DriveInjectEvent::EVENT_TYPE, ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,
     ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE };
 
   createActions();
@@ -201,6 +202,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   regex ioDeviceEjectWithRdxRegex("^mk.rdx\\((\\d+)\\): I/O device eject (\\d+)$");
   // I/O device eject 39
   regex ioDeviceEjectWithoutRdxRegex("^I/O device eject (\\d+)$");
+  // -> drive 158, ijt 0s:310ms:0us
+  regex driveInjectRegex("^-> drive (\\d+), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
 
   QProgressDialog progress("Reading " + QFileInfo(runtimeOutputFilePath.c_str()).fileName() + "...", "Cancel", 0, 100, this);
   progress.setWindowModality(Qt::WindowModal);
@@ -432,6 +435,12 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
         events_.push_back(make_shared<IoDeviceEjectEvent>(
           timestamp, object, (Code*)NULL));
     }
+    else if (regex_search(lineAfterTimestamp, matches, driveInjectRegex)) {
+      auto object = replicodeObjects_.getObject(stoul(matches[1].str()));
+      if (object)
+        events_.push_back(make_shared<DriveInjectEvent>(
+          timestamp, object, getTimestamp(matches, 2)));
+    }
   }
 
   return true;
@@ -547,7 +556,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       event->eventType_ == PredictionResultEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
-      event->eventType_ == IoDeviceEjectEvent::EVENT_TYPE) {
+      event->eventType_ == IoDeviceEjectEvent::EVENT_TYPE ||
+      event->eventType_ == DriveInjectEvent::EVENT_TYPE) {
     AeraGraphicsItem* newItem;
     bool visible = true;
 
@@ -687,6 +697,13 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
              event->eventType_ == IoDeviceEjectEvent::EVENT_TYPE)
       // TODO: Position the IoDeviceInjectEvent at its injectionTime?
       newItem = new IoDeviceInjectEjectItem(event, replicodeObjects_, scene);
+    else if (event->eventType_ == DriveInjectEvent::EVENT_TYPE) {
+      auto driveInject = (DriveInjectEvent*)event;
+      newItem = new DriveItem(driveInject, replicodeObjects_, scene);
+
+      scene->addHorizontalLine(newItem);
+      visible = (simulationsCheckBox_->checkState() == Qt::Checked);
+    }
 
     // Add the new item.
     scene->addAeraGraphicsItem(newItem);
@@ -781,7 +798,8 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
       event->eventType_ == PredictionResultEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
-      event->eventType_ == IoDeviceEjectEvent::EVENT_TYPE) {
+      event->eventType_ == IoDeviceEjectEvent::EVENT_TYPE ||
+      event->eventType_ == DriveInjectEvent::EVENT_TYPE) {
     AeraVisualizerScene* scene;
     if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
