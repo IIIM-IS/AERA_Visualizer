@@ -147,14 +147,7 @@ void AeraGraphicsItem::setTextItemAndPolygon(QString html, bool prependHeaderHtm
     path.lineTo(right - diameter / 2, bottom);
     path.lineTo(left, bottom);
   }
-  else if (shape == SHAPE_RECTANGLE_SHARP) {
-    path.moveTo(left, top);
-    path.lineTo(right, top);
-    path.lineTo(right, bottom);
-    path.lineTo(left, bottom);
-  }
   else {
-    // Default: SHAPE_RECTANGLE_ROUNDED
     path.moveTo(right, top + diameter / 2);
     path.arcTo(right - diameter, top, diameter, diameter, 0, 90);
     path.arcTo(left, top, diameter, diameter, 90, 90);
