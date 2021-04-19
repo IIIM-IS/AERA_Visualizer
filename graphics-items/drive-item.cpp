@@ -72,7 +72,7 @@ DriveItem::DriveItem(
 {
   setFactGoalFactValueHtml();
 
-  setTextItemAndPolygon(valueHtml_, false, SHAPE_RECTANGLE_SHARP);
+  setTextItemAndPolygon(valueHtml_, false, SHAPE_GOAL);
   setToolTip(factGoalFactValueHtml_);
 }
 
