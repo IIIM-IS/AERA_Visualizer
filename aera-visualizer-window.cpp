@@ -100,6 +100,10 @@ protected:
   AeraVisualizerScene* scene_;
 };
 
+const set<int> AeraVisulizerWindow::simulationEventTypes_ = {
+  DriveInjectEvent::EVENT_TYPE, ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,
+  ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE };
+
 AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 : AeraVisulizerWindowBase(0, replicodeObjects),
   iNextEvent_(0), explanationLogWindow_(0),
@@ -111,10 +115,6 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
   isPlaying_(false),
   itemBorderHighlightPen_(Qt::blue, 3)
 {
-  simulationEventTypes_ = {
-    DriveInjectEvent::EVENT_TYPE, ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,
-    ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE };
-
   createActions();
   createMenus();
 

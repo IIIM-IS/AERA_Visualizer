@@ -137,6 +137,8 @@ public:
    */
   const AeraEvent* getAeraEvent(size_t i) const { return events_[i].get(); }
 
+  static const set<int> simulationEventTypes_;
+
 protected:
   /**
    * Perform the event at events_[iNextEvent_] and then increment iNextEvent_.
@@ -222,7 +224,6 @@ private:
 
   std::vector<std::shared_ptr<AeraEvent> > events_;
   size_t iNextEvent_;
-  set<int> simulationEventTypes_;
   QPen itemBorderHighlightPen_;
   AeraGraphicsItem* hoverHighlightItem_;
   bool hoverHighlightItemWasVisible_;
