@@ -158,10 +158,12 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     }
   }
 
-  bool isSimulation = item->is_sim();
-  item->setBrush(isSimulation ? simulatedItemColor_ : itemColor_);
+  item->setBrush(item->is_sim() ? simulatedItemColor_ : itemColor_);
   bool isFocusSimulation = (selectedSimulationOids.find(item->getAeraEvent()->object_->get_oid()) 
                             != selectedSimulationOids.end());
+  bool isSimulationEventType = 
+    (AeraVisulizerWindow::simulationEventTypes_.find(item->getAeraEvent()->eventType_) !=
+     AeraVisulizerWindow::simulationEventTypes_.end());
 
   if (qIsNaN(aeraEvent->itemTopLeftPosition_.x())) {
     // Assign an initial position.
@@ -190,7 +192,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     }
 
     qreal top;
-    if (isSimulation)
+    if (isSimulationEventType)
       // Ignore eventType and stack the simulated items in order.
       top = (isFocusSimulation ? selectedSimulationNextTop_ : otherSimulationNextTop_);
     else {
@@ -209,7 +211,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 
     qreal left;
     int verticalMargin = 15;
-    if (isSimulation) {
+    if (isSimulationEventType) {
       // Position simulated items exactly.
       // We know that a simulated item's object has the form (fact (goal_or_pred (fact ...)))
       if (((_Fact*)aeraEvent->object_)->get_goal())
@@ -233,7 +235,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 
     // Set up eventTypeNextTop_ or simulation next top for the next item.
     qreal nextTop = top + item->boundingRect().height() + verticalMargin;
-    if (isSimulation) {
+    if (isSimulationEventType) {
       if (isFocusSimulation)
         selectedSimulationNextTop_ = nextTop;
       else
