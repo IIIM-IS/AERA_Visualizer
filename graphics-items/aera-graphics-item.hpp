@@ -182,7 +182,7 @@ public:
   int borderFlashCountdown_;
 
 protected:
-  typedef enum { SHAPE_RECTANGLE, SHAPE_GOAL, SHAPE_PRED } Shape;
+  typedef enum { SHAPE_RECTANGLE_ROUNDED, SHAPE_RECTANGLE_SHARP, SHAPE_GOAL, SHAPE_PRED } Shape;
 
   /**
    * AeraGraphicsItem::TextItem extends QGraphicsTextItem so that we can override its
@@ -213,11 +213,12 @@ protected:
    * \param prependHeaderHtml If false, use html as-is. If true, first set the text 
    * to html and adjust the size, then set the text to headerHtml_+html. We do this because
    * the header has a right-aligned table cell which needs to "know" the width of the text.
-   * \param shape (optional) The shape of the item. If omitted, use SHAPE_RECTANGLE.
+   * \param shape (optional) The shape of the item. If omitted, use SHAPE_RECTANGLE_ROUNDED.
    * \param targetWidth (optional) The target screen width of the item. If omitted of if this is 
    * less than the default width based on the item contents, then it is ignored.
    */
-  void setTextItemAndPolygon(QString html, bool prependHeaderHtml, Shape shape = SHAPE_RECTANGLE, qreal targetWidth = 0);
+  void setTextItemAndPolygon(
+    QString html, bool prependHeaderHtml, Shape shape = SHAPE_RECTANGLE_ROUNDED, qreal targetWidth = 0);
 
   virtual void textItemLinkActivated(const QString& link);
 
