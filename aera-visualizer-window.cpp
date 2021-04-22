@@ -299,9 +299,9 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
       auto predictingModel = replicodeObjects_.getObject(stoul(matches[1].str()));
       auto cause = replicodeObjects_.getObject(stoul(matches[2].str()));
       auto factPred = replicodeObjects_.getObjectByDebugOid(stoul(matches[3].str()));
-      if (predictingModel && cause && factPred)
-        events_.push_back(make_shared<ModelImdlPredictionEvent>(
-          timestamp, factPred, predictingModel, cause));
+      if (predictingModel && cause && factPred && ((_Fact*)factPred)->get_pred()->is_simulation())
+        events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
+          timestamp, predictingModel, factPred, cause, false));
     }
     else if (regex_search(lineAfterTimestamp, matches, modelPredictionReductionRegex)) {
       auto reduction = replicodeObjects_.getObject(stoul(matches[1].str()));
