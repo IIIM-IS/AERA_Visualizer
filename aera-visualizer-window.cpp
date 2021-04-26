@@ -176,6 +176,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   regex autofocusNewObjectRegex("^A/F -> (\\d+)\\|(\\d+) \\((\\w+)\\)$");
   // mdl 61 predict imdl -> mk.rdx 559
   regex modelImdlPredictionReductionRegex("^mdl \\d+ predict imdl -> mk.rdx (\\d+)$");
+  // mdl 64: fact (58313) pred fact imdl -> fact 220 simulated pred
+  regex modelSimulatedPredictionFromRequirementRegex("^mdl (\\d+): fact \\((\\d+)\\) pred fact imdl -> fact (\\d+) simulated pred$");
   // mdl 63 predict -> mk.rdx 68
   regex modelPredictionReductionRegex("^mdl \\d+ predict -> mk.rdx (\\d+)$");
   // mdl 41 abduce -> mk.rdx 97
@@ -309,6 +311,16 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
           events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
             timestamp, model, factPred, cause, false));
       }
+    }
+    else if (regex_search(lineAfterTimestamp, matches, modelSimulatedPredictionFromRequirementRegex)) {
+      auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
+      auto factPred = replicodeObjects_.getObject(stoul(matches[3].str()));
+      auto input = replicodeObjects_.getObjectByDebugOid(stoul(matches[2].str()));
+
+      if (model && factPred && input)
+        // TODO: Use a dedicated Item with an explanation using the requirement.
+        events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
+          timestamp, model, factPred, input, matches[3] == "super_goal"));
     }
     else if (regex_search(lineAfterTimestamp, matches, modelPredictionReductionRegex)) {
       auto reduction = replicodeObjects_.getObject(stoul(matches[1].str()));
