@@ -174,8 +174,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   regex newCompositeStateRegex("^-> cst (\\d+), CSTController\\((\\d+)\\)$");
   // A/F -> 35|40 (AXIOM)
   regex autofocusNewObjectRegex("^A/F -> (\\d+)\\|(\\d+) \\((\\w+)\\)$");
-  // fact (1022) imdl mdl 59: 60 -> fact (1029) pred fact (1025) imdl mdl 58
-  regex modelImdlPredictionRegex("^fact \\(\\d+\\) imdl mdl (\\d+): (\\d+) -> fact \\((\\d+)\\) pred fact \\(\\d+\\) imdl mdl \\d+$");
+  // mdl 61 predict imdl -> mk.rdx 559
+  regex modelImdlPredictionReductionRegex("^mdl \\d+ predict imdl -> mk.rdx (\\d+)$");
   // mdl 63 predict -> mk.rdx 68
   regex modelPredictionReductionRegex("^mdl \\d+ predict -> mk.rdx (\\d+)$");
   // mdl 41 abduce -> mk.rdx 97
@@ -294,14 +294,21 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
         events_.push_back(make_shared<AutoFocusNewObjectEvent>(
           timestamp, fromObject, toObject, matches[3].str()));
     }
-    else if (regex_search(lineAfterTimestamp, matches, modelImdlPredictionRegex)) {
-      // TODO: When Replicode makes an mk.rdx for the prediction, use it.
-      auto predictingModel = replicodeObjects_.getObject(stoul(matches[1].str()));
-      auto cause = replicodeObjects_.getObject(stoul(matches[2].str()));
-      auto factPred = replicodeObjects_.getObjectByDebugOid(stoul(matches[3].str()));
-      if (predictingModel && cause && factPred && ((_Fact*)factPred)->get_pred()->is_simulation())
-        events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
-          timestamp, predictingModel, factPred, cause, false));
+    else if (regex_search(lineAfterTimestamp, matches, modelImdlPredictionReductionRegex)) {
+      auto reduction = replicodeObjects_.getObject(stoul(matches[1].str()));
+      if (reduction) {
+        auto factImdl = reduction->get_reference(MK_RDX_IHLP_REF);
+        auto model = factImdl->get_reference(0)->get_reference(0);
+        // The super goal is the first (only) item in the set of inputs.
+        auto cause = reduction->get_reference(
+          reduction->code(reduction->code(MK_RDX_INPUTS).asIndex() + 1).asIndex());
+        // The prediction is the first (only) item in the set of productions.
+        auto factPred = AeraEvent::getFirstProduction(reduction);
+
+        if (model && cause && factPred && ((_Fact*)factPred)->get_pred()->is_simulation())
+          events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
+            timestamp, model, factPred, cause, false));
+      }
     }
     else if (regex_search(lineAfterTimestamp, matches, modelPredictionReductionRegex)) {
       auto reduction = replicodeObjects_.getObject(stoul(matches[1].str()));
