@@ -122,6 +122,7 @@ int main(int argv, char *args[])
     }
   }
   AeraVisulizerWindow mainWindow(replicodeObjects);
+  mainWindow.setWindowIcon(QIcon(":/images/app.png"));
 
   mainWindow.setWindowTitle(QString("AERA Visualizer - ") + QFileInfo(settings.source_file_name_.c_str()).fileName());
   QScreen* screen = QGuiApplication::primaryScreen();
