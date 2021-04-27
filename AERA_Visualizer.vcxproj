@@ -228,6 +228,7 @@
     <ClCompile Include="graphics-items\io-device-inject-eject-item.cpp" />
     <ClCompile Include="graphics-items\model-goal-item.cpp" />
     <ClCompile Include="graphics-items\model-item.cpp" />
+    <ClCompile Include="graphics-items\model-prediction-from-requirement.cpp" />
     <ClCompile Include="graphics-items\model-prediction-item.cpp" />
     <ClCompile Include="graphics-items\prediction-item.cpp" />
     <ClCompile Include="graphics-items\prediction-result-item.cpp" />
@@ -351,6 +352,7 @@
     <ClInclude Include="graphics-items\io-device-inject-eject-item.hpp" />
     <ClInclude Include="graphics-items\model-goal-item.hpp" />
     <ClInclude Include="graphics-items\model-item.hpp" />
+    <ClInclude Include="graphics-items\model-prediction-from-requirement-item.hpp" />
     <ClInclude Include="graphics-items\model-prediction-item.hpp" />
     <ClInclude Include="graphics-items\prediction-item.hpp" />
     <ClInclude Include="graphics-items\prediction-result-item.hpp" />

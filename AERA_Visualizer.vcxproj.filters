@@ -249,6 +249,9 @@
     <ClCompile Include="graphics-items\simulation-commit-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
+    <ClCompile Include="graphics-items\model-prediction-from-requirement.cpp">
+      <Filter>graphics-items</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aera-event.hpp" />
@@ -485,6 +488,9 @@
       <Filter>graphics-items</Filter>
     </ClInclude>
     <ClInclude Include="graphics-items\simulation-commit-item.hpp">
+      <Filter>graphics-items</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics-items\model-prediction-from-requirement-item.hpp">
       <Filter>graphics-items</Filter>
     </ClInclude>
   </ItemGroup>
