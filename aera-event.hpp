@@ -69,6 +69,14 @@ public:
     itemTopLeftPosition_(qQNaN(), qQNaN())
   {}
 
+  virtual AeraEvent::~AeraEvent() {}
+
+  /**
+   * A class can override this to specify the primary input of a reduction. 
+   * \return The primary input, or null if not specified.
+   */
+  virtual r_code::Code* getInput() { return 0;  }
+
   /**
    * A helper method to get the first item in the reduction's set of productions.
    * \param reduction The mk.rdx reduction.
@@ -287,6 +295,8 @@ public:
       factSuperGoal_((r_exec::_Fact*)factSuperGoal)
   {}
 
+  r_code::Code* getInput() override { return factSuperGoal_; }
+
   static const int EVENT_TYPE = 9;
 
   r_code::Code* model_;
@@ -312,6 +322,8 @@ public:
     compositeState_(compositeState), factGoal_((r_exec::_Fact*)factGoal),
     factSuperGoal_((r_exec::_Fact*)factSuperGoal)
   {}
+
+  r_code::Code* getInput() override { return factSuperGoal_; }
 
   static const int EVENT_TYPE = 10;
 
@@ -342,6 +354,8 @@ public:
       inputIsSuperGoal_(inputIsSuperGoal)
   {}
 
+  r_code::Code* getInput() override { return input_; }
+
   static const int EVENT_TYPE = 11;
 
   r_code::Code* model_;
@@ -368,6 +382,8 @@ public:
     compositeState_(compositeState), factPred_((r_exec::_Fact*)factPred),
     input_((r_exec::_Fact*)input)
   {}
+
+  r_code::Code* getInput() override { return input_; }
 
   static const int EVENT_TYPE = 12;
 
@@ -465,6 +481,8 @@ public:
     factPredFactSuccess_((r_exec::_Fact*)factPredFactSuccess)
   {}
 
+  r_code::Code* getInput() override { return factPredFactSuccess_; }
+
   static const int EVENT_TYPE = 18;
 
   r_exec::_Fact* factPredFactSuccess_;
@@ -489,6 +507,8 @@ public:
     model_(model), factPred_((r_exec::_Fact*)factPred),
     input_((r_exec::_Fact*)input)
   {}
+
+  r_code::Code* getInput() override { return input_; }
 
   static const int EVENT_TYPE = 19;
 
