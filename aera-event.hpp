@@ -470,6 +470,33 @@ public:
   r_exec::_Fact* factPredFactSuccess_;
 };
 
+/**
+ * ModelSimulatedPredictionReductionFromRequirement is a reduction event of a model from a predicted requirement
+ * to a simulated prediction of the LHS.
+ */
+class ModelSimulatedPredictionReductionFromRequirement : public AeraEvent {
+public:
+  /**
+   * Create a ModelSimulatedPredictionReductionFromRequirement.
+   * \param time The reduction time.
+   * \param model The model which did the reduction.
+   * \param factPred The (fact (pred...)) (production).
+   * \param input The input fact triggering the reduction.
+   */
+  ModelSimulatedPredictionReductionFromRequirement(core::Timestamp time, r_code::Code* model,
+    r_code::Code* factPred, r_code::Code* input)
+    : AeraEvent(EVENT_TYPE, time, factPred),
+    model_(model), factPred_((r_exec::_Fact*)factPred),
+    input_((r_exec::_Fact*)input)
+  {}
+
+  static const int EVENT_TYPE = 19;
+
+  r_code::Code* model_;
+  r_exec::_Fact* factPred_;
+  r_exec::_Fact* input_;
+};
+
 }
 
 #endif
