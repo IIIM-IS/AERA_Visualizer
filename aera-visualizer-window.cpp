@@ -65,6 +65,7 @@
 #include "graphics-items/instantiated-composite-state-item.hpp"
 #include "graphics-items/io-device-inject-eject-item.hpp"
 #include "graphics-items/drive-item.hpp"
+#include "graphics-items/simulation-commit-item.hpp"
 #include "graphics-items/aera-visualizer-scene.hpp"
 #include "aera-visualizer-window.hpp"
 
@@ -102,7 +103,8 @@ protected:
 
 const set<int> AeraVisulizerWindow::simulationEventTypes_ = {
   DriveInjectEvent::EVENT_TYPE, ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,
-  ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE };
+  ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
+  SimulationCommitEvent ::EVENT_TYPE};
 
 AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 : AeraVisulizerWindowBase(0, replicodeObjects),
@@ -206,6 +208,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   regex ioDeviceEjectWithoutRdxRegex("^I/O device eject (\\d+)$");
   // -> drive 158, ijt 0s:310ms:0us
   regex driveInjectRegex("^-> drive (\\d+), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
+  // sim commit: fact 238 pred fact success -> fact (82115) goal
+  regex simulationCommitRegex("^sim commit: fact (\\d+) pred fact success -> fact \\((\\d+)\\) goal$");
 
   QProgressDialog progress("Reading " + QFileInfo(runtimeOutputFilePath.c_str()).fileName() + "...", "Cancel", 0, 100, this);
   progress.setWindowModality(Qt::WindowModal);
@@ -460,6 +464,13 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
         events_.push_back(make_shared<DriveInjectEvent>(
           timestamp, object, getTimestamp(matches, 2)));
     }
+    else if (regex_search(lineAfterTimestamp, matches, simulationCommitRegex)) {
+      auto factGoal = replicodeObjects_.getObjectByDebugOid(stoul(matches[2].str()));
+      auto factPredFactSuccess = replicodeObjects_.getObject(stoul(matches[1].str()));
+      if (factGoal && factPredFactSuccess)
+        events_.push_back(make_shared<SimulationCommitEvent>(
+          timestamp, factGoal, factPredFactSuccess));
+    }
   }
 
   return true;
@@ -576,7 +587,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
       event->eventType_ == IoDeviceEjectEvent::EVENT_TYPE ||
-      event->eventType_ == DriveInjectEvent::EVENT_TYPE) {
+      event->eventType_ == DriveInjectEvent::EVENT_TYPE ||
+      event->eventType_ == SimulationCommitEvent::EVENT_TYPE) {
     AeraGraphicsItem* newItem;
     bool visible = true;
 
@@ -723,6 +735,20 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       scene->addHorizontalLine(newItem);
       visible = (simulationsCheckBox_->checkState() == Qt::Checked);
     }
+    else if (event->eventType_ == SimulationCommitEvent::EVENT_TYPE) {
+      auto commitEvent = (SimulationCommitEvent*)event;
+      newItem = new SimulationCommitItem(commitEvent, replicodeObjects_, scene);
+
+      // Add an arrow to the input Success.
+      auto factPredFactSuccessItem = scene->getAeraGraphicsItem(commitEvent->factPredFactSuccess_);
+      if (factPredFactSuccessItem)
+        // This is not a prediction or abduction, so no LHS/RHS arrowheads.
+        scene->addArrow(factPredFactSuccessItem, newItem);
+
+      scene->addHorizontalLine(newItem);
+
+      visible = (simulationsCheckBox_->checkState() == Qt::Checked);
+    }
 
     // Add the new item.
     scene->addAeraGraphicsItem(newItem);
@@ -818,7 +844,8 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
       event->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
       event->eventType_ == IoDeviceEjectEvent::EVENT_TYPE ||
-      event->eventType_ == DriveInjectEvent::EVENT_TYPE) {
+      event->eventType_ == DriveInjectEvent::EVENT_TYPE ||
+      event->eventType_ == SimulationCommitEvent::EVENT_TYPE) {
     AeraVisualizerScene* scene;
     if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
