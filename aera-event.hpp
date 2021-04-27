@@ -446,6 +446,30 @@ public:
   core::Timestamp injectionTime_;
 };
 
+/**
+ * The input of a SimulationCommitEvent is a simulated (fact (pred (fact (success...)))),
+ * and the output is a commited non-simulated (fact (goal...)) which is the RHS of a 
+ * model whose LHS is the committed action.
+ */
+class SimulationCommitEvent : public AeraEvent {
+public:
+  /**
+   * Create a SimulationCommitEvent
+   * \param time The event time.
+   * \param factGoal The (fact (goal...)) (committed RHS).
+   * \param factPredFactSuccess The (fact (pred (fact (success...)))).
+   */
+  SimulationCommitEvent(core::Timestamp time,
+    r_code::Code* factGoal, r_code::Code* factPredFactSuccess)
+    : AeraEvent(EVENT_TYPE, time, factGoal),
+    factPredFactSuccess_((r_exec::_Fact*)factPredFactSuccess)
+  {}
+
+  static const int EVENT_TYPE = 18;
+
+  r_exec::_Fact* factPredFactSuccess_;
+};
+
 }
 
 #endif
