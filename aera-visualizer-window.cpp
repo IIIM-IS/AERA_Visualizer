@@ -60,6 +60,7 @@
 #include "graphics-items/model-goal-item.hpp"
 #include "graphics-items/composite-state-goal-item.hpp"
 #include "graphics-items/model-prediction-item.hpp"
+#include "graphics-items/model-prediction-from-requirement-item.hpp"
 #include "graphics-items/composite-state-prediction-item.hpp"
 #include "graphics-items/prediction-result-item.hpp"
 #include "graphics-items/instantiated-composite-state-item.hpp"
@@ -104,7 +105,7 @@ protected:
 const set<int> AeraVisulizerWindow::simulationEventTypes_ = {
   DriveInjectEvent::EVENT_TYPE, ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,
   ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
-  SimulationCommitEvent ::EVENT_TYPE};
+  ModelSimulatedPredictionReductionFromRequirement::EVENT_TYPE, SimulationCommitEvent ::EVENT_TYPE};
 
 AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 : AeraVisulizerWindowBase(0, replicodeObjects),
@@ -322,9 +323,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
       auto input = replicodeObjects_.getObjectByDebugOid(stoul(matches[2].str()));
 
       if (model && factPred && input)
-        // TODO: Use a dedicated Item with an explanation using the requirement.
-        events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
-          timestamp, model, factPred, input, matches[3] == "super_goal"));
+        events_.push_back(make_shared<ModelSimulatedPredictionReductionFromRequirement>(
+          timestamp, model, factPred, input));
     }
     else if (regex_search(lineAfterTimestamp, matches, modelPredictionReductionRegex)) {
       auto reduction = replicodeObjects_.getObject(stoul(matches[1].str()));
@@ -582,6 +582,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       event->eventType_ == ModelGoalReduction::EVENT_TYPE ||
       event->eventType_ == CompositeStateGoalReduction::EVENT_TYPE ||
       event->eventType_ == ModelSimulatedPredictionReduction::EVENT_TYPE ||
+      event->eventType_ == ModelSimulatedPredictionReductionFromRequirement::EVENT_TYPE ||
       event->eventType_ == CompositeStateSimulatedPredictionReduction::EVENT_TYPE ||
       event->eventType_ == PredictionResultEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
@@ -688,6 +689,20 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
         visible = (simulationsCheckBox_->checkState() == Qt::Checked);
       else
         visible = (nonSimulationsCheckBox_->checkState() == Qt::Checked);
+    }
+    else if (event->eventType_ == ModelSimulatedPredictionReductionFromRequirement::EVENT_TYPE) {
+      auto reductionEvent = (ModelSimulatedPredictionReductionFromRequirement*)event;
+      newItem = new ModelPredictionFromRequirementItem(reductionEvent, replicodeObjects_, scene);
+
+      // Add an arrow to the input fact.
+      auto inputItem = scene->getAeraGraphicsItem(reductionEvent->input_);
+      if (inputItem)
+        // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
+        scene->addArrow(inputItem, newItem);
+
+      scene->addHorizontalLine(newItem);
+
+      visible = (simulationsCheckBox_->checkState() == Qt::Checked);
     }
     else if (event->eventType_ == CompositeStateSimulatedPredictionReduction::EVENT_TYPE) {
       auto reductionEvent = (CompositeStateSimulatedPredictionReduction*)event;
@@ -839,6 +854,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
       event->eventType_ == ModelGoalReduction::EVENT_TYPE ||
       event->eventType_ == CompositeStateGoalReduction::EVENT_TYPE ||
       event->eventType_ == ModelSimulatedPredictionReduction::EVENT_TYPE ||
+      event->eventType_ == ModelSimulatedPredictionReductionFromRequirement::EVENT_TYPE ||
       event->eventType_ == CompositeStateSimulatedPredictionReduction::EVENT_TYPE ||
       event->eventType_ == PredictionResultEvent::EVENT_TYPE ||
       event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
