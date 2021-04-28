@@ -1231,10 +1231,12 @@ void AeraVisulizerWindow::createToolbars()
 
     // Do the opposite of simulationsCheckBox_ .
     mainScene_->setNonItemsVisible(simulationEventTypes_, state == Qt::Checked);
-    // Make specific non-simulation items visible or not, if needed.
-    mainScene_->setAutoFocusItemsVisible("essence", essenceFactsCheckBox_->checkState() == Qt::Checked);
-    mainScene_->setItemsVisible(
-      NewInstantiatedCompositeStateEvent::EVENT_TYPE, instantiatedCompositeStatesCheckBox_->checkState() == Qt::Checked);
+    if (state == Qt::Checked) {
+      // Make specific non-simulation items not visible, if needed.
+      mainScene_->setAutoFocusItemsVisible("essence", essenceFactsCheckBox_->checkState() == Qt::Checked);
+      mainScene_->setItemsVisible(
+        NewInstantiatedCompositeStateEvent::EVENT_TYPE, instantiatedCompositeStatesCheckBox_->checkState() == Qt::Checked);
+    }
   });
   toolbar->addWidget(nonSimulationsCheckBox_);
 
