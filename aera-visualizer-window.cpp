@@ -1022,10 +1022,43 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
   else {
     if (firstEventIsSimulation) {
       // Not a new frame and the first event is a simulation, so we want to step all the simulations at once.
-      // Set iNonSimulation to the next non-simulation event.
+      // Set iNonSimulation to the next non-simulation event. Also set iCommand to the simulation event showing a
+      // non-simulated goal for a command (presumably the simulation's committed goal).
+      // TODO: What about multiple committed goals including for mandatory solutions?
+      int iCommand = -1;
       for (iNonSimulation = iNextEvent_; iNonSimulation < events_.size(); ++iNonSimulation) {
         if (simulationEventTypes_.find(events_[iNonSimulation]->eventType_) == simulationEventTypes_.end())
           break;
+
+        if (events_[iNonSimulation]->eventType_ == ModelGoalReduction::EVENT_TYPE) {
+          auto value = ((ModelGoalReduction*)events_[iNonSimulation].get())->factGoal_->get_goal()->get_target()->get_reference(0);
+          if (value->code(0).asOpcode() == Opcodes::Cmd)
+            iCommand = iNonSimulation;
+        }
+      }
+
+      if (iCommand) {
+        // Start from the committed command and get the chain of inputs.
+        std::set<int> focusSimulationDebugOids;
+        int i = iCommand;
+        while (i >= iNextEvent_ - 1) {
+          focusSimulationDebugOids.insert(events_[i]->object_->get_debug_oid());
+
+          auto input = events_[i]->getInput();
+          if (!input)
+            // The end of the backward links, presumably the drive.
+            break;
+
+          // Keep searching backwards (back to the first simulation event) for the event of the input.
+          --i;
+          for (; i >= iNextEvent_ - 1; --i) {
+            if (events_[i]->object_ == input)
+              break;
+          }
+        }
+
+        // This will display the focus simulation items at the top.
+        mainScene_->setFocusSimulationDebugOids(focusSimulationDebugOids);
       }
     }
   }
