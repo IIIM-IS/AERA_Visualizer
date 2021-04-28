@@ -1058,7 +1058,13 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
         }
 
         // This will display the focus simulation items at the top.
+        // As a temporary fix, unstep before setting focus simulations and step again to include the first one.
+        // TODO: We should compute focusSimulationDebugOids before the first call to stepEvent, but we can't just use
+        //   events_[iNextEvent_] because stepEvent make skip it. Need a way to know what stepEvent will consider the next event.
+        events_[iNextEvent_ - 1]->itemTopLeftPosition_ = QPointF(qQNaN(), qQNaN());
+        unstepEvent(Timestamp(seconds(0)));
         mainScene_->setFocusSimulationDebugOids(focusSimulationDebugOids);
+        stepEvent(Utils_MaxTime);
       }
     }
   }
