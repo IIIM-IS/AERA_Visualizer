@@ -108,11 +108,6 @@ AeraVisualizerScene::AeraVisualizerScene(
     eventTypeFirstTop_[0] = 5;
 }
 
-// TODO: Infer these.
-static std::set<int> selectedSimulationOids =
-  { 137, 142, 148, 157, 158, 158, 180, 182, 205, 232, 246, 269, 274, 280, 286, 292, 301
-    /*, 884, 886, 890, 896, 903, 919, 932 */ };
-
 void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 {
   auto aeraEvent = item->getAeraEvent();
@@ -159,8 +154,8 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
   }
 
   item->setBrush(item->is_sim() ? simulatedItemColor_ : itemColor_);
-  bool isFocusSimulation = (selectedSimulationOids.find(item->getAeraEvent()->object_->get_oid()) 
-                            != selectedSimulationOids.end());
+  bool isFocusSimulation = (focusSimulationDebugOids_.find(item->getAeraEvent()->object_->get_debug_oid()) 
+                            != focusSimulationDebugOids_.end());
   bool isSimulationEventType = 
     (AeraVisulizerWindow::simulationEventTypes_.find(item->getAeraEvent()->eventType_) !=
      AeraVisulizerWindow::simulationEventTypes_.end());
@@ -175,8 +170,8 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       thisFrameLeft_ = getTimelineX(thisFrameTime_);
       // Reset the top.
       eventTypeNextTop_.clear();
-      selectedSimulationNextTop_ = eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
-      otherSimulationNextTop_ = 1010 + eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
+      focusSimulationNextTop_ = eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
+      otherSimulationNextTop_ = 1150 + eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
     }
 
     int eventType = 0;
@@ -194,7 +189,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     qreal top;
     if (isSimulationEventType)
       // Ignore eventType and stack the simulated items in order.
-      top = (isFocusSimulation ? selectedSimulationNextTop_ : otherSimulationNextTop_);
+      top = (isFocusSimulation ? focusSimulationNextTop_ : otherSimulationNextTop_);
     else {
       if (eventTypeNextTop_.find(eventType) != eventTypeNextTop_.end())
         top = eventTypeNextTop_[eventType];
@@ -237,7 +232,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     qreal nextTop = top + item->boundingRect().height() + verticalMargin;
     if (isSimulationEventType) {
       if (isFocusSimulation)
-        selectedSimulationNextTop_ = nextTop;
+        focusSimulationNextTop_ = nextTop;
       else
         otherSimulationNextTop_ = nextTop;
     }

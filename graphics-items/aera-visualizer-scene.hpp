@@ -101,6 +101,15 @@ public:
    */
   void onViewMoved();
 
+  /**
+   * Set the set of debug OIDs for simulation items which should be shown at the top.
+   * \param focusSimulationDebugOids The set of debug OIDs, which is copied.
+   */
+  void setFocusSimulationDebugOids(const std::set<int>& focusSimulationDebugOids)
+  {
+    focusSimulationDebugOids_ = focusSimulationDebugOids;
+  }
+
   // The initial value for the flash countdown;
   static const int FLASH_COUNT = 6;
 
@@ -184,7 +193,7 @@ private:
   std::map<int, qreal> eventTypeFirstTop_;
   // key: The AeraEvent eventType_, or 0 for "other". value: The top to use for the next item added for that event type.
   std::map<int, qreal> eventTypeNextTop_;
-  qreal selectedSimulationNextTop_;
+  qreal focusSimulationNextTop_;
   qreal otherSimulationNextTop_;
   Timestamp thisFrameTime_;
   qreal thisFrameLeft_;
@@ -196,6 +205,7 @@ private:
   QString valueUpFlashColor_;
   QString valueDownFlashColor_;
   int flashTimerId_;
+  std::set<int> focusSimulationDebugOids_;
   static const int frameWidth_ = 330;
 };
 
