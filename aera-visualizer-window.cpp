@@ -1037,7 +1037,7 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
         }
       }
 
-      if (iCommand) {
+      if (iCommand >= 0) {
         // Start from the committed command and get the chain of inputs.
         std::set<int> focusSimulationDebugOids;
         int i = iCommand;
