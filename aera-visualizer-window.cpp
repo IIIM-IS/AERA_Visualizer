@@ -1014,10 +1014,21 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
   bool firstEventIsSimulation = 
     (simulationEventTypes_.find(events_[iNextEvent_ - 1]->eventType_) != simulationEventTypes_.end());
 
+  int iNonSimulation = -1;
   if (isNewFrame)
     // Remove the simulation items from the previous frame.
     // TODO: We don't expect it, but if the first event in the frame is simulated then this will erase it.
     mainScene_->removeAllItemsByEventType(simulationEventTypes_);
+  else {
+    if (firstEventIsSimulation) {
+      // Not a new frame and the first event is a simulation, so we want to step all the simulations at once.
+      // Set iNonSimulation to the next non-simulation event.
+      for (iNonSimulation = iNextEvent_; iNonSimulation < events_.size(); ++iNonSimulation) {
+        if (simulationEventTypes_.find(events_[iNonSimulation]->eventType_) == simulationEventTypes_.end())
+          break;
+      }
+    }
+  }
 
   while (true) {
     if (simulationsCheckBox_->isChecked()) {
@@ -1030,8 +1041,7 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
       }
       else {
         // If not a new frame and the first event is a simulation, keep stepping until the next item would be a non-simulation.
-        if (firstEventIsSimulation && iNextEvent_ < events_.size() && 
-            simulationEventTypes_.find(events_[iNextEvent_]->eventType_) == simulationEventTypes_.end())
+        if (firstEventIsSimulation && iNextEvent_ >= iNonSimulation)
           break;
       }
     }
