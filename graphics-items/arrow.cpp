@@ -175,10 +175,10 @@ QPointF Arrow::intersectItem(const QLineF& line, const QGraphicsPolygonItem& ite
 
 void Arrow::setArrowhead(QPolygonF& polygon, const QPointF& tip, double angle)
 {
-  QPointF arrowP1 = tip + QPointF(sin(angle + M_PI / 3) * arrowSize_,
-    cos(angle + M_PI / 3) * arrowSize_);
-  QPointF arrowP2 = tip + QPointF(sin(angle + M_PI - M_PI / 3) * arrowSize_,
-    cos(angle + M_PI - M_PI / 3) * arrowSize_);
+  QPointF arrowP1 = tip + QPointF(sin(angle + M_PI / 4) * arrowSize_,
+    cos(angle + M_PI / 4) * arrowSize_);
+  QPointF arrowP2 = tip + QPointF(sin(angle + M_PI - M_PI / 4) * arrowSize_,
+    cos(angle + M_PI - M_PI / 4) * arrowSize_);
 
   polygon.clear();
   polygon << tip << arrowP1 << arrowP2;
