@@ -375,12 +375,13 @@ public:
    * \param compositeState The composite state which did the reduction.
    * \param factPred The (fact (pred...)) (production).
    * \param input The input fact triggering the reduction.
+   * \param inputs The set of inputs which made the icst (one of which is input).
    */
   CompositeStateSimulatedPredictionReduction(core::Timestamp time, r_code::Code* compositeState,
-    r_code::Code* factPred, r_code::Code* input)
+    r_code::Code* factPred, r_code::Code* input, const std::vector<r_code::Code*>& inputs)
     : AeraEvent(EVENT_TYPE, time, factPred),
     compositeState_(compositeState), factPred_((r_exec::_Fact*)factPred),
-    input_((r_exec::_Fact*)input)
+    input_((r_exec::_Fact*)input), inputs_(inputs)
   {}
 
   r_code::Code* getInput() override { return input_; }
@@ -390,6 +391,7 @@ public:
   r_code::Code* compositeState_;
   r_exec::_Fact* factPred_;
   r_exec::_Fact* input_;
+  std::vector<r_code::Code*> inputs_;
 };
 
 class NewInstantiatedCompositeStateEvent : public AeraEvent {

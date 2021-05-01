@@ -398,9 +398,25 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
       auto compositeState = replicodeObjects_.getObject(stoul(matches[1].str()));
       auto factPred = replicodeObjects_.getObject(stoul(matches[3].str()));
       auto input = replicodeObjects_.getObject(stoul(matches[2].str()));
-      if (compositeState && factPred && input)
+
+      // Get the matching inputs.
+      string inputOids = matches[2].str();
+      std::vector<Code*> inputs;
+      bool gotAllInputs = true;
+      while (regex_search(inputOids, matches, regex("( \\d+)"))) {
+        auto input = replicodeObjects_.getObject(stoul(matches[1].str()));
+        if (!input) {
+          gotAllInputs = false;
+          break;
+        }
+        inputs.push_back(input);
+
+        inputOids = matches.suffix();
+      }
+
+      if (compositeState && factPred && input && gotAllInputs)
         events_.push_back(make_shared<CompositeStateSimulatedPredictionReduction>(
-          timestamp, compositeState, factPred, input));
+          timestamp, compositeState, factPred, input, inputs));
     }
     else if (regex_search(lineAfterTimestamp, matches, newInstantiatedCompositeStateRegex)) {
       auto instantiatedCompositeState = replicodeObjects_.getObject(stoul(matches[1].str()));
