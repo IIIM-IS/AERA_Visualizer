@@ -191,8 +191,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   regex compositeStateSimulatedAbductionRegex("^cst (\\d+): fact (\\d+) super_goal -> fact (\\d+) simulated goal$");
   // mdl 57: fact 202 pred -> fact 227 simulated pred
   regex modelSimulatedPredictionRegex("^mdl (\\d+): fact (\\d+) (pred|super_goal) -> fact (\\d+) simulated pred$");
-  // cst 60: fact 195 -> fact 218 simulated pred
-  regex compositeStateSimulatedPredictionRegex("^cst (\\d+): fact (\\d+) -> fact (\\d+) simulated pred$");
+  // cst 60: fact 195 -> fact 218 simulated pred fact icst [ 155 191]
+  regex compositeStateSimulatedPredictionRegex("^cst (\\d+): fact (\\d+) -> fact (\\d+) simulated pred fact icst \\[([ \\d]+)\\]$");
   // fact 59 icst[52][ 50 55]
   regex newInstantiatedCompositeStateRegex("^fact (\\d+) icst\\[\\d+\\]\\[([ \\d]+)\\]$");
   // fact 75 -> fact 79 success fact 60 pred
