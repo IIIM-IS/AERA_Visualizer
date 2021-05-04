@@ -598,6 +598,40 @@ void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, 
   }
 }
 
+Timestamp AeraVisulizerWindow::getINextStepEvent
+  (Timestamp maximumTime, size_t iNextEventStart, size_t& iNextStepEvent)
+{
+  // TODO: This has to closely track stepEvent to duplicate its logic, so stepEvent should be
+  // rewritten to provide the functionality to show what the next event would be without doing it.
+  if (iNextEventStart >= events_.size())
+    // Return the value meaning no change.
+    return Utils_MaxTime;
+
+  AeraEvent* event = events_[iNextEventStart].get();
+  if (event->time_ > maximumTime)
+    return Utils_MaxTime;
+
+  // Default to the same initial event.
+  iNextStepEvent = iNextEventStart;
+
+  if (newItemEventTypes_.find(event->eventType_) != newItemEventTypes_.end()) {
+    if (event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE) {
+      auto autoFocusEvent = (AutoFocusNewObjectEvent*)event;
+      if (event->time_ == replicodeObjects_.getTimeReference())
+        // Debug: For now, skip auto focus events at startup.
+        return getINextStepEvent(maximumTime, iNextEventStart + 1, iNextStepEvent);
+    }
+  }
+  else if (event->eventType_ == SetModelEvidenceCountAndSuccessRateEvent::EVENT_TYPE) {
+    // We already set the default.
+  }
+  else
+    // Skip this event.
+    return getINextStepEvent(maximumTime, iNextEventStart + 1, iNextStepEvent);
+
+  return event->time_;
+}
+
 Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 {
   if (iNextEvent_ >= events_.size())
@@ -1006,18 +1040,19 @@ void AeraVisulizerWindow::playPauseButtonClickedImpl()
 void AeraVisulizerWindow::stepButtonClickedImpl()
 {
   stopPlay();
-  if (stepEvent(Utils_MaxTime) == Utils_MaxTime)
+  size_t iNextStepEvent;
+  if (getINextStepEvent(Utils_MaxTime, iNextEvent_, iNextStepEvent) == Utils_MaxTime)
     return;
-  auto eventTime = events_[iNextEvent_ - 1]->time_;
+  auto eventTime = events_[iNextStepEvent]->time_;
 
   // Keep stepping remaining events in this same frame.
   auto relativeTime = duration_cast<microseconds>(eventTime - replicodeObjects_.getTimeReference());
   auto frameStartTime = eventTime - (relativeTime % replicodeObjects_.getSamplingPeriod());
   auto thisFrameMaxTime = frameStartTime + replicodeObjects_.getSamplingPeriod() - microseconds(1);
-  bool isNewFrame = (iNextEvent_ <= 1 || frameStartTime > events_[iNextEvent_ - 2]->time_);
+  bool isNewFrame = (iNextStepEvent <= 0 || frameStartTime > events_[iNextStepEvent - 1]->time_);
   auto firstEventTime = eventTime;
   bool firstEventIsSimulation = 
-    (simulationEventTypes_.find(events_[iNextEvent_ - 1]->eventType_) != simulationEventTypes_.end());
+    (simulationEventTypes_.find(events_[iNextStepEvent]->eventType_) != simulationEventTypes_.end());
 
   int iNonSimulation = -1;
   if (isNewFrame)
@@ -1031,7 +1066,7 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
       // non-simulated goal for a command (presumably the simulation's committed goal).
       // TODO: What about multiple committed goals including for mandatory solutions?
       int iCommand = -1;
-      for (iNonSimulation = iNextEvent_; iNonSimulation < events_.size(); ++iNonSimulation) {
+      for (iNonSimulation = iNextStepEvent; iNonSimulation < events_.size(); ++iNonSimulation) {
         if (simulationEventTypes_.find(events_[iNonSimulation]->eventType_) == simulationEventTypes_.end())
           break;
 
@@ -1046,7 +1081,7 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
         // Start from the committed command and get the chain of inputs.
         std::set<int> focusSimulationDebugOids;
         int i = iCommand;
-        while (i >= iNextEvent_ - 1) {
+        while (i >= iNextStepEvent) {
           focusSimulationDebugOids.insert(events_[i]->object_->get_debug_oid());
 
           auto input = events_[i]->getInput();
@@ -1056,25 +1091,23 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
 
           // Keep searching backwards (back to the first simulation event) for the event of the input.
           --i;
-          for (; i >= iNextEvent_ - 1; --i) {
+          for (; i >= iNextStepEvent; --i) {
             if (events_[i]->object_ == input)
               break;
           }
         }
 
         // This will display the focus simulation items at the top.
-        // As a temporary fix, unstep before setting focus simulations and step again to include the first one.
-        // TODO: We should compute focusSimulationDebugOids before the first call to stepEvent, but we can't just use
-        //   events_[iNextEvent_] because stepEvent make skip it. Need a way to know what stepEvent will consider the next event.
-        events_[iNextEvent_ - 1]->itemTopLeftPosition_ = QPointF(qQNaN(), qQNaN());
-        unstepEvent(Timestamp(seconds(0)));
         mainScene_->setFocusSimulationDebugOids(focusSimulationDebugOids);
-        stepEvent(Utils_MaxTime);
       }
     }
   }
 
   while (true) {
+    if (stepEvent(thisFrameMaxTime) == Utils_MaxTime)
+      break;
+    eventTime = events_[iNextEvent_ - 1]->time_;
+
     if (simulationsCheckBox_->isChecked()) {
       if (isNewFrame) {
         // In a new frame, advance until the next item would be a simulation item that is not at the first event time.
@@ -1089,10 +1122,6 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
           break;
       }
     }
-
-    if (stepEvent(thisFrameMaxTime) == Utils_MaxTime)
-      break;
-    eventTime = events_[iNextEvent_ - 1]->time_;
   }
 
   setPlayTime(eventTime);

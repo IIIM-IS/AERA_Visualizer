@@ -141,6 +141,20 @@ public:
 
 protected:
   /**
+   * Set iNextStepEvent to the index in events_ of the next event that stepEvent will process.
+   * \param maximumTime If the time of next event is greater than maximumTime, don't perform the
+   * event, and return Utils_MaxTime.
+   * \param iNextEventStart The index of the first event to consider, usually iNextEvent_ (but used
+   * internally to recursively call this method.
+   * \param iNextStepEvent the index in events_ of the next event that stepEvent will process. In most
+   * cases, this is iNextEventStart. However, if this method returns Utils_MaxTime, then stepEvent will
+   * not process a next event and iNextStepEvent is undefined.
+   * \return The time of the next event. If there is no next event, then
+   * return Utils_MaxTime.
+   */
+  Timestamp getINextStepEvent(Timestamp maximumTime, size_t iNextEventStart, size_t& iNextStepEvent);
+
+  /**
    * Perform the event at events_[iNextEvent_] and then increment iNextEvent_.
    * \param maximumTime If the time of next event is greater than maximumTime, don't perform the
    * event, and return Utils_MaxTime.
