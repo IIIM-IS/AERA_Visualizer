@@ -142,7 +142,7 @@ public:
 protected:
   /**
    * Perform the event at events_[iNextEvent_] and then increment iNextEvent_.
-   * \param maximumTime if the time of next event is greater than maximumTime, don't perform the
+   * \param maximumTime If the time of next event is greater than maximumTime, don't perform the
    * event, and return Utils_MaxTime.
    * \return The time of the next event. If there is no next event, then
    * return Utils_MaxTime.
@@ -234,6 +234,8 @@ private:
   core::Timestamp playTime_;
   int playTimerId_;
   bool isPlaying_;
+  // The AeraEvent types where stepEvent will create a new AeraGraphicsItem.
+  static const set<int> newItemEventTypes_;
 };
 
 }

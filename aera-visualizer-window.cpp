@@ -107,6 +107,23 @@ const set<int> AeraVisulizerWindow::simulationEventTypes_ = {
   ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
   ModelSimulatedPredictionReductionFromRequirement::EVENT_TYPE, SimulationCommitEvent ::EVENT_TYPE};
 
+const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
+  NewModelEvent::EVENT_TYPE,
+  NewCompositeStateEvent::EVENT_TYPE,
+  AutoFocusNewObjectEvent::EVENT_TYPE,
+  ModelMkValPredictionReduction::EVENT_TYPE,
+  ModelGoalReduction::EVENT_TYPE,
+  CompositeStateGoalReduction::EVENT_TYPE,
+  ModelSimulatedPredictionReduction::EVENT_TYPE,
+  ModelSimulatedPredictionReductionFromRequirement::EVENT_TYPE,
+  CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
+  PredictionResultEvent::EVENT_TYPE,
+  NewInstantiatedCompositeStateEvent::EVENT_TYPE,
+  IoDeviceInjectEvent::EVENT_TYPE,
+  IoDeviceEjectEvent::EVENT_TYPE,
+  DriveInjectEvent::EVENT_TYPE,
+  SimulationCommitEvent::EVENT_TYPE };
+
 AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 : AeraVisulizerWindowBase(0, replicodeObjects),
   iNextEvent_(0), explanationLogWindow_(0),
@@ -591,21 +608,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
   if (event->time_ > maximumTime)
     return Utils_MaxTime;
 
-  if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
-      event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
-      event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
-      event->eventType_ == ModelMkValPredictionReduction::EVENT_TYPE ||
-      event->eventType_ == ModelGoalReduction::EVENT_TYPE ||
-      event->eventType_ == CompositeStateGoalReduction::EVENT_TYPE ||
-      event->eventType_ == ModelSimulatedPredictionReduction::EVENT_TYPE ||
-      event->eventType_ == ModelSimulatedPredictionReductionFromRequirement::EVENT_TYPE ||
-      event->eventType_ == CompositeStateSimulatedPredictionReduction::EVENT_TYPE ||
-      event->eventType_ == PredictionResultEvent::EVENT_TYPE ||
-      event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
-      event->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
-      event->eventType_ == IoDeviceEjectEvent::EVENT_TYPE ||
-      event->eventType_ == DriveInjectEvent::EVENT_TYPE ||
-      event->eventType_ == SimulationCommitEvent::EVENT_TYPE) {
+  if (newItemEventTypes_.find(event->eventType_) != newItemEventTypes_.end()) {
     AeraGraphicsItem* newItem;
     bool visible = true;
 
@@ -863,21 +866,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
   --iNextEvent_;
 
   AeraEvent* event = events_[iNextEvent_].get();
-  if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
-      event->eventType_ == NewCompositeStateEvent::EVENT_TYPE ||
-      event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE ||
-      event->eventType_ == ModelMkValPredictionReduction::EVENT_TYPE ||
-      event->eventType_ == ModelGoalReduction::EVENT_TYPE ||
-      event->eventType_ == CompositeStateGoalReduction::EVENT_TYPE ||
-      event->eventType_ == ModelSimulatedPredictionReduction::EVENT_TYPE ||
-      event->eventType_ == ModelSimulatedPredictionReductionFromRequirement::EVENT_TYPE ||
-      event->eventType_ == CompositeStateSimulatedPredictionReduction::EVENT_TYPE ||
-      event->eventType_ == PredictionResultEvent::EVENT_TYPE ||
-      event->eventType_ == NewInstantiatedCompositeStateEvent::EVENT_TYPE ||
-      event->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
-      event->eventType_ == IoDeviceEjectEvent::EVENT_TYPE ||
-      event->eventType_ == DriveInjectEvent::EVENT_TYPE ||
-      event->eventType_ == SimulationCommitEvent::EVENT_TYPE) {
+  if (newItemEventTypes_.find(event->eventType_) != newItemEventTypes_.end()) {
     AeraVisualizerScene* scene;
     if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
