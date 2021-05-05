@@ -128,7 +128,10 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
                                cos(angle + -M_PI / 2)),
     angle);
 
-  painter->setPen(pen());
+  if (isSelected())
+    painter->setPen(QPen(pen().color(), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
+  else
+    painter->setPen(pen());
   painter->setBrush(pen().color());
   painter->drawLine(line());
 
@@ -139,15 +142,6 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
   painter->setPen(arrowTipPen_);
   painter->setBrush(arrowTipPen_.color());
   painter->drawPolygon(arrowTip_);
-
-  if (isSelected()) {
-    painter->setPen(QPen(DefaultPen.color(), 1, Qt::DashLine));
-    QLineF myLine = line();
-    myLine.translate(0, 4.0);
-    painter->drawLine(myLine);
-    myLine.translate(0, -8.0);
-    painter->drawLine(myLine);
-  }
 }
 
 QPointF Arrow::intersectItem(const QLineF& line, const QGraphicsPolygonItem& item)
