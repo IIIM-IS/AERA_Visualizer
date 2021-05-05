@@ -69,7 +69,7 @@ protected:
   void textItemLinkActivated(const QString& link) override;
 
 private:
-  typedef enum { HIDE_IMODEL, WHAT_MADE_THIS, SHOW_MODEL } ShowState;
+  typedef enum { HIDE_IMDL, WHAT_MADE_THIS, SHOW_MODEL } ShowState;
 
   /**
    * Set factPredFactMkValHtml_ to the HTML source code for the fact, pred, fact and mk.val

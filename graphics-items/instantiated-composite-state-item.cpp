@@ -245,12 +245,12 @@ QString InstantiatedCompositeStateItem::makeHtml()
 {
   QString html = "";
   if (showState_ == HIDE_ICST) {
-    html += SelectedRadioButtonHtml + " Hide iCst" +
+    html += SelectedRadioButtonHtml + " Hide icst" +
       " <a href=\"#what-made-this\">" + UnselectedRadioButtonHtml + " What Made This?</a><br>";
     html += boundCstMembersHtml_;
   }
   else {
-    html += "<a href=\"#hide-icst\">" + UnselectedRadioButtonHtml + " Hide iCst</a>" +
+    html += "<a href=\"#hide-icst\">" + UnselectedRadioButtonHtml + " Hide icst</a>" +
       " " + SelectedRadioButtonHtml + " What Made This?";
 
     auto factIcst = newInstantiatedCompositeStateEvent_->object_;

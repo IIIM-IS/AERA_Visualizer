@@ -69,7 +69,7 @@ PredictionItem::PredictionItem(
   ModelMkValPredictionReduction* modelReduction, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
   : AeraGraphicsItem(modelReduction, replicodeObjects, parent, "Prediction"),
-  modelReduction_(modelReduction), showState_(HIDE_IMODEL)
+  modelReduction_(modelReduction), showState_(HIDE_IMDL)
 {
   setFactPredFactMkValHtml();
   setFactImdlHtml();
@@ -227,11 +227,11 @@ QString PredictionItem::makeHtml()
   if (showState_ == WHAT_MADE_THIS ||
       showState_ == SHOW_MODEL) {
     if (showState_ == WHAT_MADE_THIS)
-      html += "<br><a href=\"#hide-imodel\">" + UnselectedRadioButtonHtml + " Hide iModel</a>" +
+      html += "<br><a href=\"#hide-imdl\">" + UnselectedRadioButtonHtml + " Hide imdl</a>" +
         " " + SelectedRadioButtonHtml + " What Made This?" +
         " <a href=\"#show-model\">" + UnselectedRadioButtonHtml + " Show Model</a>";
     else
-      html += "<br><a href=\"#hide-imodel\">" + UnselectedRadioButtonHtml + " Hide iModel</a> " +
+      html += "<br><a href=\"#hide-imdl\">" + UnselectedRadioButtonHtml + " Hide imdl</a> " +
         " <a href=\"#what-made-this\">" + UnselectedRadioButtonHtml + " What Made This?</a>" +
         " " + SelectedRadioButtonHtml + " Show Model";
 
@@ -244,7 +244,7 @@ QString PredictionItem::makeHtml()
     html += "<br><br>" + (showState_ == WHAT_MADE_THIS ? boundModelHtml_ : unboundModelHtml_);
   }
   else {
-    html += "<br>" + SelectedRadioButtonHtml + " Hide iModel" +
+    html += "<br>" + SelectedRadioButtonHtml + " Hide imdl" +
       " <a href=\"#what-made-this\">" + UnselectedRadioButtonHtml + " What Made This?</a>" +
       " <a href=\"#show-model\">" + UnselectedRadioButtonHtml + " Show Model</a>";
   }
@@ -254,8 +254,8 @@ QString PredictionItem::makeHtml()
 
 void PredictionItem::textItemLinkActivated(const QString& link)
 {
-  if (link == "#hide-imodel") {
-    showState_ = HIDE_IMODEL;
+  if (link == "#hide-imdl") {
+    showState_ = HIDE_IMDL;
     setTextItemAndPolygon(makeHtml(), true);
     bringToFront();
   }
