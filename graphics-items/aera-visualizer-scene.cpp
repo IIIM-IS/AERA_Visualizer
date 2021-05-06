@@ -410,7 +410,7 @@ void AeraVisualizerScene::setNonItemsVisible(const set<int>& notEventTypes, bool
 
 void AeraVisualizerScene::setAutoFocusItemsVisible(const string& property, bool visible)
 {
-  auto propertyObject = replicodeObjects_.getObject(property);
+  auto propertyObject = (property == "essence" ? essencePropertyObject_ : replicodeObjects_.getObject(property));
   if (!propertyObject)
     return;
 
