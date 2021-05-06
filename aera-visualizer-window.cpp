@@ -429,7 +429,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
       auto input = replicodeObjects_.getObject(stoul(matches[2].str()));
 
       // Get the matching inputs.
-      string inputOids = matches[2].str();
+      string inputOids = matches[4].str();
       std::vector<Code*> inputs;
       bool gotAllInputs = true;
       while (regex_search(inputOids, matches, regex("( \\d+)"))) {
@@ -775,9 +775,18 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 
       // Add an arrow to the input fact.
       auto inputItem = scene->getAeraGraphicsItem(reductionEvent->input_);
-      if (inputItem)
-        // The inputItem of the prediction is the LHS.
-        scene->addArrow(inputItem, newItem, inputItem);
+
+      // Add arrows to the inputs.
+      for (int i = 0; i < reductionEvent->inputs_.size(); ++i) {
+        auto referencedItem = scene->getAeraGraphicsItem(reductionEvent->inputs_[i]);
+        if (!referencedItem)
+          continue;
+        if (referencedItem == inputItem)
+          // The inputItem of the prediction is the LHS.
+          scene->addArrow(referencedItem, newItem, inputItem);
+        else
+          scene->addArrow(referencedItem, newItem);
+      }
 
       scene->addHorizontalLine(newItem);
 
