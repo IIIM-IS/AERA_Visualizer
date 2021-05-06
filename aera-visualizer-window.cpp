@@ -208,6 +208,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   regex compositeStateSimulatedAbductionRegex("^cst (\\d+): fact (\\d+) super_goal -> fact (\\d+) simulated goal$");
   // mdl 57: fact 202 pred -> fact 227 simulated pred
   regex modelSimulatedPredictionRegex("^mdl (\\d+): fact (\\d+) (pred|super_goal) -> fact (\\d+) simulated pred$");
+  // mdl 60: fact 181 super_goal -> fact (41817) simulated pred start
+  regex modelSimulatedPredictionStartRegex("^mdl (\\d+): fact (\\d+) super_goal -> fact \\((\\d+)\\) simulated pred start, ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
   // cst 60: fact 195 -> fact 218 simulated pred fact icst [ 155 191]
   regex compositeStateSimulatedPredictionRegex("^cst (\\d+): fact (\\d+) -> fact (\\d+) simulated pred fact icst \\[([ \\d]+)\\]$");
   // fact 59 icst[52][ 50 55]
@@ -410,6 +412,16 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
       if (model && factPred && input)
         events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
           timestamp, model, factPred, input, matches[3] == "super_goal"));
+    }
+    else if (regex_search(lineAfterTimestamp, matches, modelSimulatedPredictionStartRegex)) {
+      auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
+      auto factPred = replicodeObjects_.getObjectByDebugOid(stoul(matches[3].str()));
+      auto input = replicodeObjects_.getObject(stoul(matches[2].str()));
+
+      if (model && factPred && input)
+        // TODO: Use an AeraEvent with the details of starting the simulated forward chaining.
+        events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
+          timestamp, model, factPred, input, true));
     }
     else if (regex_search(lineAfterTimestamp, matches, compositeStateSimulatedPredictionRegex)) {
       auto compositeState = replicodeObjects_.getObject(stoul(matches[1].str()));
