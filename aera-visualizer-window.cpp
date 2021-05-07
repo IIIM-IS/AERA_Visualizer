@@ -179,7 +179,7 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
 {
   // load mdl 37, MDLController(113)
-  regex loadModelRegex("^load mdl (\\d+), MDLController\\((\\d+)\\)$");
+  regex loadModelRegex("^load mdl (\\d+), MDLController\\((\\d+)\\) cnt:(\\d+) sr:([\\d\\.]+)$");
   // load cst 36, CSTController(98)
   regex loadCompositeStateRegex("^load cst (\\d+), CSTController\\((\\d+)\\)$");
 
@@ -263,9 +263,13 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
     if (regex_search(line, matches, loadModelRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
       if (model) {
-        // Assume the initial success rate is 1.
+        // Restore the initial count and success rate.
+        core::float32 evidenceCount = stol(matches[3].str());
+        core::float32 successRate = stof(matches[4].str());
+        model->code(MDL_CNT) = Atom::Float(evidenceCount);
+        model->code(MDL_SR) = Atom::Float(successRate);
         auto event = new NewModelEvent(
-          replicodeObjects_.getTimeReference(), model, 1, 1, stoll(matches[2].str()));
+          replicodeObjects_.getTimeReference(), model, evidenceCount, successRate, stoll(matches[2].str()));
         // Assume it is loaded before run time starts, so show now.
         modelsScene_->addAeraGraphicsItem(new ModelItem(event, replicodeObjects_, modelsScene_));
         // TODO: Add arrows.
