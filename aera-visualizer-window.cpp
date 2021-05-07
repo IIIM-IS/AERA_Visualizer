@@ -246,6 +246,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   }
   progress.setMaximum(nLines);
 
+  std::vector<shared_ptr<AeraEvent> > pendingEvents;
   ifstream runtimeOutputFile(runtimeOutputFilePath);
   int lineNumber = 0;
   string line;
@@ -295,6 +296,12 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
       continue;
     core::Timestamp timestamp = getTimestamp(matches);
     string lineAfterTimestamp = matches[4].str();
+
+    while (pendingEvents.size() >= 1 && pendingEvents.front()->time_ <= timestamp) {
+      // Insert the pending event before this new event.
+      events_.push_back(pendingEvents.front());
+      pendingEvents.erase(pendingEvents.begin());
+    }
 
     if (regex_search(lineAfterTimestamp, matches, newModelRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
@@ -422,10 +429,16 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
       auto factPred = replicodeObjects_.getObjectByDebugOid(stoul(matches[3].str()));
       auto input = replicodeObjects_.getObject(stoul(matches[2].str()));
 
-      if (model && factPred && input)
+      if (model && factPred && input) {
+        core::Timestamp injectionTime = getTimestamp(matches, 4);
+        if (injectionTime < timestamp)
+          // We don't expect this, but the runtime would not have injected earlier.
+          injectionTime = timestamp;
         // TODO: Use an AeraEvent with the details of starting the simulated forward chaining.
-        events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
-          timestamp, model, factPred, input, true));
+        auto event = make_shared<ModelSimulatedPredictionReduction>(injectionTime, model, factPred, input, true);
+        // Put in pendingEvents to be added to events_ later.
+        pendingEvents.push_back(event);
+      }
     }
     else if (regex_search(lineAfterTimestamp, matches, compositeStateSimulatedPredictionRegex)) {
       auto compositeState = replicodeObjects_.getObject(stoul(matches[1].str()));
@@ -521,6 +534,11 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
           timestamp, factGoal, factPredFactSuccess));
     }
   }
+
+  // Transfer any remaining pendingEvents to events_.
+  for (auto event = pendingEvents.begin(); event != pendingEvents.end(); ++event)
+    events_.push_back(*event);
+  pendingEvents.clear();
 
   return true;
 }
