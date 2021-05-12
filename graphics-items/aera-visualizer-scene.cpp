@@ -147,7 +147,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
         text->setZValue(-100);
         text->setDefaultTextColor(Qt::darkGray);
         text->setPos(frameLeft, 0);
-        // Save the text so that we can adjust to position.
+        // Save the text so that we can adjust the position.
         timestampTexts_.push_back(text);
       }
     }
