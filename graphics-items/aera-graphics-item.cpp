@@ -280,7 +280,7 @@ QString AeraGraphicsItem::htmlify(const QString& input, bool useNowrap)
   result.replace("\x01", "<br>");
 
   if (useNowrap)
-    result = "<div style=\"white-space: nowrap;\">" + htmlify(result) + "</div>";
+    result = "<div style=\"white-space: nowrap;\">" + result + "</div>";
 
   return result;
 }
