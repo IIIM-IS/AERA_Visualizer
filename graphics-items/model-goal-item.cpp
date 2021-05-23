@@ -82,13 +82,15 @@ void ModelGoalItem::textItemLinkActivated(const QString& link)
     menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
 
     _Fact* factSuperGoal = modelReduction_->factSuperGoal_;
-    _Fact* goalFact = (_Fact*)factSuperGoal->get_reference(0)->get_reference(0);
-    if (goalFact->get_reference(0)->code(0).asOpcode() == Opcodes::Ent) {
+    _Fact* factValue = (_Fact*)factSuperGoal->get_reference(0)->get_reference(0);
+    auto value = factValue->get_reference(0);
+    if (value->code(0).asOpcode() == Opcodes::Ent) {
       // The super goal is a drive.
       menu->addAction("What Made This?", [=]() {
         QString explanation = "<b>Q: What made goal " + makeHtmlLink(modelReduction_->object_) +
           " ?</b><br>Model " + makeHtmlLink(modelReduction_->model_) +
-          " abduced this from drive " + makeHtmlLink(factSuperGoal) + "<br><br>";
+          " abduced this from drive <b>" + replicodeObjects_.getLabel(value).c_str() + "</b> in " +
+          makeHtmlLink(factSuperGoal) + "<br><br>";
         parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
         });
     }
