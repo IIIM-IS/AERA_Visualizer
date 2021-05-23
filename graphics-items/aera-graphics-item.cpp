@@ -100,7 +100,7 @@ AeraGraphicsItem::AeraGraphicsItem(
     eventTime = aeraEvent_->time_;
   headerHtml_ = QString("<table width=\"100%\"><tr>") + 
     "<td style=\"white-space:nowrap\"><font size=\"+1\"><b><font color=\"darkred\">" + headerPrefix +
-    "</font> <a href=\"#this""\">" + replicodeObjects_.getLabel(aeraEvent_->object_).c_str() + "</a></b></font></td>" +
+    "</font> <a href=\"#this\">" + replicodeObjects_.getLabel(aeraEvent_->object_).c_str() + "</a></b></font></td>" +
     "<td style=\"white-space:nowrap\" align=\"right\"><font style=\"color:gray\"> " + 
     replicodeObjects_.relativeTime(eventTime).c_str() + "</font></td>" + "</tr></table><br>";
 }
