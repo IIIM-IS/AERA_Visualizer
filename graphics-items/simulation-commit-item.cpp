@@ -74,4 +74,18 @@ SimulationCommitItem::SimulationCommitItem(
 {
 }
 
+void SimulationCommitItem::textItemLinkActivated(const QString& link)
+{
+  if (link == "#this") {
+    auto menu = new QMenu();
+    menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
+
+    menu->exec(QCursor::pos() - QPoint(10, 10));
+    delete menu;
+  }
+  else
+    // For #expand, #debug_oid- and others, defer to the base class.
+    ExpandableGoaOrPredlItem::textItemLinkActivated(link);
+}
+
 }

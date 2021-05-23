@@ -114,7 +114,7 @@ void ExpandableGoaOrPredlItem::setFactGoalOrPredFactValueHtml(const QString& pre
     factValueHtml = QString(factValueSource.c_str()).replace(valueLabel, DownArrowHtml);
   }
   
-  factGoalOrPredFactValueHtml_ = prefix + " <b>" + replicodeObjects_.getLabel(getAeraEvent()->object_).c_str() + "</b>\n";
+  factGoalOrPredFactValueHtml_ = prefix + " <b><a href=\"#this\">" + replicodeObjects_.getLabel(getAeraEvent()->object_).c_str() + "</a></b>\n";
   if (is_sim()) {
     // All outer facts in a simulation have the same time, so don't show it.
     factGoalOrPredFactValueHtml_ += goalOrPredHtml;

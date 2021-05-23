@@ -65,6 +65,9 @@ public:
     CompositeStateSimulatedPredictionReduction* compositeStateReduction,
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 
+protected:
+  void textItemLinkActivated(const QString& link) override;
+
 private:
   CompositeStateSimulatedPredictionReduction* compositeStateReduction_;
 };

@@ -65,6 +65,9 @@ public:
     SimulationCommitEvent* commitEvent, ReplicodeObjects& replicodeObjects,
     AeraVisualizerScene* parent);
 
+protected:
+  void textItemLinkActivated(const QString& link) override;
+
 private:
   SimulationCommitEvent* commitEvent_;
 };

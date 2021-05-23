@@ -65,6 +65,9 @@ public:
     DriveInjectEvent* driveInject, ReplicodeObjects& replicodeObjects,
     AeraVisualizerScene* parent);
 
+protected:
+  void textItemLinkActivated(const QString& link) override;
+
 private:
   DriveInjectEvent* driveInject_;
 };

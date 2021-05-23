@@ -65,6 +65,9 @@ public:
     ModelSimulatedPredictionReductionFromRequirement* modelReduction, ReplicodeObjects& replicodeObjects,
     AeraVisualizerScene* parent);
 
+protected:
+  void textItemLinkActivated(const QString& link) override;
+
 private:
   ModelSimulatedPredictionReductionFromRequirement* modelReduction_;
 };
