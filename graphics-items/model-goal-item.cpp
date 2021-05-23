@@ -74,7 +74,7 @@ ModelGoalItem::ModelGoalItem(
   setFactGoalFactValueHtml();
 
   setTextItemAndPolygon(valueHtml_, false, SHAPE_GOAL);
-  setToolTip(factGoalFactValueHtml_);
+  setToolTip(toolTipText_);
 }
 
 void ModelGoalItem::setFactGoalFactValueHtml()
@@ -114,14 +114,18 @@ void ModelGoalItem::setFactGoalFactValueHtml()
     factGoalFactValueHtml_ += "\n                  " + valueHtml;
   }
 
+  // Set toolTipText_ before adding links and buttons.
+  toolTipText_ = htmlify(factGoalFactValueHtml_, true);
   addSourceCodeHtmlLinks(modelReduction_->object_, factGoalFactValueHtml_);
-  factGoalFactValueHtml_ = htmlify(factGoalFactValueHtml_, true);
+  factGoalFactValueHtml_ = htmlify("down-pointing-triangle " + factGoalFactValueHtml_, true);
+  factGoalFactValueHtml_.replace("down-pointing-triangle", "<a href=\"#unexpand\">" + DownPointingTriangleHtml + "</a>");
 
   if (value->code(0).asOpcode() == Opcodes::ICst)
     valueHtml = InstantiatedCompositeStateItem::makeIcstMembersSource(value, replicodeObjects_);
-  valueHtml_ = htmlify(valueHtml, true);
+  valueHtml_ = htmlify("right-pointing-triangle " + valueHtml, true);
   if (((_Fact*)factValue)->is_anti_fact())
     valueHtml_ =  "<font color=\"red\">" + valueHtml_ + "</font>";
+  valueHtml_.replace("right-pointing-triangle", "<a href=\"#expand\">" + RightPointingTriangleHtml + "</a>");
 }
 
 void ModelGoalItem::textItemLinkActivated(const QString& link)
@@ -147,6 +151,16 @@ void ModelGoalItem::textItemLinkActivated(const QString& link)
 
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
+  }
+  else if (link == "#expand") {
+    setTextItemAndPolygon(factGoalFactValueHtml_, false);
+    setToolTip("");
+    bringToFront();
+  }
+  else if (link == "#unexpand") {
+    setTextItemAndPolygon(valueHtml_, false, SHAPE_GOAL);
+    setToolTip(toolTipText_);
+    bringToFront();
   }
   else
     // For #debug_oid- and others, defer to the base class.
