@@ -74,6 +74,8 @@ const QString AeraGraphicsItem::RightArrowHtml = "<font size=\"+1\"><b>&#129050;
 const QString AeraGraphicsItem::RightDoubleArrowHtml = "<font size=\"+1\"><b>&#8658;</b></font>";
 const QString AeraGraphicsItem::SelectedRadioButtonHtml = "<font size=\"+2\">&#x25C9;</font>";
 const QString AeraGraphicsItem::UnselectedRadioButtonHtml = "<font size=\"+3\">&#x25CB;</font>";
+const QString AeraGraphicsItem::RightPointingTriangleHtml = "<font size=\"+2\">&#x25B6;</font>";
+const QString AeraGraphicsItem::DownPointingTriangleHtml = "<font size=\"+1\">&#x25BC;</font>";
 
 AeraGraphicsItem::AeraGraphicsItem(
   AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent,

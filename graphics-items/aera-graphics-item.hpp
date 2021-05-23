@@ -178,6 +178,8 @@ public:
   static const QString RightDoubleArrowHtml;
   static const QString SelectedRadioButtonHtml;
   static const QString UnselectedRadioButtonHtml;
+  static const QString RightPointingTriangleHtml;
+  static const QString DownPointingTriangleHtml;
 
   int borderFlashCountdown_;
 
