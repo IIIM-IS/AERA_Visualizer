@@ -52,13 +52,13 @@
 #ifndef SIMULATION_COMMIT_ITEM_HPP
 #define SIMULATION_COMMIT_ITEM_HPP
 
-#include "aera-graphics-item.hpp"
+#include "expandable-goal-or-pred-item.hpp"
 
 namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
-class SimulationCommitItem : public AeraGraphicsItem
+class SimulationCommitItem : public ExpandableGoaOrPredlItem
 {
 public:
   SimulationCommitItem(
@@ -66,15 +66,7 @@ public:
     AeraVisualizerScene* parent);
 
 private:
-  /**
-   * Set factGoalFactValueHtml_ to the HTML source code for the fact, goal, fact and value
-   * from commitEvent_->object_. Also set valueHtml_ to the HTML source code for the value.
-   */
-  void setFactGoalFactValueHtml();
-
   SimulationCommitEvent* commitEvent_;
-  QString factGoalFactValueHtml_;
-  QString valueHtml_;
 };
 
 }

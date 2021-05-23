@@ -68,52 +68,10 @@ namespace aera_visualizer {
 SimulationCommitItem::SimulationCommitItem(
   SimulationCommitEvent* commitEvent, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-  : AeraGraphicsItem(commitEvent, replicodeObjects, parent, "Goal"),
+: ExpandableGoaOrPredlItem(commitEvent, replicodeObjects,
+    "Simulation commit " + RightDoubleArrowHtml, parent),
   commitEvent_(commitEvent)
 {
-  setFactGoalFactValueHtml();
-
-  setTextItemAndPolygon(valueHtml_, false, SHAPE_GOAL);
-  setToolTip(factGoalFactValueHtml_);
-}
-
-void SimulationCommitItem::setFactGoalFactValueHtml()
-{
-  auto goal = commitEvent_->object_->get_reference(0);
-  auto factValue = goal->get_reference(0);
-  auto value = factValue->get_reference(0);
-
-  // Strip the ending confidence value and propagation of saliency threshold.
-  regex saliencyRegex("\\s+[\\w\\:]+\\)$");
-  regex confidenceAndSaliencyRegex("\\s+\\w+\\s+[\\w\\:]+\\)$");
-  string factGoalSource = regex_replace(replicodeObjects_.getSourceCode(commitEvent_->object_), confidenceAndSaliencyRegex, ")");
-  string goalSource = regex_replace(replicodeObjects_.getSourceCode(goal), saliencyRegex, ")");
-  string factValueSource = regex_replace(replicodeObjects_.getSourceCode(factValue), confidenceAndSaliencyRegex, ")");
-  string valueSource = regex_replace(replicodeObjects_.getSourceCode(value), saliencyRegex, ")");
-
-  QString goalLabel(replicodeObjects_.getLabel(goal).c_str());
-  QString factValueLabel(replicodeObjects_.getLabel(factValue).c_str());
-  QString valueLabel(replicodeObjects_.getLabel(value).c_str());
-
-  QString goalHtml = QString(goalSource.c_str()).replace(factValueLabel, DownArrowHtml);
-  QString factGoalHtml = QString(factGoalSource.c_str()).replace(goalLabel, goalHtml);
-  QString factValueHtml = QString(factValueSource.c_str()).replace(valueLabel, DownArrowHtml);
-  QString valueHtml = valueSource.c_str();
-  
-  factGoalFactValueHtml_ = "Simulation commit " + RightDoubleArrowHtml + " <b>" + 
-    replicodeObjects_.getLabel(commitEvent_->object_).c_str() + "</b>\n";
-  factGoalFactValueHtml_ += factGoalHtml;
-  factGoalFactValueHtml_ += "\n              " + factValueHtml;
-  factGoalFactValueHtml_ += "\n                  " + valueHtml;
-
-  addSourceCodeHtmlLinks(commitEvent_->object_, factGoalFactValueHtml_);
-  factGoalFactValueHtml_ = htmlify(factGoalFactValueHtml_, true);
-
-  if (value->code(0).asOpcode() == Opcodes::ICst)
-    valueHtml = InstantiatedCompositeStateItem::makeIcstMembersSource(value, replicodeObjects_);
-  valueHtml_ = htmlify(valueHtml, true);
-  if (((_Fact*)factValue)->is_anti_fact())
-    valueHtml_ =  "<font color=\"red\">" + valueHtml_ + "</font>";
 }
 
 }

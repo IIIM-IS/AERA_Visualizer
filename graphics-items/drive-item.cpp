@@ -67,48 +67,10 @@ namespace aera_visualizer {
 DriveItem::DriveItem(
   DriveInjectEvent* driveInject, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-: AeraGraphicsItem(driveInject, replicodeObjects, parent, "Drive"),
+: ExpandableGoaOrPredlItem(driveInject, replicodeObjects,
+    "Drive inject " + RightDoubleArrowHtml, parent),
   driveInject_(driveInject)
 {
-  setFactGoalFactValueHtml();
-
-  setTextItemAndPolygon(valueHtml_, false, SHAPE_GOAL);
-  setToolTip(factGoalFactValueHtml_);
-}
-
-void DriveItem::setFactGoalFactValueHtml()
-{
-  auto goal = driveInject_->object_->get_reference(0);
-  auto factValue = goal->get_reference(0);
-  auto value = factValue->get_reference(0);
-
-  // Strip the ending confidence value and propagation of saliency threshold.
-  regex saliencyRegex("\\s+[\\w\\:]+\\)$");
-  regex confidenceAndSaliencyRegex("\\s+\\w+\\s+[\\w\\:]+\\)$");
-  string factGoalSource = regex_replace(replicodeObjects_.getSourceCode(driveInject_->object_), confidenceAndSaliencyRegex, ")");
-  string goalSource = regex_replace(replicodeObjects_.getSourceCode(goal), saliencyRegex, ")");
-  string factValueSource = regex_replace(replicodeObjects_.getSourceCode(factValue), confidenceAndSaliencyRegex, ")");
-
-  QString goalLabel(replicodeObjects_.getLabel(goal).c_str());
-  QString factValueLabel(replicodeObjects_.getLabel(factValue).c_str());
-
-  QString goalHtml = QString(goalSource.c_str()).replace(factValueLabel, DownArrowHtml);
-  QString factGoalHtml = QString(factGoalSource.c_str()).replace(goalLabel, goalHtml);
-  QString factValueHtml = factValueSource.c_str();
-  // The value is a single identifier.
-  QString valueHtml = replicodeObjects_.getLabel(value).c_str();
-
-  factGoalFactValueHtml_ = RightDoubleArrowHtml +" <b>" + 
-    replicodeObjects_.getLabel(driveInject_->object_).c_str() + "</b>\n";
-  factGoalFactValueHtml_ += factGoalHtml;
-  factGoalFactValueHtml_ += "\n              " + factValueHtml;
-
-  addSourceCodeHtmlLinks(driveInject_->object_, factGoalFactValueHtml_);
-  factGoalFactValueHtml_ = htmlify(factGoalFactValueHtml_, true);
-
-  valueHtml_ = htmlify(valueHtml, true);
-  if (((_Fact*)factValue)->is_anti_fact())
-    valueHtml_ = "<font color=\"red\">" + valueHtml_ + "</font>";
 }
 
 }

@@ -52,13 +52,13 @@
 #ifndef DRIVE_ITEM_HPP
 #define DRIVE_ITEM_HPP
 
-#include "aera-graphics-item.hpp"
+#include "expandable-goal-or-pred-item.hpp"
 
 namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
-class DriveItem : public AeraGraphicsItem
+class DriveItem : public ExpandableGoaOrPredlItem
 {
 public:
   DriveItem(
@@ -66,15 +66,7 @@ public:
     AeraVisualizerScene* parent);
 
 private:
-  /**
-   * Set factGoalFactValueHtml_ to the HTML source code for the fact, goal, fact and value
-   * from driveInject_->object_. Also set valueHtml_ to the HTML source code for the value.
-   */
-  void setFactGoalFactValueHtml();
-
   DriveInjectEvent* driveInject_;
-  QString factGoalFactValueHtml_;
-  QString valueHtml_;
 };
 
 }

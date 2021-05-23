@@ -52,13 +52,13 @@
 #ifndef MODEL_GOAL_ITEM_HPP
 #define MODEL_GOAL_ITEM_HPP
 
-#include "aera-graphics-item.hpp"
+#include "expandable-goal-or-pred-item.hpp"
 
 namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
-class ModelGoalItem : public AeraGraphicsItem
+class ModelGoalItem : public ExpandableGoaOrPredlItem
 {
 public:
   ModelGoalItem(
@@ -69,17 +69,7 @@ protected:
   void textItemLinkActivated(const QString& link) override;
 
 private:
-  /**
-   * Set factGoalFactValueHtml_ to the HTML source code for the fact, goal, fact and value
-   * from modelReduction_->object_, and set toolTipText_ to the value before adding links.
-   * Also set valueHtml_ to the HTML source code for the value.
-   */
-  void setFactGoalFactValueHtml();
-
   ModelGoalReduction* modelReduction_;
-  QString factGoalFactValueHtml_;
-  QString toolTipText_;
-  QString valueHtml_;
 };
 
 }

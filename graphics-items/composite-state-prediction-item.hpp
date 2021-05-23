@@ -52,32 +52,21 @@
 #ifndef COMPOSITE_STATE_PREDICTION_ITEM_HPP
 #define COMPOSITE_STATE_PREDICTION_ITEM_HPP
 
-#include "aera-graphics-item.hpp"
+#include "expandable-goal-or-pred-item.hpp"
 
 namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
-class CompositeStatePredictionItem : public AeraGraphicsItem
+class CompositeStatePredictionItem : public ExpandableGoaOrPredlItem
 {
 public:
   CompositeStatePredictionItem(
     CompositeStateSimulatedPredictionReduction* compositeStateReduction,
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 
-protected:
-  void textItemLinkActivated(const QString& link) override;
-
 private:
-  /**
-   * Set factPredFactValueHtml_ to the HTML source code for the fact, goal, fact and value
-   * from modelReduction_->object_. Also set valueHtml_ to the HTML source code for the value.
-   */
-  void setFactPredFactValueHtml();
-
   CompositeStateSimulatedPredictionReduction* compositeStateReduction_;
-  QString factPredFactValueHtml_;
-  QString valueHtml_;
 };
 
 }

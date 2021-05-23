@@ -2,7 +2,7 @@
 //_/_/
 //_/_/ AERA VISUALIZER
 //_/_/
-//_/_/ Copyright(c)2021 Icelandic Institute for Intelligent Machines ses
+//_/_/ Copyright(c)2020 Icelandic Institute for Intelligent Machines ses
 //_/_/ Vitvelastofnun Islands ses, kt. 571209-0390
 //_/_/ Author: Jeffrey Thompson <jeff@iiim.is>
 //_/_/
@@ -49,30 +49,55 @@
 //_/_/
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-#include <regex>
-#include <QMenu>
-#include "../explanation-log-window.hpp"
-#include "../aera-visualizer-window.hpp"
-#include "../submodules/replicode/r_exec/factory.h"
-#include "aera-visualizer-scene.hpp"
-#include "instantiated-composite-state-item.hpp"
-#include "model-prediction-from-requirement-item.hpp"
+#ifndef EXPANDABLE_GOAL_OR_PRED_ITEM_HPP
+#define EXPANDABLE_GOAL_OR_PRED_ITEM_HPP
 
-using namespace std;
-using namespace core;
-using namespace r_code;
-using namespace r_exec;
+#include "aera-graphics-item.hpp"
 
 namespace aera_visualizer {
 
-ModelPredictionFromRequirementItem::ModelPredictionFromRequirementItem(
-  ModelSimulatedPredictionReductionFromRequirement* modelReduction, ReplicodeObjects& replicodeObjects,
-  AeraVisualizerScene* parent)
-: ExpandableGoaOrPredlItem(modelReduction, replicodeObjects,
-    "Model " + makeHtmlLink(modelReduction->model_, replicodeObjects) + " from requirement " + RightDoubleArrowHtml,
-    parent),
-  modelReduction_(modelReduction)
+class AeraVisualizerScene;
+
+/**
+ * An ExpandableGoaOrPredlItem extends AeraGraphicsItem for use in ModelGoalItem, etc. to show
+ * the simplified value of a goal or prediction, with a clickable "expand triangle" which expands
+ * the item to show the full fact goal/pred fact value.
+ */
+class ExpandableGoaOrPredlItem : public AeraGraphicsItem
 {
-}
+public:
+  /**
+   * Create an ExpandableGoaOrPredlItem, and compute the text of the simplified value of
+   * getAeraEvet()->object_ as well as the full  fact goal/pred fact value.
+   * \param aeraEvent The AeraEvent with the object_ to display.
+   * \param replicodeObjects The ReplicodeObjects used to get the debug OID and label.
+   * \param prefix The prefix to put before the fact label of factGoalOrPredFactValueHtml_,
+   * for example "Model M6 =>".
+   * \param parent The parent AeraVisualizerScene.
+   */
+  ExpandableGoaOrPredlItem(
+    AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, const QString& prefix,
+    AeraVisualizerScene* parent);
+
+protected:
+  void textItemLinkActivated(const QString& link) override;
+
+private:
+  /**
+   * Set factGoalOrPredFactValueHtml_ to the HTML source code for the fact goal/pred fact value
+   * from getAeraEvet()->object_, and set toolTipText_ to the value before adding links.
+   * Also set valueHtml_ to the HTML source code for the value. These include linked triangle shapes to
+   * expand and unexpand, handled by textItemLinkActivated.
+   * \param prefix The prefix to put before the fact label of factGoalOrPredFactValueHtml_, e.g. "Model M6 =>".
+   */
+  void setFactGoalOrPredFactValueHtml(const QString& prefix);
+
+  QString factGoalOrPredFactValueHtml_;
+  QString toolTipText_;
+  QString valueHtml_;
+  Shape shape_;
+};
 
 }
+
+#endif

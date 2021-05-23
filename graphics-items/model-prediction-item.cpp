@@ -68,91 +68,11 @@ namespace aera_visualizer {
 ModelPredictionItem::ModelPredictionItem(
   ModelSimulatedPredictionReduction* modelReduction, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-  : AeraGraphicsItem(modelReduction, replicodeObjects, parent, "Goal"),
+: ExpandableGoaOrPredlItem(modelReduction, replicodeObjects,
+    QString("Model ") + makeHtmlLink(modelReduction->model_, replicodeObjects) + " " + RightDoubleArrowHtml,
+    parent),
   modelReduction_(modelReduction)
 {
-  setFactPredFactValueHtml();
-
-  setTextItemAndPolygon(valueHtml_, false, SHAPE_PRED);
-  setToolTip(factPredFactValueHtml_);
-}
-
-void ModelPredictionItem::setFactPredFactValueHtml()
-{
-  auto pred = modelReduction_->object_->get_reference(0);
-  auto factValue = pred->get_reference(0);
-  auto value = factValue->get_reference(0);
-
-  // Strip the ending confidence value and propagation of saliency threshold.
-  regex saliencyRegex("\\s+[\\w\\:]+\\)$");
-  regex confidenceAndSaliencyRegex("\\s+\\w+\\s+[\\w\\:]+\\)$");
-  string factGoalSource = regex_replace(replicodeObjects_.getSourceCode(modelReduction_->object_), confidenceAndSaliencyRegex, ")");
-  string predSource = regex_replace(replicodeObjects_.getSourceCode(pred), saliencyRegex, ")");
-  string factValueSource = regex_replace(replicodeObjects_.getSourceCode(factValue), confidenceAndSaliencyRegex, ")");
-  string valueSource = regex_replace(replicodeObjects_.getSourceCode(value), saliencyRegex, ")");
-
-  QString predLabel(replicodeObjects_.getLabel(pred).c_str());
-  QString factValueLabel(replicodeObjects_.getLabel(factValue).c_str());
-  QString valueLabel(replicodeObjects_.getLabel(value).c_str());
-
-  QString predHtml = QString(predSource.c_str()).replace(factValueLabel, DownArrowHtml);
-  QString factPredHtml = QString(factGoalSource.c_str()).replace(predLabel, predHtml);
-  QString factValueHtml = QString(factValueSource.c_str()).replace(valueLabel, DownArrowHtml);
-  QString valueHtml = valueSource.c_str();
-  
-  factPredFactValueHtml_ = "Model " + makeHtmlLink(modelReduction_->model_) + " " + RightDoubleArrowHtml + 
-    " <b>" + replicodeObjects_.getLabel(modelReduction_->object_).c_str() + "</b>\n";
-  if (is_sim()) {
-    // All outer facts in a simulation have the same time, so don't show it.
-    factPredFactValueHtml_ += predHtml;
-    factPredFactValueHtml_ += "\n      " + factValueHtml;
-    factPredFactValueHtml_ += "\n          " + valueHtml;
-  }
-  else {
-    factPredFactValueHtml_ += factPredHtml;
-    factPredFactValueHtml_ += "\n              " + factValueHtml;
-    factPredFactValueHtml_ += "\n                  " + valueHtml;
-  }
-
-  addSourceCodeHtmlLinks(modelReduction_->object_, factPredFactValueHtml_);
-  factPredFactValueHtml_ = htmlify(factPredFactValueHtml_, true);
-
-  if (value->code(0).asOpcode() == Opcodes::ICst)
-    valueHtml = InstantiatedCompositeStateItem::makeIcstMembersSource(value, replicodeObjects_);
-  valueHtml_ = htmlify(valueHtml, true);
-  if (((_Fact*)factValue)->is_anti_fact())
-    valueHtml_ = "<font color=\"red\">" + valueHtml_ + "</font>";
-}
-
-void ModelPredictionItem::textItemLinkActivated(const QString& link)
-{
-  if (link == "#this") {
-    auto menu = new QMenu();
-    menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
-
-#if 0
-    _Fact* factSuperGoal = modelReduction_->factSuperGoal_;
-    _Fact* goalFact = (_Fact*)factSuperGoal->get_reference(0)->get_reference(0);
-    if (goalFact->get_reference(0)->code(0).asOpcode() == Opcodes::Ent) {
-      // The super goal is a drive.
-      menu->addAction("What Made This?", [=]() {
-
-        QString explanation = "<b>Q: What made goal " + makeHtmlLink(modelReduction_->object_) +
-          " ?</b><br>Model " + makeHtmlLink(modelReduction_->model_) + 
-          " abduced this from drive " +
-          // TODO: Make the drive goal pretty.
-          QString(replicodeObjects_.getSourceCode(factSuperGoal->get_goal()).c_str()) + "<br><br>";
-        parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
-      });
-    }
-#endif
-
-    menu->exec(QCursor::pos() - QPoint(10, 10));
-    delete menu;
-  }
-  else
-    // For #debug_oid- and others, defer to the base class.
-    AeraGraphicsItem::textItemLinkActivated(link);
 }
 
 }

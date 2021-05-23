@@ -68,64 +68,11 @@ namespace aera_visualizer {
 ModelGoalItem::ModelGoalItem(
   ModelGoalReduction* modelReduction, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-  : AeraGraphicsItem(modelReduction, replicodeObjects, parent, "Goal"),
+: ExpandableGoaOrPredlItem(modelReduction, replicodeObjects,
+    "Model " + makeHtmlLink(modelReduction->model_, replicodeObjects) + " " + RightDoubleArrowHtml,
+    parent),
   modelReduction_(modelReduction)
 {
-  setFactGoalFactValueHtml();
-
-  setTextItemAndPolygon(valueHtml_, false, SHAPE_GOAL);
-  setToolTip(toolTipText_);
-}
-
-void ModelGoalItem::setFactGoalFactValueHtml()
-{
-  auto goal = modelReduction_->object_->get_reference(0);
-  auto factValue = goal->get_reference(0);
-  auto value = factValue->get_reference(0);
-
-  // Strip the ending confidence value and propagation of saliency threshold.
-  regex saliencyRegex("\\s+[\\w\\:]+\\)$");
-  regex confidenceAndSaliencyRegex("\\s+\\w+\\s+[\\w\\:]+\\)$");
-  string factGoalSource = regex_replace(replicodeObjects_.getSourceCode(modelReduction_->object_), confidenceAndSaliencyRegex, ")");
-  string goalSource = regex_replace(replicodeObjects_.getSourceCode(goal), saliencyRegex, ")");
-  string factValueSource = regex_replace(replicodeObjects_.getSourceCode(factValue), confidenceAndSaliencyRegex, ")");
-  string valueSource = regex_replace(replicodeObjects_.getSourceCode(value), saliencyRegex, ")");
-
-  QString goalLabel(replicodeObjects_.getLabel(goal).c_str());
-  QString factValueLabel(replicodeObjects_.getLabel(factValue).c_str());
-  QString valueLabel(replicodeObjects_.getLabel(value).c_str());
-
-  QString goalHtml = QString(goalSource.c_str()).replace(factValueLabel, DownArrowHtml);
-  QString factGoalHtml = QString(factGoalSource.c_str()).replace(goalLabel, goalHtml);
-  QString factValueHtml = QString(factValueSource.c_str()).replace(valueLabel, DownArrowHtml);
-  QString valueHtml = valueSource.c_str();
-  
-  factGoalFactValueHtml_ = "Model " + makeHtmlLink(modelReduction_->model_) + " " + RightDoubleArrowHtml + 
-    " <b>" + replicodeObjects_.getLabel(modelReduction_->object_).c_str() + "</b>\n";
-  if (is_sim()) {
-    // All outer facts in a simulation have the same time, so don't show it.
-    factGoalFactValueHtml_ += goalHtml;
-    factGoalFactValueHtml_ += "\n      " + factValueHtml;
-    factGoalFactValueHtml_ += "\n          " + valueHtml;
-  }
-  else {
-    factGoalFactValueHtml_ += factGoalHtml;
-    factGoalFactValueHtml_ += "\n              " + factValueHtml;
-    factGoalFactValueHtml_ += "\n                  " + valueHtml;
-  }
-
-  // Set toolTipText_ before adding links and buttons.
-  toolTipText_ = htmlify(factGoalFactValueHtml_, true);
-  addSourceCodeHtmlLinks(modelReduction_->object_, factGoalFactValueHtml_);
-  factGoalFactValueHtml_ = htmlify("down-pointing-triangle " + factGoalFactValueHtml_, true);
-  factGoalFactValueHtml_.replace("down-pointing-triangle", "<a href=\"#unexpand\">" + DownPointingTriangleHtml + "</a>");
-
-  if (value->code(0).asOpcode() == Opcodes::ICst)
-    valueHtml = InstantiatedCompositeStateItem::makeIcstMembersSource(value, replicodeObjects_);
-  valueHtml_ = htmlify("right-pointing-triangle " + valueHtml, true);
-  if (((_Fact*)factValue)->is_anti_fact())
-    valueHtml_ =  "<font color=\"red\">" + valueHtml_ + "</font>";
-  valueHtml_.replace("right-pointing-triangle", "<a href=\"#expand\">" + RightPointingTriangleHtml + "</a>");
 }
 
 void ModelGoalItem::textItemLinkActivated(const QString& link)
@@ -152,19 +99,9 @@ void ModelGoalItem::textItemLinkActivated(const QString& link)
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
   }
-  else if (link == "#expand") {
-    setTextItemAndPolygon(factGoalFactValueHtml_, false);
-    setToolTip("");
-    bringToFront();
-  }
-  else if (link == "#unexpand") {
-    setTextItemAndPolygon(valueHtml_, false, SHAPE_GOAL);
-    setToolTip(toolTipText_);
-    bringToFront();
-  }
   else
-    // For #debug_oid- and others, defer to the base class.
-    AeraGraphicsItem::textItemLinkActivated(link);
+    // For #expand, #debug_oid- and others, defer to the base class.
+    ExpandableGoaOrPredlItem::textItemLinkActivated(link);
 }
 
 }
