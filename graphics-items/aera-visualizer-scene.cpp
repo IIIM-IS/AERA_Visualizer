@@ -98,9 +98,9 @@ AeraVisualizerScene::AeraVisualizerScene(
     eventTypeFirstTop_[IoDeviceEjectEvent::EVENT_TYPE] = 20;
     eventTypeFirstTop_[IoDeviceInjectEvent::EVENT_TYPE] = 45;
     eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] = 120;
-    eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 315;
     eventTypeFirstTop_[ModelMkValPredictionReduction::EVENT_TYPE] = 555;
     eventTypeFirstTop_[PredictionResultEvent::EVENT_TYPE] = 830;
+    eventTypeFirstTop_[NewInstantiatedCompositeStateEvent::EVENT_TYPE] = 880;
     eventTypeFirstTop_[0] = 580;
   }
   else
