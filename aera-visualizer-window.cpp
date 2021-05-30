@@ -1098,10 +1098,12 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
     (simulationEventTypes_.find(events_[iNextStepEvent]->eventType_) != simulationEventTypes_.end());
 
   int iNonSimulation = -1;
-  if (isNewFrame)
+  if (isNewFrame) {
     // Remove the simulation items from the previous frame.
     // TODO: We don't expect it, but if the first event in the frame is simulated then this will erase it.
     mainScene_->removeAllItemsByEventType(simulationEventTypes_);
+    mainScene_->setFocusSimulationDebugOids(set<int>());
+  }
   else {
     if (firstEventIsSimulation) {
       // Not a new frame and the first event is a simulation, so we want to step all the simulations at once.
