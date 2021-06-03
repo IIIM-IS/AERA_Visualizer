@@ -190,6 +190,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   regex newModelRegex("^-> mdl (\\d+), MDLController\\((\\d+)\\)$");
   // mdl 53 cnt:2 sr:1
   regex setEvidenceCountAndSuccessRateRegex("^mdl (\\d+) cnt:(\\d+) sr:([\\d\\.]+)$");
+  // mdl 53 deleted
+  regex deleteModelRegex("^mdl (\\d+) deleted$");
   // -> cst 52, CSTController(375)
   regex newCompositeStateRegex("^-> cst (\\d+), CSTController\\((\\d+)\\)$");
   // A/F -> 35|40 (AXIOM)
@@ -315,6 +317,11 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
       if (model)
         events_.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(
           timestamp, model, stol(matches[2].str()), stof(matches[3].str())));
+    }
+    else if (regex_search(lineAfterTimestamp, matches, deleteModelRegex)) {
+      auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
+      if (model)
+        events_.push_back(make_shared<DeleteModelEvent>(timestamp, model));
     }
     else if (regex_search(lineAfterTimestamp, matches, newCompositeStateRegex)) {
       auto compositeState = replicodeObjects_.getObject(stoul(matches[1].str()));
@@ -650,14 +657,14 @@ Timestamp AeraVisulizerWindow::getINextStepEvent
 
   if (newItemEventTypes_.find(event->eventType_) != newItemEventTypes_.end()) {
     if (event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE) {
-      auto autoFocusEvent = (AutoFocusNewObjectEvent*)event;
       if (event->time_ == replicodeObjects_.getTimeReference())
         // Debug: For now, skip auto focus events at startup.
         return getINextStepEvent(maximumTime, iNextEventStart + 1, iNextStepEvent);
     }
   }
-  else if (event->eventType_ == SetModelEvidenceCountAndSuccessRateEvent::EVENT_TYPE) {
-    // We already set the default.
+  else if (event->eventType_ == SetModelEvidenceCountAndSuccessRateEvent::EVENT_TYPE ||
+           event->eventType_ == DeleteModelEvent::EVENT_TYPE) {
+    // We already set the default iNextStepEvent.
   }
   else
     // Skip this event.
@@ -919,6 +926,14 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       modelsScene_->establishFlashTimer();
     }
   }
+  else if (event->eventType_ == DeleteModelEvent::EVENT_TYPE) {
+    auto deleteModelEvent = (DeleteModelEvent*)event;
+
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(deleteModelEvent->object_));
+    if (modelItem)
+      // Set the background color.
+      modelItem->setBrush(Qt::gray);
+  }
   else {
     // Skip this event.
     ++iNextEvent_;
@@ -985,6 +1000,15 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
       modelItem->updateFromModel();
       modelsScene_->establishFlashTimer();
     }
+  }
+  else if (event->eventType_ == DeleteModelEvent::EVENT_TYPE) {
+    // Find the ModelItem for this event and set its appearance to not deleted.
+    auto deleteModelEvent = (DeleteModelEvent*)event;
+
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(deleteModelEvent->object_));
+    if (modelItem)
+      // Set the background color.
+      modelItem->setBrush(Qt::white);
   }
   else
     // Skip this event.
