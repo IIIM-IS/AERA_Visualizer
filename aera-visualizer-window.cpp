@@ -349,9 +349,14 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
         // The prediction is the first (only) item in the set of productions.
         auto factPred = AeraEvent::getFirstProduction(reduction);
 
-        if (model && cause && factPred && ((_Fact*)factPred)->get_pred()->is_simulation())
-          events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
-            timestamp, model, factPred, cause, false));
+        if (model && cause && factPred) {
+          if (((_Fact*)factPred)->get_pred()->is_simulation())
+            events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
+              timestamp, model, factPred, cause, false));
+          else
+            events_.push_back(make_shared<ModelImdlPredictionEvent>(
+              timestamp, factPred, model, cause));
+        }
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, modelSimulatedPredictionFromRequirementRegex)) {
