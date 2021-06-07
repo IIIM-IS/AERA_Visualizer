@@ -276,6 +276,8 @@ void PredictionItem::textItemLinkActivated(const QString& link)
     Code* requirementPred = requirementFactPred->get_reference(0);
     Code* factImdl = requirementPred->get_reference(0);
     Code* imdl = factImdl->get_reference(0);
+    if (modelReduction_->imdlPredictionEventIndex_ < 0)
+      return;
     auto imdlPredictionEvent = (ModelImdlPredictionEvent*)parent_->getParent()->getAeraEvent(
       modelReduction_->imdlPredictionEventIndex_);
     Code* predictingModel = imdlPredictionEvent->predictingModel_;
