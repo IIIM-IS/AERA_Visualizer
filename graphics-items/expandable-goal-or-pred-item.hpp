@@ -70,7 +70,7 @@ public:
    * Create an ExpandableGoaOrPredlItem, and compute the text of the simplified value of
    * getAeraEvet()->object_ as well as the full  fact goal/pred fact value.
    * \param aeraEvent The AeraEvent with the object_ to display.
-   * \param replicodeObjects The ReplicodeObjects used to get the debug OID and label.
+   * \param replicodeObjects The ReplicodeObjects used to get the detail OID and label.
    * \param prefix The prefix to put before the fact label of factGoalOrPredFactValueHtml_,
    * for example "Model M6 =>".
    * \param parent The parent AeraVisualizerScene.

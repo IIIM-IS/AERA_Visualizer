@@ -16,7 +16,7 @@ Following are the detailed steps for each platform to install the prerequisites.
 
 ## Windows
 To install Replicode, see https://github.com/IIIM-IS/replicode/blob/master/INSTALL.md . Be sure
-to follow the instructions to set `WITH_DEBUG_OID` .
+to follow the instructions to set `WITH_DETAIL_OID` .
 
 To install Qt Framework:
 

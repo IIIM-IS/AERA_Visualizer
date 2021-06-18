@@ -86,7 +86,7 @@ public:
    * Create an AeraGraphicsItem, and set headerHtml_ to a header with aeraEvent_->time_ and 
    * headerPrefix + the aeraEvent label with a "#this" link.
    * \param aeraEvent The AeraEvent which is used to get the time_ for the header and the itemTopLeftPosition_.
-   * \param replicodeObjects The ReplicodeObjects used to get the debug OID and label.
+   * \param replicodeObjects The ReplicodeObjects used to get the detail OID and label.
    * \param parent The parent AeraVisualizerScene.
    * \param headerPrefix The prefix for headerHtml_ as described above.
    */
@@ -126,7 +126,7 @@ public:
   static QString htmlify(const std::string& input, bool useNowrap = false) { return htmlify(QString(input.c_str()), useNowrap); }
 
   /**
-   * Make an HTML string with <a href="#debug_oid-XXX"></a> around the label the object. 
+   * Make an HTML string with <a href="#detail_oid-XXX"></a> around the label the object. 
    * When clicked, this link is handled by textItemLinkActivated().
    * \param object The object to be linked.
    * \param replicodeObjects the ReplicodeObjects for looking up labels. This is passed
@@ -141,7 +141,7 @@ public:
   }
 
   /**
-   * Go through object's references and modify html with <a href="#debug_oid-XXX"></a>
+   * Go through object's references and modify html with <a href="#detail_oid-XXX"></a>
    * around the label of each referenced object. When clicked, this link is handled
    * by textItemLinkActivated().
    * \param object The object with the references.

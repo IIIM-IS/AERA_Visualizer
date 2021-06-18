@@ -84,7 +84,7 @@ void SimulationCommitItem::textItemLinkActivated(const QString& link)
     delete menu;
   }
   else
-    // For #expand, #debug_oid- and others, defer to the base class.
+    // For #expand, #detail_oid- and others, defer to the base class.
     ExpandableGoaOrPredlItem::textItemLinkActivated(link);
 }
 

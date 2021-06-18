@@ -133,7 +133,7 @@ void PredictionResultItem::textItemLinkActivated(const QString& link)
     delete menu;
   }
   else
-    // For #debug_oid- and others, defer to the base class.
+    // For #detail_oid- and others, defer to the base class.
     AeraGraphicsItem::textItemLinkActivated(link);
 }
 

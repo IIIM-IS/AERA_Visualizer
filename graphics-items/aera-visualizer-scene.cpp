@@ -154,8 +154,8 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
   }
 
   item->setBrush(item->is_sim() ? simulatedItemColor_ : itemColor_);
-  bool isFocusSimulation = (focusSimulationDebugOids_.find(item->getAeraEvent()->object_->get_debug_oid()) 
-                            != focusSimulationDebugOids_.end());
+  bool isFocusSimulation = (focusSimulationDetailOids_.find(item->getAeraEvent()->object_->get_detail_oid()) 
+                            != focusSimulationDetailOids_.end());
   bool isSimulationEventType = 
     (AeraVisulizerWindow::simulationEventTypes_.find(item->getAeraEvent()->eventType_) !=
      AeraVisulizerWindow::simulationEventTypes_.end());

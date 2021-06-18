@@ -92,14 +92,14 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
   r_exec::Now = Time::Get;
 
   map<string, uint32> objectOids;
-  map<string, uint64> objectDebugOids;
+  map<string, uint64> objectDetailOids;
 
   {
     ifstream testOpen(decompiledFilePath);
     if (!testOpen)
       return "Can't open decompiled objects file: " + decompiledFilePath;
   }
-  auto decompiledOut = processDecompiledObjects(decompiledFilePath, objectOids, objectDebugOids);
+  auto decompiledOut = processDecompiledObjects(decompiledFilePath, objectOids, objectDetailOids);
 
   // Preprocess and compile the processed decompiler output, using the metadata we got above.
   istringstream decompiledIn(decompiledOut);
@@ -126,7 +126,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
   r_exec::Mem<r_exec::LObject, r_exec::MemStatic> tempMem;
   image.get_objects(&tempMem, imageObjects);
 
-  // Set the OIDs and debug OIDs of objects in imageObjects based on the decompiled output.
+  // Set the OIDs and detail OIDs of objects in imageObjects based on the decompiled output.
   // Set up objectLabel_ and labelObject_ based on the object in imageObjects.
   for (auto i = 0; i < imageObjects.size(); ++i) {
     string label = compiler.getObjectName(i);
@@ -138,9 +138,9 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
       if (oidEntry != objectOids.end())
         imageObjects[i]->set_oid(oidEntry->second);
 
-      auto debugOidEntry = objectDebugOids.find(label);
-      if (debugOidEntry != objectDebugOids.end())
-        imageObjects[i]->set_debug_oid(debugOidEntry->second);
+      auto detailOidEntry = objectDetailOids.find(label);
+      if (detailOidEntry != objectDetailOids.end())
+        imageObjects[i]->set_detail_oid(detailOidEntry->second);
     }
   }
 
@@ -204,7 +204,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
 
   Timestamp::duration timeOffset = duration_cast<microseconds>(timeReference_.time_since_epoch());
   for (uint16 i = 0; i < packedImage.code_segment_.objects_.size(); ++i) {
-    auto object = getObjectByDebugOid(packedImage.code_segment_.objects_[i]->debug_oid_);
+    auto object = getObjectByDetailOid(packedImage.code_segment_.objects_[i]->detail_oid_);
     if (object) {
       std::ostringstream decompiledCode;
       decompiler.decompile_object(i, &decompiledCode, timeOffset, false, false, false);
@@ -221,19 +221,19 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
 }
 
 string ReplicodeObjects::processDecompiledObjects(
-  string decompiledFilePath, map<string, uint32>& objectOids, map<string, uint64>& objectDebugOids)
+  string decompiledFilePath, map<string, uint32>& objectOids, map<string, uint64>& objectDetailOids)
 {
   objectOids.clear();
-  objectDebugOids.clear();
+  objectDetailOids.clear();
 
   ifstream rawDecompiledFile(decompiledFilePath);
   regex blankLineRegex("^\\s*$");
   regex timeReferenceRegex("^> DECOMPILATION. TimeReference (\\d+)s:(\\d+)ms:(\\d+)us");
-  regex debugOidRegex("^\\((\\d+)\\) ([\\w\\.]+)(:)(.+)$");
-  regex oidAndDebugOidRegex("^(\\d+)\\((\\d+)\\) (\\w+)(:)(.+)$");
+  regex detailOidRegex("^\\((\\d+)\\) ([\\w\\.]+)(:)(.+)$");
+  regex oidAndDetailOidRegex("^(\\d+)\\((\\d+)\\) (\\w+)(:)(.+)$");
 
   // Scan the input and fill decompiledOut.
-  uint64 currentDebugOid = 0;
+  uint64 currentDetailOid = 0;
   ostringstream decompiledOut;
   string line;
   while (getline(rawDecompiledFile, line)) {
@@ -254,32 +254,32 @@ string ReplicodeObjects::processDecompiledObjects(
     else if (line.size() > 0 && line[0] == '>')
       // Skip other decompiler messages starting with '>'.
       decompiledOut << endl;
-    else if (regex_search(line, matches, debugOidRegex)) {
-      auto debugOid = stoull(matches[1].str());
+    else if (regex_search(line, matches, detailOidRegex)) {
+      auto detailOid = stoull(matches[1].str());
       auto name = matches[2].str();
       auto sourceCodeStart = matches[4].str();
       objectOids[name] = UNDEFINED_OID;
-      objectDebugOids[name] = debugOid;
+      objectDetailOids[name] = detailOid;
 
       // Use the line without the OID.
       decompiledOut << name << ':' << sourceCodeStart << endl;
 
       // We are starting a new object.
-      currentDebugOid = debugOid;
+      currentDetailOid = detailOid;
     }
-    else if (regex_search(line, matches, oidAndDebugOidRegex)) {
+    else if (regex_search(line, matches, oidAndDetailOidRegex)) {
       auto oid = stoul(matches[1].str());
-      auto debugOid = stoul(matches[2].str());
+      auto detailOid = stoul(matches[2].str());
       auto name = matches[3].str();
       auto sourceCodeStart = matches[5].str();
       objectOids[name] = oid;
-      objectDebugOids[name] = debugOid;
+      objectDetailOids[name] = detailOid;
 
       // Use the line without the OID.
       decompiledOut << name << ':' << sourceCodeStart << endl;
 
       // We are starting a new object.
-      currentDebugOid = debugOid;
+      currentDetailOid = detailOid;
     }
     else
       // Use the line as-is.
@@ -302,10 +302,10 @@ Code* ReplicodeObjects::getObject(uint32 oid) const
   return NULL;
 }
 
-Code* ReplicodeObjects::getObjectByDebugOid(uint64 debugOid) const
+Code* ReplicodeObjects::getObjectByDetailOid(uint64 detailOid) const
 {
   for (auto o = objects_.begin(); o != objects_.end(); ++o) {
-    if ((*o)->get_debug_oid() == debugOid)
+    if ((*o)->get_detail_oid() == detailOid)
       return *o;
   }
 

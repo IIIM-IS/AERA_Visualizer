@@ -100,11 +100,11 @@ public:
   r_code::Code* getObject(uint32 oid) const;
 
   /**
-   * Get the object by the debug OID.
-   * \param debugOid The debug OID.
+   * Get the object by the detail OID.
+   * \param detailOid The detail OID.
    * \return The object, or NULL if not found.
    */
-  r_code::Code* getObjectByDebugOid(uint64 debugOid) const;
+  r_code::Code* getObjectByDetailOid(uint64 detailOid) const;
 
   /**
    * Get the object's label (from the decompiled objects file).
@@ -159,18 +159,18 @@ public:
 
 private:
   /**
-   * Process the decompiled objects file to remove OIDs, debug OIDs and info lines starting with ">".
+   * Process the decompiled objects file to remove OIDs, detail OIDs and info lines starting with ">".
    * This sets timeReference_ from the header info line. This gets the object's source code, which is
    * stripped of the label and view set.
    * The source code does not have an ending newline, even if it is multi-line code.
    * \param decompiledFilePath The path of the decompiled objects file.
    * \param objectOids Fill this map of label to OID. This first clears the map.
-   * \param objectDebugOids Fill this map of label to debug OID. This first clears the map.
-   * \return A string of the decompiled objects file with removed OIDs and debug OIDs.
+   * \param objectDetailOids Fill this map of label to detail OID. This first clears the map.
+   * \return A string of the decompiled objects file with removed OIDs and detail OIDs.
    */
   std::string processDecompiledObjects(
     std::string decompiledFilePath, std::map<std::string, core::uint32>& objectOids,
-    std::map<std::string, core::uint64>& objectDebugOids);
+    std::map<std::string, core::uint64>& objectDetailOids);
 
   std::chrono::microseconds basePeriod_;
   core::Timestamp timeReference_;

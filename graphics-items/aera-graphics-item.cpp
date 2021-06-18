@@ -293,9 +293,9 @@ QString AeraGraphicsItem::makeHtmlLink(
   QString label = replicodeObjects.getLabel(object).c_str();
   if (label == "")
     // We don't expect this to happen.
-    label = "object_" + QString::number(object->get_debug_oid());
+    label = "object_" + QString::number(object->get_detail_oid());
 
-  return "<a href=\"#debug_oid-" + QString::number(object->get_debug_oid()) + "\">" +
+  return "<a href=\"#detail_oid-" + QString::number(object->get_detail_oid()) + "\">" +
     label + "</a>";
 }
 
@@ -372,9 +372,9 @@ void AeraGraphicsItem::textItemLinkActivated(const QString& link)
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
   }
-  else if (link.startsWith("#debug_oid-")) {
-    uint64 debug_oid = link.mid(11).toULongLong();
-    auto object = replicodeObjects_.getObjectByDebugOid(debug_oid);
+  else if (link.startsWith("#detail_oid-")) {
+    uint64 detail_oid = link.mid(12).toULongLong();
+    auto object = replicodeObjects_.getObjectByDetailOid(detail_oid);
     if (object) {
       if (parent_->getParent()->getAeraGraphicsItem(object)) {
         // Show the menu.

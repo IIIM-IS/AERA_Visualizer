@@ -102,12 +102,12 @@ public:
   void onViewMoved();
 
   /**
-   * Set the set of debug OIDs for simulation items which should be shown at the top.
-   * \param focusSimulationDebugOids The set of debug OIDs, which is copied.
+   * Set the set of detail OIDs for simulation items which should be shown at the top.
+   * \param focusSimulationDetailOids The set of detail OIDs, which is copied.
    */
-  void setFocusSimulationDebugOids(const std::set<int>& focusSimulationDebugOids)
+  void setFocusSimulationDetailOids(const std::set<int>& focusSimulationDetailOids)
   {
-    focusSimulationDebugOids_ = focusSimulationDebugOids;
+    focusSimulationDetailOids_ = focusSimulationDetailOids;
   }
 
   // The initial value for the flash countdown;
@@ -205,7 +205,7 @@ private:
   QString valueUpFlashColor_;
   QString valueDownFlashColor_;
   int flashTimerId_;
-  std::set<int> focusSimulationDebugOids_;
+  std::set<int> focusSimulationDetailOids_;
   static const int frameWidth_ = 330;
 };
 

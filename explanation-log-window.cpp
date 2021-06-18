@@ -83,7 +83,7 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
 {
   if (url.url().startsWith("#requirement_prediction-")) {
     // There is no item for a requirement prediction, so show a menu for a "What Is" explanation.
-    // TODO: This should be the debug_oid of an mk.rdx, which Replicode currently doesn't make. 
+    // TODO: This should be the detail_oid of an mk.rdx, which Replicode currently doesn't make. 
     int imdlPredictionEventIndex = url.url().mid(24).toULongLong();
     auto imdlPredictionEvent = (ModelImdlPredictionEvent*)mainWindow_->getAeraEvent(imdlPredictionEventIndex);
     Code* predictingModel = imdlPredictionEvent->predictingModel_;
@@ -109,9 +109,9 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
   }
-  else if (url.url().startsWith("#debug_oid-")) {
-    uint64 debug_oid = url.url().mid(11).toULongLong();
-    auto object = replicodeObjects_.getObjectByDebugOid(debug_oid);
+  else if (url.url().startsWith("#detail_oid-")) {
+    uint64 detail_oid = url.url().mid(12).toULongLong();
+    auto object = replicodeObjects_.getObjectByDetailOid(detail_oid);
     if (!object)
       return;
 

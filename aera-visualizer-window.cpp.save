@@ -60,6 +60,7 @@
 #include "graphics-items/model-goal-item.hpp"
 #include "graphics-items/composite-state-goal-item.hpp"
 #include "graphics-items/model-prediction-item.hpp"
+//debug #include "graphics-items/model-imdl-prediction-item.hpp"
 #include "graphics-items/model-prediction-from-requirement-item.hpp"
 #include "graphics-items/composite-state-prediction-item.hpp"
 #include "graphics-items/prediction-result-item.hpp"
@@ -112,6 +113,7 @@ const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
   NewCompositeStateEvent::EVENT_TYPE,
   AutoFocusNewObjectEvent::EVENT_TYPE,
   ModelMkValPredictionReduction::EVENT_TYPE,
+  ModelImdlPredictionEvent::EVENT_TYPE,
   ModelGoalReduction::EVENT_TYPE,
   CompositeStateGoalReduction::EVENT_TYPE,
   ModelSimulatedPredictionReduction::EVENT_TYPE,
@@ -334,7 +336,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
       auto toObject = replicodeObjects_.getObject(stoul(matches[2].str()));
       // Skip auto-focus of the same fact (such as eject facts).
       // But show auto-focus of the same anti-fact (such as prediction failure).
-      if (fromObject && toObject && !(fromObject == toObject && fromObject->code(0).asOpcode() == Opcodes::Fact))
+      if (fromObject && toObject /*debug && !(fromObject == toObject && fromObject->code(0).asOpcode() == Opcodes::Fact) */)
         events_.push_back(make_shared<AutoFocusNewObjectEvent>(
           timestamp, fromObject, toObject, matches[3].str()));
     }
@@ -621,7 +623,7 @@ void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, 
   hoverPreviousUrl_ = url;
   if (url.startsWith("#detail_oid-")) {
     // Highlight the linked item.
-    uint64 detail_oid = url.mid(12).toULongLong();
+    uint64 detail_oid = url.mid(11).toULongLong();
     auto object = replicodeObjects_.getObjectByDetailOid(detail_oid);
     if (object) {
       if (hoverHighlightItem_) {
@@ -741,6 +743,18 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
         scene->addArrow(causeItem, newItem);
       visible = (nonSimulationsCheckBox_->checkState() == Qt::Checked);
     }
+#if 0 // debug
+    else if (event->eventType_ == ModelImdlPredictionEvent::EVENT_TYPE) {
+      auto reductionEvent = (ModelImdlPredictionEvent*)event;
+      newItem = new ImdlPredictionItem(reductionEvent, replicodeObjects_, scene);
+
+      // Add an arrow to the cause.
+      auto causeItem = scene->getAeraGraphicsItem(reductionEvent->cause_);
+      if (causeItem)
+        scene->addArrow(causeItem, newItem);
+      visible = (nonSimulationsCheckBox_->checkState() == Qt::Checked);
+    }
+#endif
     else if (event->eventType_ == ModelGoalReduction::EVENT_TYPE) {
       auto reductionEvent = (ModelGoalReduction*)event;
       newItem = new ModelGoalItem(reductionEvent, replicodeObjects_, scene);
