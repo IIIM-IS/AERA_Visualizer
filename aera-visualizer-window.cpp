@@ -60,6 +60,7 @@
 #include "graphics-items/model-goal-item.hpp"
 #include "graphics-items/composite-state-goal-item.hpp"
 #include "graphics-items/model-prediction-item.hpp"
+#include "graphics-items/model-imdl-prediction-item.hpp"
 #include "graphics-items/model-prediction-from-requirement-item.hpp"
 #include "graphics-items/composite-state-prediction-item.hpp"
 #include "graphics-items/prediction-result-item.hpp"
@@ -112,6 +113,7 @@ const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
   NewCompositeStateEvent::EVENT_TYPE,
   AutoFocusNewObjectEvent::EVENT_TYPE,
   ModelMkValPredictionReduction::EVENT_TYPE,
+  ModelImdlPredictionEvent::EVENT_TYPE,
   ModelGoalReduction::EVENT_TYPE,
   CompositeStateGoalReduction::EVENT_TYPE,
   ModelSimulatedPredictionReduction::EVENT_TYPE,
@@ -334,7 +336,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
       auto toObject = replicodeObjects_.getObject(stoul(matches[2].str()));
       // Skip auto-focus of the same fact (such as eject facts).
       // But show auto-focus of the same anti-fact (such as prediction failure).
-      if (fromObject && toObject && !(fromObject == toObject && fromObject->code(0).asOpcode() == Opcodes::Fact))
+      if (fromObject && toObject /*debug && !(fromObject == toObject && fromObject->code(0).asOpcode() == Opcodes::Fact) */)
         events_.push_back(make_shared<AutoFocusNewObjectEvent>(
           timestamp, fromObject, toObject, matches[3].str()));
     }
@@ -740,6 +742,18 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       if (causeItem)
         scene->addArrow(causeItem, newItem);
       visible = (nonSimulationsCheckBox_->checkState() == Qt::Checked);
+    }
+    else if (event->eventType_ == ModelImdlPredictionEvent::EVENT_TYPE) {
+      auto reductionEvent = (ModelImdlPredictionEvent*)event;
+      newItem = new ImdlPredictionItem(reductionEvent, replicodeObjects_, scene);
+
+      // Add an arrow to the cause.
+      auto causeItem = scene->getAeraGraphicsItem(reductionEvent->cause_);
+      if (causeItem)
+        scene->addArrow(causeItem, newItem);
+
+      visible = ((nonSimulationsCheckBox_->checkState() == Qt::Checked) &&
+        (requirementsCheckBox_->checkState() == Qt::Checked));
     }
     else if (event->eventType_ == ModelGoalReduction::EVENT_TYPE) {
       auto reductionEvent = (ModelGoalReduction*)event;
@@ -1336,6 +1350,7 @@ void AeraVisulizerWindow::createToolbars()
   connect(nonSimulationsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     essenceFactsCheckBox_->setEnabled(state == Qt::Checked);
     instantiatedCompositeStatesCheckBox_->setEnabled(state == Qt::Checked);
+    requirementsCheckBox_->setEnabled(state == Qt::Checked);
 
     // Do the opposite of simulationsCheckBox_ .
     mainScene_->setNonItemsVisible(simulationEventTypes_, state == Qt::Checked);
@@ -1344,6 +1359,8 @@ void AeraVisulizerWindow::createToolbars()
       mainScene_->setAutoFocusItemsVisible("essence", essenceFactsCheckBox_->checkState() == Qt::Checked);
       mainScene_->setItemsVisible(
         NewInstantiatedCompositeStateEvent::EVENT_TYPE, instantiatedCompositeStatesCheckBox_->checkState() == Qt::Checked);
+      mainScene_->setItemsVisible(
+        ModelImdlPredictionEvent::EVENT_TYPE, requirementsCheckBox_->checkState() == Qt::Checked);
     }
   });
   toolbar->addWidget(nonSimulationsCheckBox_);
@@ -1359,6 +1376,12 @@ void AeraVisulizerWindow::createToolbars()
   connect(instantiatedCompositeStatesCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     mainScene_->setItemsVisible(NewInstantiatedCompositeStateEvent::EVENT_TYPE, state == Qt::Checked);  });
   toolbar->addWidget(instantiatedCompositeStatesCheckBox_);
+
+  requirementsCheckBox_ = new QCheckBox("Requirements", this);
+  requirementsCheckBox_->setStyleSheet("background-color:#ffffff");
+  connect(requirementsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
+    mainScene_->setItemsVisible(ModelImdlPredictionEvent::EVENT_TYPE, state == Qt::Checked);  });
+  toolbar->addWidget(requirementsCheckBox_);
 }
 
 }
