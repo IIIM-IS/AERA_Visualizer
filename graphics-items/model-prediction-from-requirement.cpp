@@ -68,7 +68,7 @@ namespace aera_visualizer {
 ModelPredictionFromRequirementItem::ModelPredictionFromRequirementItem(
   ModelSimulatedPredictionReductionFromRequirement* modelReduction, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-: ExpandableGoaOrPredlItem(modelReduction, replicodeObjects,
+: ExpandableGoaOrPredItem(modelReduction, replicodeObjects,
     "Model " + makeHtmlLink(modelReduction->model_, replicodeObjects) + " from requirement " + RightDoubleArrowHtml,
     parent),
   modelReduction_(modelReduction)
@@ -86,7 +86,7 @@ void ModelPredictionFromRequirementItem::textItemLinkActivated(const QString& li
   }
   else
     // For #expand, #detail_oid- and others, defer to the base class.
-    ExpandableGoaOrPredlItem::textItemLinkActivated(link);
+    ExpandableGoaOrPredItem::textItemLinkActivated(link);
 }
 
 }

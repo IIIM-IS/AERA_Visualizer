@@ -58,7 +58,7 @@ namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
-class ModelGoalItem : public ExpandableGoaOrPredlItem
+class ModelGoalItem : public ExpandableGoaOrPredItem
 {
 public:
   ModelGoalItem(

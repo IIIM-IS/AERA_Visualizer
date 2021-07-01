@@ -68,7 +68,7 @@ namespace aera_visualizer {
 SimulationCommitItem::SimulationCommitItem(
   SimulationCommitEvent* commitEvent, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-: ExpandableGoaOrPredlItem(commitEvent, replicodeObjects,
+: ExpandableGoaOrPredItem(commitEvent, replicodeObjects,
     "Simulation commit " + RightDoubleArrowHtml, parent),
   commitEvent_(commitEvent)
 {
@@ -85,7 +85,7 @@ void SimulationCommitItem::textItemLinkActivated(const QString& link)
   }
   else
     // For #expand, #detail_oid- and others, defer to the base class.
-    ExpandableGoaOrPredlItem::textItemLinkActivated(link);
+    ExpandableGoaOrPredItem::textItemLinkActivated(link);
 }
 
 }
