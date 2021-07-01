@@ -90,12 +90,18 @@ public:
   AeraVisulizerWindow(ReplicodeObjects& replicodeObjects);
 
   /**
-   * Scan the runtimeOutputFilePath and add to events_. Call this once after creating the window.
+   * Scan the runtimeOutputFilePath and add to startupEvents_ and events_. Call this once after creating the window.
+   * After showing the window for the first time, you must call addStartupItems().
    * \param runtimeOutputFilePath The file path of the runtime output,
    * typically ending in "runtime_out.txt".
    * \return True for success, false if canceled.
    */
   bool addEvents(const std::string& runtimeOutputFilePath);
+
+  /**
+   * Add the startup items to modelsScene_ for the startupEvents_ added by addEvents().
+   */
+  void addStartupItems();
 
   void setExplanationLogWindow(ExplanationLogWindow* explanationLogWindow)
   {
@@ -237,6 +243,7 @@ private:
   QCheckBox* instantiatedCompositeStatesCheckBox_;
   QCheckBox* requirementsCheckBox_;
 
+  std::vector<std::shared_ptr<AeraEvent> > startupEvents_;
   std::vector<std::shared_ptr<AeraEvent> > events_;
   size_t iNextEvent_;
   QPen itemBorderHighlightPen_;

@@ -273,24 +273,17 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
         core::float32 successRate = stof(matches[4].str());
         model->code(MDL_CNT) = Atom::Float(evidenceCount);
         model->code(MDL_SR) = Atom::Float(successRate);
-        auto event = new NewModelEvent(
-          replicodeObjects_.getTimeReference(), model, evidenceCount, successRate, stoll(matches[2].str()));
-        // Assume it is loaded before run time starts, so show now.
-        modelsScene_->addAeraGraphicsItem(new ModelItem(event, replicodeObjects_, modelsScene_));
-        // TODO: Add arrows.
+        startupEvents_.push_back(make_shared <NewModelEvent>(
+          replicodeObjects_.getTimeReference(), model, evidenceCount, successRate, stoll(matches[2].str())));
       }
 
       continue;
     }
     else if (regex_search(line, matches, loadCompositeStateRegex)) {
       auto compositeState = replicodeObjects_.getObject(stoul(matches[1].str()));
-      if (compositeState) {
-        auto event = new NewCompositeStateEvent(
-          replicodeObjects_.getTimeReference(), compositeState, stoll(matches[2].str()));
-        // Assume it is loaded before run time starts, so show now.
-        modelsScene_->addAeraGraphicsItem(new CompositeStateItem(event, replicodeObjects_, modelsScene_));
-        // TODO: Add arrows.
-      }
+      if (compositeState)
+        startupEvents_.push_back(make_shared <NewCompositeStateEvent>(
+          replicodeObjects_.getTimeReference(), compositeState, stoll(matches[2].str())));
 
       continue;
     }
@@ -555,6 +548,25 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   pendingEvents.clear();
 
   return true;
+}
+
+void AeraVisulizerWindow::addStartupItems()
+{
+  for (int i = 0; i < startupEvents_.size(); ++i) {
+    AeraEvent* event = startupEvents_[i].get();
+    if (event->time_ > replicodeObjects_.getTimeReference())
+      // Finished scanning the initial events.
+      return;
+
+    if (event->eventType_ == NewModelEvent::EVENT_TYPE)
+      // TODO: Add arrows.
+      modelsScene_->addAeraGraphicsItem(
+        new ModelItem((NewModelEvent*)event, replicodeObjects_, modelsScene_));
+    else if (event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
+      // TODO: Add arrows.
+      modelsScene_->addAeraGraphicsItem(
+        new CompositeStateItem((NewCompositeStateEvent*)event, replicodeObjects_, modelsScene_));
+  }
 }
 
 Timestamp AeraVisulizerWindow::getTimestamp(const smatch& matches, int index)

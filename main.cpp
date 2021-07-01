@@ -146,6 +146,7 @@ int main(int argv, char *args[])
   mainWindow.show();
   if (!mainWindow.addEvents(runtimeOutputFilePath))
     return -1;
+  mainWindow.addStartupItems();
 
   return app.exec();
 }
