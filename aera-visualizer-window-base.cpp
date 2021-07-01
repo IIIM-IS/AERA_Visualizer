@@ -88,7 +88,13 @@ void AeraVisulizerWindowBase::createPlayerControlPanel()
   playerLayout->addWidget(stepBackButton_);
   playSlider_ = new QSlider(Qt::Horizontal, this);
   playSlider_->setMaximum(2000);
+#if 1
+  // Until we implement playSliderValueChanged, disable the slider so the user can't drag it.
+  // See https://github.com/IIIM-IS/AERA_Visualizer/issues/3 .
+  playSlider_->setEnabled(false);
+#else
   connect(playSlider_, SIGNAL(valueChanged(int)), this, SLOT(playSliderValueChanged(int)));
+#endif
   playerLayout->addWidget(playSlider_);
   stepButton_ = new QToolButton(this);
   stepButton_->setIcon(QIcon(":/images/play-step.png"));
