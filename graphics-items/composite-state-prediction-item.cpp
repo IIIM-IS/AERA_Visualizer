@@ -69,7 +69,7 @@ namespace aera_visualizer {
 CompositeStatePredictionItem::CompositeStatePredictionItem(
   CompositeStateSimulatedPredictionReduction* compositeStateReduction, 
   ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
-: ExpandableGoaOrPredItem(compositeStateReduction, replicodeObjects,
+: ExpandableGoalOrPredItem(compositeStateReduction, replicodeObjects,
     "Comp. State " + makeHtmlLink(compositeStateReduction->compositeState_, replicodeObjects) + " " + RightDoubleArrowHtml,
     parent),
   compositeStateReduction_(compositeStateReduction)
@@ -87,7 +87,7 @@ void CompositeStatePredictionItem::textItemLinkActivated(const QString& link)
   }
   else
     // For #expand, #detail_oid- and others, defer to the base class.
-    ExpandableGoaOrPredItem::textItemLinkActivated(link);
+    ExpandableGoalOrPredItem::textItemLinkActivated(link);
 }
 
 }

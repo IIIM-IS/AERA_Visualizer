@@ -59,15 +59,15 @@ namespace aera_visualizer {
 class AeraVisualizerScene;
 
 /**
- * An ExpandableGoaOrPredItem extends AeraGraphicsItem for use in ModelGoalItem, etc. to show
+ * An ExpandableGoalOrPredItem extends AeraGraphicsItem for use in ModelGoalItem, etc. to show
  * the simplified value of a goal or prediction, with a clickable "expand triangle" which expands
  * the item to show the full fact goal/pred fact value.
  */
-class ExpandableGoaOrPredItem : public AeraGraphicsItem
+class ExpandableGoalOrPredItem : public AeraGraphicsItem
 {
 public:
   /**
-   * Create an ExpandableGoaOrPredItem, and compute the text of the simplified value of
+   * Create an ExpandableGoalOrPredItem, and compute the text of the simplified value of
    * getAeraEvet()->object_ as well as the full  fact goal/pred fact value.
    * \param aeraEvent The AeraEvent with the object_ to display.
    * \param replicodeObjects The ReplicodeObjects used to get the detail OID and label.
@@ -75,7 +75,7 @@ public:
    * for example "Model M6 =>".
    * \param parent The parent AeraVisualizerScene.
    */
-  ExpandableGoaOrPredItem(
+  ExpandableGoalOrPredItem(
     AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, const QString& prefix,
     AeraVisualizerScene* parent);
 

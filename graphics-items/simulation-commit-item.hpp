@@ -58,7 +58,7 @@ namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
-class SimulationCommitItem : public ExpandableGoaOrPredItem
+class SimulationCommitItem : public ExpandableGoalOrPredItem
 {
 public:
   SimulationCommitItem(

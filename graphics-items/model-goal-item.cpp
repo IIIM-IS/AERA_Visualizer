@@ -68,7 +68,7 @@ namespace aera_visualizer {
 ModelGoalItem::ModelGoalItem(
   ModelGoalReduction* modelReduction, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-: ExpandableGoaOrPredItem(modelReduction, replicodeObjects,
+: ExpandableGoalOrPredItem(modelReduction, replicodeObjects,
     "Model " + makeHtmlLink(modelReduction->model_, replicodeObjects) + " " + RightDoubleArrowHtml,
     parent),
   modelReduction_(modelReduction)
@@ -100,7 +100,7 @@ void ModelGoalItem::textItemLinkActivated(const QString& link)
   }
   else
     // For #expand, #detail_oid- and others, defer to the base class.
-    ExpandableGoaOrPredItem::textItemLinkActivated(link);
+    ExpandableGoalOrPredItem::textItemLinkActivated(link);
 }
 
 }

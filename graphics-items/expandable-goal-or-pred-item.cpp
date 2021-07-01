@@ -65,7 +65,7 @@ using namespace r_exec;
 
 namespace aera_visualizer {
 
-ExpandableGoaOrPredItem::ExpandableGoaOrPredItem(
+ExpandableGoalOrPredItem::ExpandableGoalOrPredItem(
   AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, const QString& prefix,
   AeraVisualizerScene* parent)
 : AeraGraphicsItem(aeraEvent, replicodeObjects, parent, "")
@@ -82,7 +82,7 @@ ExpandableGoaOrPredItem::ExpandableGoaOrPredItem(
   setToolTip(toolTipText_);
 }
 
-void ExpandableGoaOrPredItem::setFactGoalOrPredFactValueHtml(const QString& prefix)
+void ExpandableGoalOrPredItem::setFactGoalOrPredFactValueHtml(const QString& prefix)
 {
   auto goalOrPred = getAeraEvent()->object_->get_reference(0);
   auto factValue = goalOrPred->get_reference(0);
@@ -144,7 +144,7 @@ void ExpandableGoaOrPredItem::setFactGoalOrPredFactValueHtml(const QString& pref
   valueHtml_.replace("right-pointing-triangle", "<a href=\"#expand\">" + RightPointingTriangleHtml + "</a>");
 }
 
-void ExpandableGoaOrPredItem::textItemLinkActivated(const QString& link)
+void ExpandableGoalOrPredItem::textItemLinkActivated(const QString& link)
 {
   if (link == "#expand") {
     setTextItemAndPolygon(factGoalOrPredFactValueHtml_, false, shape_);

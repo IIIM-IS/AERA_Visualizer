@@ -58,7 +58,7 @@ namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
-class CompositeStateGoalItem : public ExpandableGoaOrPredItem
+class CompositeStateGoalItem : public ExpandableGoalOrPredItem
 {
 public:
   CompositeStateGoalItem(

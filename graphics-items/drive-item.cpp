@@ -67,7 +67,7 @@ namespace aera_visualizer {
 DriveItem::DriveItem(
   DriveInjectEvent* driveInject, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-: ExpandableGoaOrPredItem(driveInject, replicodeObjects,
+: ExpandableGoalOrPredItem(driveInject, replicodeObjects,
     "Drive inject " + RightDoubleArrowHtml, parent),
   driveInject_(driveInject)
 {
@@ -84,7 +84,7 @@ void DriveItem::textItemLinkActivated(const QString& link)
   }
   else
     // For #expand, #detail_oid- and others, defer to the base class.
-    ExpandableGoaOrPredItem::textItemLinkActivated(link);
+    ExpandableGoalOrPredItem::textItemLinkActivated(link);
 }
 
 }

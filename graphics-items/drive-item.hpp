@@ -58,7 +58,7 @@ namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
-class DriveItem : public ExpandableGoaOrPredItem
+class DriveItem : public ExpandableGoalOrPredItem
 {
 public:
   DriveItem(
