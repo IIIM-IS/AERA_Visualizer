@@ -178,7 +178,7 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
   setUnifiedTitleAndToolBarOnMac(true);
 }
 
-bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
+bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgressDialog& progress)
 {
   // load mdl 37, MDLController(113)
   regex loadModelRegex("^load mdl (\\d+), MDLController\\((\\d+)\\) cnt:(\\d+) sr:([\\d\\.]+)$");
@@ -235,12 +235,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath)
   // sim commit: fact 238 pred fact success -> fact (82115) goal
   regex simulationCommitRegex("^sim commit: fact (\\d+) pred fact success -> fact \\((\\d+)\\) goal$");
 
-  QProgressDialog progress("Reading " + QFileInfo(runtimeOutputFilePath.c_str()).fileName() + "...", "Cancel", 0, 100, this);
-  progress.setWindowModality(Qt::WindowModal);
-  // Remove the '?' in the title.
-  progress.setWindowFlags(progress.windowFlags() & ~Qt::WindowContextHelpButtonHint);
-  progress.setWindowTitle("Initializing");
-  QApplication::processEvents();
+  progress.setLabelText("Reading " + QFileInfo(runtimeOutputFilePath.c_str()).fileName() + "...");
 
   // Count the number of lines, to use in the progress dialog.
   int nLines;

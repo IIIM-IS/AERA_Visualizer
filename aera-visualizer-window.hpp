@@ -69,6 +69,7 @@ class QComboBox;
 class QLineEdit;
 class QCheckBox;
 class QGraphicsView;
+class QProgressDialog;
 
 namespace aera_visualizer {
 
@@ -94,9 +95,11 @@ public:
    * After showing the window for the first time, you must call addStartupItems().
    * \param runtimeOutputFilePath The file path of the runtime output,
    * typically ending in "runtime_out.txt".
+   * \param progress The progress dialog where you can call setLabelText, setMaximum and setValue. You should
+   * periodically call QApplication::processEvents(). You can call wasCanceled and quit if true.
    * \return True for success, false if canceled.
    */
-  bool addEvents(const std::string& runtimeOutputFilePath);
+  bool addEvents(const std::string& runtimeOutputFilePath, QProgressDialog& progress);
 
   /**
    * Add the startup items to modelsScene_ for the startupEvents_ added by addEvents().

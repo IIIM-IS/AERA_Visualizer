@@ -59,6 +59,7 @@
 #include <QFileDialog>
 #include <QScreen>
 #include <QProxyStyle>
+#include <QProgressDialog>
 
 using namespace std;
 using namespace std::chrono;
@@ -101,6 +102,28 @@ int main(int argv, char *args[])
 
   // Files are relative to the directory of settingsFilePath.
   QDir settingsFileDir = QFileInfo(settingsFilePath).dir();
+  string runtimeOutputFilePath = settingsFileDir.absoluteFilePath(settings.runtime_output_file_path_.c_str()).toStdString();
+  {
+    // Test opening the file now so we can exit on error.
+    ifstream testOpen(runtimeOutputFilePath);
+    if (!testOpen) {
+      QMessageBox::information(NULL, "File Error",
+        QString("Can't open debug stream output file: ") + runtimeOutputFilePath.c_str(), QMessageBox::Ok);
+      return -1;
+    }
+  }
+
+  // Create the progress dialog to show while compiling and reading the runtime output.
+  QProgressDialog progress("", "Cancel", 0, 100);
+  progress.setWindowModality(Qt::WindowModal);
+  // Remove the '?' in the title.
+  progress.setWindowFlags(progress.windowFlags() & ~Qt::WindowContextHelpButtonHint);
+  progress.setWindowTitle("Initializing");
+  progress.setAutoReset(false);
+  progress.setAutoClose(false);
+  progress.show();
+  QApplication::processEvents();
+
   ReplicodeObjects replicodeObjects;
   string error = replicodeObjects.init(
     settingsFileDir.absoluteFilePath(settings.usr_class_path_.c_str()).toStdString(), 
@@ -111,18 +134,11 @@ int main(int argv, char *args[])
     return -1;
   }
 
-  string runtimeOutputFilePath = settingsFileDir.absoluteFilePath(settings.runtime_output_file_path_.c_str()).toStdString();
-  {
-    // Test opening the file now so we can exit on error.
-    ifstream testOpen(runtimeOutputFilePath);
-    if (!testOpen) {
-      QMessageBox::information(NULL, "File Error", 
-        QString("Can't open debug stream output file: ") + runtimeOutputFilePath.c_str(), QMessageBox::Ok);
-      return -1;
-    }
-  }
   AeraVisulizerWindow mainWindow(replicodeObjects);
   mainWindow.setWindowIcon(QIcon(":/images/app.png"));
+
+  if (!mainWindow.addEvents(runtimeOutputFilePath, progress))
+    return -1;
 
   mainWindow.setWindowTitle(QString("AERA Visualizer - ") + QFileInfo(settings.source_file_name_.c_str()).fileName());
   QScreen* screen = QGuiApplication::primaryScreen();
@@ -143,9 +159,8 @@ int main(int argv, char *args[])
   explanationLogWindow->setGeometry(left + width, top, explanationLogWindowWidth, height);
   explanationLogWindow->show();
 
+  progress.close();
   mainWindow.show();
-  if (!mainWindow.addEvents(runtimeOutputFilePath))
-    return -1;
   mainWindow.addStartupItems();
 
   return app.exec();
