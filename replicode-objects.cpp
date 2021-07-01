@@ -197,7 +197,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
   decompiler.init(&metadata);
 
   // Fill the objectNames map from the image and use it in decompile_references.
-  UNORDERED_MAP<uint16, std::string> objectNames;
+  unordered_map<uint16, std::string> objectNames;
   for (auto i = 0; i < packedImage.code_segment_.objects_.size(); ++i)
     objectNames[i] = compiler.getObjectName(i);
   decompiler.decompile_references(&packedImage, &objectNames);
