@@ -68,7 +68,11 @@ namespace aera_visualizer {
 PredictionItem::PredictionItem(
   ModelMkValPredictionReduction* modelReduction, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-  : AeraGraphicsItem(modelReduction, replicodeObjects, parent, "Prediction"),
+  : AeraGraphicsItem(modelReduction,
+    replicodeObjects,
+    parent,
+    "Model " + makeHtmlLink(modelReduction->getFactImdl()->get_reference(0)->get_reference(0), replicodeObjects) +
+    " " + RightDoubleArrowHtml + " Prediction"),
   modelReduction_(modelReduction), showState_(HIDE_IMDL)
 {
   setFactPredFactMkValHtml();
