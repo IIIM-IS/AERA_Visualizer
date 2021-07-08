@@ -72,7 +72,7 @@ PredictionItem::PredictionItem(
     replicodeObjects,
     parent,
     "Model " + makeHtmlLink(modelReduction->getFactImdl()->get_reference(0)->get_reference(0), replicodeObjects) +
-    " " + RightDoubleArrowHtml + " Prediction"),
+    " " + RightDoubleArrowHtml + "<br>&nbsp;&nbsp;Prediction"),
   modelReduction_(modelReduction), showState_(HIDE_IMDL)
 {
   setFactPredFactMkValHtml();
