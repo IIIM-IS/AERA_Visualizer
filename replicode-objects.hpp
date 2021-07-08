@@ -57,6 +57,8 @@
 #include <regex>
 #include "submodules/replicode/r_exec/mem.h"
 
+class QProgressDialog;
+
 namespace aera_visualizer {
 
 /**
@@ -74,10 +76,13 @@ public:
    * \param decompiledFilePath The decompiled output, usually ending in
    * "decompiled_objects.txt".
    * \param basePeriod The base_period from settings.xml, used for getSamplinePeriod().
-   * \return An empty string for success, otherwise an error string.
+   * \param progress The progress dialog where you can call setLabelText, setMaximum and setValue. You should
+   * periodically call QApplication::processEvents(). You can call wasCanceled and quit if true.
+   * \return An empty string for success, otherwise an error string. If the string is "cancel" then
+   * the user clicked Cancel in the progress dialog.
    */
   std::string init(const std::string& userClassesFilePath, const std::string& decompiledFilePath,
-    std::chrono::microseconds basePeriod);
+    std::chrono::microseconds basePeriod, QProgressDialog& progress);
 
   /**
    * Get the sampling period, which is 2 * base_period from settings.xml. This should

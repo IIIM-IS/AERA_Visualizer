@@ -57,6 +57,8 @@
 #include "submodules/replicode/r_comp/decompiler.h"
 #include "submodules/replicode/r_exec/model_base.h"
 #include "replicode-objects.hpp"
+#include <QApplication>
+#include <QProgressDialog>
 
 using namespace std;
 using namespace std::chrono;
@@ -68,7 +70,7 @@ using namespace r_exec;
 namespace aera_visualizer {
 
 string ReplicodeObjects::init(const string& userClassesFilePath, const string& decompiledFilePath,
-    microseconds basePeriod)
+    microseconds basePeriod, QProgressDialog& progress)
 {
   basePeriod_ = basePeriod;
 
@@ -82,6 +84,12 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
   string error;
   // We won't compile the preprocessed user operators code.
   ostringstream dummyPreprocessedUserClasses;
+
+  progress.setLabelText("Preprocessing code (1 of 2) ...");
+  QApplication::processEvents();
+  if (progress.wasCanceled())
+    return "cancel";
+
   if (!preprocessor.process(
       &userClassesFile, userClassesFilePath, &dummyPreprocessedUserClasses, error, &metadata))
     return error;
@@ -104,6 +112,12 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
   // Preprocess and compile the processed decompiler output, using the metadata we got above.
   istringstream decompiledIn(decompiledOut);
   ostringstream preprocessedOut;
+
+  progress.setLabelText("Preprocessing code (2 of 2) ...");
+  QApplication::processEvents();
+  if (progress.wasCanceled())
+    return "cancel";
+
   if (!preprocessor.process(
       &decompiledIn, decompiledFilePath, &preprocessedOut, error, NULL))
     return error;
@@ -111,6 +125,12 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
   istringstream preprocessedIn(preprocessedOut.str());
   Compiler compiler(true);
   r_comp::Image image;
+
+  progress.setLabelText("Compiling code ...");
+  QApplication::processEvents();
+  if (progress.wasCanceled())
+    return "cancel";
+
   if (!compiler.compile(&preprocessedIn, &image, &metadata, error, false)) {
     auto iError = (size_t)preprocessedIn.tellg();
     auto nBeforeError = min(iError, 50);
@@ -126,9 +146,18 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
   r_exec::Mem<r_exec::LObject, r_exec::MemStatic> tempMem;
   image.get_objects(&tempMem, imageObjects);
 
+  progress.setLabelText("Postprocessing code ...");
+  // We update progress for 3 loops of imageObjects.size().
+  progress.setMaximum(imageObjects.size() * 3);
   // Set the OIDs and detail OIDs of objects in imageObjects based on the decompiled output.
   // Set up objectLabel_ and labelObject_ based on the object in imageObjects.
   for (auto i = 0; i < imageObjects.size(); ++i) {
+    if (progress.wasCanceled())
+      return "cancel";
+    progress.setValue(i);
+    if (i % 100 == 0)
+      QApplication::processEvents();
+
     string label = compiler.getObjectName(i);
     if (label != "") {
       objectLabel_[imageObjects[i]] = label;
@@ -198,12 +227,25 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
 
   // Fill the objectNames map from the image and use it in decompile_references.
   unordered_map<uint16, std::string> objectNames;
-  for (auto i = 0; i < packedImage.code_segment_.objects_.size(); ++i)
+  for (auto i = 0; i < packedImage.code_segment_.objects_.size(); ++i) {
+    if (progress.wasCanceled())
+      return "cancel";
+    progress.setValue(imageObjects.size() + i);
+    if (i % 100 == 0)
+      QApplication::processEvents();
+
     objectNames[i] = compiler.getObjectName(i);
+  }
   decompiler.decompile_references(&packedImage, &objectNames);
 
   Timestamp::duration timeOffset = duration_cast<microseconds>(timeReference_.time_since_epoch());
   for (uint16 i = 0; i < packedImage.code_segment_.objects_.size(); ++i) {
+    if (progress.wasCanceled())
+      return "cancel";
+    progress.setValue(2 * imageObjects.size() + i);
+    if (i % 100 == 0)
+      QApplication::processEvents();
+
     auto object = getObjectByDetailOid(packedImage.code_segment_.objects_[i]->detail_oid_);
     if (object) {
       std::ostringstream decompiledCode;

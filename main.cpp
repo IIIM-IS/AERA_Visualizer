@@ -128,7 +128,9 @@ int main(int argv, char *args[])
   string error = replicodeObjects.init(
     settingsFileDir.absoluteFilePath(settings.usr_class_path_.c_str()).toStdString(), 
     settingsFileDir.absoluteFilePath(settings.decompilation_file_path_.c_str()).toStdString(),
-    microseconds(settings.base_period_));
+    microseconds(settings.base_period_), progress);
+  if (error == "cancel")
+    return -1;
   if (error != "") {
     QMessageBox::information(NULL, "Compiler Error", error.c_str(), QMessageBox::Ok);
     return -1;
