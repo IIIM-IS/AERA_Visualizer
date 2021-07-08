@@ -245,7 +245,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   }
   progress.setMaximum(nLines);
 
-  std::vector<shared_ptr<AeraEvent> > pendingEvents;
+  // pendingEvents is an ordered map keyed by event time. The value is a list of pending events at the time.
+  std::map<core::Timestamp, std::vector<shared_ptr<AeraEvent> > > pendingEvents;
   ifstream runtimeOutputFile(runtimeOutputFilePath);
   int lineNumber = 0;
   string line;
@@ -289,9 +290,10 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
     core::Timestamp timestamp = getTimestamp(matches);
     string lineAfterTimestamp = matches[4].str();
 
-    while (pendingEvents.size() >= 1 && pendingEvents.front()->time_ <= timestamp) {
+    while (pendingEvents.size() >= 1 && pendingEvents.begin()->first <= timestamp) {
       // Insert the pending event before this new event.
-      events_.push_back(pendingEvents.front());
+      for (int i = 0; i < pendingEvents.begin()->second.size(); ++i)
+        events_.push_back(pendingEvents.begin()->second[i]);
       pendingEvents.erase(pendingEvents.begin());
     }
 
@@ -439,7 +441,10 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
         // TODO: Use an AeraEvent with the details of starting the simulated forward chaining.
         auto event = make_shared<ModelSimulatedPredictionReduction>(injectionTime, model, factPred, input, true);
         // Put in pendingEvents to be added to events_ later.
-        pendingEvents.push_back(event);
+        if (pendingEvents.find(event->time_) == pendingEvents.end())
+          // Create the entry.
+          pendingEvents[event->time_] = std::vector<shared_ptr<AeraEvent> >();
+        pendingEvents[event->time_].push_back(event);
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, compositeStateSimulatedPredictionRegex)) {
@@ -538,8 +543,10 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   }
 
   // Transfer any remaining pendingEvents to events_.
-  for (auto event = pendingEvents.begin(); event != pendingEvents.end(); ++event)
-    events_.push_back(*event);
+  for (auto event = pendingEvents.begin(); event != pendingEvents.end(); ++event) {
+    for (int i = 0; i < event->second.size(); ++i)
+      events_.push_back(event->second[i]);
+  }
   pendingEvents.clear();
 
   return true;
