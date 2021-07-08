@@ -68,7 +68,11 @@ namespace aera_visualizer {
 ImdlPredictionItem::ImdlPredictionItem(
   ModelImdlPredictionEvent* modelReduction, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-  : AeraGraphicsItem(modelReduction, replicodeObjects, parent, "Prediction"),
+  : AeraGraphicsItem(modelReduction,
+    replicodeObjects,
+    parent,
+    "Model " + makeHtmlLink(modelReduction->predictingModel_, replicodeObjects) +
+    " " + RightDoubleArrowHtml + "<br>&nbsp;&nbsp;Prediction"),
   modelReduction_(modelReduction), showState_(HIDE_IMDL)
 {
   setFactPredFactImdlHtml();
