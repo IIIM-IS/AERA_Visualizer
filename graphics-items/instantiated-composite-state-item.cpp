@@ -203,12 +203,17 @@ QString InstantiatedCompositeStateItem::makeIcstMembersSource(Code* icst, Replic
   string cstSource = CompositeStateItem::simplifyCstSource(replicodeObjects.getSourceCode(cst));
   // Get just the members, which are indented by three spaces. Get the value inside the (fact value ...).
   string cstMembersSource;
-  auto i = QRegularExpression("   \\(fact (\\([^\\)]+\\))[^\\)]+\\)\\n").globalMatch(cstSource.c_str());
+  auto i = QRegularExpression("   \\(fact (\\([^\\n]+)\\n").globalMatch(cstSource.c_str());
   while (i.hasNext()) {
     auto match = i.next();
+    auto value = match.captured(1);
+    // Strip the fact timings from the end.
+    value = value.mid(0, value.length() - 1);
+    value = value.mid(0, value.lastIndexOf(')') + 1);
+
     if (cstMembersSource != "")
       cstMembersSource += "\n";
-    cstMembersSource += match.captured(1).toStdString();
+    cstMembersSource += value.toStdString();
   }
 
   // Substitute variables.
