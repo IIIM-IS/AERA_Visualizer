@@ -68,8 +68,12 @@ namespace aera_visualizer {
 InstantiatedCompositeStateItem::InstantiatedCompositeStateItem(
   NewInstantiatedCompositeStateEvent* newInstantiatedCompositeStateEvent,
   ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
-  : AeraGraphicsItem(newInstantiatedCompositeStateEvent, replicodeObjects, parent,
-      "Instantiated Comp. State"),
+  : AeraGraphicsItem(newInstantiatedCompositeStateEvent,
+    replicodeObjects,
+    parent,
+    "Comp. State " + 
+    makeHtmlLink(newInstantiatedCompositeStateEvent->object_->get_reference(0)->get_reference(0), replicodeObjects) +
+    " " + RightDoubleArrowHtml + "<br>&nbsp;&nbsp;Instantiated Comp. State"),
   newInstantiatedCompositeStateEvent_(newInstantiatedCompositeStateEvent), showState_(HIDE_ICST)
 {
   setFactIcstHtml();
