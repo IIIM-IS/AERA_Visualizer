@@ -15,7 +15,7 @@ Prerequisites
 Following are the detailed steps for each platform to install the prerequisites.
 
 ## Windows
-To install Replicode, see https://github.com/IIIM-IS/replicode/blob/master/INSTALL.md . Be sure
+To install Replicode, see https://github.com/IIIM-IS/AERA/blob/master/INSTALL.md . Be sure
 to follow the instructions to set `WITH_DETAIL_OID` .
 
 To install Qt Framework:
@@ -44,7 +44,7 @@ On the Build menu, click Build Solution. (Don't worry about all the compiler war
 Run
 ===
 
-The AERA Visualizer requires output from running AERA. See the file [INSTALL.md](https://github.com/IIIM-IS/replicode/blob/master/INSTALL.md)
+The AERA Visualizer requires output from running AERA. See the file [INSTALL.md](https://github.com/IIIM-IS/AERA/blob/master/INSTALL.md)
 for details. Be sure to change the `settings.xml` parameter `keep_invalidated_objects` to "yes", and set
 `source_file_name` to a file such as "../AERA/replicode_v1.2/ball.external.replicode" .
 
