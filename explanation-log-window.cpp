@@ -50,7 +50,7 @@
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 #include <QtWidgets>
-#include "submodules/replicode/r_exec/opcodes.h"
+#include "submodules/AERA/r_exec/opcodes.h"
 #include "graphics-items/program-reduction-item.hpp"
 #include "graphics-items/io-device-inject-eject-item.hpp"
 #include "aera-visualizer-window.hpp"

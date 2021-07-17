@@ -53,7 +53,7 @@
 #include <QMenu>
 #include "../explanation-log-window.hpp"
 #include "../aera-visualizer-window.hpp"
-#include "../submodules/replicode/r_exec/factory.h"
+#include "../submodules/AERA/r_exec/factory.h"
 #include "aera-visualizer-scene.hpp"
 #include "instantiated-composite-state-item.hpp"
 #include "composite-state-goal-item.hpp"

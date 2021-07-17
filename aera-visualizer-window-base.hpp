@@ -58,7 +58,7 @@
 #include <QToolButton>
 #include <QSlider>
 #include <QLabel>
-#include "submodules/replicode/r_code/utils.h"
+#include "submodules/AERA/r_code/utils.h"
 #include "replicode-objects.hpp"
 
 namespace aera_visualizer {

@@ -51,7 +51,7 @@
 
 #include <regex>
 #include <QMenu>
-#include "../submodules/replicode/r_exec/opcodes.h"
+#include "../submodules/AERA/r_exec/opcodes.h"
 #include "explanation-log-window.hpp"
 #include "aera-visualizer-scene.hpp"
 #include "prediction-item.hpp"

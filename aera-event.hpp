@@ -53,9 +53,9 @@
 #define AERA_EVENT_HPP
 
 #include <QPointF>
-#include "submodules/replicode/r_code/object.h"
-#include "submodules/replicode/r_exec/opcodes.h"
-#include "submodules/replicode/r_exec/factory.h"
+#include "submodules/AERA/r_code/object.h"
+#include "submodules/AERA/r_exec/opcodes.h"
+#include "submodules/AERA/r_exec/factory.h"
 
 namespace aera_visualizer {
 
