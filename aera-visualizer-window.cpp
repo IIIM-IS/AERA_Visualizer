@@ -51,7 +51,7 @@
 
 #include <fstream>
 #include <algorithm>
-#include "submodules/replicode/r_exec/opcodes.h"
+#include "submodules/AERA/r_exec/opcodes.h"
 #include "graphics-items/arrow.hpp"
 #include "graphics-items/model-item.hpp"
 #include "graphics-items/composite-state-item.hpp"

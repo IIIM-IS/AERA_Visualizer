@@ -55,7 +55,7 @@
 #include <string>
 #include <map>
 #include <regex>
-#include "submodules/replicode/r_exec/mem.h"
+#include "submodules/AERA/r_exec/mem.h"
 
 class QProgressDialog;
 

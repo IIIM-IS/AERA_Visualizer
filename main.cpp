@@ -51,7 +51,7 @@
 
 #include "aera-visualizer-window.hpp"
 #include "explanation-log-window.hpp"
-#include "submodules/replicode/AERA/settings.h"
+#include "submodules/AERA/AERA/settings.h"
 
 #include <QApplication>
 #include <QSettings>

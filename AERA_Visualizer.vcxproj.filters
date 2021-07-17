@@ -4,182 +4,182 @@
     <ClCompile Include="aera-visualizer-window-base.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="aera-visualizer-window.cpp" />
-    <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\base.cpp">
+    <ClCompile Include="submodules\AERA\submodules\CoreLibrary\CoreLibrary\base.cpp">
       <Filter>CoreLibrary</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\utils.cpp">
+    <ClCompile Include="submodules\AERA\submodules\CoreLibrary\CoreLibrary\utils.cpp">
       <Filter>CoreLibrary</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_code\atom.cpp">
+    <ClCompile Include="submodules\AERA\r_code\atom.cpp">
       <Filter>r_code</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_code\image.cpp">
+    <ClCompile Include="submodules\AERA\r_code\image.cpp">
       <Filter>r_code</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_code\image_impl.cpp">
+    <ClCompile Include="submodules\AERA\r_code\image_impl.cpp">
       <Filter>r_code</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_code\object.cpp">
+    <ClCompile Include="submodules\AERA\r_code\object.cpp">
       <Filter>r_code</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_code\r_code.cpp">
+    <ClCompile Include="submodules\AERA\r_code\r_code.cpp">
       <Filter>r_code</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_code\vector.cpp">
+    <ClCompile Include="submodules\AERA\r_code\vector.cpp">
       <Filter>r_code</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_code\code_utils.cpp">
+    <ClCompile Include="submodules\AERA\r_code\code_utils.cpp">
       <Filter>r_code</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_comp\class.cpp">
+    <ClCompile Include="submodules\AERA\r_comp\class.cpp">
       <Filter>r_comp</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_comp\compiler.cpp">
+    <ClCompile Include="submodules\AERA\r_comp\compiler.cpp">
       <Filter>r_comp</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_comp\decompiler.cpp">
+    <ClCompile Include="submodules\AERA\r_comp\decompiler.cpp">
       <Filter>r_comp</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_comp\preprocessor.cpp">
+    <ClCompile Include="submodules\AERA\r_comp\preprocessor.cpp">
       <Filter>r_comp</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_comp\r_comp.cpp">
+    <ClCompile Include="submodules\AERA\r_comp\r_comp.cpp">
       <Filter>r_comp</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_comp\segments.cpp">
+    <ClCompile Include="submodules\AERA\r_comp\segments.cpp">
       <Filter>r_comp</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_comp\string_utils.cpp">
+    <ClCompile Include="submodules\AERA\r_comp\string_utils.cpp">
       <Filter>r_comp</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_comp\structure_member.cpp">
+    <ClCompile Include="submodules\AERA\r_comp\structure_member.cpp">
       <Filter>r_comp</Filter>
     </ClCompile>
     <ClCompile Include="replicode-objects.cpp" />
-    <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\base.tpl.cpp">
+    <ClCompile Include="submodules\AERA\submodules\CoreLibrary\CoreLibrary\base.tpl.cpp">
       <Filter>CoreLibrary</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\pipe.tpl.cpp">
+    <ClCompile Include="submodules\AERA\submodules\CoreLibrary\CoreLibrary\pipe.tpl.cpp">
       <Filter>CoreLibrary</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\utils.tpl.cpp">
+    <ClCompile Include="submodules\AERA\submodules\CoreLibrary\CoreLibrary\utils.tpl.cpp">
       <Filter>CoreLibrary</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\_context.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\_context.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\ast_controller.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\ast_controller.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\ast_controller.tpl.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\ast_controller.tpl.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\auto_focus.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\auto_focus.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\binding_map.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\binding_map.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\callbacks.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\callbacks.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\context.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\context.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\cpp_programs.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\cpp_programs.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\cst_controller.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\cst_controller.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\factory.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\factory.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\g_monitor.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\g_monitor.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\group.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\group.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\group.inline.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\group.inline.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\guard_builder.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\guard_builder.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\hlp_context.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\hlp_context.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\hlp_controller.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\hlp_controller.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\hlp_overlay.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\hlp_overlay.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\init.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\init.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\mdl_controller.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\mdl_controller.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\mem.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\mem.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\mem.tpl.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\mem.tpl.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\model_base.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\model_base.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\monitor.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\monitor.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\object.tpl.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\object.tpl.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\opcodes.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\opcodes.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\operator.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\operator.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\overlay.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\overlay.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\p_monitor.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\p_monitor.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\pattern_extractor.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\pattern_extractor.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\pgm_controller.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\pgm_controller.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\pgm_overlay.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\pgm_overlay.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\pgm_overlay.inline.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\pgm_overlay.inline.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\reduction_core.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\reduction_core.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\reduction_job.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\reduction_job.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\time_core.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\time_core.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\time_job.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\time_job.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\view.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\view.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_exec\view.inline.cpp">
+    <ClCompile Include="submodules\AERA\r_exec\view.inline.cpp">
       <Filter>r_exec</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\usr_operators\auto_focus_callback.cpp">
+    <ClCompile Include="submodules\AERA\usr_operators\auto_focus_callback.cpp">
       <Filter>usr_operators</Filter>
     </ClCompile>
     <ClCompile Include="explanation-log-window.cpp" />
@@ -213,7 +213,7 @@
     <ClCompile Include="graphics-items\auto-focus-fact-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\xml_parser.cpp">
+    <ClCompile Include="submodules\AERA\submodules\CoreLibrary\CoreLibrary\xml_parser.cpp">
       <Filter>CoreLibrary</Filter>
     </ClCompile>
     <ClCompile Include="graphics-items\prediction-result-item.cpp">
@@ -228,10 +228,10 @@
     <ClCompile Include="graphics-items\io-device-inject-eject-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_code\atom.inline.cpp">
+    <ClCompile Include="submodules\AERA\r_code\atom.inline.cpp">
       <Filter>r_code</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\replicode\r_code\image.tpl.cpp">
+    <ClCompile Include="submodules\AERA\r_code\image.tpl.cpp">
       <Filter>r_code</Filter>
     </ClCompile>
     <ClCompile Include="graphics-items\model-prediction-item.cpp">
@@ -261,176 +261,176 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aera-event.hpp" />
-    <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\base.h">
+    <ClInclude Include="submodules\AERA\submodules\CoreLibrary\CoreLibrary\base.h">
       <Filter>CoreLibrary</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\types.h">
+    <ClInclude Include="submodules\AERA\submodules\CoreLibrary\CoreLibrary\types.h">
       <Filter>CoreLibrary</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\utils.h">
+    <ClInclude Include="submodules\AERA\submodules\CoreLibrary\CoreLibrary\utils.h">
       <Filter>CoreLibrary</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_code\atom.h">
+    <ClInclude Include="submodules\AERA\r_code\atom.h">
       <Filter>r_code</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_code\image.h">
+    <ClInclude Include="submodules\AERA\r_code\image.h">
       <Filter>r_code</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_code\image_impl.h">
+    <ClInclude Include="submodules\AERA\r_code\image_impl.h">
       <Filter>r_code</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_code\list.h">
+    <ClInclude Include="submodules\AERA\r_code\list.h">
       <Filter>r_code</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_code\object.h">
+    <ClInclude Include="submodules\AERA\r_code\object.h">
       <Filter>r_code</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_code\r_code.h">
+    <ClInclude Include="submodules\AERA\r_code\r_code.h">
       <Filter>r_code</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_code\replicode_defs.h">
+    <ClInclude Include="submodules\AERA\r_code\replicode_defs.h">
       <Filter>r_code</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_code\time_buffer.h">
+    <ClInclude Include="submodules\AERA\r_code\time_buffer.h">
       <Filter>r_code</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_code\utils.h">
+    <ClInclude Include="submodules\AERA\r_code\utils.h">
       <Filter>r_code</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_code\vector.h">
+    <ClInclude Include="submodules\AERA\r_code\vector.h">
       <Filter>r_code</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_comp\class.h">
+    <ClInclude Include="submodules\AERA\r_comp\class.h">
       <Filter>r_comp</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_comp\compiler.h">
+    <ClInclude Include="submodules\AERA\r_comp\compiler.h">
       <Filter>r_comp</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_comp\decompiler.h">
+    <ClInclude Include="submodules\AERA\r_comp\decompiler.h">
       <Filter>r_comp</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_comp\out_stream.h">
+    <ClInclude Include="submodules\AERA\r_comp\out_stream.h">
       <Filter>r_comp</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_comp\preprocessor.h">
+    <ClInclude Include="submodules\AERA\r_comp\preprocessor.h">
       <Filter>r_comp</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_comp\r_comp.h">
+    <ClInclude Include="submodules\AERA\r_comp\r_comp.h">
       <Filter>r_comp</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_comp\segments.h">
+    <ClInclude Include="submodules\AERA\r_comp\segments.h">
       <Filter>r_comp</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_comp\string_utils.h">
+    <ClInclude Include="submodules\AERA\r_comp\string_utils.h">
       <Filter>r_comp</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_comp\structure_member.h">
+    <ClInclude Include="submodules\AERA\r_comp\structure_member.h">
       <Filter>r_comp</Filter>
     </ClInclude>
     <ClInclude Include="replicode-objects.hpp" />
-    <ClInclude Include="submodules\replicode\r_exec\_context.h">
+    <ClInclude Include="submodules\AERA\r_exec\_context.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\ast_controller.h">
+    <ClInclude Include="submodules\AERA\r_exec\ast_controller.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\auto_focus.h">
+    <ClInclude Include="submodules\AERA\r_exec\auto_focus.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\binding_map.h">
+    <ClInclude Include="submodules\AERA\r_exec\binding_map.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\callbacks.h">
+    <ClInclude Include="submodules\AERA\r_exec\callbacks.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\context.h">
+    <ClInclude Include="submodules\AERA\r_exec\context.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\cpp_programs.h">
+    <ClInclude Include="submodules\AERA\r_exec\cpp_programs.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\cst_controller.h">
+    <ClInclude Include="submodules\AERA\r_exec\cst_controller.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\dll.h">
+    <ClInclude Include="submodules\AERA\r_exec\dll.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\factory.h">
+    <ClInclude Include="submodules\AERA\r_exec\factory.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\g_monitor.h">
+    <ClInclude Include="submodules\AERA\r_exec\g_monitor.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\group.h">
+    <ClInclude Include="submodules\AERA\r_exec\group.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\guard_builder.h">
+    <ClInclude Include="submodules\AERA\r_exec\guard_builder.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\hlp_context.h">
+    <ClInclude Include="submodules\AERA\r_exec\hlp_context.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\hlp_controller.h">
+    <ClInclude Include="submodules\AERA\r_exec\hlp_controller.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\hlp_overlay.h">
+    <ClInclude Include="submodules\AERA\r_exec\hlp_overlay.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\init.h">
+    <ClInclude Include="submodules\AERA\r_exec\init.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\mdl_controller.h">
+    <ClInclude Include="submodules\AERA\r_exec\mdl_controller.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\mem.h">
+    <ClInclude Include="submodules\AERA\r_exec\mem.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\model_base.h">
+    <ClInclude Include="submodules\AERA\r_exec\model_base.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\monitor.h">
+    <ClInclude Include="submodules\AERA\r_exec\monitor.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\object.h">
+    <ClInclude Include="submodules\AERA\r_exec\object.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\opcodes.h">
+    <ClInclude Include="submodules\AERA\r_exec\opcodes.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\operator.h">
+    <ClInclude Include="submodules\AERA\r_exec\operator.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\overlay.h">
+    <ClInclude Include="submodules\AERA\r_exec\overlay.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\p_monitor.h">
+    <ClInclude Include="submodules\AERA\r_exec\p_monitor.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\pattern_extractor.h">
+    <ClInclude Include="submodules\AERA\r_exec\pattern_extractor.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\pgm_controller.h">
+    <ClInclude Include="submodules\AERA\r_exec\pgm_controller.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\pgm_overlay.h">
+    <ClInclude Include="submodules\AERA\r_exec\pgm_overlay.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\reduction_core.h">
+    <ClInclude Include="submodules\AERA\r_exec\reduction_core.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\reduction_job.h">
+    <ClInclude Include="submodules\AERA\r_exec\reduction_job.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\time_core.h">
+    <ClInclude Include="submodules\AERA\r_exec\time_core.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\time_job.h">
+    <ClInclude Include="submodules\AERA\r_exec\time_job.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\r_exec\view.h">
+    <ClInclude Include="submodules\AERA\r_exec\view.h">
       <Filter>r_exec</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\usr_operators\auto_focus_callback.h">
+    <ClInclude Include="submodules\AERA\usr_operators\auto_focus_callback.h">
       <Filter>usr_operators</Filter>
     </ClInclude>
     <ClInclude Include="graphics-items\aera-graphics-item.hpp">
@@ -463,7 +463,7 @@
     <ClInclude Include="graphics-items\auto-focus-fact-item.hpp">
       <Filter>graphics-items</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\xml_parser.h">
+    <ClInclude Include="submodules\AERA\submodules\CoreLibrary\CoreLibrary\xml_parser.h">
       <Filter>CoreLibrary</Filter>
     </ClInclude>
     <ClInclude Include="graphics-items\prediction-result-item.hpp">
@@ -478,7 +478,7 @@
     <ClInclude Include="graphics-items\io-device-inject-eject-item.hpp">
       <Filter>graphics-items</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\replicode\submodules\CoreLibrary\CoreLibrary\pipe.h">
+    <ClInclude Include="submodules\AERA\submodules\CoreLibrary\CoreLibrary\pipe.h">
       <Filter>CoreLibrary</Filter>
     </ClInclude>
     <ClInclude Include="graphics-items\model-prediction-item.hpp">
@@ -549,7 +549,7 @@
     <QtMoc Include="explanation-log-window.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="submodules\replicode\r_exec\r_exec.vcxproj">
+    <None Include="submodules\AERA\r_exec\r_exec.vcxproj">
       <Filter>r_exec</Filter>
     </None>
   </ItemGroup>

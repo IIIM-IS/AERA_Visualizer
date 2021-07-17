@@ -55,7 +55,7 @@
 #include <QMenu>
 #include <QtWidgets>
 #include <QRegularExpression>
-#include "submodules/replicode/r_exec/opcodes.h"
+#include "submodules/AERA/r_exec/opcodes.h"
 #include "arrow.hpp"
 #include "anchored-horizontal-line.hpp"
 #include "aera-visualizer-scene.hpp"

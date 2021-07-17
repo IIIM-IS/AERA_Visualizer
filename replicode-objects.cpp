@@ -52,10 +52,10 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include "submodules/replicode/r_comp/preprocessor.h"
-#include "submodules/replicode/r_comp/compiler.h"
-#include "submodules/replicode/r_comp/decompiler.h"
-#include "submodules/replicode/r_exec/model_base.h"
+#include "submodules/AERA/r_comp/preprocessor.h"
+#include "submodules/AERA/r_comp/compiler.h"
+#include "submodules/AERA/r_comp/decompiler.h"
+#include "submodules/AERA/r_exec/model_base.h"
 #include "replicode-objects.hpp"
 #include <QApplication>
 #include <QProgressDialog>
