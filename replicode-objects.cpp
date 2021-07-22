@@ -96,7 +96,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
   dummyPreprocessedUserClasses.clear();
 
   r_exec::InitOpcodes(metadata);
-  // Now() is called when construcing model controllers.
+  // Now() is called when constructing model controllers.
   r_exec::Now = Time::Get;
 
   map<string, uint32> objectOids;
