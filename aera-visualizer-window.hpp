@@ -187,6 +187,7 @@ private slots:
   void zoomIn();
   void zoomOut();
   void zoomHome();
+  void zoomTo();
 
 private:
   friend class AeraVisulizerWindowBase;
@@ -239,6 +240,7 @@ private:
   QAction* zoomInAction_;
   QAction* zoomOutAction_;
   QAction* zoomHomeAction_;
+  QAction* zoomToAction_;
 
   QCheckBox* simulationsCheckBox_;
   QCheckBox* nonSimulationsCheckBox_;

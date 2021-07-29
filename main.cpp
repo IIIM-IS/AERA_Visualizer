@@ -84,6 +84,9 @@ int main(int argv, char *args[])
   };
   app.setStyle(new MyProxyStyle(qApp->style()));
 
+  // Globally remove the '?' from the QInputDialog title bar.
+  QApplication::setAttribute(Qt::AA_DisableWindowContextHelpButton);
+
   QSettings preferences("IIIM", "AERA_Visualizer");
   QString settingsFilePath0 = preferences.value("settingsFilePath").toString();
   if (settingsFilePath0 == "")

@@ -1304,6 +1304,30 @@ void AeraVisulizerWindow::zoomHome()
   selectedScene_->zoomViewHome();
 }
 
+void AeraVisulizerWindow::zoomTo()
+{
+  bool ok;
+  QString text = QInputDialog::getText(
+    this, tr("Zoom To..."), tr("Enter the object name:"), QLineEdit::Normal, "", &ok);
+  if (!ok || text == "")
+    return;
+
+  auto object = replicodeObjects_.getObject(text.toStdString());
+  if (!object) {
+    QMessageBox::information(this, "Zoom To Error", "Cannot find object " + text, QMessageBox::Ok);
+    return;
+  }
+
+  AeraVisualizerScene* scene;
+  auto item = getAeraGraphicsItem(object, &scene);
+  if (!item || !item->isVisible()) {
+    QMessageBox::information(this, "Zoom To Error", "The item '" + text + "' is not visible", QMessageBox::Ok);
+    return;
+  }
+
+  scene->zoomToItem(item);
+}
+
 void AeraVisulizerWindow::createActions()
 {
   exitAction_ = new QAction(tr("E&xit"), this);
@@ -1321,6 +1345,9 @@ void AeraVisulizerWindow::createActions()
   zoomHomeAction_ = new QAction(QIcon(":/images/zoom-home.png"), tr("Zoom Home"), this);
   zoomHomeAction_->setStatusTip(tr("Zoom to show all"));
   connect(zoomHomeAction_, SIGNAL(triggered()), this, SLOT(zoomHome()));
+
+  zoomToAction_ = new QAction(tr("Zoom To..."), this);
+  connect(zoomToAction_, SIGNAL(triggered()), this, SLOT(zoomTo()));
 }
 
 void AeraVisulizerWindow::createMenus()
@@ -1332,6 +1359,7 @@ void AeraVisulizerWindow::createMenus()
   viewMenu->addAction(zoomInAction_);
   viewMenu->addAction(zoomOutAction_);
   viewMenu->addAction(zoomHomeAction_);
+  viewMenu->addAction(zoomToAction_);
 }
 
 void AeraVisulizerWindow::createToolbars()
