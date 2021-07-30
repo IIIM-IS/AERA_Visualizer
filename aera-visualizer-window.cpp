@@ -1347,6 +1347,7 @@ void AeraVisulizerWindow::createActions()
   connect(zoomHomeAction_, SIGNAL(triggered()), this, SLOT(zoomHome()));
 
   zoomToAction_ = new QAction(tr("Zoom To..."), this);
+  zoomToAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
   connect(zoomToAction_, SIGNAL(triggered()), this, SLOT(zoomTo()));
 }
 
