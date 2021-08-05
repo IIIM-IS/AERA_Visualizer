@@ -92,7 +92,20 @@ AeraVisualizerScene::AeraVisualizerScene(
   lineColor_ = Qt::black;
   setBackgroundBrush(QColor(245, 245, 245));
   flashTimerId_ = 0;
-  setSceneRect(QRectF(0, 0, 20000, 20000));
+  
+  // setting the size of scene according to the number of items in the model and main scenes
+  QRectF bounding_rectangle;
+  foreach(QGraphicsItem * item, items()) {
+    if (dynamic_cast<AeraGraphicsItem*>(item) && item->isVisible()) {
+      if (bounding_rectangle.width() == 0)
+        bounding_rectangle = item->sceneBoundingRect();
+      else
+        bounding_rectangle = bounding_rectangle.united(item->sceneBoundingRect());
+    }
+  }
+  int Width_of_Scene = bounding_rectangle.width();
+  int Highet_Of_Scene = bounding_rectangle.height();
+  setSceneRect(QRectF(0, 0, Width_of_Scene, Highet_Of_Scene));
 
   if (isMainScene_) {
     eventTypeFirstTop_[IoDeviceEjectEvent::EVENT_TYPE] = 20;

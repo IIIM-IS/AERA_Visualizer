@@ -147,15 +147,15 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
   modelsScene_ = new AeraVisualizerScene(replicodeObjects_, this, false,
     [=]() { selectedScene_ = modelsScene_; });
   auto modelsSceneView = new QGraphicsView(modelsScene_, this);
-  modelsSceneView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  modelsSceneView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  modelsSceneView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+  modelsSceneView->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
   mainScene_ = new AeraVisualizerScene(replicodeObjects_, this, true,
     [=]() { selectedScene_ = mainScene_; });
   // Use a MyQGraphicsView so that we can track movements to the scene view.
   auto mainSceneView = new MyQGraphicsView(mainScene_, this);
-  mainSceneView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  mainSceneView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  mainSceneView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+  mainSceneView->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
   // Set a default selected scene.
   selectedScene_ = mainScene_;
 
