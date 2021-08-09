@@ -55,7 +55,7 @@ To run, in Visual Studio on the Debug menu, select "Run Without Debugging". Sele
 Run from AeraVisualizer.exe
 ===========================
 
-As shown above, you can run AERA Visualizer from Visual Studio. To run AeraVisualizer.exe directly (without Visual Studio),
+As shown above, you can run AERA Visualizer from Visual Studio. To run AeraVisualizer.exe directly (after building in Visual Studio),
 you need to put the Qt bin folder in the system path as follows:
 
 * Open the System control panel.
