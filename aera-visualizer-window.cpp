@@ -213,7 +213,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   // mdl 57: fact 202 pred -> fact 227 simulated pred
   regex modelSimulatedPredictionRegex("^mdl (\\d+): fact (\\d+) (pred|super_goal) -> fact (\\d+) simulated pred$");
   // mdl 60: fact 181 super_goal -> fact (41817) simulated pred start
-  regex modelSimulatedPredictionStartRegex("^mdl (\\d+): fact (\\d+) super_goal -> fact \\((\\d+)\\) simulated pred start, ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
+  regex modelSimulatedPredictionStartRegex("^mdl (\\d+): fact (\\d+) super_goal -> fact \\((\\d+)\\) simulated pred start, using req \\((\\d+)\\), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
   // cst 60: fact 195 -> fact 218 simulated pred fact icst [ 155 191]
   regex compositeStateSimulatedPredictionRegex("^cst (\\d+): fact (\\d+) -> fact (\\d+) simulated pred fact icst \\[([ \\d]+)\\]$");
   // fact 59 icst[52][ 50 55]
@@ -430,15 +430,16 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
     }
     else if (regex_search(lineAfterTimestamp, matches, modelSimulatedPredictionStartRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
-      auto factPred = replicodeObjects_.getObjectByDetailOid(stoul(matches[3].str()));
       auto input = replicodeObjects_.getObject(stoul(matches[2].str()));
+      auto factPred = replicodeObjects_.getObjectByDetailOid(stoul(matches[3].str()));
+      auto requirement = replicodeObjects_.getObjectByDetailOid(stoul(matches[4].str()));
 
-      if (model && factPred && input) {
-        core::Timestamp injectionTime = getTimestamp(matches, 4);
+      if (model && factPred && input && requirement) {
+        core::Timestamp injectionTime = getTimestamp(matches, 5);
         if (injectionTime < timestamp)
           // We don't expect this, but the runtime would not have injected earlier.
           injectionTime = timestamp;
-        // TODO: Use an AeraEvent with the details of starting the simulated forward chaining.
+        // TODO: Use an AeraEvent with the details of starting the simulated forward chaining, and include requirement.
         auto event = make_shared<ModelSimulatedPredictionReduction>(injectionTime, model, factPred, input, true);
         // Put in pendingEvents to be added to events_ later.
         if (pendingEvents.find(event->time_) == pendingEvents.end())
