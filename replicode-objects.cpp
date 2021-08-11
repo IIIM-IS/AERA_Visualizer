@@ -378,7 +378,7 @@ QString ReplicodeObjects::getProgressLabelText(const QString& message)
 
     if (it == iMessageMatch)
       // Highlight this message.
-      result += ("=> " + *it + " ...");
+      result += ("\n=> " + *it + " ...");
     else
       result += *it;
   }
