@@ -235,7 +235,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   // sim commit: fact 238 pred fact success -> fact (82115) goal
   regex simulationCommitRegex("^sim commit: fact (\\d+) pred fact success -> fact \\((\\d+)\\) goal$");
 
-  progress.setLabelText("Reading " + QFileInfo(runtimeOutputFilePath.c_str()).fileName() + "...");
+  progress.setLabelText(replicodeObjects_.getProgressLabelText("Reading runtime output"));
 
   // Count the number of lines, to use in the progress dialog.
   int nLines;

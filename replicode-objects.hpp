@@ -55,6 +55,7 @@
 #include <string>
 #include <map>
 #include <regex>
+#include <QString>
 #include "submodules/AERA/r_exec/mem.h"
 
 class QProgressDialog;
@@ -67,6 +68,8 @@ namespace aera_visualizer {
  */
 class ReplicodeObjects {
 public:
+  ReplicodeObjects();
+
   /**
    * Compile and load the metadata from the user operators file, then compile
    * the decompiled file and set up the list of Replicode objects. This
@@ -162,6 +165,14 @@ public:
     return core::Time::ToString_seconds(timestamp - timeReference_);
   }
 
+  /**
+   * If message is in progressMessages_, then show all the progressMessages_ with this message highlighted.
+   * Otherwise, just show this message.
+   * \param message The progress message for matching an entry in progressMessages_.
+   * \return The text for progress.setLabelText.
+   */
+  QString getProgressLabelText(const QString& message);
+
 private:
   /**
    * Process the decompiled objects file to remove OIDs, detail OIDs and info lines starting with ">".
@@ -186,6 +197,7 @@ private:
   // Key is the label from the decompiled objects, value is the Code* object.
   std::map<std::string, r_code::Code*> labelObject_;
   r_code::list<P<r_code::Code> > objects_;
+  std::vector<QString> progressMessages_;
 };
 
 }

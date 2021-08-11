@@ -69,6 +69,16 @@ using namespace r_exec;
 
 namespace aera_visualizer {
 
+ReplicodeObjects::ReplicodeObjects()
+{
+  // Set up progressLines_. Used by getProgressLabelText to make the progress messages clearer.
+  progressMessages_.push_back("Preprocessing code (1 of 2)");
+  progressMessages_.push_back("Preprocessing code (2 of 2)");
+  progressMessages_.push_back("Compiling code");
+  progressMessages_.push_back("Postprocessing code");
+  progressMessages_.push_back("Reading runtime output");
+}
+
 string ReplicodeObjects::init(const string& userClassesFilePath, const string& decompiledFilePath,
     microseconds basePeriod, QProgressDialog& progress)
 {
@@ -85,7 +95,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
   // We won't compile the preprocessed user operators code.
   ostringstream dummyPreprocessedUserClasses;
 
-  progress.setLabelText("Preprocessing code (1 of 2) ...");
+  progress.setLabelText(getProgressLabelText("Preprocessing code (1 of 2)"));
   QApplication::processEvents();
   if (progress.wasCanceled())
     return "cancel";
@@ -113,7 +123,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
   istringstream decompiledIn(decompiledOut);
   ostringstream preprocessedOut;
 
-  progress.setLabelText("Preprocessing code (2 of 2) ...");
+  progress.setLabelText(getProgressLabelText("Preprocessing code (2 of 2)"));
   QApplication::processEvents();
   if (progress.wasCanceled())
     return "cancel";
@@ -126,7 +136,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
   Compiler compiler(true);
   r_comp::Image image;
 
-  progress.setLabelText("Compiling code ...");
+  progress.setLabelText(getProgressLabelText("Compiling code"));
   QApplication::processEvents();
   if (progress.wasCanceled())
     return "cancel";
@@ -146,7 +156,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
   r_exec::Mem<r_exec::LObject, r_exec::MemStatic> tempMem;
   image.get_objects(&tempMem, imageObjects);
 
-  progress.setLabelText("Postprocessing code ...");
+  progress.setLabelText(getProgressLabelText("Postprocessing code"));
   // We update progress for 3 loops of imageObjects.size().
   progress.setMaximum(imageObjects.size() * 3);
   // Set the OIDs and detail OIDs of objects in imageObjects based on the decompiled output.
@@ -352,6 +362,28 @@ Code* ReplicodeObjects::getObjectByDetailOid(uint64 detailOid) const
   }
 
   return NULL;
+}
+
+QString ReplicodeObjects::getProgressLabelText(const QString& message)
+{
+  auto iMessageMatch = find(progressMessages_.begin(), progressMessages_.end(), message);
+  if (iMessageMatch == progressMessages_.end())
+    // We don't expect this. The message is not one of the messages added by the constructor.
+    return message + " ...";
+
+  QString result = "";
+  for (auto it = progressMessages_.begin(); it != progressMessages_.end(); ++it) {
+    if (result != "")
+      result += "\n";
+
+    if (it == iMessageMatch)
+      // Highlight this message.
+      result += ("=> " + *it + " ...");
+    else
+      result += *it;
+  }
+
+  return result;
 }
 
 }
