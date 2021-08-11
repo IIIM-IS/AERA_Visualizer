@@ -200,8 +200,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   regex autofocusNewObjectRegex("^A/F -> (\\d+)\\|(\\d+) \\((\\w+)\\)$");
   // mdl 61 predict imdl -> mk.rdx 559
   regex modelImdlPredictionReductionRegex("^mdl \\d+ predict imdl -> mk.rdx (\\d+)$");
-  // mdl 64: fact (58313) pred fact imdl -> fact 220 simulated pred
-  regex modelSimulatedPredictionFromRequirementRegex("^mdl (\\d+): fact \\((\\d+)\\) pred fact imdl -> fact (\\d+) simulated pred$");
+  // mdl 67: fact (352225) pred fact imdl -> fact 588 simulated pred, from goal req 533
+  regex modelSimulatedPredictionFromRequirementRegex("^mdl (\\d+): fact \\((\\d+)\\) pred fact imdl -> fact (\\d+) simulated pred, from goal req (\\d+)$");
   // mdl 63 predict -> mk.rdx 68
   regex modelPredictionReductionRegex("^mdl \\d+ predict -> mk.rdx (\\d+)$");
   // mdl 41 abduce -> mk.rdx 97
@@ -212,7 +212,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   regex compositeStateSimulatedAbductionRegex("^cst (\\d+): fact (\\d+) super_goal -> fact (\\d+) simulated goal$");
   // mdl 57: fact 202 pred -> fact 227 simulated pred
   regex modelSimulatedPredictionRegex("^mdl (\\d+): fact (\\d+) (pred|super_goal) -> fact (\\d+) simulated pred$");
-  // mdl 60: fact 181 super_goal -> fact (41817) simulated pred start
+  // mdl 63: fact 531 super_goal -> fact (332278) simulated pred start, using req (323845), ijt 0s:535ms:0us
   regex modelSimulatedPredictionStartRegex("^mdl (\\d+): fact (\\d+) super_goal -> fact \\((\\d+)\\) simulated pred start, using req \\((\\d+)\\), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
   // cst 60: fact 195 -> fact 218 simulated pred fact icst [ 155 191]
   regex compositeStateSimulatedPredictionRegex("^cst (\\d+): fact (\\d+) -> fact (\\d+) simulated pred fact icst \\[([ \\d]+)\\]$");
@@ -355,10 +355,11 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
       auto factPred = replicodeObjects_.getObject(stoul(matches[3].str()));
       auto input = replicodeObjects_.getObjectByDetailOid(stoul(matches[2].str()));
+      auto goal_requirement = replicodeObjects_.getObject(stoul(matches[4].str()));
 
-      if (model && factPred && input)
+      if (model && factPred && input && goal_requirement)
         events_.push_back(make_shared<ModelSimulatedPredictionReductionFromRequirement>(
-          timestamp, model, factPred, input));
+          timestamp, model, factPred, input, goal_requirement));
     }
     else if (regex_search(lineAfterTimestamp, matches, modelPredictionReductionRegex)) {
       auto reduction = replicodeObjects_.getObject(stoul(matches[1].str()));
@@ -827,6 +828,12 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       if (inputItem)
         // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
         scene->addArrow(inputItem, newItem);
+
+      // Add an arrow to the signaling goal requirement.
+      auto goalRequirementItem = scene->getAeraGraphicsItem(reductionEvent->goal_requirement_);
+      if (goalRequirementItem)
+        // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
+        scene->addArrow(goalRequirementItem, newItem);
 
       scene->addHorizontalLine(newItem);
 

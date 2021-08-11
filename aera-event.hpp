@@ -512,12 +512,13 @@ public:
    * \param model The model which did the reduction.
    * \param factPred The (fact (pred...)) (production).
    * \param input The input fact triggering the reduction.
+   * \param goal_requirement The original goal requirement (the target of the signalled SRMonitor).
    */
   ModelSimulatedPredictionReductionFromRequirement(core::Timestamp time, r_code::Code* model,
-    r_code::Code* factPred, r_code::Code* input)
+    r_code::Code* factPred, r_code::Code* input, r_code::Code* goal_requirement)
     : AeraEvent(EVENT_TYPE, time, factPred),
     model_(model), factPred_((r_exec::_Fact*)factPred),
-    input_((r_exec::_Fact*)input)
+    input_((r_exec::_Fact*)input), goal_requirement_((r_exec::_Fact*)goal_requirement)
   {}
 
   r_code::Code* getInput() override { return input_; }
@@ -527,6 +528,7 @@ public:
   r_code::Code* model_;
   r_exec::_Fact* factPred_;
   r_exec::_Fact* input_;
+  r_exec::_Fact* goal_requirement_;
 };
 
 }
