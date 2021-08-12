@@ -507,13 +507,30 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="images\pause.png" />
-    <Image Include="images\play-step-back.png" />
-    <Image Include="images\play-step.png" />
-    <Image Include="images\play.png" />
-    <Image Include="images\zoom-home.png" />
-    <Image Include="images\zoom-in.png" />
-    <Image Include="images\zoom-out.png" />
+    <Image Include="images\pause.png">
+      <Filter>images</Filter>
+    </Image>
+    <Image Include="images\play.png">
+      <Filter>images</Filter>
+    </Image>
+    <Image Include="images\play-step.png">
+      <Filter>images</Filter>
+    </Image>
+    <Image Include="images\play-step-back.png">
+      <Filter>images</Filter>
+    </Image>
+    <Image Include="images\zoom-home.png">
+      <Filter>images</Filter>
+    </Image>
+    <Image Include="images\zoom-in.png">
+      <Filter>images</Filter>
+    </Image>
+    <Image Include="images\zoom-out.png">
+      <Filter>images</Filter>
+    </Image>
+    <Image Include="images\app.png">
+      <Filter>images</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="aera_visualizer.qrc" />
@@ -541,6 +558,9 @@
     </Filter>
     <Filter Include="graphics-items">
       <UniqueIdentifier>{b3e0c323-7a69-4f9f-bad1-86040e5e046c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="images">
+      <UniqueIdentifier>{0c46a924-114d-4f51-ab3b-c17420510b01}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

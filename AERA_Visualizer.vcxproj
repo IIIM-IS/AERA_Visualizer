@@ -428,6 +428,7 @@
     <QtMoc Include="aera-visualizer-window.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="images\app.png" />
     <Image Include="images\pause.png">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
