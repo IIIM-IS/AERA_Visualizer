@@ -140,7 +140,7 @@ int main(int argv, char *args[])
   }
 
   AeraVisulizerWindow mainWindow(replicodeObjects);
-  mainWindow.setWindowIcon(QIcon(":/images/app.png"));
+  mainWindow.setWindowIcon(QIcon(":/images/app.ico"));
 
   if (!mainWindow.addEvents(runtimeOutputFilePath, progress))
     return -1;

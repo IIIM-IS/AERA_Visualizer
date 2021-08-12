@@ -528,7 +528,7 @@
     <Image Include="images\zoom-out.png">
       <Filter>images</Filter>
     </Image>
-    <Image Include="images\app.png">
+    <Image Include="images\app.ico">
       <Filter>images</Filter>
     </Image>
   </ItemGroup>

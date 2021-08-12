@@ -7,6 +7,6 @@
         <file>images/pause.png</file>
         <file>images/play-step-back.png</file>
         <file>images/play-step.png</file>
-        <file>images/app.png</file>
+        <file>images/app.ico</file>
     </qresource>
 </RCC>
