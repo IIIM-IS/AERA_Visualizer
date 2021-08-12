@@ -121,6 +121,7 @@ int main(int argv, char *args[])
   progress.setWindowModality(Qt::WindowModal);
   // Remove the '?' in the title.
   progress.setWindowFlags(progress.windowFlags() & ~Qt::WindowContextHelpButtonHint);
+  progress.setWindowIcon(QIcon(":/images/app.ico"));
   progress.setWindowTitle("Initializing");
   progress.setAutoReset(false);
   progress.setAutoClose(false);
