@@ -808,7 +808,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       // Add an arrow to the input fact.
       auto inputItem = scene->getAeraGraphicsItem(reductionEvent->input_);
       if (inputItem)
-        // If the input is a super goal, then the inputItem is the RHS, otherwose,
+        // If the input is a super goal, then the inputItem is the RHS, otherwise,
         // the input of the prediction is the LHS.
         scene->addArrow(inputItem, newItem, reductionEvent->inputIsSuperGoal_ ? newItem : inputItem);
 
