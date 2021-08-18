@@ -353,14 +353,15 @@ public:
    * \param model The model which did the reduction.
    * \param factPred The (fact (pred...)) (production).
    * \param input The input fact triggering the reduction.
+   * \param requirement The requirement used by the reduction (may be NULL).
    * \param inputIsSuperGoal True if the input is a super goal, meaning that this event
    * is the last step of simulated backward chaining to start forward chaining.
    */
   ModelSimulatedPredictionReduction(core::Timestamp time, r_code::Code* model,
-      r_code::Code* factPred, r_code::Code* input, bool inputIsSuperGoal)
+      r_code::Code* factPred, r_code::Code* input, r_code::Code* requirement, bool inputIsSuperGoal)
     : AeraEvent(EVENT_TYPE, time, factPred),
       model_(model), factPred_((r_exec::_Fact*)factPred),
-      input_((r_exec::_Fact*)input),
+      input_((r_exec::_Fact*)input), requirement_((r_exec::_Fact*)requirement),
       inputIsSuperGoal_(inputIsSuperGoal)
   {}
 
@@ -371,6 +372,7 @@ public:
   r_code::Code* model_;
   r_exec::_Fact* factPred_;
   r_exec::_Fact* input_;
+  r_exec::_Fact* requirement_;
   bool inputIsSuperGoal_;
 };
 

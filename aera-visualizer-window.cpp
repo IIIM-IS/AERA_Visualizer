@@ -211,7 +211,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   // cst 64: fact 96 super_goal -> fact 98 simulated goal
   regex compositeStateSimulatedAbductionRegex("^cst (\\d+): fact (\\d+) super_goal -> fact (\\d+) simulated goal$");
   // mdl 57: fact 202 pred -> fact 227 simulated pred
-  regex modelSimulatedPredictionRegex("^mdl (\\d+): fact (\\d+) pred -> fact (\\d+) simulated pred$");
+  regex modelSimulatedPredictionRegex("^mdl (\\d+): fact (\\d+) pred -> fact (\\d+) simulated pred(?:, using req \\((\\d+)\\))?$");
   // mdl 63: fact 531 super_goal -> fact (332278) simulated pred start, using req (323845), ijt 0s:535ms:0us
   regex modelSimulatedPredictionStartRegex("^mdl (\\d+): fact (\\d+) super_goal -> fact \\((\\d+)\\) simulated pred start, using req \\((\\d+)\\), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
   // cst 60: fact 195 -> fact 218 simulated pred fact icst [ 155 191]
@@ -344,7 +344,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
         if (model && cause && factPred) {
           if (((_Fact*)factPred)->get_pred()->is_simulation())
             events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
-              timestamp, model, factPred, cause, false));
+              timestamp, model, factPred, cause, (Code*)NULL, false));
           else
             events_.push_back(make_shared<ModelImdlPredictionEvent>(
               timestamp, factPred, model, cause));
@@ -422,12 +422,17 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
     }
     else if (regex_search(lineAfterTimestamp, matches, modelSimulatedPredictionRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
-      auto factPred = replicodeObjects_.getObject(stoul(matches[3].str()));
       auto input = replicodeObjects_.getObject(stoul(matches[2].str()));
+      auto factPred = replicodeObjects_.getObject(stoul(matches[3].str()));
+      Code* requirement = 0;
+      if (matches[4].length() > 0)
+        requirement = replicodeObjects_.getObjectByDetailOid(stoul(matches[4].str()));
+      else
+        int debug1 = 1;
 
       if (model && factPred && input)
         events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
-          timestamp, model, factPred, input, false));
+          timestamp, model, factPred, input, requirement, false));
     }
     else if (regex_search(lineAfterTimestamp, matches, modelSimulatedPredictionStartRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
@@ -441,7 +446,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
           // We don't expect this, but the runtime would not have injected earlier.
           injectionTime = timestamp;
         // TODO: Use an AeraEvent with the details of starting the simulated forward chaining, and include requirement.
-        auto event = make_shared<ModelSimulatedPredictionReduction>(injectionTime, model, factPred, input, true);
+        auto event = make_shared<ModelSimulatedPredictionReduction>(injectionTime, model, factPred, input, requirement, true);
         // Put in pendingEvents to be added to events_ later.
         if (pendingEvents.find(event->time_) == pendingEvents.end())
           // Create the entry.
@@ -581,7 +586,7 @@ Timestamp AeraVisulizerWindow::getTimestamp(const smatch& matches, int index)
   return replicodeObjects_.getTimeReference() + us;
 }
 
-AeraGraphicsItem* AeraVisulizerWindow::getAeraGraphicsItem(r_code::Code* object, AeraVisualizerScene** scene)
+AeraGraphicsItem* AeraVisulizerWindow::getAeraGraphicsItem(Code* object, AeraVisualizerScene** scene)
 {
   if (scene)
     // Initialize to default NULL.
@@ -604,7 +609,7 @@ AeraGraphicsItem* AeraVisulizerWindow::getAeraGraphicsItem(r_code::Code* object,
   return NULL;
 }
 
-void AeraVisulizerWindow::zoomToAeraGraphicsItem(r_code::Code* object)
+void AeraVisulizerWindow::zoomToAeraGraphicsItem(Code* object)
 {
   AeraVisualizerScene* scene;
   auto item = getAeraGraphicsItem(object, &scene);
@@ -819,6 +824,13 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
         // If the input is a super goal, then the inputItem is the RHS, otherwise,
         // the input of the prediction is the LHS.
         scene->addArrow(inputItem, newItem, reductionEvent->inputIsSuperGoal_ ? newItem : inputItem);
+
+      // Add an arrow to the requirement.
+      if (reductionEvent->requirement_) {
+        auto requirementItem = scene->getAeraGraphicsItem(reductionEvent->requirement_);
+        if (requirementItem)
+          scene->addArrow(requirementItem, newItem);
+      }
 
       scene->addHorizontalLine(newItem);
 
