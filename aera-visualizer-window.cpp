@@ -211,7 +211,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   // cst 64: fact 96 super_goal -> fact 98 simulated goal
   regex compositeStateSimulatedAbductionRegex("^cst (\\d+): fact (\\d+) super_goal -> fact (\\d+) simulated goal$");
   // mdl 57: fact 202 pred -> fact 227 simulated pred
-  regex modelSimulatedPredictionRegex("^mdl (\\d+): fact (\\d+) (pred|super_goal) -> fact (\\d+) simulated pred$");
+  regex modelSimulatedPredictionRegex("^mdl (\\d+): fact (\\d+) pred -> fact (\\d+) simulated pred$");
   // mdl 63: fact 531 super_goal -> fact (332278) simulated pred start, using req (323845), ijt 0s:535ms:0us
   regex modelSimulatedPredictionStartRegex("^mdl (\\d+): fact (\\d+) super_goal -> fact \\((\\d+)\\) simulated pred start, using req \\((\\d+)\\), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
   // cst 60: fact 195 -> fact 218 simulated pred fact icst [ 155 191]
@@ -422,12 +422,12 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
     }
     else if (regex_search(lineAfterTimestamp, matches, modelSimulatedPredictionRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
-      auto factPred = replicodeObjects_.getObject(stoul(matches[4].str()));
+      auto factPred = replicodeObjects_.getObject(stoul(matches[3].str()));
       auto input = replicodeObjects_.getObject(stoul(matches[2].str()));
 
       if (model && factPred && input)
         events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
-          timestamp, model, factPred, input, matches[3] == "super_goal"));
+          timestamp, model, factPred, input, false));
     }
     else if (regex_search(lineAfterTimestamp, matches, modelSimulatedPredictionStartRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
