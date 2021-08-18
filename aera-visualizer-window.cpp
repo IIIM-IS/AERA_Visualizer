@@ -757,6 +757,14 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       auto causeItem = scene->getAeraGraphicsItem(reductionEvent->getCause());
       if (causeItem)
         scene->addArrow(causeItem, newItem);
+
+      // Add an arrow to the requirement.
+      if (reductionEvent->getRequirement()) {
+        auto requirementItem = scene->getAeraGraphicsItem(reductionEvent->getRequirement());
+        if (requirementItem)
+          scene->addArrow(requirementItem, newItem);
+      }
+
       visible = (nonSimulationsCheckBox_->checkState() == Qt::Checked);
     }
     else if (event->eventType_ == ModelImdlPredictionEvent::EVENT_TYPE) {
