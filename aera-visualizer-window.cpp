@@ -193,7 +193,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   // mdl 53 cnt:2 sr:1
   regex setEvidenceCountAndSuccessRateRegex("^mdl (\\d+) cnt:(\\d+) sr:([\\d\\.]+)$");
   // mdl 53 deleted
-  regex deleteModelRegex("^mdl (\\d+) deleted$");
+  // mdl 53 phased out
+  regex deleteOrPhaseOutModelRegex("^mdl (\\d+) (deleted|phased out)$");
   // -> cst 52, CSTController(375)
   regex newCompositeStateRegex("^-> cst (\\d+), CSTController\\((\\d+)\\)$");
   // A/F -> 35|40 (AXIOM)
@@ -310,9 +311,10 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
         events_.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(
           timestamp, model, stol(matches[2].str()), stof(matches[3].str())));
     }
-    else if (regex_search(lineAfterTimestamp, matches, deleteModelRegex)) {
+    else if (regex_search(lineAfterTimestamp, matches, deleteOrPhaseOutModelRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
       if (model)
+        // TODO: Distinguish delete and phase out.
         events_.push_back(make_shared<DeleteModelEvent>(timestamp, model));
     }
     else if (regex_search(lineAfterTimestamp, matches, newCompositeStateRegex)) {
