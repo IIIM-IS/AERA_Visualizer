@@ -112,20 +112,20 @@ public:
 
 class NewModelEvent : public AeraEvent {
 public:
-  NewModelEvent(core::Timestamp time, r_code::Code* model, core::float32 evidenceCount, 
-    core::float32 successRate, core::float32 strength, uint64 controllerDegugOid)
+  NewModelEvent(core::Timestamp time, r_code::Code* model, core::float32 strength,
+    core::float32 evidenceCount, core::float32 successRate, uint64 controllerDegugOid)
     : AeraEvent(EVENT_TYPE, time, model),
+    strength_(strength),
     evidenceCount_(evidenceCount),
     successRate_(successRate),
-    strength_(strength),
     controllerDegugOid_(controllerDegugOid)
   {}
 
   static const int EVENT_TYPE = 1;
 
+  core::float32 strength_;
   core::float32 evidenceCount_;
   core::float32 successRate_;
-  core::float32 strength_;
   // TODO: Should the model's controller be recorded globally?
   uint64 controllerDegugOid_;
 };

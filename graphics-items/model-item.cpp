@@ -63,11 +63,11 @@ ModelItem::ModelItem(
   NewModelEvent* newModelEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
   : AeraGraphicsItem(newModelEvent, replicodeObjects, parent, "Model"),
   newModelEvent_(newModelEvent),
+  strength_(newModelEvent_->object_->code(MDL_STRENGTH).asFloat()),
   evidenceCount_(newModelEvent_->object_->code(MDL_CNT).asFloat()),
   successRate_(newModelEvent_->object_->code(MDL_SR).asFloat()),
-  strength_(newModelEvent_->object_->code(MDL_STRENGTH).asFloat()),
-  evidenceCountColor_("black"), successRateColor_("black"), strengthColor_("black"),
-  evidenceCountFlashCountdown_(0), successRateFlashCountdown_(0), strengthFlashCountdown_(0)
+  strengthColor_("black"), evidenceCountColor_("black"), successRateColor_("black"),
+  strengthFlashCountdown_(0), evidenceCountFlashCountdown_(0), successRateFlashCountdown_(0)
 {
   // Set up sourceCodeHtml_
   sourceCodeHtml_ = simplifyModelSource(replicodeObjects_.getSourceCode(newModelEvent_->object_));
@@ -150,12 +150,12 @@ QString ModelItem::makeHtml()
 void ModelItem::updateFromModel()
 {
   auto model = newModelEvent_->object_;
+  strengthIncreased_ = (model->code(MDL_STRENGTH).asFloat() >= strength_);
+  strength_ = model->code(MDL_STRENGTH).asFloat();
   evidenceCountIncreased_ = (model->code(MDL_CNT).asFloat() >= evidenceCount_);
   evidenceCount_ = model->code(MDL_CNT).asFloat();
   successRateIncreased_ = (model->code(MDL_SR).asFloat() >= successRate_);
   successRate_ = model->code(MDL_SR).asFloat();
-  strengthIncreased_ = (model->code(MDL_STRENGTH).asFloat() >= strength_);
-  strength_ = model->code(MDL_STRENGTH).asFloat();
 
   refreshText();
 }

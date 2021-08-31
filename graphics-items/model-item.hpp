@@ -69,6 +69,12 @@ public:
 
   void updateFromModel();
 
+  void setStrengthColor(QString color)
+  {
+    strengthColor_ = color;
+    refreshText();
+  };
+
   void setEvidenceCountColor(QString color) 
   { 
     evidenceCountColor_ = color;
@@ -78,12 +84,6 @@ public:
   void setSuccessRateColor(QString color)
   {
     successRateColor_ = color;
-    refreshText();
-  };
-
-  void setStrengthColor(QString color)
-  {
-    strengthColor_ = color;
     refreshText();
   };
 
@@ -121,12 +121,12 @@ public:
    */
   static bool getTimingVariables(r_code::Code* fact, int& iAfterVariable, int& iBeforeVariable);
 
+  int strengthFlashCountdown_;
+  bool strengthIncreased_;
   int evidenceCountFlashCountdown_;
   bool evidenceCountIncreased_;
   int successRateFlashCountdown_;
   bool successRateIncreased_;
-  int strengthFlashCountdown_;
-  bool strengthIncreased_;
 
 private:
   QString makeHtml();
@@ -146,12 +146,12 @@ private:
 
   NewModelEvent* newModelEvent_;
   QString sourceCodeHtml_;
+  core::float32 strength_;
+  QString strengthColor_;
   core::float32 evidenceCount_;
   QString evidenceCountColor_;
   core::float32 successRate_;
   QString successRateColor_;
-  core::float32 strength_;
-  QString strengthColor_;
 };
 
 }

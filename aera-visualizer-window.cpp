@@ -181,7 +181,7 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgressDialog& progress)
 {
   // load mdl 37, MDLController(113)
-  regex loadModelRegex("^load mdl (\\d+), MDLController\\((\\d+)\\) cnt:(\\d+) sr:([\\d\\.]+) strength:([\\d\\.]+)$");
+  regex loadModelRegex("^load mdl (\\d+), MDLController\\((\\d+)\\) strength:([\\d\\.]+) cnt:(\\d+) sr:([\\d\\.]+)$");
   // load cst 36, CSTController(98)
   regex loadCompositeStateRegex("^load cst (\\d+), CSTController\\((\\d+)\\)$");
 
@@ -268,14 +268,14 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
       if (model) {
         // Restore the initial count, success rate and strength.
-        core::float32 evidenceCount = stol(matches[3].str());
-        core::float32 successRate = stof(matches[4].str());
-        core::float32 strength = stof(matches[5].str());
+        core::float32 strength = stof(matches[3].str());
+        core::float32 evidenceCount = stol(matches[4].str());
+        core::float32 successRate = stof(matches[5].str());
+        model->code(MDL_STRENGTH) = Atom::Float(strength);
         model->code(MDL_CNT) = Atom::Float(evidenceCount);
         model->code(MDL_SR) = Atom::Float(successRate);
-        model->code(MDL_STRENGTH) = Atom::Float(strength);
         startupEvents_.push_back(make_shared <NewModelEvent>(
-          replicodeObjects_.getTimeReference(), model, evidenceCount, successRate, strength, stoll(matches[2].str())));
+          replicodeObjects_.getTimeReference(), model, strength, evidenceCount, successRate, stoll(matches[2].str())));
       }
 
       continue;
@@ -305,9 +305,9 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
     if (regex_search(lineAfterTimestamp, matches, newModelRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
       if (model)
-        // Use the count, success rate and strength as initialized in _TPX::build_mdl_tail.
+        // Use the strength, count and success rate as initialized in _TPX::build_mdl_tail.
         events_.push_back(make_shared<NewModelEvent>(
-          timestamp, model, 1, 1, 0, stoll(matches[2].str())));
+          timestamp, model, 0, 1, 1, stoll(matches[2].str())));
     }
     else if (regex_search(lineAfterTimestamp, matches, setEvidenceCountAndSuccessRateRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
@@ -739,9 +739,9 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       auto newModelEvent = (NewModelEvent*)event;
 
       // Restore the evidence count, success rate and strength in case we did a rewind.
+      newModelEvent->object_->code(MDL_STRENGTH) = Atom::Float(newModelEvent->strength_);
       newModelEvent->object_->code(MDL_CNT) = Atom::Float(newModelEvent->evidenceCount_);
       newModelEvent->object_->code(MDL_SR) = Atom::Float(newModelEvent->successRate_);
-      newModelEvent->object_->code(MDL_STRENGTH) = Atom::Float(newModelEvent->strength_);
 
       newItem = new ModelItem(newModelEvent, replicodeObjects_, scene);
     }

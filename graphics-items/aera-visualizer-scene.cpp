@@ -484,6 +484,17 @@ void AeraVisualizerScene::timerEvent(QTimerEvent* event)
 
     auto modelItem = dynamic_cast<ModelItem*>(item);
     if (modelItem) {
+      if (modelItem->strengthFlashCountdown_ > 0) {
+        isFlashing = true;
+
+        --modelItem->strengthFlashCountdown_;
+        if (modelItem->strengthFlashCountdown_ % 2 == 1)
+          modelItem->setStrengthColor
+          (modelItem->strengthIncreased_ ? valueUpFlashColor_ : valueDownFlashColor_);
+        else
+          modelItem->setStrengthColor(noFlashColor_);
+      }
+
       if (modelItem->evidenceCountFlashCountdown_ > 0) {
         isFlashing = true;
 
@@ -504,17 +515,6 @@ void AeraVisualizerScene::timerEvent(QTimerEvent* event)
           (modelItem->successRateIncreased_ ? valueUpFlashColor_ : valueDownFlashColor_);
         else
           modelItem->setSuccessRateColor(noFlashColor_);
-      }
-
-      if (modelItem->strengthFlashCountdown_ > 0) {
-        isFlashing = true;
-
-        --modelItem->strengthFlashCountdown_;
-        if (modelItem->strengthFlashCountdown_ % 2 == 1)
-          modelItem->setStrengthColor
-          (modelItem->strengthIncreased_ ? valueUpFlashColor_ : valueDownFlashColor_);
-        else
-          modelItem->setStrengthColor(noFlashColor_);
       }
     }
   }
