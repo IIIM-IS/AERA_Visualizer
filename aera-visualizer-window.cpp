@@ -181,7 +181,7 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgressDialog& progress)
 {
   // load mdl 37, MDLController(113)
-  regex loadModelRegex("^load mdl (\\d+), MDLController\\((\\d+)\\) cnt:(\\d+) sr:([\\d\\.]+)$");
+  regex loadModelRegex("^load mdl (\\d+), MDLController\\((\\d+)\\) cnt:(\\d+) sr:([\\d\\.]+) strength:([\\d\\.]+)$");
   // load cst 36, CSTController(98)
   regex loadCompositeStateRegex("^load cst (\\d+), CSTController\\((\\d+)\\)$");
 
@@ -265,11 +265,13 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
     if (regex_search(line, matches, loadModelRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
       if (model) {
-        // Restore the initial count and success rate.
+        // Restore the initial count, success rate and strength.
         core::float32 evidenceCount = stol(matches[3].str());
         core::float32 successRate = stof(matches[4].str());
+        core::float32 strength = stof(matches[5].str());
         model->code(MDL_CNT) = Atom::Float(evidenceCount);
         model->code(MDL_SR) = Atom::Float(successRate);
+        model->code(MDL_STRENGTH) = Atom::Float(strength);
         startupEvents_.push_back(make_shared <NewModelEvent>(
           replicodeObjects_.getTimeReference(), model, evidenceCount, successRate, stoll(matches[2].str())));
       }
