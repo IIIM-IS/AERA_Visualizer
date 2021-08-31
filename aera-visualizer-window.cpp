@@ -273,7 +273,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
         model->code(MDL_SR) = Atom::Float(successRate);
         model->code(MDL_STRENGTH) = Atom::Float(strength);
         startupEvents_.push_back(make_shared <NewModelEvent>(
-          replicodeObjects_.getTimeReference(), model, evidenceCount, successRate, stoll(matches[2].str())));
+          replicodeObjects_.getTimeReference(), model, evidenceCount, successRate, strength, stoll(matches[2].str())));
       }
 
       continue;
@@ -303,9 +303,9 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
     if (regex_search(lineAfterTimestamp, matches, newModelRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
       if (model)
-        // Assume the initial success rate is 1.
+        // Use the count, success rate and strength as initialized in _TPX::build_mdl_tail.
         events_.push_back(make_shared<NewModelEvent>(
-          timestamp, model, 1, 1, stoll(matches[2].str())));
+          timestamp, model, 1, 1, 0, stoll(matches[2].str())));
     }
     else if (regex_search(lineAfterTimestamp, matches, setEvidenceCountAndSuccessRateRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
