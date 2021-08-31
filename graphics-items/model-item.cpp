@@ -65,8 +65,9 @@ ModelItem::ModelItem(
   newModelEvent_(newModelEvent),
   evidenceCount_(newModelEvent_->object_->code(MDL_CNT).asFloat()),
   successRate_(newModelEvent_->object_->code(MDL_SR).asFloat()),
-  evidenceCountColor_("black"), successRateColor_("black"),
-  evidenceCountFlashCountdown_(0), successRateFlashCountdown_(0)
+  strength_(newModelEvent_->object_->code(MDL_STRENGTH).asFloat()),
+  evidenceCountColor_("black"), successRateColor_("black"), strengthColor_("black"),
+  evidenceCountFlashCountdown_(0), successRateFlashCountdown_(0), strengthFlashCountdown_(0)
 {
   // Set up sourceCodeHtml_
   sourceCodeHtml_ = simplifyModelSource(replicodeObjects_.getSourceCode(newModelEvent_->object_));
@@ -136,6 +137,8 @@ QString ModelItem::makeHtml()
   auto model = newModelEvent_->object_;
 
   QString html = "";
+  html += "<font style=\"color:" + strengthColor_ + "\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Strength: " +
+    QString::number(strength_) + "</font><br>";
   html += "<font style=\"color:" + evidenceCountColor_ + "\">Evidence Count: " +
     QString::number(evidenceCount_) + "</font><br>";
   html += "<font style=\"color:" + successRateColor_ + "\">&nbsp;&nbsp;&nbsp;&nbsp;Success Rate: " +
@@ -151,6 +154,8 @@ void ModelItem::updateFromModel()
   evidenceCount_ = model->code(MDL_CNT).asFloat();
   successRateIncreased_ = (model->code(MDL_SR).asFloat() >= successRate_);
   successRate_ = model->code(MDL_SR).asFloat();
+  strengthIncreased_ = (model->code(MDL_STRENGTH).asFloat() >= strength_);
+  strength_ = model->code(MDL_STRENGTH).asFloat();
 
   refreshText();
 }

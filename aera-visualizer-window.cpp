@@ -192,6 +192,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   regex newModelRegex("^-> mdl (\\d+), MDLController\\((\\d+)\\)$");
   // mdl 53 cnt:2 sr:1
   regex setEvidenceCountAndSuccessRateRegex("^mdl (\\d+) cnt:(\\d+) sr:([\\d\\.]+)$");
+  // mdl 75 strength:1
+  regex setStrengthRegex("^mdl (\\d+) strength:([\\d\\.]+)$");
   // mdl 53 deleted
   // mdl 53 phased out
   regex deleteOrPhaseOutModelRegex("^mdl (\\d+) (deleted|phased out)$");
@@ -312,6 +314,12 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
       if (model)
         events_.push_back(make_shared<SetModelEvidenceCountAndSuccessRateEvent>(
           timestamp, model, stol(matches[2].str()), stof(matches[3].str())));
+    }
+    else if (regex_search(lineAfterTimestamp, matches, setStrengthRegex)) {
+      auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
+      if (model)
+        events_.push_back(make_shared<SetModelStrengthEvent>(
+          timestamp, model, stof(matches[2].str())));
     }
     else if (regex_search(lineAfterTimestamp, matches, deleteOrPhaseOutModelRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
@@ -695,6 +703,7 @@ Timestamp AeraVisulizerWindow::getINextStepEvent
     }
   }
   else if (event->eventType_ == SetModelEvidenceCountAndSuccessRateEvent::EVENT_TYPE ||
+           event->eventType_ == SetModelStrengthEvent::EVENT_TYPE ||
            event->eventType_ == DeleteModelEvent::EVENT_TYPE) {
     // We already set the default iNextStepEvent.
   }
@@ -729,9 +738,10 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     if (event->eventType_ == NewModelEvent::EVENT_TYPE) {
       auto newModelEvent = (NewModelEvent*)event;
 
-      // Restore the evidence count and success rate in case we did a rewind.
+      // Restore the evidence count, success rate and strength in case we did a rewind.
       newModelEvent->object_->code(MDL_CNT) = Atom::Float(newModelEvent->evidenceCount_);
       newModelEvent->object_->code(MDL_SR) = Atom::Float(newModelEvent->successRate_);
+      newModelEvent->object_->code(MDL_STRENGTH) = Atom::Float(newModelEvent->strength_);
 
       newItem = new ModelItem(newModelEvent, replicodeObjects_, scene);
     }
@@ -995,6 +1005,22 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       modelsScene_->establishFlashTimer();
     }
   }
+  else if (event->eventType_ == SetModelStrengthEvent::EVENT_TYPE) {
+    auto setStrengthEvent = (SetModelStrengthEvent*)event;
+
+    // Save the current values for a later undo.
+    setStrengthEvent->oldStrength_ = setStrengthEvent->object_->code(MDL_STRENGTH).asFloat();
+
+    // Update the model.
+    setStrengthEvent->object_->code(MDL_STRENGTH) = Atom::Float(setStrengthEvent->strength_);
+
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(setStrengthEvent->object_));
+    if (modelItem) {
+      modelItem->updateFromModel();
+      modelItem->strengthFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
+      modelsScene_->establishFlashTimer();
+    }
+  }
   else if (event->eventType_ == DeleteModelEvent::EVENT_TYPE) {
     auto deleteModelEvent = (DeleteModelEvent*)event;
 
@@ -1065,6 +1091,20 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
         modelItem->evidenceCountFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
         modelItem->successRateFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
       }
+
+      modelItem->updateFromModel();
+      modelsScene_->establishFlashTimer();
+    }
+  }
+  else if (event->eventType_ == SetModelStrengthEvent::EVENT_TYPE) {
+    // Find the ModelItem for this event and set to the old strength.
+    auto setStrengthEvent = (SetModelStrengthEvent*)event;
+
+    setStrengthEvent->object_->code(MDL_STRENGTH) = Atom::Float(setStrengthEvent->oldStrength_);
+
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(setStrengthEvent->object_));
+    if (modelItem) {
+      modelItem->strengthFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
 
       modelItem->updateFromModel();
       modelsScene_->establishFlashTimer();

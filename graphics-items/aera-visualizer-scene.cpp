@@ -505,6 +505,17 @@ void AeraVisualizerScene::timerEvent(QTimerEvent* event)
         else
           modelItem->setSuccessRateColor(noFlashColor_);
       }
+
+      if (modelItem->strengthFlashCountdown_ > 0) {
+        isFlashing = true;
+
+        --modelItem->strengthFlashCountdown_;
+        if (modelItem->strengthFlashCountdown_ % 2 == 1)
+          modelItem->setStrengthColor
+          (modelItem->strengthIncreased_ ? valueUpFlashColor_ : valueDownFlashColor_);
+        else
+          modelItem->setStrengthColor(noFlashColor_);
+      }
     }
   }
 

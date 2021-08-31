@@ -81,6 +81,12 @@ public:
     refreshText();
   };
 
+  void setStrengthColor(QString color)
+  {
+    strengthColor_ = color;
+    refreshText();
+  };
+
   /**
    * Start with the source from replicodeObjects_.getSourceCode for a model, and
    * remove the set of output groups and parameters, and remove trailing wildcards, and
@@ -119,6 +125,8 @@ public:
   bool evidenceCountIncreased_;
   int successRateFlashCountdown_;
   bool successRateIncreased_;
+  int strengthFlashCountdown_;
+  bool strengthIncreased_;
 
 private:
   QString makeHtml();
@@ -142,6 +150,8 @@ private:
   QString evidenceCountColor_;
   core::float32 successRate_;
   QString successRateColor_;
+  core::float32 strength_;
+  QString strengthColor_;
 };
 
 }
