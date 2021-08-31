@@ -864,9 +864,13 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     else if (event->eventType_ == CompositeStateSimulatedPredictionReduction::EVENT_TYPE) {
       auto reductionEvent = (CompositeStateSimulatedPredictionReduction*)event;
       newItem = new CompositeStatePredictionItem(reductionEvent, replicodeObjects_, scene);
+      if (reductionEvent->object_->get_oid() == 1426)
+        int debug1 = 1;
 
       // Add an arrow to the input fact.
       auto inputItem = scene->getAeraGraphicsItem(reductionEvent->input_);
+      if (inputItem)
+        scene->addArrow(inputItem, newItem, inputItem);
 
       // Add arrows to the inputs.
       for (int i = 0; i < reductionEvent->inputs_.size(); ++i) {
@@ -874,8 +878,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
         if (!referencedItem)
           continue;
         if (referencedItem == inputItem)
-          // The inputItem of the prediction is the LHS.
-          scene->addArrow(referencedItem, newItem, inputItem);
+          // We already added the arrow above.
+          continue;
         else
           scene->addArrow(referencedItem, newItem);
       }
