@@ -323,9 +323,12 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
     }
     else if (regex_search(lineAfterTimestamp, matches, deleteOrPhaseOutModelRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
-      if (model)
-        // TODO: Distinguish delete and phase out.
-        events_.push_back(make_shared<DeleteModelEvent>(timestamp, model));
+      if (model) {
+        if (matches[2] == "phased out")
+          events_.push_back(make_shared<PhaseOutModelEvent>(timestamp, model));
+        else
+          events_.push_back(make_shared<DeleteModelEvent>(timestamp, model));
+      }
     }
     else if (regex_search(lineAfterTimestamp, matches, newCompositeStateRegex)) {
       auto compositeState = replicodeObjects_.getObject(stoul(matches[1].str()));
@@ -704,6 +707,7 @@ Timestamp AeraVisulizerWindow::getINextStepEvent
   }
   else if (event->eventType_ == SetModelEvidenceCountAndSuccessRateEvent::EVENT_TYPE ||
            event->eventType_ == SetModelStrengthEvent::EVENT_TYPE ||
+           event->eventType_ == PhaseOutModelEvent::EVENT_TYPE ||
            event->eventType_ == DeleteModelEvent::EVENT_TYPE) {
     // We already set the default iNextStepEvent.
   }
@@ -1021,6 +1025,14 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       modelsScene_->establishFlashTimer();
     }
   }
+  else if (event->eventType_ == PhaseOutModelEvent::EVENT_TYPE) {
+    auto phaseOutModelEvent = (PhaseOutModelEvent*)event;
+
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(phaseOutModelEvent->object_));
+    if (modelItem)
+      // Set the background color.
+      modelItem->setBrush(QColor(255, 192, 192));
+  }
   else if (event->eventType_ == DeleteModelEvent::EVENT_TYPE) {
     auto deleteModelEvent = (DeleteModelEvent*)event;
 
@@ -1109,6 +1121,15 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
       modelItem->updateFromModel();
       modelsScene_->establishFlashTimer();
     }
+  }
+  else if (event->eventType_ == PhaseOutModelEvent::EVENT_TYPE) {
+    // Find the ModelItem for this event and set its appearance to not phased out.
+    auto phaseOutModelEvent = (PhaseOutModelEvent*)event;
+
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(phaseOutModelEvent->object_));
+    if (modelItem)
+      // Set the background color.
+      modelItem->setBrush(Qt::white);
   }
   else if (event->eventType_ == DeleteModelEvent::EVENT_TYPE) {
     // Find the ModelItem for this event and set its appearance to not deleted.
