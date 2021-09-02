@@ -131,6 +131,7 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
   iNextEvent_(0), explanationLogWindow_(0),
   essencePropertyObject_(replicodeObjects_.getObject("essence")),
   hoverHighlightItem_(0),
+  phasedOutModelColor_(255, 192, 192),
   showRelativeTime_(true),
   playTime_(seconds(0)),
   playTimerId_(0),
@@ -195,8 +196,9 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   // mdl 75 strength:1
   regex setStrengthRegex("^mdl (\\d+) strength:([\\d\\.]+)$");
   // mdl 53 deleted
+  // mdl 53 phased in
   // mdl 53 phased out
-  regex deleteOrPhaseOutModelRegex("^mdl (\\d+) (deleted|phased out)$");
+  regex deleteOrPhaseInOrOutModelRegex("^mdl (\\d+) (deleted|phased in|phased out)$");
   // -> cst 52, CSTController(375)
   regex newCompositeStateRegex("^-> cst (\\d+), CSTController\\((\\d+)\\)$");
   // A/F -> 35|40 (AXIOM)
@@ -321,12 +323,14 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
         events_.push_back(make_shared<SetModelStrengthEvent>(
           timestamp, model, stof(matches[2].str())));
     }
-    else if (regex_search(lineAfterTimestamp, matches, deleteOrPhaseOutModelRegex)) {
+    else if (regex_search(lineAfterTimestamp, matches, deleteOrPhaseInOrOutModelRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
       if (model) {
+        if (matches[2] == "phased in")
+          events_.push_back(make_shared<PhaseInModelEvent>(timestamp, model));
         if (matches[2] == "phased out")
           events_.push_back(make_shared<PhaseOutModelEvent>(timestamp, model));
-        else
+        else if (matches[2] == "deleted")
           events_.push_back(make_shared<DeleteModelEvent>(timestamp, model));
       }
     }
@@ -707,6 +711,7 @@ Timestamp AeraVisulizerWindow::getINextStepEvent
   }
   else if (event->eventType_ == SetModelEvidenceCountAndSuccessRateEvent::EVENT_TYPE ||
            event->eventType_ == SetModelStrengthEvent::EVENT_TYPE ||
+           event->eventType_ == PhaseInModelEvent::EVENT_TYPE ||
            event->eventType_ == PhaseOutModelEvent::EVENT_TYPE ||
            event->eventType_ == DeleteModelEvent::EVENT_TYPE) {
     // We already set the default iNextStepEvent.
@@ -1025,13 +1030,21 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       modelsScene_->establishFlashTimer();
     }
   }
+  else if (event->eventType_ == PhaseInModelEvent::EVENT_TYPE) {
+    auto phaseInModelEvent = (PhaseInModelEvent*)event;
+
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(phaseInModelEvent->object_));
+    if (modelItem)
+      // Set the background color.
+      modelItem->setBrush(Qt::white);
+  }
   else if (event->eventType_ == PhaseOutModelEvent::EVENT_TYPE) {
     auto phaseOutModelEvent = (PhaseOutModelEvent*)event;
 
     auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(phaseOutModelEvent->object_));
     if (modelItem)
       // Set the background color.
-      modelItem->setBrush(QColor(255, 192, 192));
+      modelItem->setBrush(phasedOutModelColor_);
   }
   else if (event->eventType_ == DeleteModelEvent::EVENT_TYPE) {
     auto deleteModelEvent = (DeleteModelEvent*)event;
@@ -1121,6 +1134,15 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
       modelItem->updateFromModel();
       modelsScene_->establishFlashTimer();
     }
+  }
+  else if (event->eventType_ == PhaseInModelEvent::EVENT_TYPE) {
+    // Find the ModelItem for this event and set its appearance to not phased out.
+    auto phaseInModelEvent = (PhaseInModelEvent*)event;
+
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(phaseInModelEvent->object_));
+    if (modelItem)
+      // Set the background color. Assume the model was phased out before phase in.
+      modelItem->setBrush(phasedOutModelColor_);
   }
   else if (event->eventType_ == PhaseOutModelEvent::EVENT_TYPE) {
     // Find the ModelItem for this event and set its appearance to not phased out.

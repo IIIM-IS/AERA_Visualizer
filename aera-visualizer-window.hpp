@@ -256,6 +256,7 @@ private:
   bool hoverHighlightItemWasVisible_;
   QString hoverPreviousUrl_;
   r_code::Code* essencePropertyObject_;
+  QColor phasedOutModelColor_;
 
   bool showRelativeTime_;
   core::Timestamp playTime_;
