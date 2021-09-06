@@ -230,7 +230,7 @@
     <ClCompile Include="graphics-items\model-goal-item.cpp" />
     <ClCompile Include="graphics-items\model-imdl-prediction-item.cpp" />
     <ClCompile Include="graphics-items\model-item.cpp" />
-    <ClCompile Include="graphics-items\model-prediction-from-requirement.cpp" />
+    <ClCompile Include="graphics-items\model-prediction-from-requirement-item.cpp" />
     <ClCompile Include="graphics-items\model-prediction-item.cpp" />
     <ClCompile Include="graphics-items\prediction-item.cpp" />
     <ClCompile Include="graphics-items\prediction-result-item.cpp" />

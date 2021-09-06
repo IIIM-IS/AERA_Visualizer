@@ -249,7 +249,7 @@
     <ClCompile Include="graphics-items\simulation-commit-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
-    <ClCompile Include="graphics-items\model-prediction-from-requirement.cpp">
+    <ClCompile Include="graphics-items\model-prediction-from-requirement-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
     <ClCompile Include="graphics-items\expandable-goal-or-pred-item.cpp">
