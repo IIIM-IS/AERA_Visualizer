@@ -184,7 +184,7 @@ public:
   int borderFlashCountdown_;
 
 protected:
-  typedef enum { SHAPE_RECTANGLE, SHAPE_GOAL, SHAPE_PRED } Shape;
+  typedef enum { SHAPE_RECTANGLE, SHAPE_GOAL, SHAPE_PRED, SHAPE_STOP } Shape;
 
   /**
    * AeraGraphicsItem::TextItem extends QGraphicsTextItem so that we can override its

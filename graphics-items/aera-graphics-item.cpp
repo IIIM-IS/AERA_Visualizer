@@ -149,6 +149,16 @@ void AeraGraphicsItem::setTextItemAndPolygon(QString html, bool prependHeaderHtm
     path.lineTo(right - diameter / 2, bottom);
     path.lineTo(left, bottom);
   }
+  else if (shape == SHAPE_STOP) {
+    path.moveTo(left + diameter / 2, top);
+    path.lineTo(right - diameter / 2, top);
+    path.lineTo(right, top + (bottom - top) / 4);
+    path.lineTo(right, top + (bottom - top) * 3 / 4);
+    path.lineTo(right - diameter / 2, bottom);
+    path.lineTo(left + diameter / 2, bottom);
+    path.lineTo(left, top + (bottom - top) * 3 / 4);
+    path.lineTo(left, top + (bottom - top) / 4);
+  }
   else {
     path.moveTo(right, top + diameter / 2);
     path.arcTo(right - diameter, top, diameter, diameter, 0, 90);
@@ -352,7 +362,7 @@ void AeraGraphicsItem::setItemAndArrowsAndHorizontalLinesVisible(bool visible)
 
 bool AeraGraphicsItem::is_sim()
 {
-  if (aeraEvent_->object_->references_size() < 1)
+  if (!aeraEvent_->object_ || aeraEvent_->object_->references_size() < 1)
     return false;
 
   auto obj = aeraEvent_->object_->get_reference(0);
