@@ -154,7 +154,8 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
   }
 
   item->setBrush(item->is_sim() ? simulatedItemColor_ : itemColor_);
-  bool isFocusSimulation = (focusSimulationDetailOids_.find(item->getAeraEvent()->object_->get_detail_oid()) 
+  bool isFocusSimulation = (item->getAeraEvent()->object_ &&
+                            focusSimulationDetailOids_.find(item->getAeraEvent()->object_->get_detail_oid())
                             != focusSimulationDetailOids_.end());
   bool isSimulationEventType = 
     (AeraVisulizerWindow::simulationEventTypes_.find(item->getAeraEvent()->eventType_) !=
@@ -305,7 +306,8 @@ void AeraVisualizerScene::addArrow(
 
 void AeraVisualizerScene::addHorizontalLine(AeraGraphicsItem* item)
 {
-  if (item->getAeraEvent()->object_->code(0).asOpcode() == r_exec::Opcodes::Fact) {
+  if (item->getAeraEvent()->object_ &&
+      item->getAeraEvent()->object_->code(0).asOpcode() == r_exec::Opcodes::Fact) {
     auto fact = (_Fact*)item->getAeraEvent()->object_;
     Timestamp after, before;
 

@@ -959,21 +959,23 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     // Add the new item.
     scene->addAeraGraphicsItem(newItem);
 
-    // Add arrows to all referenced objects.
-    for (int i = 0; i < event->object_->references_size(); ++i) {
-      auto referencedItem = scene->getAeraGraphicsItem(event->object_->get_reference(i));
-      if (referencedItem)
-        scene->addArrow(referencedItem, newItem);
-    }
-    if (event->object_->code(0).asOpcode() == Opcodes::Fact ||
-        event->object_->code(0).asOpcode() == Opcodes::AntiFact) {
-      // Add references from the fact value.
-      auto value = event->object_->get_reference(0);
-      if (!(value->code(0).asOpcode() == Opcodes::IMdl || value->code(0).asOpcode() == Opcodes::ICst)) {
-        for (int i = 0; i < value->references_size(); ++i) {
-          auto referencedItem = scene->getAeraGraphicsItem(value->get_reference(i));
-          if (referencedItem)
-            scene->addArrow(referencedItem, newItem);
+    if (event->object_) {
+      // Add arrows to all referenced objects.
+      for (int i = 0; i < event->object_->references_size(); ++i) {
+        auto referencedItem = scene->getAeraGraphicsItem(event->object_->get_reference(i));
+        if (referencedItem)
+          scene->addArrow(referencedItem, newItem);
+      }
+      if (event->object_->code(0).asOpcode() == Opcodes::Fact ||
+          event->object_->code(0).asOpcode() == Opcodes::AntiFact) {
+        // Add references from the fact value.
+        auto value = event->object_->get_reference(0);
+        if (!(value->code(0).asOpcode() == Opcodes::IMdl || value->code(0).asOpcode() == Opcodes::ICst)) {
+          for (int i = 0; i < value->references_size(); ++i) {
+            auto referencedItem = scene->getAeraGraphicsItem(value->get_reference(i));
+            if (referencedItem)
+              scene->addArrow(referencedItem, newItem);
+          }
         }
       }
     }
