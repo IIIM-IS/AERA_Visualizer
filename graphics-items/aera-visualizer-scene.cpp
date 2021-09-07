@@ -153,7 +153,8 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     }
   }
 
-  item->setBrush(item->is_sim() ? simulatedItemColor_ : itemColor_);
+  item->setBrush(aeraEvent->eventType_ == ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE || item->is_sim() ?
+                 simulatedItemColor_ : itemColor_);
   bool isFocusSimulation = (item->getAeraEvent()->object_ &&
                             focusSimulationDetailOids_.find(item->getAeraEvent()->object_->get_detail_oid())
                             != focusSimulationDetailOids_.end());
@@ -209,13 +210,19 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     int verticalMargin = 15;
     if (isSimulationEventType) {
       // Position simulated items exactly.
-      // We know that a simulated item's object has the form (fact (goal_or_pred (fact ...)))
-      if (((_Fact*)aeraEvent->object_)->get_goal())
-        // Position a goal at the time it needs to be achieved by.
-        left = getTimelineX(((_Fact*)aeraEvent->object_->get_reference(0)->get_reference(0))->get_before()) -
+      if (aeraEvent->eventType_ == ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE)
+        // Special case. aeraEvent->object_ is null, so use the strong_requirement.
+        left = getTimelineX(((_Fact*)((ModelSimulatedPredictionFromRequirementDisabledEvent*)aeraEvent)->strong_requirement_
+                                       ->get_reference(0)->get_reference(0))->get_after());
+      else {
+        // We know that a simulated item's object has the form (fact (goal_or_pred (fact ...)))
+        if (((_Fact*)aeraEvent->object_)->get_goal())
+          // Position a goal at the time it needs to be achieved by.
+          left = getTimelineX(((_Fact*)aeraEvent->object_->get_reference(0)->get_reference(0))->get_before()) -
           item->boundingRect().width();
-      else
-        left = getTimelineX(((_Fact*)aeraEvent->object_->get_reference(0)->get_reference(0))->get_after());
+        else
+          left = getTimelineX(((_Fact*)aeraEvent->object_->get_reference(0)->get_reference(0))->get_after());
+      }
     }
     else {
       if (aeraEvent->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
