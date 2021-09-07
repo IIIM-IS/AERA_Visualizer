@@ -230,6 +230,7 @@
     <ClCompile Include="graphics-items\model-goal-item.cpp" />
     <ClCompile Include="graphics-items\model-imdl-prediction-item.cpp" />
     <ClCompile Include="graphics-items\model-item.cpp" />
+    <ClCompile Include="graphics-items\model-prediction-from-requirement-disabled-item.cpp" />
     <ClCompile Include="graphics-items\model-prediction-from-requirement-item.cpp" />
     <ClCompile Include="graphics-items\model-prediction-item.cpp" />
     <ClCompile Include="graphics-items\prediction-item.cpp" />
@@ -356,6 +357,7 @@
     <ClInclude Include="graphics-items\model-goal-item.hpp" />
     <ClInclude Include="graphics-items\model-imdl-prediction-item.hpp" />
     <ClInclude Include="graphics-items\model-item.hpp" />
+    <ClInclude Include="graphics-items\model-prediction-from-requirement-disabled-item.hpp" />
     <ClInclude Include="graphics-items\model-prediction-from-requirement-item.hpp" />
     <ClInclude Include="graphics-items\model-prediction-item.hpp" />
     <ClInclude Include="graphics-items\prediction-item.hpp" />
