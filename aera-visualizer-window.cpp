@@ -62,6 +62,7 @@
 #include "graphics-items/model-prediction-item.hpp"
 #include "graphics-items/model-imdl-prediction-item.hpp"
 #include "graphics-items/model-prediction-from-requirement-item.hpp"
+#include "graphics-items/model-prediction-from-requirement-disabled-item.hpp"
 #include "graphics-items/composite-state-prediction-item.hpp"
 #include "graphics-items/prediction-result-item.hpp"
 #include "graphics-items/instantiated-composite-state-item.hpp"
@@ -106,7 +107,8 @@ protected:
 const set<int> AeraVisulizerWindow::simulationEventTypes_ = {
   DriveInjectEvent::EVENT_TYPE, ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,
   ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
-  ModelSimulatedPredictionReductionFromRequirement::EVENT_TYPE, SimulationCommitEvent ::EVENT_TYPE};
+  ModelSimulatedPredictionReductionFromRequirement::EVENT_TYPE, SimulationCommitEvent ::EVENT_TYPE,
+  ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE };
 
 const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
   NewModelEvent::EVENT_TYPE,
@@ -118,6 +120,7 @@ const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
   CompositeStateGoalReduction::EVENT_TYPE,
   ModelSimulatedPredictionReduction::EVENT_TYPE,
   ModelSimulatedPredictionReductionFromRequirement::EVENT_TYPE,
+  ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE,
   CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
   PredictionResultEvent::EVENT_TYPE,
   NewInstantiatedCompositeStateEvent::EVENT_TYPE,
@@ -207,6 +210,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   regex modelImdlPredictionReductionRegex("^mdl \\d+ predict imdl -> mk.rdx (\\d+)$");
   // mdl 67: fact (352225) pred fact imdl -> fact 588 simulated pred, from goal req 533
   regex modelSimulatedPredictionFromRequirementRegex("^mdl (\\d+): fact \\((\\d+)\\) pred fact imdl -> fact (\\d+) simulated pred, from goal req (\\d+)$");
+  // mdl 67: fact (697996) pred fact imdl, from goal req 1250, simulated pred disabled by fact (696754) pred |fact imdl
+  regex modelSimulatedPredictionDisabledByStrongRequirementRegex("^mdl (\\d+): fact \\((\\d+)\\) pred fact imdl, from goal req (\\d+), simulated pred disabled by fact \\((\\d+)\\) pred \\|fact imdl$");
   // mdl 63 predict -> mk.rdx 68
   regex modelPredictionReductionRegex("^mdl \\d+ predict -> mk.rdx (\\d+)$");
   // mdl 41 abduce -> mk.rdx 97
@@ -379,6 +384,16 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
       if (model && factPred && input && goal_requirement)
         events_.push_back(make_shared<ModelSimulatedPredictionReductionFromRequirement>(
           timestamp, model, factPred, input, goal_requirement));
+    }
+    else if (regex_search(lineAfterTimestamp, matches, modelSimulatedPredictionDisabledByStrongRequirementRegex)) {
+      auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
+      auto input = replicodeObjects_.getObjectByDetailOid(stoul(matches[2].str()));
+      auto goal_requirement = replicodeObjects_.getObject(stoul(matches[3].str()));
+      auto strong_requirement = replicodeObjects_.getObjectByDetailOid(stoul(matches[4].str()));
+
+      if (model && input && goal_requirement && strong_requirement)
+        events_.push_back(make_shared<ModelSimulatedPredictionFromRequirementDisabledEvent>(
+          timestamp, model, input, goal_requirement, strong_requirement));
     }
     else if (regex_search(lineAfterTimestamp, matches, modelPredictionReductionRegex)) {
       auto reduction = replicodeObjects_.getObject(stoul(matches[1].str()));
@@ -877,6 +892,26 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       if (goalRequirementItem)
         // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
         scene->addArrow(goalRequirementItem, newItem);
+
+      scene->addHorizontalLine(newItem);
+
+      visible = (simulationsCheckBox_->checkState() == Qt::Checked);
+    }
+    else if (event->eventType_ == ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE) {
+      auto requirementDisabledEvent = (ModelSimulatedPredictionFromRequirementDisabledEvent*)event;
+      newItem = new ModelPredictionFromRequirementDisabledItem(requirementDisabledEvent, replicodeObjects_, scene);
+
+      // Add an arrow to the input fact.
+      auto inputItem = scene->getAeraGraphicsItem(requirementDisabledEvent->input_);
+      if (inputItem)
+        // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
+        scene->addArrow(inputItem, newItem);
+
+      // Add an arrow to the strong requirement.
+      auto strongRequirementItem = scene->getAeraGraphicsItem(requirementDisabledEvent->strong_requirement_);
+      if (strongRequirementItem)
+        // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
+        scene->addArrow(strongRequirementItem, newItem);
 
       scene->addHorizontalLine(newItem);
 
