@@ -222,7 +222,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   regex compositeStateSimulatedAbductionRegex("^cst (\\d+): fact (\\d+) super_goal -> fact (\\d+) simulated goal$");
   // mdl 57: fact 202 pred -> fact 227 simulated pred
   // mdl 57: fact 202 pred -> fact 227 simulated pred, using req (745971)
-  regex modelSimulatedPredictionRegex("^mdl (\\d+): fact (\\d+) pred -> fact (\\d+) simulated pred(?:, using req \\((\\d+)\\))?$");
+  // mdl 57: fact 202 pred -> fact 227 simulated pred fact imdl, using req (745971)
+  regex modelSimulatedPredictionRegex("^mdl (\\d+): fact (\\d+) pred -> fact (\\d+) simulated pred( fact imdl)?(?:, using req \\((\\d+)\\))?$");
   // mdl 63: fact 531 super_goal -> fact (332278) simulated pred start, using req (323845), ijt 0s:535ms:0us
   regex modelSimulatedPredictionStartRegex("^mdl (\\d+): fact (\\d+) super_goal -> fact \\((\\d+)\\) simulated pred start, using req \\((\\d+)\\), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
   // cst 60: fact 195 -> fact 218 simulated pred fact icst [ 155 191]
@@ -369,7 +370,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
         if (model && cause && factPred) {
           if (((_Fact*)factPred)->get_pred()->is_simulation())
             events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
-              timestamp, model, factPred, cause, (Code*)NULL, false));
+              timestamp, model, factPred, cause, (Code*)NULL, false, false));
           else
             events_.push_back(make_shared<ModelImdlPredictionEvent>(
               timestamp, factPred, model, cause));
@@ -459,13 +460,14 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
       auto input = replicodeObjects_.getObject(stoul(matches[2].str()));
       auto factPred = replicodeObjects_.getObject(stoul(matches[3].str()));
+      bool factPredIsImdl = (matches[4] == " fact imdl");
       Code* requirement = 0;
-      if (matches[4].length() > 0)
-        requirement = replicodeObjects_.getObjectByDetailOid(stoul(matches[4].str()));
+      if (matches[5].length() > 0)
+        requirement = replicodeObjects_.getObjectByDetailOid(stoul(matches[5].str()));
 
       if (model && factPred && input)
         events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
-          timestamp, model, factPred, input, requirement, false));
+          timestamp, model, factPred, input, requirement, false, factPredIsImdl));
     }
     else if (regex_search(lineAfterTimestamp, matches, modelSimulatedPredictionStartRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
@@ -479,7 +481,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
           // We don't expect this, but the runtime would not have injected earlier.
           injectionTime = timestamp;
         // TODO: Use an AeraEvent with the details of starting the simulated forward chaining, and include requirement.
-        auto event = make_shared<ModelSimulatedPredictionReduction>(injectionTime, model, factPred, input, requirement, true);
+        auto event = make_shared<ModelSimulatedPredictionReduction>(injectionTime, model, factPred, input, requirement, true, false);
         // Put in pendingEvents to be added to events_ later.
         if (pendingEvents.find(event->time_) == pendingEvents.end())
           // Create the entry.
@@ -857,10 +859,15 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 
       // Add an arrow to the input fact.
       auto inputItem = scene->getAeraGraphicsItem(reductionEvent->input_);
-      if (inputItem)
-        // If the input is a super goal, then the inputItem is the RHS, otherwise,
-        // the input of the prediction is the LHS.
-        scene->addArrow(inputItem, newItem, reductionEvent->inputIsSuperGoal_ ? newItem : inputItem);
+      if (inputItem) {
+        if (reductionEvent->factPredIsImdl_)
+          // This is the imdl, not the RHS, so don't use red/green arrows.
+          scene->addArrow(inputItem, newItem);
+        else
+          // If the input is a super goal, then the inputItem is the RHS, otherwise,
+          // the input of the prediction is the LHS.
+          scene->addArrow(inputItem, newItem, reductionEvent->inputIsSuperGoal_ ? newItem : inputItem);
+      }
 
       // Add an arrow to the requirement.
       if (reductionEvent->requirement_) {

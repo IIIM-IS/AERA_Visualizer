@@ -391,13 +391,15 @@ public:
    * \param requirement The requirement used by the reduction (may be NULL).
    * \param inputIsSuperGoal True if the input is a super goal, meaning that this event
    * is the last step of simulated backward chaining to start forward chaining.
+   * \param factPredIsImdl True if the prediction is of the imdl, not of the RHS.
    */
   ModelSimulatedPredictionReduction(core::Timestamp time, r_code::Code* model,
-      r_code::Code* factPred, r_code::Code* input, r_code::Code* requirement, bool inputIsSuperGoal)
+      r_code::Code* factPred, r_code::Code* input, r_code::Code* requirement, bool inputIsSuperGoal,
+      bool factPredIsImdl)
     : AeraEvent(EVENT_TYPE, time, factPred),
       model_(model), factPred_((r_exec::_Fact*)factPred),
       input_((r_exec::_Fact*)input), requirement_((r_exec::_Fact*)requirement),
-      inputIsSuperGoal_(inputIsSuperGoal)
+      inputIsSuperGoal_(inputIsSuperGoal), factPredIsImdl_(factPredIsImdl)
   {}
 
   r_code::Code* getInput() override { return input_; }
@@ -409,6 +411,7 @@ public:
   r_exec::_Fact* input_;
   r_exec::_Fact* requirement_;
   bool inputIsSuperGoal_;
+  bool factPredIsImdl_;
 };
 
 /**
