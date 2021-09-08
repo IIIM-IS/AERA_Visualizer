@@ -221,6 +221,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   // cst 64: fact 96 super_goal -> fact 98 simulated goal
   regex compositeStateSimulatedAbductionRegex("^cst (\\d+): fact (\\d+) super_goal -> fact (\\d+) simulated goal$");
   // mdl 57: fact 202 pred -> fact 227 simulated pred
+  // mdl 57: fact 202 pred -> fact 227 simulated pred, using req (745971)
   regex modelSimulatedPredictionRegex("^mdl (\\d+): fact (\\d+) pred -> fact (\\d+) simulated pred(?:, using req \\((\\d+)\\))?$");
   // mdl 63: fact 531 super_goal -> fact (332278) simulated pred start, using req (323845), ijt 0s:535ms:0us
   regex modelSimulatedPredictionStartRegex("^mdl (\\d+): fact (\\d+) super_goal -> fact \\((\\d+)\\) simulated pred start, using req \\((\\d+)\\), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
@@ -461,8 +462,6 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
       Code* requirement = 0;
       if (matches[4].length() > 0)
         requirement = replicodeObjects_.getObjectByDetailOid(stoul(matches[4].str()));
-      else
-        int debug1 = 1;
 
       if (model && factPred && input)
         events_.push_back(make_shared<ModelSimulatedPredictionReduction>(
