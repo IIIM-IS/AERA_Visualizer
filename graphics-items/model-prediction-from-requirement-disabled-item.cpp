@@ -70,6 +70,8 @@ ModelPredictionFromRequirementDisabledItem::ModelPredictionFromRequirementDisabl
 : AeraGraphicsItem(requirementDisabledEvent, replicodeObjects, parent, ""),
   requirementDisabledEvent_(requirementDisabledEvent)
 {
+  borderNoHighlightPen_ = QPen(Qt::red, 2);
+
   setMessageHtml();
   setTextItemAndPolygon(messageHtml_, false, SHAPE_STOP);
   setToolTip(toolTipText_);
