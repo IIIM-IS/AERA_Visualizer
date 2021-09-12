@@ -7,7 +7,7 @@ Prerequisites
 =============
 
 * Required: Replicode
-* Required: Qt Framework, version 4.9 or greater
+* Required: Qt Framework, version 5.14.2
 * Required: The AERA Visualizer code repository from https://github.com/IIIM-IS/AERA_Visualizer . Do a "recursive" clone to get submodules, e.g.:
 
     git clone --recursive https://github.com/IIIM-IS/AERA_Visualizer
@@ -21,14 +21,14 @@ to follow the instructions to set `WITH_DETAIL_OID` .
 To install Qt Framework:
 
 * Download and install from https://www.qt.io/download-qt-installer . In the
-  installer, select "Custom installation". Expand "Qt" and expand the latest version 5 release,
-  e.g. "5.15.2". Select your MSVC 64-bit version, e.g. "MSVC 2019 64.bit" When the installer is
+  installer, select "Custom installation". Expand "Qt" and expand version
+  "5.14.2". Select your MSVC 64-bit version, e.g. "MSVC 2017 64.bit" When the installer is
   finished, you can uncheck "Launch Qt Creator" since we don't need it. 
 * With Visual Studio closed, download and install the Qt Visual Studio Tools from
   https://marketplace.visualstudio.com/items?itemName=TheQtCompany.QtVisualStudioTools2019 .
 * Launch Visual Studio. On the "splash" screen, click "continue without code". On the Extensions menu, click 
   "Qt VS Tools" then "Options". On the "Qt Versions" tab, click "<add new Qt version>". Click the folder icon and 
-  select the path of the qmake executable, e.g. `C:\Qt\5.15.0\msvc2019_64\bin\qmake.exe` . Click "OK".
+  select the path of the qmake executable, e.g. `C:\Qt\5.14.2\msvc2017_64\bin\qmake.exe` . Click "OK".
 
 To get the AERA Visualizer code repository, launch GitHub for Desktop and sign in to GitHub. In the File menu, 
 click "Clone a Repository". Click the URL tab and enter `https://github.com/IIIM-IS/AERA_Visualizer` . 
