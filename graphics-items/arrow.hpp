@@ -63,6 +63,7 @@ class QGraphicsLineItem;
 class QGraphicsScene;
 class QRectF;
 class QGraphicsSceneMouseEvent;
+class QGraphicsSceneContextMenuEvent;
 class QPainterPath;
 
 namespace aera_visualizer {
@@ -102,6 +103,8 @@ public:
   QPainterPath shape() const override;
   QGraphicsPolygonItem* startItem() const { return startItem_; }
   QGraphicsPolygonItem* endItem() const { return endItem_; }
+
+  void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 
   void updatePosition();
 

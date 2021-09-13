@@ -53,7 +53,9 @@
 #include "aera-visualizer-scene.hpp"
 
 #include <qmath.h>
+#include <QGraphicsSceneContextMenuEvent>
 #include <QPainter>
+#include <QMenu>
 
 namespace aera_visualizer {
 
@@ -76,6 +78,15 @@ Arrow::Arrow(
   setPen(DefaultPen);
   arrowBasePen_ = DefaultPen;
   arrowTipPen_ = DefaultPen;
+}
+
+void Arrow::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+{
+    auto menu = new QMenu();
+    menu->addAction("Zoom to Start", [=]() { parent_->zoomToItem(startItem_); });
+    menu->addAction("Zoom to End", [=]() { parent_->zoomToItem(endItem_); });
+    menu->exec(QCursor::pos() - QPoint(10, 10));
+    delete menu;
 }
 
 QRectF Arrow::boundingRect() const
