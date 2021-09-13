@@ -55,6 +55,7 @@
 #include <qmath.h>
 #include <QGraphicsSceneContextMenuEvent>
 #include <QPainter>
+#include <QGraphicsView>
 #include <QMenu>
 
 namespace aera_visualizer {
@@ -80,13 +81,27 @@ Arrow::Arrow(
   arrowTipPen_ = DefaultPen;
 }
 
+void Arrow::showBothSides()
+{
+  QRectF boundingRect = startItem_->sceneBoundingRect();
+  // United gives a rectangle containing both items
+  boundingRect = boundingRect.united(endItem_->sceneBoundingRect());
+  if (boundingRect.isValid()) {
+    parent_->views().at(0)->fitInView(boundingRect, Qt::KeepAspectRatio);
+  }
+}
+
 void Arrow::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
-    auto menu = new QMenu();
-    menu->addAction("Zoom to Start", [=]() { parent_->zoomToItem(startItem_); });
-    menu->addAction("Zoom to End", [=]() { parent_->zoomToItem(endItem_); });
-    menu->exec(QCursor::pos() - QPoint(10, 10));
-    delete menu;
+  auto menu = new QMenu();
+
+  menu->addAction("Zoom to Start", [=]() { parent_->zoomToItem(startItem_); });
+  menu->addAction("Zoom to End", [=]() { parent_->zoomToItem(endItem_); });
+  menu->addAction("Show both sides", [=]() { showBothSides(); });
+
+  menu->exec(QCursor::pos() - QPoint(10, 10));
+
+  delete menu;
 }
 
 QRectF Arrow::boundingRect() const

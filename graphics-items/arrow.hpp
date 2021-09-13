@@ -105,7 +105,7 @@ public:
   QGraphicsPolygonItem* endItem() const { return endItem_; }
 
   void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
-
+  void showBothSides();
   void updatePosition();
 
   /**
