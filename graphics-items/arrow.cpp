@@ -50,6 +50,7 @@
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 #include "arrow.hpp"
+#include "aera-visualizer-scene.hpp"
 
 #include <qmath.h>
 #include <QPainter>
@@ -63,11 +64,12 @@ const QPen Arrow::RedArrowheadPen(QColor(255, 0, 0), 2, Qt::SolidLine, Qt::Round
 
 Arrow::Arrow(
   QGraphicsPolygonItem* startItem, QGraphicsPolygonItem* endItem,
-   const QPen& highlightArrowBasePen, const QPen& highlightArrowTipPen, QGraphicsItem* parent)
-: QGraphicsLineItem(parent),
+   const QPen& highlightArrowBasePen, const QPen& highlightArrowTipPen, AeraVisualizerScene* parent)
+: QGraphicsLineItem(),
   highlightArrowBasePen_(highlightArrowBasePen),
   highlightArrowTipPen_(highlightArrowTipPen)
 {
+  parent_ = parent;
   startItem_ = startItem;
   endItem_ = endItem;
   setFlag(QGraphicsItem::ItemIsSelectable, true);
