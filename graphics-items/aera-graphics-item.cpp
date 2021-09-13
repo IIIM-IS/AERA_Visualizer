@@ -249,15 +249,20 @@ void AeraGraphicsItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
   delete menu;
 }
 
+void AeraGraphicsItem::updateArrowsAndLines()
+{
+  foreach(Arrow * arrow, arrows_)
+    arrow->updatePosition();
+  foreach(AnchoredHorizontalLine * line, horizontalLines_)
+    line->updatePosition();
+}
+
 QVariant AeraGraphicsItem::itemChange(GraphicsItemChange change, const QVariant& value)
 {
   if (change == QGraphicsItem::ItemPositionChange) {
     aeraEvent_->itemTopLeftPosition_ = boundingRect().topLeft() + value.toPointF();
 
-    foreach(Arrow * arrow, arrows_)
-      arrow->updatePosition();
-    foreach(AnchoredHorizontalLine * line, horizontalLines_)
-      line->updatePosition();
+    updateArrowsAndLines();
   }
 
   return value;
