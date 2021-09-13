@@ -91,12 +91,34 @@ void Arrow::showBothSides()
   }
 }
 
+void Arrow::moveEndsSideBySide()
+{
+  // Scene bounding rect contains the position on the scene
+  QPointF position = startItem_->pos();
+  QRectF endRect = endItem_->boundingRect();
+
+  // Position the end item {rightOffset} from the right of the start item
+  int rightOffset { 50 };
+  position.setX(position.x() + startItem_->boundingRect().width() / 2 + endRect.width() / 2 + rightOffset);
+  endItem_->setPos(position);
+
+  // Updates the position of other arrows connected to end item
+  auto aeraGraphicsEndItem = dynamic_cast<AeraGraphicsItem*>(endItem_);
+  if (aeraGraphicsEndItem) {
+    aeraGraphicsEndItem->updateArrowsAndLines();
+  }
+
+  // Fit the view with the newly positioned side-by-side items
+  showBothSides();
+}
+
 void Arrow::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
   auto menu = new QMenu();
 
   menu->addAction("Zoom to Start", [=]() { parent_->zoomToItem(startItem_); });
   menu->addAction("Zoom to End", [=]() { parent_->zoomToItem(endItem_); });
+  menu->addAction("Move side-by-side", [=]() { moveEndsSideBySide(); });
   menu->addAction("Show both sides", [=]() { showBothSides(); });
 
   menu->exec(QCursor::pos() - QPoint(10, 10));

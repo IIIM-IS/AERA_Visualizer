@@ -106,6 +106,7 @@ public:
 
   void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
   void showBothSides();
+  void moveEndsSideBySide();
   void updatePosition();
 
   /**
