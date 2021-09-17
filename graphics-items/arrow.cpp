@@ -50,9 +50,13 @@
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 #include "arrow.hpp"
+#include "aera-visualizer-scene.hpp"
 
 #include <qmath.h>
+#include <QGraphicsSceneContextMenuEvent>
 #include <QPainter>
+#include <QGraphicsView>
+#include <QMenu>
 
 namespace aera_visualizer {
 
@@ -63,17 +67,63 @@ const QPen Arrow::RedArrowheadPen(QColor(255, 0, 0), 2, Qt::SolidLine, Qt::Round
 
 Arrow::Arrow(
   QGraphicsPolygonItem* startItem, QGraphicsPolygonItem* endItem,
-   const QPen& highlightArrowBasePen, const QPen& highlightArrowTipPen, QGraphicsItem* parent)
-: QGraphicsLineItem(parent),
+   const QPen& highlightArrowBasePen, const QPen& highlightArrowTipPen, AeraVisualizerScene* parent)
+: QGraphicsLineItem(),
   highlightArrowBasePen_(highlightArrowBasePen),
   highlightArrowTipPen_(highlightArrowTipPen)
 {
+  parent_ = parent;
   startItem_ = startItem;
   endItem_ = endItem;
   setFlag(QGraphicsItem::ItemIsSelectable, true);
   setPen(DefaultPen);
   arrowBasePen_ = DefaultPen;
   arrowTipPen_ = DefaultPen;
+}
+
+void Arrow::showBothSides()
+{
+  QRectF boundingRect = startItem_->sceneBoundingRect();
+  // United gives a rectangle containing both items
+  boundingRect = boundingRect.united(endItem_->sceneBoundingRect());
+  if (boundingRect.isValid()) {
+    parent_->views().at(0)->fitInView(boundingRect, Qt::KeepAspectRatio);
+  }
+}
+
+void Arrow::moveEndsSideBySide()
+{
+  // Scene bounding rect contains the position on the scene
+  QPointF position = startItem_->pos();
+  QRectF endRect = endItem_->boundingRect();
+
+  // Position the end item {rightOffset} from the right of the start item
+  int rightOffset { 50 };
+  position.setX(position.x() + startItem_->boundingRect().width() / 2 + endRect.width() / 2 + rightOffset);
+  endItem_->setPos(position);
+
+  // Updates the position of other arrows connected to end item
+  auto aeraGraphicsEndItem = dynamic_cast<AeraGraphicsItem*>(endItem_);
+  if (aeraGraphicsEndItem) {
+    aeraGraphicsEndItem->updateArrowsAndLines();
+  }
+
+  // Fit the view with the newly positioned side-by-side items
+  showBothSides();
+}
+
+void Arrow::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+{
+  auto menu = new QMenu();
+
+  menu->addAction("Zoom to Start", [=]() { parent_->zoomToItem(startItem_); });
+  menu->addAction("Zoom to End", [=]() { parent_->zoomToItem(endItem_); });
+  menu->addAction("Move side-by-side", [=]() { moveEndsSideBySide(); });
+  menu->addAction("Show both sides", [=]() { showBothSides(); });
+
+  menu->exec(QCursor::pos() - QPoint(10, 10));
+
+  delete menu;
 }
 
 QRectF Arrow::boundingRect() const

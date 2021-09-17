@@ -52,6 +52,8 @@
 #ifndef ARROW_HPP
 #define ARROW_HPP
 
+#include "aera-visualizer-scene.hpp"
+
 #include <QGraphicsLineItem>
 #include <QGraphicsPolygonItem>
 #include <QPen>
@@ -61,6 +63,7 @@ class QGraphicsLineItem;
 class QGraphicsScene;
 class QRectF;
 class QGraphicsSceneMouseEvent;
+class QGraphicsSceneContextMenuEvent;
 class QPainterPath;
 
 namespace aera_visualizer {
@@ -78,21 +81,21 @@ public:
    * but is not otherwise used.
    * \param highlightArrowTipPen This pen is retrieved by getHighlightArrowTipPen(),
    * but is not otherwise used.
-   * \param parent (optional) The parent QGraphicsItem. If omitted, use null.
+   * \param parent The parent AeraVisualizerScene.
    */
   Arrow(QGraphicsPolygonItem* startItem, QGraphicsPolygonItem* endItem,
     const QPen& highlightArrowBasePen, const QPen& highlightArrowTipPen,
-    QGraphicsItem* parent = 0);
+    AeraVisualizerScene* parent);
 
   /**
    * Create an arrow from the startItem to the endItem.
    * getHighlightArrowBasePen( and getHighlightArrowTipPen() will return HighlightedPen.
    * \param startItem The Item for the start of the arrow.
    * \param endItem The Item for the end of the arrow.
-   * \param parent (optional) The parent QGraphicsItem. If omitted, use null.
+   * \param parent The parent AeraVisualizerScene.
    */
   Arrow(QGraphicsPolygonItem* startItem, QGraphicsPolygonItem* endItem,
-    QGraphicsItem* parent = 0)
+    AeraVisualizerScene* parent)
   : Arrow(startItem, endItem, HighlightedPen, HighlightedPen, parent) {};
 
   int type() const override { return Type; }
@@ -101,6 +104,9 @@ public:
   QGraphicsPolygonItem* startItem() const { return startItem_; }
   QGraphicsPolygonItem* endItem() const { return endItem_; }
 
+  void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
+  void showBothSides();
+  void moveEndsSideBySide();
   void updatePosition();
 
   /**
@@ -150,6 +156,7 @@ private:
   static void setArrowhead(QPolygonF& polygon, const QPointF& tip, double angle);
 
   static const int arrowSize_ = 6;
+  AeraVisualizerScene* parent_;
   QGraphicsPolygonItem* startItem_;
   QGraphicsPolygonItem* endItem_;
   QPen highlightArrowBasePen_;

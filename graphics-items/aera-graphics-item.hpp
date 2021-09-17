@@ -97,6 +97,7 @@ public:
   void removeArrowsAndHorizontalLines();
   void addArrow(Arrow* arrow) { arrows_.append(arrow); }
   void addHorizontalLine(AnchoredHorizontalLine* line) { horizontalLines_.append(line); }
+  void updateArrowsAndLines();
   AeraEvent* getAeraEvent() { return aeraEvent_; }
 
   /**
