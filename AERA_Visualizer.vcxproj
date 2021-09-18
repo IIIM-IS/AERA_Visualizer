@@ -233,6 +233,7 @@
     <ClCompile Include="graphics-items\model-prediction-from-requirement-disabled-item.cpp" />
     <ClCompile Include="graphics-items\model-prediction-from-requirement-item.cpp" />
     <ClCompile Include="graphics-items\model-prediction-item.cpp" />
+    <ClCompile Include="graphics-items\predicted-instantiated-composite-state-item.cpp" />
     <ClCompile Include="graphics-items\prediction-item.cpp" />
     <ClCompile Include="graphics-items\prediction-result-item.cpp" />
     <ClCompile Include="graphics-items\program-output-fact-item.cpp" />
@@ -360,6 +361,7 @@
     <ClInclude Include="graphics-items\model-prediction-from-requirement-disabled-item.hpp" />
     <ClInclude Include="graphics-items\model-prediction-from-requirement-item.hpp" />
     <ClInclude Include="graphics-items\model-prediction-item.hpp" />
+    <ClInclude Include="graphics-items\predicted-instantiated-composite-state-item.hpp" />
     <ClInclude Include="graphics-items\prediction-item.hpp" />
     <ClInclude Include="graphics-items\prediction-result-item.hpp" />
     <ClInclude Include="graphics-items\program-output-fact-item.hpp" />
