@@ -945,6 +945,12 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
         // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
         scene->addArrow(strongRequirementItem, newItem);
 
+      // Add an arrow to the goal requirement.
+      auto goalRequirementItem = scene->getAeraGraphicsItem(requirementDisabledEvent->goal_requirement_);
+      if (goalRequirementItem)
+        // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
+        scene->addArrow(goalRequirementItem, newItem);
+
       scene->addHorizontalLine(newItem);
 
       visible = (simulationsCheckBox_->checkState() == Qt::Checked);
