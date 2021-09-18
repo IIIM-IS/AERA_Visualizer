@@ -458,6 +458,28 @@ public:
   std::vector<r_code::Code*> inputs_;
 };
 
+/* Use NewPredictedInstantiatedCompositeStateEvent for a new predicted (non-simulated) icst.
+ */
+class NewPredictedInstantiatedCompositeStateEvent : public AeraEvent {
+public:
+  /**
+   * Create a NewPredictedInstantiatedCompositeStateEvent.
+   * \param time The reduction time.
+   * \param f_p_f_icst The new (fact (pred (fact (icst ...))))
+   * \param inputs The list of inputs. Note that some may be predictions.
+   */
+  NewPredictedInstantiatedCompositeStateEvent(
+    core::Timestamp time, r_code::Code* f_p_f_icst,
+    const std::vector<r_code::Code*>& inputs)
+    : AeraEvent(EVENT_TYPE, time, f_p_f_icst),
+      inputs_(inputs)
+  {}
+
+  static const int EVENT_TYPE = 18;
+
+  std::vector<r_code::Code*> inputs_;
+};
+
 /**
  * Use PredictionResultEvent for both success and failure. Use the method isSuccess to distinguish.
  */
@@ -473,7 +495,7 @@ public:
    */
   bool isSuccess() { return object_->code(0).asOpcode() == r_exec::Opcodes::Fact;  }
 
-  static const int EVENT_TYPE = 18;
+  static const int EVENT_TYPE = 19;
 };
 
 class IoDeviceInjectEvent : public AeraEvent {
@@ -484,7 +506,7 @@ public:
     injectionTime_(injectionTime)
   {}
 
-  static const int EVENT_TYPE = 19;
+  static const int EVENT_TYPE = 20;
 
   core::Timestamp injectionTime_;
 };
@@ -496,7 +518,7 @@ public:
     reduction_(reduction)
   {}
 
-  static const int EVENT_TYPE = 20;
+  static const int EVENT_TYPE = 21;
 
   r_code::Code* reduction_;
 };
@@ -509,7 +531,7 @@ public:
     injectionTime_(injectionTime)
   {}
 
-  static const int EVENT_TYPE = 21;
+  static const int EVENT_TYPE = 22;
 
   core::Timestamp injectionTime_;
 };
@@ -535,7 +557,7 @@ public:
 
   r_code::Code* getInput() override { return factPredFactSuccess_; }
 
-  static const int EVENT_TYPE = 22;
+  static const int EVENT_TYPE = 23;
 
   r_exec::_Fact* factPredFactSuccess_;
 };
@@ -563,7 +585,7 @@ public:
 
   r_code::Code* getInput() override { return input_; }
 
-  static const int EVENT_TYPE = 23;
+  static const int EVENT_TYPE = 24;
 
   r_code::Code* model_;
   r_exec::_Fact* factPred_;
@@ -596,7 +618,7 @@ public:
 
   r_code::Code* getInput() override { return input_; }
 
-  static const int EVENT_TYPE = 24;
+  static const int EVENT_TYPE = 25;
 
   r_code::Code* model_;
   r_exec::_Fact* input_;
