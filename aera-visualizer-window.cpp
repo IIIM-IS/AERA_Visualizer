@@ -66,6 +66,7 @@
 #include "graphics-items/composite-state-prediction-item.hpp"
 #include "graphics-items/prediction-result-item.hpp"
 #include "graphics-items/instantiated-composite-state-item.hpp"
+#include "graphics-items/predicted-instantiated-composite-state-item.hpp"
 #include "graphics-items/io-device-inject-eject-item.hpp"
 #include "graphics-items/drive-item.hpp"
 #include "graphics-items/simulation-commit-item.hpp"
@@ -124,6 +125,7 @@ const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
   CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
   PredictionResultEvent::EVENT_TYPE,
   NewInstantiatedCompositeStateEvent::EVENT_TYPE,
+  NewPredictedInstantiatedCompositeStateEvent::EVENT_TYPE,
   IoDeviceInjectEvent::EVENT_TYPE,
   IoDeviceEjectEvent::EVENT_TYPE,
   DriveInjectEvent::EVENT_TYPE,
@@ -230,6 +232,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   regex compositeStateSimulatedPredictionRegex("^cst (\\d+): fact (\\d+) -> fact (\\d+) simulated pred fact icst \\[([ \\d]+)\\]$");
   // fact 59 icst[52][ 50 55]
   regex newInstantiatedCompositeStateRegex("^fact (\\d+) icst\\[\\d+\\]\\[([ \\d]+)\\]$");
+  // fact 59 pred fact (193775) icst[52][ 50 55]
+  regex newPredictedInstantiatedCompositeStateRegex("^fact (\\d+) pred fact \\(\\d+\\) icst\\[\\d+\\]\\[([ \\d]+)\\]$");
   // fact 75 -> fact 79 success fact 60 pred
   regex predictionSuccessRegex("^fact (\\d+) -> fact (\\d+) success fact \\d+ pred$");
   // |fact 72 fact 59 pred failure
@@ -534,6 +538,28 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
       if (instantiatedCompositeState && gotAllInputs)
         events_.push_back(make_shared<NewInstantiatedCompositeStateEvent>(
           timestamp, instantiatedCompositeState, inputs));
+    }
+    else if (regex_search(lineAfterTimestamp, matches, newPredictedInstantiatedCompositeStateRegex)) {
+      auto f_p_f_icst = replicodeObjects_.getObject(stoul(matches[1].str()));
+
+      // Get the matching inputs.
+      string inputOids = matches[2].str();
+      std::vector<Code*> inputs;
+      bool gotAllInputs = true;
+      while (regex_search(inputOids, matches, regex("( \\d+)"))) {
+        auto input = replicodeObjects_.getObject(stoul(matches[1].str()));
+        if (!input) {
+          gotAllInputs = false;
+          break;
+        }
+        inputs.push_back(input);
+
+        inputOids = matches.suffix();
+      }
+
+      if (f_p_f_icst && gotAllInputs)
+        events_.push_back(make_shared<NewPredictedInstantiatedCompositeStateEvent>(
+          timestamp, f_p_f_icst, inputs));
     }
     else if (regex_search(lineAfterTimestamp, matches, predictionSuccessRegex)) {
       auto factSuccessFactPred = replicodeObjects_.getObject(stoul(matches[2].str()));
@@ -970,6 +996,20 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 
       visible = ((nonSimulationsCheckBox_->checkState() == Qt::Checked) && 
                  (instantiatedCompositeStatesCheckBox_->checkState() == Qt::Checked));
+    }
+    else if (event->eventType_ == NewPredictedInstantiatedCompositeStateEvent::EVENT_TYPE) {
+      auto newIcstEvent = (NewPredictedInstantiatedCompositeStateEvent*)event;
+      newItem = new PredictedInstantiatedCompositeStateItem(newIcstEvent, replicodeObjects_, scene);
+
+      // Add arrows to inputs.
+      for (int i = 0; i < newIcstEvent->inputs_.size(); ++i) {
+        auto referencedItem = scene->getAeraGraphicsItem(newIcstEvent->inputs_[i]);
+        if (referencedItem)
+          scene->addArrow(referencedItem, newItem);
+      }
+
+      visible = ((nonSimulationsCheckBox_->checkState() == Qt::Checked) && 
+                 (predictedInstantiatedCompositeStatesCheckBox_->checkState() == Qt::Checked));
     }
     else if (event->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
              event->eventType_ == IoDeviceEjectEvent::EVENT_TYPE)
@@ -1555,6 +1595,7 @@ void AeraVisulizerWindow::createToolbars()
   connect(nonSimulationsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     essenceFactsCheckBox_->setEnabled(state == Qt::Checked);
     instantiatedCompositeStatesCheckBox_->setEnabled(state == Qt::Checked);
+    predictedInstantiatedCompositeStatesCheckBox_->setEnabled(state == Qt::Checked);
     requirementsCheckBox_->setEnabled(state == Qt::Checked);
 
     // Do the opposite of simulationsCheckBox_ .
@@ -1564,6 +1605,8 @@ void AeraVisulizerWindow::createToolbars()
       mainScene_->setAutoFocusItemsVisible("essence", essenceFactsCheckBox_->checkState() == Qt::Checked);
       mainScene_->setItemsVisible(
         NewInstantiatedCompositeStateEvent::EVENT_TYPE, instantiatedCompositeStatesCheckBox_->checkState() == Qt::Checked);
+      mainScene_->setItemsVisible(
+        NewPredictedInstantiatedCompositeStateEvent::EVENT_TYPE, predictedInstantiatedCompositeStatesCheckBox_->checkState() == Qt::Checked);
       mainScene_->setItemsVisible(
         ModelImdlPredictionEvent::EVENT_TYPE, requirementsCheckBox_->checkState() == Qt::Checked);
     }
@@ -1579,8 +1622,14 @@ void AeraVisulizerWindow::createToolbars()
   instantiatedCompositeStatesCheckBox_ = new QCheckBox("Instantiated Comp. States", this);
   instantiatedCompositeStatesCheckBox_->setStyleSheet("background-color:#ffffff");
   connect(instantiatedCompositeStatesCheckBox_, &QCheckBox::stateChanged, [=](int state) {
-    mainScene_->setItemsVisible(NewInstantiatedCompositeStateEvent::EVENT_TYPE, state == Qt::Checked);  });
+    mainScene_->setItemsVisible(NewInstantiatedCompositeStateEvent::EVENT_TYPE, state == Qt::Checked); });
   toolbar->addWidget(instantiatedCompositeStatesCheckBox_);
+
+  predictedInstantiatedCompositeStatesCheckBox_ = new QCheckBox("Pred. Instantiated Comp. States", this);
+  predictedInstantiatedCompositeStatesCheckBox_->setStyleSheet("background-color:#ffffff");
+  connect(predictedInstantiatedCompositeStatesCheckBox_, &QCheckBox::stateChanged, [=](int state) {
+    mainScene_->setItemsVisible(NewPredictedInstantiatedCompositeStateEvent::EVENT_TYPE, state == Qt::Checked); });
+  toolbar->addWidget(predictedInstantiatedCompositeStatesCheckBox_);
 
   requirementsCheckBox_ = new QCheckBox("Requirements", this);
   requirementsCheckBox_->setStyleSheet("background-color:#ffffff");

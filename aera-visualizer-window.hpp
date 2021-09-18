@@ -246,6 +246,7 @@ private:
   QCheckBox* nonSimulationsCheckBox_;
   QCheckBox* essenceFactsCheckBox_;
   QCheckBox* instantiatedCompositeStatesCheckBox_;
+  QCheckBox* predictedInstantiatedCompositeStatesCheckBox_;
   QCheckBox* requirementsCheckBox_;
 
   std::vector<std::shared_ptr<AeraEvent> > startupEvents_;
