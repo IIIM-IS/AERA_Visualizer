@@ -63,7 +63,7 @@ you need to put the Qt bin folder in the system path as follows:
 * Click Environment Variables
 * In the "System variables" section, click Path and click Edit....
 * In the "Edit environment variable" window, click New.
-* Paste the path of the Qt bin folder that you used above. For example, `C:\Qt\5.15.0\msvc2019_64\bin`
+* Paste the path of the Qt bin folder that you used above. For example, `C:\Qt\5.14.2\msvc2017_64\bin`
 * Repeatedly click OK to close all the windows.
 * Restart your computer to update the Path for the whole system.
 * After restart, open a Command Prompt and enter the following, changing `c:\Users\user\AERA_Visualizer` to
