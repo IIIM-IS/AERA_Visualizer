@@ -201,6 +201,7 @@ protected:
 
   protected:
     void hoverMoveEvent(QGraphicsSceneHoverEvent* event) override;
+    void mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent) override;
   };
   friend TextItem;
 
@@ -208,6 +209,7 @@ protected:
   QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
   void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
   void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
+  void mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent) override;
 
   /**
    * Set the textItem_ to the given html and create the border polygon. Connect
