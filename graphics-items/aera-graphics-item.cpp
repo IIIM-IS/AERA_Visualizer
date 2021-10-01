@@ -435,11 +435,28 @@ void AeraGraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
   QGraphicsPolygonItem::hoverLeaveEvent(event);
 }
 
+void AeraGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent)
+{
+  if (mouseEvent->button() == Qt::LeftButton)
+  {
+    bringToFront();
+  }
+
+  QGraphicsItem::mousePressEvent(mouseEvent);
+}
+
 void AeraGraphicsItem::TextItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
 {
   parent_->parent_->getParent()->textItemHoverMoveEvent(document(), event->pos());
 
   QGraphicsTextItem::hoverMoveEvent(event);
+}
+
+void AeraGraphicsItem::TextItem::mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent)
+{
+  // Forward mouse click events to the graphics item itself
+  parent_->mousePressEvent(mouseEvent);
+  QGraphicsTextItem::mousePressEvent(mouseEvent);
 }
 
 }
