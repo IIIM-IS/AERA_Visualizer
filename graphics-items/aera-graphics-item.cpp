@@ -54,6 +54,7 @@
 #include <QGraphicsSceneContextMenuEvent>
 #include <QMenu>
 #include <QtWidgets>
+#include <QTimer>
 #include <QRegularExpression>
 #include "submodules/AERA/r_exec/opcodes.h"
 #include "arrow.hpp"
@@ -92,16 +93,21 @@ AeraGraphicsItem::AeraGraphicsItem(
   setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
   setAcceptHoverEvents(true);
 
+  // Setup the ensure visible timer
+  ensureVisibleTimer_ = new QTimer();
+  ensureVisibleTimer_->setSingleShot(true);
+  QObject::connect(ensureVisibleTimer_, &QTimer::timeout, [this]() { ensureVisible(); });
+
   Timestamp eventTime;
   if (is_sim())
     // We know that a simulated item's object has the form (fact (goal_or_pred (fact ...)))
     eventTime = ((_Fact*)aeraEvent->object_->get_reference(0)->get_reference(0))->get_after();
   else
     eventTime = aeraEvent_->time_;
-  headerHtml_ = QString("<table width=\"100%\"><tr>") + 
+  headerHtml_ = QString("<table width=\"100%\"><tr>") +
     "<td style=\"white-space:nowrap\"><font size=\"+1\"><b><font color=\"darkred\">" + headerPrefix +
     "</font> <a href=\"#this\">" + replicodeObjects_.getLabel(aeraEvent_->object_).c_str() + "</a></b></font></td>" +
-    "<td style=\"white-space:nowrap\" align=\"right\"><font style=\"color:gray\"> " + 
+    "<td style=\"white-space:nowrap\" align=\"right\"><font style=\"color:gray\"> " +
     replicodeObjects_.relativeTime(eventTime).c_str() + "</font></td>" + "</tr></table><br>";
 }
 
@@ -443,6 +449,18 @@ void AeraGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent)
   }
 
   QGraphicsItem::mousePressEvent(mouseEvent);
+}
+
+void AeraGraphicsItem::mouseMoveEvent(QGraphicsSceneMouseEvent* mouseEvent)
+{
+  // If the item is bigger than the current viewport the "ensure visible functionality" is disabled
+  if (parent_->mouseGrabberItem() == this && parent_->views().at(0)->viewport()->width() > boundingRect().width()) {
+    // Starts a timer to ensure that the item is visible
+    // The timer will restart if it is already started
+    ensureVisibleTimer_->start(50);
+  }
+
+  QGraphicsItem::mouseMoveEvent(mouseEvent);
 }
 
 void AeraGraphicsItem::TextItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)

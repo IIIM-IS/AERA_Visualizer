@@ -64,6 +64,7 @@ class QGraphicsScene;
 class QTextEdit;
 class QGraphicsSceneMouseEvent;
 class QMenu;
+class QTimer;
 class QGraphicsSceneContextMenuEvent;
 class QStyleOptionGraphicsItem;
 class QWidget;
@@ -210,6 +211,7 @@ protected:
   void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
   void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
   void mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent) override;
+  void mouseMoveEvent(QGraphicsSceneMouseEvent* mouseEvent) override;
 
   /**
    * Set the textItem_ to the given html and create the border polygon. Connect
@@ -239,6 +241,7 @@ private:
   AeraEvent* aeraEvent_;
   QList<Arrow*> arrows_;
   QList<AnchoredHorizontalLine*> horizontalLines_;
+  QTimer* ensureVisibleTimer_;
 };
 
 }
