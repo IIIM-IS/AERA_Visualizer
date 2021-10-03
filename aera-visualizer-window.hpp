@@ -242,6 +242,13 @@ private:
   QAction* zoomHomeAction_;
   QAction* zoomToAction_;
 
+  static const QString SettingsKeySimulationsVisible;
+  static const QString SettingsKeyNonSimulationsVisible;
+  static const QString SettingsKeyEssenceFactsVisible;
+  static const QString SettingsKeyInstantiatedCompositeStatesVisible;
+  static const QString SettingsKeyPredictedInstantiatedCompositeStatesVisible;
+  static const QString SettingsKeyRequirementsVisible;
+
   AeraCheckbox* simulationsCheckBox_;
   AeraCheckbox* nonSimulationsCheckBox_;
   AeraCheckbox* essenceFactsCheckBox_;

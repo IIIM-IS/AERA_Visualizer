@@ -132,6 +132,13 @@ const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
   DriveInjectEvent::EVENT_TYPE,
   SimulationCommitEvent::EVENT_TYPE };
 
+const QString AeraVisulizerWindow::SettingsKeySimulationsVisible = "simulationsVisible";
+const QString AeraVisulizerWindow::SettingsKeyNonSimulationsVisible = "nonSimulationsVisible";
+const QString AeraVisulizerWindow::SettingsKeyEssenceFactsVisible = "essenceFactsVisible";
+const QString AeraVisulizerWindow::SettingsKeyInstantiatedCompositeStatesVisible = "instantiatedCompositeStatesVisible";
+const QString AeraVisulizerWindow::SettingsKeyPredictedInstantiatedCompositeStatesVisible = "predictedInstantiatedCompositeStatesVisible";
+const QString AeraVisulizerWindow::SettingsKeyRequirementsVisible = "requirementsVisible";
+
 AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 : AeraVisulizerWindowBase(0, replicodeObjects),
   iNextEvent_(0), explanationLogWindow_(0),
@@ -1585,7 +1592,7 @@ void AeraVisulizerWindow::createToolbars()
   toolbar->addWidget(new QLabel("Show/Hide: ", this));
 
   // Show simulations by default.
-  simulationsCheckBox_ = new AeraCheckbox("Simulations", "simulationsVisible", this, Qt::Checked);
+  simulationsCheckBox_ = new AeraCheckbox("Simulations", SettingsKeySimulationsVisible, this, Qt::Checked);
   simulationsCheckBox_->setColor(QColor("#ffffdc"));
   connect(simulationsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     for (auto i = simulationEventTypes_.begin(); i != simulationEventTypes_.end(); ++i)
@@ -1597,7 +1604,7 @@ void AeraVisulizerWindow::createToolbars()
   toolbar->addWidget(new QLabel("    ", this));
 
   // Show non-simulations by default.
-  nonSimulationsCheckBox_ = new AeraCheckbox("Non-Simulations", "nonSimulationsVisible", this, Qt::Checked);
+  nonSimulationsCheckBox_ = new AeraCheckbox("Non-Simulations", SettingsKeyNonSimulationsVisible, this, Qt::Checked);
   connect(nonSimulationsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     essenceFactsCheckBox_->setEnabled(state == Qt::Checked);
     instantiatedCompositeStatesCheckBox_->setEnabled(state == Qt::Checked);
@@ -1619,22 +1626,22 @@ void AeraVisulizerWindow::createToolbars()
   });
   toolbar->addWidget(nonSimulationsCheckBox_);
 
-  essenceFactsCheckBox_ = new AeraCheckbox("Essence Facts", "essenceFactsVisible", this);
+  essenceFactsCheckBox_ = new AeraCheckbox("Essence Facts", SettingsKeyEssenceFactsVisible, this);
   connect(essenceFactsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     mainScene_->setAutoFocusItemsVisible("essence", state == Qt::Checked);  });
   toolbar->addWidget(essenceFactsCheckBox_);
 
-  instantiatedCompositeStatesCheckBox_ = new AeraCheckbox("Instantiated Comp. States", "instantiatedCompStatesVisible", this);
+  instantiatedCompositeStatesCheckBox_ = new AeraCheckbox("Instantiated Comp. States", SettingsKeyInstantiatedCompositeStatesVisible, this);
   connect(instantiatedCompositeStatesCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     mainScene_->setItemsVisible(NewInstantiatedCompositeStateEvent::EVENT_TYPE, state == Qt::Checked); });
   toolbar->addWidget(instantiatedCompositeStatesCheckBox_);
 
-  predictedInstantiatedCompositeStatesCheckBox_ = new AeraCheckbox("Pred. Instantiated Comp. States", "predInstantiatedCompStatesVisible", this);
+  predictedInstantiatedCompositeStatesCheckBox_ = new AeraCheckbox("Pred. Instantiated Comp. States", SettingsKeyPredictedInstantiatedCompositeStatesVisible, this);
   connect(predictedInstantiatedCompositeStatesCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     mainScene_->setItemsVisible(NewPredictedInstantiatedCompositeStateEvent::EVENT_TYPE, state == Qt::Checked); });
   toolbar->addWidget(predictedInstantiatedCompositeStatesCheckBox_);
 
-  requirementsCheckBox_ = new AeraCheckbox("Requirements", "requirementsVisible", this);
+  requirementsCheckBox_ = new AeraCheckbox("Requirements", SettingsKeyRequirementsVisible, this);
   connect(requirementsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     mainScene_->setItemsVisible(ModelImdlPredictionEvent::EVENT_TYPE, state == Qt::Checked);  });
   toolbar->addWidget(requirementsCheckBox_);
