@@ -56,6 +56,7 @@
 #include "graphics-items/aera-graphics-item.hpp"
 #include "aera-event.hpp"
 #include "aera-visualizer-window-base.hpp"
+#include "aera-checkbox.h"
 
 #include <vector>
 #include <QIcon>
@@ -67,7 +68,6 @@ class QToolBox;
 class QSpinBox;
 class QComboBox;
 class QLineEdit;
-class QCheckBox;
 class QGraphicsView;
 class QProgressDialog;
 
@@ -242,12 +242,12 @@ private:
   QAction* zoomHomeAction_;
   QAction* zoomToAction_;
 
-  QCheckBox* simulationsCheckBox_;
-  QCheckBox* nonSimulationsCheckBox_;
-  QCheckBox* essenceFactsCheckBox_;
-  QCheckBox* instantiatedCompositeStatesCheckBox_;
-  QCheckBox* predictedInstantiatedCompositeStatesCheckBox_;
-  QCheckBox* requirementsCheckBox_;
+  AeraCheckbox* simulationsCheckBox_;
+  AeraCheckbox* nonSimulationsCheckBox_;
+  AeraCheckbox* essenceFactsCheckBox_;
+  AeraCheckbox* instantiatedCompositeStatesCheckBox_;
+  AeraCheckbox* predictedInstantiatedCompositeStatesCheckBox_;
+  AeraCheckbox* requirementsCheckBox_;
 
   std::vector<std::shared_ptr<AeraEvent> > startupEvents_;
   std::vector<std::shared_ptr<AeraEvent> > events_;
