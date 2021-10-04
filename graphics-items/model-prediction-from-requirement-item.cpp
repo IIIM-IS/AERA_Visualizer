@@ -69,7 +69,7 @@ ModelPredictionFromRequirementItem::ModelPredictionFromRequirementItem(
   ModelSimulatedPredictionReductionFromRequirement* modelReduction, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
 : ExpandableGoalOrPredItem(modelReduction, replicodeObjects,
-    "Model " + makeHtmlLink(modelReduction->model_, replicodeObjects) + " from requirement " + RightDoubleArrowHtml,
+    "Model " + makeHtmlLink(modelReduction->model_, replicodeObjects) + " from goal requirement " + RightDoubleArrowHtml,
     parent),
   modelReduction_(modelReduction)
 {
