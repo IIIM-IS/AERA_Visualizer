@@ -1581,8 +1581,6 @@ void AeraVisulizerWindow::createMenus()
 
 void AeraVisulizerWindow::createToolbars()
 {
-  QSettings settings;
-
   QToolBar* toolbar = addToolBar(tr("Main"));
   toolbar->addAction(zoomInAction_);
   toolbar->addAction(zoomOutAction_);
