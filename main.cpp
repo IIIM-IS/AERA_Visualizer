@@ -92,6 +92,10 @@ int main(int argv, char *args[])
   // Enables using the settings from anywhere
   QCoreApplication::setOrganizationName("IIIM");
   QCoreApplication::setApplicationName("AERA_Visualizer");
+
+  // Configure QSettings to use .ini files to store settings
+  QSettings::setDefaultFormat(QSettings::IniFormat);
+
   QSettings preferences;
 
   QString settingsFilePath0 = preferences.value("settingsFilePath").toString();
