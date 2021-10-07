@@ -72,6 +72,7 @@
 #include "graphics-items/simulation-commit-item.hpp"
 #include "graphics-items/aera-visualizer-scene.hpp"
 #include "aera-visualizer-window.hpp"
+#include "aera-checkbox.h"
 
 #include <QtWidgets>
 #include <QProgressDialog>
@@ -130,6 +131,13 @@ const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
   IoDeviceEjectEvent::EVENT_TYPE,
   DriveInjectEvent::EVENT_TYPE,
   SimulationCommitEvent::EVENT_TYPE };
+
+const QString AeraVisulizerWindow::SettingsKeySimulationsVisible = "simulationsVisible";
+const QString AeraVisulizerWindow::SettingsKeyNonSimulationsVisible = "nonSimulationsVisible";
+const QString AeraVisulizerWindow::SettingsKeyEssenceFactsVisible = "essenceFactsVisible";
+const QString AeraVisulizerWindow::SettingsKeyInstantiatedCompositeStatesVisible = "instantiatedCompositeStatesVisible";
+const QString AeraVisulizerWindow::SettingsKeyPredictedInstantiatedCompositeStatesVisible = "predictedInstantiatedCompositeStatesVisible";
+const QString AeraVisulizerWindow::SettingsKeyRequirementsVisible = "requirementsVisible";
 
 AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
 : AeraVisulizerWindowBase(0, replicodeObjects),
@@ -1581,10 +1589,9 @@ void AeraVisulizerWindow::createToolbars()
   toolbar->addSeparator();
   toolbar->addWidget(new QLabel("Show/Hide: ", this));
 
-  simulationsCheckBox_ = new QCheckBox("Simulations", this);
-  simulationsCheckBox_->setStyleSheet("background-color:#ffffdc");
   // Show simulations by default.
-  simulationsCheckBox_->setCheckState(Qt::Checked);
+  simulationsCheckBox_ = new AeraCheckbox("Simulations", SettingsKeySimulationsVisible, this, Qt::Checked);
+  simulationsCheckBox_->setColor(QColor("#ffffdc"));
   connect(simulationsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     for (auto i = simulationEventTypes_.begin(); i != simulationEventTypes_.end(); ++i)
       mainScene_->setItemsVisible(*i, state == Qt::Checked);
@@ -1594,10 +1601,8 @@ void AeraVisulizerWindow::createToolbars()
   // Separate the non-simulations check boxes.
   toolbar->addWidget(new QLabel("    ", this));
 
-  nonSimulationsCheckBox_ = new QCheckBox("Non-Simulations", this);
-  nonSimulationsCheckBox_->setStyleSheet("background-color:#ffffff");
   // Show non-simulations by default.
-  nonSimulationsCheckBox_->setCheckState(Qt::Checked);
+  nonSimulationsCheckBox_ = new AeraCheckbox("Non-Simulations", SettingsKeyNonSimulationsVisible, this, Qt::Checked);
   connect(nonSimulationsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     essenceFactsCheckBox_->setEnabled(state == Qt::Checked);
     instantiatedCompositeStatesCheckBox_->setEnabled(state == Qt::Checked);
@@ -1619,26 +1624,22 @@ void AeraVisulizerWindow::createToolbars()
   });
   toolbar->addWidget(nonSimulationsCheckBox_);
 
-  essenceFactsCheckBox_ = new QCheckBox("Essence Facts", this);
-  essenceFactsCheckBox_->setStyleSheet("background-color:#ffffff");
+  essenceFactsCheckBox_ = new AeraCheckbox("Essence Facts", SettingsKeyEssenceFactsVisible, this);
   connect(essenceFactsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     mainScene_->setAutoFocusItemsVisible("essence", state == Qt::Checked);  });
   toolbar->addWidget(essenceFactsCheckBox_);
 
-  instantiatedCompositeStatesCheckBox_ = new QCheckBox("Instantiated Comp. States", this);
-  instantiatedCompositeStatesCheckBox_->setStyleSheet("background-color:#ffffff");
+  instantiatedCompositeStatesCheckBox_ = new AeraCheckbox("Instantiated Comp. States", SettingsKeyInstantiatedCompositeStatesVisible, this);
   connect(instantiatedCompositeStatesCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     mainScene_->setItemsVisible(NewInstantiatedCompositeStateEvent::EVENT_TYPE, state == Qt::Checked); });
   toolbar->addWidget(instantiatedCompositeStatesCheckBox_);
 
-  predictedInstantiatedCompositeStatesCheckBox_ = new QCheckBox("Pred. Instantiated Comp. States", this);
-  predictedInstantiatedCompositeStatesCheckBox_->setStyleSheet("background-color:#ffffff");
+  predictedInstantiatedCompositeStatesCheckBox_ = new AeraCheckbox("Pred. Instantiated Comp. States", SettingsKeyPredictedInstantiatedCompositeStatesVisible, this);
   connect(predictedInstantiatedCompositeStatesCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     mainScene_->setItemsVisible(NewPredictedInstantiatedCompositeStateEvent::EVENT_TYPE, state == Qt::Checked); });
   toolbar->addWidget(predictedInstantiatedCompositeStatesCheckBox_);
 
-  requirementsCheckBox_ = new QCheckBox("Requirements", this);
-  requirementsCheckBox_->setStyleSheet("background-color:#ffffff");
+  requirementsCheckBox_ = new AeraCheckbox("Requirements", SettingsKeyRequirementsVisible, this);
   connect(requirementsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     mainScene_->setItemsVisible(ModelImdlPredictionEvent::EVENT_TYPE, state == Qt::Checked);  });
   toolbar->addWidget(requirementsCheckBox_);

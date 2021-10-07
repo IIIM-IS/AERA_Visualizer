@@ -54,6 +54,7 @@
 #include "submodules/AERA/AERA/settings.h"
 
 #include <QApplication>
+#include <QCoreApplication>
 #include <QSettings>
 #include <QMessageBox>
 #include <QFileDialog>
@@ -87,7 +88,16 @@ int main(int argv, char *args[])
   // Globally remove the '?' from the QInputDialog title bar.
   QApplication::setAttribute(Qt::AA_DisableWindowContextHelpButton);
 
-  QSettings preferences("IIIM", "AERA_Visualizer");
+  // Set the organization and application name
+  // Enables using the settings from anywhere
+  QCoreApplication::setOrganizationName("IIIM");
+  QCoreApplication::setApplicationName("AERA_Visualizer");
+
+  // Configure QSettings to use .ini files to store settings
+  QSettings::setDefaultFormat(QSettings::IniFormat);
+
+  QSettings preferences;
+
   QString settingsFilePath0 = preferences.value("settingsFilePath").toString();
   if (settingsFilePath0 == "")
     settingsFilePath0 = "../replicode/AERA/settings.xml";
