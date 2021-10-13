@@ -71,6 +71,7 @@
 #include "graphics-items/drive-item.hpp"
 #include "graphics-items/simulation-commit-item.hpp"
 #include "graphics-items/promoted-prediction-item.hpp"
+#include "graphics-items/promoted-prediction-defeated-item.hpp"
 #include "graphics-items/aera-visualizer-scene.hpp"
 #include "aera-visualizer-window.hpp"
 #include "aera-checkbox.h"
@@ -111,7 +112,8 @@ const set<int> AeraVisulizerWindow::simulationEventTypes_ = {
   DriveInjectEvent::EVENT_TYPE, ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,
   ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
   ModelSimulatedPredictionReductionFromRequirement::EVENT_TYPE, SimulationCommitEvent ::EVENT_TYPE,
-  ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE, PromotedSimulatedPredictionEvent::EVENT_TYPE };
+  ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE, PromotedSimulatedPredictionEvent::EVENT_TYPE,
+  PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE };
 
 const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
   NewModelEvent::EVENT_TYPE,
@@ -132,7 +134,8 @@ const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
   IoDeviceEjectEvent::EVENT_TYPE,
   DriveInjectEvent::EVENT_TYPE,
   SimulationCommitEvent::EVENT_TYPE,
-  PromotedSimulatedPredictionEvent::EVENT_TYPE };
+  PromotedSimulatedPredictionEvent::EVENT_TYPE,
+  PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE };
 
 const QString AeraVisulizerWindow::SettingsKeySimulationsVisible = "simulationsVisible";
 const QString AeraVisulizerWindow::SettingsKeyNonSimulationsVisible = "nonSimulationsVisible";
@@ -262,6 +265,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   regex simulationCommitRegex("^sim commit: fact (\\d+) pred fact success -> fact \\((\\d+)\\) goal$");
   // fact 182 -> promoted simulated pred fact 250 w/ fact 247 timings
   regex simulationPromotedSimulatedPredictionRegex("^fact (\\d+) -> promoted simulated pred fact (\\d+) w/ fact (\\d+) timings$");
+  // promoted simulated fact 251 defeated by fact 253
+  regex simulationPromotedSimulatedPredictionDefeatedRegex("^promoted simulated fact (\\d+) defeated by fact (\\d+)");
 
   progress.setLabelText(replicodeObjects_.getProgressLabelText("Reading runtime output"));
 
@@ -628,6 +633,13 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
         events_.push_back(make_shared<PromotedSimulatedPredictionEvent>(
           timestamp, promotedFact, promotedFromFact,timingsFact));
     }
+    else if (regex_search(lineAfterTimestamp, matches, simulationPromotedSimulatedPredictionDefeatedRegex)) {
+      auto input = replicodeObjects_.getObject(stoul(matches[2].str()));
+      auto promotedFact = replicodeObjects_.getObject(stoul(matches[1].str()));
+      if (input && promotedFact)
+        events_.push_back(make_shared<PromotedSimulatedPredictionDefeatEvent>(
+          timestamp, input, promotedFact));
+    }
   }
 
   // Transfer any remaining pendingEvents to events_.
@@ -971,8 +983,6 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
         // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
         scene->addArrow(goalRequirementItem, newItem);
 
-      scene->addHorizontalLine(newItem);
-
       visible = (simulationsCheckBox_->checkState() == Qt::Checked);
     }
     else if (event->eventType_ == CompositeStateSimulatedPredictionReduction::EVENT_TYPE) {
@@ -1082,6 +1092,24 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
         visible = (simulationsCheckBox_->checkState() == Qt::Checked);
       else
         visible = (nonSimulationsCheckBox_->checkState() == Qt::Checked);
+    }
+    else if (event->eventType_ == PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE) {
+      auto defeatEvent = (PromotedSimulatedPredictionDefeatEvent*)event;
+      newItem = new PromotedPredictionDefeatedItem(defeatEvent, replicodeObjects_, scene);
+
+      // Add an arrow to the input fact.
+      auto inputItem = scene->getAeraGraphicsItem(defeatEvent->input_);
+      if (inputItem)
+        // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
+        scene->addArrow(inputItem, newItem);
+
+      // Add an arrow to the defeated promoted prediction item.
+      auto promotedItem = scene->getAeraGraphicsItem(defeatEvent->promotedFact_);
+      if (promotedItem)
+        // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
+        scene->addArrow(promotedItem, newItem);
+
+      visible = (simulationsCheckBox_->checkState() == Qt::Checked);
     }
 
     // Add the new item.
