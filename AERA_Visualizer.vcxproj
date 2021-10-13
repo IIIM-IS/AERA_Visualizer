@@ -239,6 +239,7 @@
     <ClCompile Include="graphics-items\prediction-result-item.cpp" />
     <ClCompile Include="graphics-items\program-output-fact-item.cpp" />
     <ClCompile Include="graphics-items\program-reduction-item.cpp" />
+    <ClCompile Include="graphics-items\promoted-prediction-item.cpp" />
     <ClCompile Include="graphics-items\simulation-commit-item.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="aera-visualizer-window.cpp" />
@@ -371,6 +372,7 @@
     <ClInclude Include="graphics-items\prediction-result-item.hpp" />
     <ClInclude Include="graphics-items\program-output-fact-item.hpp" />
     <ClInclude Include="graphics-items\program-reduction-item.hpp" />
+    <ClInclude Include="graphics-items\promoted-prediction-item.hpp" />
     <ClInclude Include="graphics-items\simulation-commit-item.hpp" />
     <ClInclude Include="replicode-objects.hpp" />
     <ClInclude Include="submodules\AERA\r_code\atom.h" />

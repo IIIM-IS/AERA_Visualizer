@@ -626,6 +626,30 @@ public:
   r_exec::_Fact* strong_requirement_;
 };
 
+class PromotedSimulatedPredictionEvent : public AeraEvent {
+public:
+  /**
+   * Create a PromotedSimulatedPredictionEvent
+   * \param time The event time.
+   * \param promotedFact The promoted fact.
+   * \param promotedFromFact The fact from which the promoted fact was made.
+   * \param timingsFact The fact whose timings are used for the promoted fact (treated as the input).
+   */
+  PromotedSimulatedPredictionEvent(core::Timestamp time,
+    r_code::Code* promotedFact, r_code::Code* promotedFromFact, r_code::Code* timingsFact)
+    : AeraEvent(EVENT_TYPE, time, promotedFact),
+    promotedFromFact_((r_exec::_Fact*)promotedFromFact),
+    timingsFact_((r_exec::_Fact*)timingsFact)
+  {}
+
+  r_code::Code* getInput() override { return timingsFact_; }
+
+  static const int EVENT_TYPE = 26;
+
+  r_exec::_Fact* promotedFromFact_;
+  r_exec::_Fact* timingsFact_;
+};
+
 }
 
 #endif

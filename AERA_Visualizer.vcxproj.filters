@@ -267,6 +267,9 @@
     <ClCompile Include="aera-checkbox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="graphics-items\promoted-prediction-item.cpp">
+      <Filter>graphics-items</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aera-event.hpp" />
@@ -518,6 +521,9 @@
       <Filter>graphics-items</Filter>
     </ClInclude>
     <ClInclude Include="graphics-items\predicted-instantiated-composite-state-item.hpp">
+      <Filter>graphics-items</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics-items\promoted-prediction-item.hpp">
       <Filter>graphics-items</Filter>
     </ClInclude>
   </ItemGroup>
