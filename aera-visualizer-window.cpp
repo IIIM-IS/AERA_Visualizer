@@ -70,6 +70,7 @@
 #include "graphics-items/io-device-inject-eject-item.hpp"
 #include "graphics-items/drive-item.hpp"
 #include "graphics-items/simulation-commit-item.hpp"
+#include "graphics-items/promoted-prediction-item.hpp"
 #include "graphics-items/aera-visualizer-scene.hpp"
 #include "aera-visualizer-window.hpp"
 #include "aera-checkbox.h"
@@ -110,7 +111,7 @@ const set<int> AeraVisulizerWindow::simulationEventTypes_ = {
   DriveInjectEvent::EVENT_TYPE, ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,
   ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
   ModelSimulatedPredictionReductionFromRequirement::EVENT_TYPE, SimulationCommitEvent ::EVENT_TYPE,
-  ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE };
+  ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE, PromotedSimulatedPredictionEvent::EVENT_TYPE };
 
 const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
   NewModelEvent::EVENT_TYPE,
@@ -130,7 +131,8 @@ const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
   IoDeviceInjectEvent::EVENT_TYPE,
   IoDeviceEjectEvent::EVENT_TYPE,
   DriveInjectEvent::EVENT_TYPE,
-  SimulationCommitEvent::EVENT_TYPE };
+  SimulationCommitEvent::EVENT_TYPE,
+  PromotedSimulatedPredictionEvent::EVENT_TYPE };
 
 const QString AeraVisulizerWindow::SettingsKeySimulationsVisible = "simulationsVisible";
 const QString AeraVisulizerWindow::SettingsKeyNonSimulationsVisible = "nonSimulationsVisible";
@@ -258,6 +260,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   regex driveInjectRegex("^-> drive (\\d+), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
   // sim commit: fact 238 pred fact success -> fact (82115) goal
   regex simulationCommitRegex("^sim commit: fact (\\d+) pred fact success -> fact \\((\\d+)\\) goal$");
+  // fact 182 -> promoted simulated pred fact 250 w/ fact 247 timings
+  regex simulationPromotedSimulatedPredictionRegex("^fact (\\d+) -> promoted simulated pred fact (\\d+) w/ fact (\\d+) timings$");
 
   progress.setLabelText(replicodeObjects_.getProgressLabelText("Reading runtime output"));
 
@@ -615,6 +619,14 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
       if (factGoal && factPredFactSuccess)
         events_.push_back(make_shared<SimulationCommitEvent>(
           timestamp, factGoal, factPredFactSuccess));
+    }
+    else if (regex_search(lineAfterTimestamp, matches, simulationPromotedSimulatedPredictionRegex)) {
+      auto promotedFact = replicodeObjects_.getObject(stoul(matches[2].str()));
+      auto promotedFromFact = replicodeObjects_.getObject(stoul(matches[1].str()));
+      auto timingsFact = replicodeObjects_.getObject(stoul(matches[3].str()));
+      if (promotedFact && promotedFromFact && timingsFact)
+        events_.push_back(make_shared<PromotedSimulatedPredictionEvent>(
+          timestamp, promotedFact, promotedFromFact,timingsFact));
     }
   }
 
@@ -1049,6 +1061,27 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       scene->addHorizontalLine(newItem);
 
       visible = (simulationsCheckBox_->checkState() == Qt::Checked);
+    }
+    else if (event->eventType_ == PromotedSimulatedPredictionEvent::EVENT_TYPE) {
+      auto promotedPredictionEvent = (PromotedSimulatedPredictionEvent*)event;
+      newItem = new PromotedPredictionItem(promotedPredictionEvent, replicodeObjects_, scene);
+
+      // Add an arrow to the input fact.
+      auto inputItem = scene->getAeraGraphicsItem(promotedPredictionEvent->timingsFact_);
+      if (inputItem)
+        scene->addArrow(inputItem, newItem);
+
+      // Add an arrow to the promoted from item.
+      auto promotedFromItem = scene->getAeraGraphicsItem(promotedPredictionEvent->promotedFromFact_);
+      if (promotedFromItem)
+        scene->addArrow(promotedFromItem, newItem);
+
+      scene->addHorizontalLine(newItem);
+
+      if (newItem->is_sim())
+        visible = (simulationsCheckBox_->checkState() == Qt::Checked);
+      else
+        visible = (nonSimulationsCheckBox_->checkState() == Qt::Checked);
     }
 
     // Add the new item.
