@@ -270,6 +270,9 @@
     <ClCompile Include="graphics-items\promoted-prediction-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
+    <ClCompile Include="graphics-items\promoted-prediction-defeated-item.cpp">
+      <Filter>graphics-items</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aera-event.hpp" />
@@ -524,6 +527,9 @@
       <Filter>graphics-items</Filter>
     </ClInclude>
     <ClInclude Include="graphics-items\promoted-prediction-item.hpp">
+      <Filter>graphics-items</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics-items\promoted-prediction-defeated-item.hpp">
       <Filter>graphics-items</Filter>
     </ClInclude>
   </ItemGroup>

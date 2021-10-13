@@ -650,6 +650,34 @@ public:
   r_exec::_Fact* timingsFact_;
 };
 
+/**
+ * A PromotedSimulatedPredictionDefeatEvent is the event when an actual simulated prediction defeats a
+ * promoted simulated prediction.
+ */
+class PromotedSimulatedPredictionDefeatEvent : public AeraEvent {
+public:
+  /**
+   * Create a PromotedSimulatedPredictionDefeatEvent. This sets object_ to NULL, since this is
+   * an event for invalidating the production of an output.
+   * \param time The time of the defeat event.
+   * \param input The input fact (non-promoted) triggering the event.
+   * \param promoted_fact The promoted fact which is defeated.
+   */
+  PromotedSimulatedPredictionDefeatEvent(core::Timestamp time, r_code::Code* input, r_code::Code* promotedFact)
+    : AeraEvent(EVENT_TYPE, time, NULL),
+    input_((r_exec::_Fact*)input),
+    promotedFact_((r_exec::_Fact*)promotedFact)
+  {}
+
+  r_code::Code* getInput() override { return input_; }
+
+  static const int EVENT_TYPE = 27;
+
+  r_code::Code* model_;
+  r_exec::_Fact* input_;
+  r_exec::_Fact* promotedFact_;
+};
+
 }
 
 #endif

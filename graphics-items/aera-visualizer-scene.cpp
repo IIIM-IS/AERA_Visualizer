@@ -154,8 +154,9 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     }
   }
 
-  item->setBrush(aeraEvent->eventType_ == ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE || item->is_sim() ?
-                 simulatedItemColor_ : itemColor_);
+  item->setBrush(aeraEvent->eventType_ == ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE || 
+                 aeraEvent->eventType_ == PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE || 
+                 item->is_sim() ? simulatedItemColor_ : itemColor_);
   bool isFocusSimulation = (item->getAeraEvent()->object_ &&
                             focusSimulationDetailOids_.find(item->getAeraEvent()->object_->get_detail_oid())
                             != focusSimulationDetailOids_.end());
@@ -214,6 +215,10 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       if (aeraEvent->eventType_ == ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE)
         // Special case. aeraEvent->object_ is null, so use the strong_requirement.
         left = getTimelineX(((_Fact*)((ModelSimulatedPredictionFromRequirementDisabledEvent*)aeraEvent)->strong_requirement_
+                                       ->get_reference(0)->get_reference(0))->get_after());
+      else if (aeraEvent->eventType_ == PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE)
+        // Special case. aeraEvent->object_ is null, so use the input_.
+        left = getTimelineX(((_Fact*)((PromotedSimulatedPredictionDefeatEvent*)aeraEvent)->input_
                                        ->get_reference(0)->get_reference(0))->get_after());
       else {
         // We know that a simulated item's object has the form (fact (goal_or_pred (fact ...)))
