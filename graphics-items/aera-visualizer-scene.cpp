@@ -411,13 +411,23 @@ void AeraVisualizerScene::focusOnItem(QGraphicsItem* item)
 
 void AeraVisualizerScene::zoomToItem(QGraphicsItem* item)
 {
-  views().at(0)->fitInView(item, Qt::KeepAspectRatio);
+  double minimumZoomLevel = 1;
+
+  QGraphicsView* qGraphicsView = views().at(0);
+
+  double currentScale = qGraphicsView->transform().m11();
+
+  if (currentScale < minimumZoomLevel) {
+    qGraphicsView->resetMatrix();
+    qGraphicsView->scale(minimumZoomLevel, minimumZoomLevel);
+  }
 
   auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
   if (aeraGraphicsItem) {
     if (!aeraGraphicsItem->isVisible())
       aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(true);
-    aeraGraphicsItem->bringToFront();
+
+    aeraGraphicsItem->focus();
   }
 }
 
