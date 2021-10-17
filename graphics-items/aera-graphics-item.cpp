@@ -238,6 +238,21 @@ void AeraGraphicsItem::resetPosition()
     setPos(aeraEvent_->itemInitialTopLeftPosition_ - boundingRect().topLeft());
 }
 
+void AeraGraphicsItem::ensureVisible()
+{
+  QGraphicsView *qGraphicsView = parent_->views().at(0);
+  QRectF sceneRect = sceneBoundingRect();
+
+  // If the item is wider than the scene, just ensure the left side of it is visible
+  if (qGraphicsView->viewport()->width() < sceneRect.width()) {
+    sceneRect.setWidth(qGraphicsView->viewport()->width());
+    qGraphicsView->ensureVisible(sceneRect, 0, 0);
+  }
+  else {
+    qGraphicsView->ensureVisible(this);
+  }
+}
+
 void AeraGraphicsItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
   auto menu = new QMenu();

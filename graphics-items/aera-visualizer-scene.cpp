@@ -287,8 +287,14 @@ void AeraVisualizerScene::mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent)
 
 void AeraVisualizerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* mouseEvent)
 {
+  QGraphicsView *qGraphicsView = views().at(0);
+
+  AeraGraphicsItem *aeraGraphicsItem = qgraphicsitem_cast<AeraGraphicsItem *>(mouseGrabberItem());
+  if (aeraGraphicsItem)
+    aeraGraphicsItem->ensureVisible();
+
   // Reset the drag mode.
-  views().at(0)->setDragMode(QGraphicsView::NoDrag);
+  qGraphicsView->setDragMode(QGraphicsView::NoDrag);
   QGraphicsScene::mouseReleaseEvent(mouseEvent);
 }
 

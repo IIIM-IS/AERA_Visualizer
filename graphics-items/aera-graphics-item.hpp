@@ -115,6 +115,8 @@ public:
    */
   void resetPosition();
 
+  void ensureVisible();
+
   /**
    * Replace all "\n" or "\x01" with "<br>" and extra " " with "&nbsp;".
    * \param input The input string to htmlify.
