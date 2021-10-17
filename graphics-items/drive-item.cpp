@@ -79,6 +79,7 @@ void DriveItem::textItemLinkActivated(const QString& link)
     auto menu = new QMenu();
     menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
     menu->addAction("Focus on This", [=]() { parent_->focusOnItem(this); });
+    menu->addAction("Center on This", [=]() { parent_->centerOnItem(this); });
 
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;

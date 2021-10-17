@@ -112,6 +112,8 @@ public:
 
   void focus();
 
+  void centerOn();
+
   /**
    * Reset the position to aeraEvent_->itemInitialTopLeftPosition_.
    */

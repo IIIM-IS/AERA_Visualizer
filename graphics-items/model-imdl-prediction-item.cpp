@@ -129,6 +129,7 @@ void ImdlPredictionItem::textItemLinkActivated(const QString& link)
     auto menu = new QMenu();
     menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
     menu->addAction("Focus on This", [=]() { parent_->focusOnItem(this); });
+    menu->addAction("Center on This", [=]() { parent_->centerOnItem(this); });
     menu->addAction("What Made This?", [=]() {
       auto pred = modelReduction_->object_->get_reference(0);
       auto factImdl = pred->get_reference(0);

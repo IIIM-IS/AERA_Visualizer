@@ -139,6 +139,14 @@ public:
    */
    void focusOnAeraGraphicsItem(r_code::Code* object);
 
+    /**
+  * Get the scene AeraGraphicsItem whose getAeraEvent() has the given object, and center on it.
+  * If the item is not found, do nothing. You can use hasAeraGraphicsItem() first to
+  * make sure this will succeed.
+  * \param object The Code* object to search for.
+  */
+    void centerOnAeraGraphicsItem(r_code::Code* object);
+
   /**
    * Handle hover move events to get the HTML link at the position and highlight the linked item
    * until the mouse leaves the link.

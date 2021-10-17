@@ -245,6 +245,23 @@ void AeraGraphicsItem::resetPosition()
     setPos(aeraEvent_->itemInitialTopLeftPosition_ - boundingRect().topLeft());
 }
 
+void AeraGraphicsItem::centerOn()
+{
+  QGraphicsView *qGraphicsView = parent_->views().at(0);
+  QRectF sceneRect = sceneBoundingRect();
+
+  // If the item is wider than the scene, just center on the left part of it
+  if (qGraphicsView->viewport()->width() < sceneRect.width()) {
+    sceneRect.setWidth(qGraphicsView->viewport()->width());
+    qGraphicsView->centerOn(sceneRect.center());
+  }
+  else {
+    qGraphicsView->centerOn(this);
+  }
+  bringToFront();
+  setSelected(true);
+}
+
 void AeraGraphicsItem::ensureVisible()
 {
   QGraphicsView *qGraphicsView = parent_->views().at(0);
@@ -265,6 +282,7 @@ void AeraGraphicsItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
   auto menu = new QMenu();
   menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
   menu->addAction("Focus on This", [=]() { parent_->focusOnItem(this); });
+  menu->addAction("Center on This", [=]() { parent_->centerOnItem(this); });
   menu->addAction("Bring To Front", [=]() { bringToFront(); });
   menu->addAction("Send To Back", [=]() { sendToBack(); });
   menu->addAction("Reset Position", [=]() { resetPosition(); });
@@ -408,6 +426,7 @@ void AeraGraphicsItem::textItemLinkActivated(const QString& link)
     auto menu = new QMenu();
     menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
     menu->addAction("Focus on This", [=]() { parent_->focusOnItem(this); });
+    menu->addAction("Center on This", [=]() { parent_->centerOnItem(this); });
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
   }
@@ -422,6 +441,8 @@ void AeraGraphicsItem::textItemLinkActivated(const QString& link)
           [=]() { parent_->getParent()->zoomToAeraGraphicsItem(object); });
         menu->addAction(QString("Focus on ") + replicodeObjects_.getLabel(object).c_str(),
                         [=]() { parent_->getParent()->focusOnAeraGraphicsItem(object); });
+        menu->addAction(QString("Center on ") + replicodeObjects_.getLabel(object).c_str(),
+                        [=]() { parent_->getParent()->centerOnAeraGraphicsItem(object); });
         menu->exec(QCursor::pos() - QPoint(10, 10));
         delete menu;
       }
