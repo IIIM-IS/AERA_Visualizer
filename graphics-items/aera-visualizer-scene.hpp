@@ -83,6 +83,7 @@ public:
   AeraVisulizerWindow* getParent() { return parent_; }
 
   void zoomToItem(QGraphicsItem* item);
+  void focusOnItem(QGraphicsItem* item);
 
   /**
    * Get the X position on the timeline for the given timestamp.

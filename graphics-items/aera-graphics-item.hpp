@@ -110,6 +110,8 @@ public:
    */
   void sendToBack();
 
+  void focus();
+
   /**
    * Reset the position to aeraEvent_->itemInitialTopLeftPosition_.
    */

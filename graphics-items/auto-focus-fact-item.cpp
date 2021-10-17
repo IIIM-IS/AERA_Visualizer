@@ -99,6 +99,7 @@ void AutoFocusFactItem::textItemLinkActivated(const QString& link)
   if (link == "#this") {
     auto menu = new QMenu();
     menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
+    menu->addAction("Focus on This", [=]() { parent_->focusOnItem(this); });
 
     auto fromObject = autoFocusNewObjectEvent_->fromObject_;
     // TODO: How to handle auto focus of the same fact?

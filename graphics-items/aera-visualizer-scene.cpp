@@ -398,6 +398,17 @@ void AeraVisualizerScene::zoomViewHome()
     views().at(0)->fitInView(boundingRect, Qt::KeepAspectRatio);
 }
 
+void AeraVisualizerScene::focusOnItem(QGraphicsItem* item)
+{
+  auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
+  if (aeraGraphicsItem) {
+    if (!aeraGraphicsItem->isVisible())
+      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(true);
+
+    aeraGraphicsItem->focus();
+  }
+}
+
 void AeraVisualizerScene::zoomToItem(QGraphicsItem* item)
 {
   views().at(0)->fitInView(item, Qt::KeepAspectRatio);

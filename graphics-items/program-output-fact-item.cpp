@@ -98,6 +98,7 @@ void ProgramOutputFactItem::textItemLinkActivated(const QString& link)
   if (link == "#this") {
     auto menu = new QMenu();
     menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
+    menu->addAction("Focus on This", [=]() { parent_->focusOnItem(this); });
     menu->addAction("What Made This?", [=]() {
       auto mkRdx = programReductionNewObjectEvent_->programReduction_;
 

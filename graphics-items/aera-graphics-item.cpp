@@ -232,6 +232,13 @@ void AeraGraphicsItem::sendToBack()
   setZValue(zValue);
 }
 
+void AeraGraphicsItem::focus()
+{
+  bringToFront();
+  ensureVisible();
+  setSelected(true);
+}
+
 void AeraGraphicsItem::resetPosition()
 {
   if (!qIsNaN(aeraEvent_->itemInitialTopLeftPosition_.x()))
@@ -257,6 +264,7 @@ void AeraGraphicsItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
   auto menu = new QMenu();
   menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
+  menu->addAction("Focus on This", [=]() { parent_->focusOnItem(this); });
   menu->addAction("Bring To Front", [=]() { bringToFront(); });
   menu->addAction("Send To Back", [=]() { sendToBack(); });
   menu->addAction("Reset Position", [=]() { resetPosition(); });
@@ -399,6 +407,7 @@ void AeraGraphicsItem::textItemLinkActivated(const QString& link)
   if (link == "#this") {
     auto menu = new QMenu();
     menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
+    menu->addAction("Focus on This", [=]() { parent_->focusOnItem(this); });
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
   }
@@ -411,6 +420,8 @@ void AeraGraphicsItem::textItemLinkActivated(const QString& link)
         auto menu = new QMenu();
         menu->addAction(QString("Zoom to ") + replicodeObjects_.getLabel(object).c_str(),
           [=]() { parent_->getParent()->zoomToAeraGraphicsItem(object); });
+        menu->addAction(QString("Focus on ") + replicodeObjects_.getLabel(object).c_str(),
+                        [=]() { parent_->getParent()->focusOnAeraGraphicsItem(object); });
         menu->exec(QCursor::pos() - QPoint(10, 10));
         delete menu;
       }

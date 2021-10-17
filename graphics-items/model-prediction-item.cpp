@@ -80,6 +80,7 @@ void ModelPredictionItem::textItemLinkActivated(const QString& link)
   if (link == "#this") {
     auto menu = new QMenu();
     menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
+    menu->addAction("Focus on This", [=]() { parent_->focusOnItem(this); });
 
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
