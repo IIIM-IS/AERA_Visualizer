@@ -287,8 +287,14 @@ void AeraVisualizerScene::mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent)
 
 void AeraVisualizerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* mouseEvent)
 {
+  QGraphicsView *qGraphicsView = views().at(0);
+
+  AeraGraphicsItem *aeraGraphicsItem = qgraphicsitem_cast<AeraGraphicsItem *>(mouseGrabberItem());
+  if (aeraGraphicsItem)
+    aeraGraphicsItem->ensureVisible();
+
   // Reset the drag mode.
-  views().at(0)->setDragMode(QGraphicsView::NoDrag);
+  qGraphicsView->setDragMode(QGraphicsView::NoDrag);
   QGraphicsScene::mouseReleaseEvent(mouseEvent);
 }
 
@@ -392,15 +398,46 @@ void AeraVisualizerScene::zoomViewHome()
     views().at(0)->fitInView(boundingRect, Qt::KeepAspectRatio);
 }
 
+void AeraVisualizerScene::centerOnItem(QGraphicsItem *item) {
+  auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
+  if (aeraGraphicsItem) {
+    if (!aeraGraphicsItem->isVisible())
+      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(true);
+
+    aeraGraphicsItem->centerOn();
+  }
+}
+
+void AeraVisualizerScene::focusOnItem(QGraphicsItem* item)
+{
+  auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
+  if (aeraGraphicsItem) {
+    if (!aeraGraphicsItem->isVisible())
+      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(true);
+
+    aeraGraphicsItem->focus();
+  }
+}
+
 void AeraVisualizerScene::zoomToItem(QGraphicsItem* item)
 {
-  views().at(0)->fitInView(item, Qt::KeepAspectRatio);
+  double minimumZoomLevel = 1;
+
+  QGraphicsView* qGraphicsView = views().at(0);
+
+  double currentScale = qGraphicsView->transform().m11();
+
+  if (currentScale < minimumZoomLevel) {
+    qGraphicsView->resetMatrix();
+    qGraphicsView->scale(minimumZoomLevel, minimumZoomLevel);
+  }
 
   auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
   if (aeraGraphicsItem) {
     if (!aeraGraphicsItem->isVisible())
       aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(true);
-    aeraGraphicsItem->bringToFront();
+
+    aeraGraphicsItem->focus();
   }
 }
 

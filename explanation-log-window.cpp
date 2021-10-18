@@ -147,6 +147,10 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
       auto menu = new QMenu();
       menu->addAction(QString("Zoom to ") + replicodeObjects_.getLabel(object).c_str(),
         [=]() { mainWindow_->zoomToAeraGraphicsItem(object); });
+      menu->addAction(QString("Focus on ") + replicodeObjects_.getLabel(object).c_str(),
+                      [=]() { mainWindow_->focusOnAeraGraphicsItem(object); });
+      menu->addAction(QString("Center on ") + replicodeObjects_.getLabel(object).c_str(),
+                      [=]() { mainWindow_->centerOnAeraGraphicsItem(object); });
       menu->exec(QCursor::pos() - QPoint(10, 10));
       delete menu;
     }

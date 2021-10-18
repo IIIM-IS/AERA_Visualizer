@@ -110,10 +110,16 @@ public:
    */
   void sendToBack();
 
+  void focus();
+
+  void centerOn();
+
   /**
    * Reset the position to aeraEvent_->itemInitialTopLeftPosition_.
    */
   void resetPosition();
+
+  void ensureVisible();
 
   /**
    * Replace all "\n" or "\x01" with "<br>" and extra " " with "&nbsp;".

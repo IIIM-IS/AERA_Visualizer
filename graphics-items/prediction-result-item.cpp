@@ -100,6 +100,8 @@ void PredictionResultItem::textItemLinkActivated(const QString& link)
   if (link == "#this") {
     auto menu = new QMenu();
     menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
+    menu->addAction("Focus on This", [=]() { parent_->focusOnItem(this); });
+    menu->addAction("Center on This", [=]() { parent_->centerOnItem(this); });
     menu->addAction("What Made This?", [=]() {
       QString explanation;
       Code* factPrediction = predictionResultEvent_->object_->get_reference(0)->get_reference(0);

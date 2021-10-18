@@ -715,6 +715,32 @@ void AeraVisulizerWindow::zoomToAeraGraphicsItem(Code* object)
   }
 }
 
+void AeraVisulizerWindow::focusOnAeraGraphicsItem(Code* object)
+{
+  AeraVisualizerScene* scene;
+  auto item = getAeraGraphicsItem(object, &scene);
+  if (item) {
+    if (item == hoverHighlightItem_ && !hoverHighlightItemWasVisible_)
+      // The item is temporarily visible while hovering. Make sure it stays visible when we un-hover.
+      hoverHighlightItemWasVisible_ = true;
+
+    scene->focusOnItem(item);
+  }
+}
+
+void AeraVisulizerWindow::centerOnAeraGraphicsItem(Code* object)
+{
+  AeraVisualizerScene* scene;
+  auto item = getAeraGraphicsItem(object, &scene);
+  if (item) {
+    if (item == hoverHighlightItem_ && !hoverHighlightItemWasVisible_)
+      // The item is temporarily visible while hovering. Make sure it stays visible when we un-hover.
+      hoverHighlightItemWasVisible_ = true;
+
+    scene->centerOnItem(item);
+  }
+}
+
 void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, QPointF position)
 {
   auto url = document->documentLayout()->anchorAt(position);

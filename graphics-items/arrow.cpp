@@ -118,6 +118,10 @@ void Arrow::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 
   menu->addAction("Zoom to Start", [=]() { parent_->zoomToItem(startItem_); });
   menu->addAction("Zoom to End", [=]() { parent_->zoomToItem(endItem_); });
+  menu->addAction("Focus on Start", [=]() { parent_->focusOnItem(startItem_); });
+  menu->addAction("Focus on End", [=]() { parent_->focusOnItem(endItem_); });
+  menu->addAction("Center on Start", [=]() { parent_->centerOnItem(startItem_); });
+  menu->addAction("Center on End", [=]() { parent_->centerOnItem(endItem_); });
   menu->addAction("Move side-by-side", [=]() { moveEndsSideBySide(); });
   menu->addAction("Show both sides", [=]() { showBothSides(); });
 
