@@ -129,10 +129,27 @@ void ExpandableGoalOrPredItem::setFactGoalOrPredFactValueHtml(const QString& pre
       factGoalOrPredFactValueHtml_ += "\n                  " + valueHtml;
   }
 
-  // Set toolTipText_ before adding links and buttons.
+  // Set toolTipText_ before adding links and buttons and other detail.
   toolTipText_ = htmlify(factGoalOrPredFactValueHtml_, true);
   // TODO: Add source code links for references at all levels.
   addSourceCodeHtmlLinks(value, factGoalOrPredFactValueHtml_);
+
+  if (getAeraEvent()->eventType_ == CompositeStateSimulatedPredictionReduction::EVENT_TYPE) {
+    // Add the icst inputs.
+    auto icstEvent = (CompositeStateSimulatedPredictionReduction*)getAeraEvent();
+    QString html = "<br><br>From inputs ";
+    for (int i = 0; i < icstEvent->inputs_.size(); ++i) {
+      if (i == icstEvent->inputs_.size() - 1)
+        html += " and ";
+      else if (i > 0)
+        html += ", ";
+
+      html += makeHtmlLink(icstEvent->inputs_[i]);
+    }
+    html += "&nbsp;.";
+
+    factGoalOrPredFactValueHtml_ += html;
+  }
   factGoalOrPredFactValueHtml_ = htmlify("down-pointing-triangle " + factGoalOrPredFactValueHtml_, true);
   factGoalOrPredFactValueHtml_.replace("down-pointing-triangle", "<a href=\"#unexpand\">" + DownPointingTriangleHtml + "</a>");
 
