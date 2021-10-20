@@ -66,7 +66,7 @@ using namespace r_exec;
 namespace aera_visualizer {
 
 ModelPredictionFromRequirementItem::ModelPredictionFromRequirementItem(
-  ModelSimulatedPredictionReductionFromRequirement* modelReduction, ReplicodeObjects& replicodeObjects,
+  ModelSimulatedPredictionReductionFromGoalRequirement* modelReduction, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
 : ExpandableGoalOrPredItem(modelReduction, replicodeObjects,
     "Model " + makeHtmlLink(modelReduction->model_, replicodeObjects) + " from goal requirement " + RightDoubleArrowHtml,

@@ -563,20 +563,20 @@ public:
 };
 
 /**
- * ModelSimulatedPredictionReductionFromRequirement is a reduction event of a model from a predicted requirement
+ * ModelSimulatedPredictionReductionFromGoalRequirement is a reduction event of a model from a goal requirement
  * to a simulated prediction of the LHS.
  */
-class ModelSimulatedPredictionReductionFromRequirement : public AeraEvent {
+class ModelSimulatedPredictionReductionFromGoalRequirement : public AeraEvent {
 public:
   /**
-   * Create a ModelSimulatedPredictionReductionFromRequirement.
+   * Create a ModelSimulatedPredictionReductionFromGoalRequirement.
    * \param time The reduction time.
    * \param model The model which did the reduction.
    * \param factPred The (fact (pred...)) (production).
    * \param input The input fact triggering the reduction.
    * \param goal_requirement The original goal requirement (the target of the signalled SRMonitor).
    */
-  ModelSimulatedPredictionReductionFromRequirement(core::Timestamp time, r_code::Code* model,
+  ModelSimulatedPredictionReductionFromGoalRequirement(core::Timestamp time, r_code::Code* model,
     r_code::Code* factPred, r_code::Code* input, r_code::Code* goal_requirement)
     : AeraEvent(EVENT_TYPE, time, factPred),
     model_(model), factPred_((r_exec::_Fact*)factPred),

@@ -111,7 +111,7 @@ protected:
 const set<int> AeraVisulizerWindow::simulationEventTypes_ = {
   DriveInjectEvent::EVENT_TYPE, ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,
   ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
-  ModelSimulatedPredictionReductionFromRequirement::EVENT_TYPE, SimulationCommitEvent ::EVENT_TYPE,
+  ModelSimulatedPredictionReductionFromGoalRequirement::EVENT_TYPE, SimulationCommitEvent ::EVENT_TYPE,
   ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE, PromotedSimulatedPredictionEvent::EVENT_TYPE,
   PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE };
 
@@ -124,7 +124,7 @@ const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
   ModelGoalReduction::EVENT_TYPE,
   CompositeStateGoalReduction::EVENT_TYPE,
   ModelSimulatedPredictionReduction::EVENT_TYPE,
-  ModelSimulatedPredictionReductionFromRequirement::EVENT_TYPE,
+  ModelSimulatedPredictionReductionFromGoalRequirement::EVENT_TYPE,
   ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE,
   CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
   PredictionResultEvent::EVENT_TYPE,
@@ -224,7 +224,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   // mdl 61 predict imdl -> mk.rdx 559
   regex modelImdlPredictionReductionRegex("^mdl \\d+ predict imdl -> mk.rdx (\\d+)$");
   // mdl 67: fact (352225) pred fact imdl -> fact 588 simulated pred, from goal req 533
-  regex modelSimulatedPredictionFromRequirementRegex("^mdl (\\d+): fact \\((\\d+)\\) pred fact imdl -> fact (\\d+) simulated pred, from goal req (\\d+)$");
+  regex modelSimulatedPredictionFromGoalRequirementRegex("^mdl (\\d+): fact \\((\\d+)\\) pred fact imdl -> fact (\\d+) simulated pred, from goal req (\\d+)$");
   // mdl 67: fact (697996) pred fact imdl, from goal req 1250, simulated pred disabled by fact (696754) pred |fact imdl
   regex modelSimulatedPredictionDisabledByStrongRequirementRegex("^mdl (\\d+): fact \\((\\d+)\\) pred fact imdl, from goal req (\\d+), simulated pred disabled by fact \\((\\d+)\\) pred \\|fact imdl$");
   // mdl 63 predict -> mk.rdx 68
@@ -398,14 +398,14 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
         }
       }
     }
-    else if (regex_search(lineAfterTimestamp, matches, modelSimulatedPredictionFromRequirementRegex)) {
+    else if (regex_search(lineAfterTimestamp, matches, modelSimulatedPredictionFromGoalRequirementRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
       auto factPred = replicodeObjects_.getObject(stoul(matches[3].str()));
       auto input = replicodeObjects_.getObjectByDetailOid(stoul(matches[2].str()));
       auto goal_requirement = replicodeObjects_.getObject(stoul(matches[4].str()));
 
       if (model && factPred && input && goal_requirement)
-        events_.push_back(make_shared<ModelSimulatedPredictionReductionFromRequirement>(
+        events_.push_back(make_shared<ModelSimulatedPredictionReductionFromGoalRequirement>(
           timestamp, model, factPred, input, goal_requirement));
     }
     else if (regex_search(lineAfterTimestamp, matches, modelSimulatedPredictionDisabledByStrongRequirementRegex)) {
@@ -967,8 +967,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       else
         visible = (nonSimulationsCheckBox_->checkState() == Qt::Checked);
     }
-    else if (event->eventType_ == ModelSimulatedPredictionReductionFromRequirement::EVENT_TYPE) {
-      auto reductionEvent = (ModelSimulatedPredictionReductionFromRequirement*)event;
+    else if (event->eventType_ == ModelSimulatedPredictionReductionFromGoalRequirement::EVENT_TYPE) {
+      auto reductionEvent = (ModelSimulatedPredictionReductionFromGoalRequirement*)event;
       newItem = new ModelPredictionFromRequirementItem(reductionEvent, replicodeObjects_, scene);
 
       // Add an arrow to the input fact.

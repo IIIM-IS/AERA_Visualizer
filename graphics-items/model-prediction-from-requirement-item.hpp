@@ -62,14 +62,14 @@ class ModelPredictionFromRequirementItem : public ExpandableGoalOrPredItem
 {
 public:
   ModelPredictionFromRequirementItem(
-    ModelSimulatedPredictionReductionFromRequirement* modelReduction, ReplicodeObjects& replicodeObjects,
+    ModelSimulatedPredictionReductionFromGoalRequirement* modelReduction, ReplicodeObjects& replicodeObjects,
     AeraVisualizerScene* parent);
 
 protected:
   void textItemLinkActivated(const QString& link) override;
 
 private:
-  ModelSimulatedPredictionReductionFromRequirement* modelReduction_;
+  ModelSimulatedPredictionReductionFromGoalRequirement* modelReduction_;
 };
 
 }
