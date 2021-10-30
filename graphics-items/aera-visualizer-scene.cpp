@@ -202,6 +202,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 
         if (thisFrameTime_ - replicodeObjects_.getTimeReference() < milliseconds(150) &&
             eventType == AutoFocusNewObjectEvent::EVENT_TYPE &&
+            aeraEvent->object_->get_reference(0)->references_size() >= 2 &&
             aeraEvent->object_->get_reference(0)->get_reference(1) == replicodeObjects_.getObject("essence"))
           // Debug: The first essence item. Override to make the same types of values line up. Should use a layout algorithm.
           top = 296;
