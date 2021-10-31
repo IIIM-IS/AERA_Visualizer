@@ -137,6 +137,7 @@ const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
   PromotedSimulatedPredictionEvent::EVENT_TYPE,
   PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE };
 
+const QString AeraVisulizerWindow::SettingsKeyAutoScroll = "AutoScroll";
 const QString AeraVisulizerWindow::SettingsKeySimulationsVisible = "simulationsVisible";
 const QString AeraVisulizerWindow::SettingsKeyNonSimulationsVisible = "nonSimulationsVisible";
 const QString AeraVisulizerWindow::SettingsKeyEssenceFactsVisible = "essenceFactsVisible";
@@ -1412,6 +1413,12 @@ void AeraVisulizerWindow::setPlayTime(Timestamp time)
   playTimeLabel_->setText(buffer);
   for (size_t i = 0; i < children_.size(); ++i)
     children_[i]->playTimeLabel_->setText(buffer);
+
+  QSettings settings;
+  // If auto scroll is enabled, ensure the new item is visible
+  if (mainScene_ && settings.value("AutoScroll", Qt::Unchecked).toInt() == Qt::Checked) {
+    mainScene_->scrollToTimestamp(time);
+  }
 }
 
 void AeraVisulizerWindow::setSliderToPlayTime()
@@ -1672,6 +1679,10 @@ void AeraVisulizerWindow::createToolbars()
   toolbar->addAction(zoomInAction_);
   toolbar->addAction(zoomOutAction_);
   toolbar->addAction(zoomHomeAction_);
+
+  toolbar->addSeparator();
+  // Checkbox for auto scroll
+  toolbar->addWidget(new AeraCheckbox("Auto-scroll", SettingsKeyAutoScroll, this));
 
   toolbar->addSeparator();
   toolbar->addWidget(new QLabel("Show/Hide: ", this));

@@ -442,6 +442,17 @@ void AeraVisualizerScene::zoomToItem(QGraphicsItem* item)
   }
 }
 
+void AeraVisualizerScene::scrollToTimestamp(core::Timestamp timestamp) {
+  auto relativeTime = duration_cast<microseconds>(timestamp - replicodeObjects_.getTimeReference());
+  auto frameStartTime = timestamp - (relativeTime % replicodeObjects_.getSamplingPeriod());
+  qreal xPos = getTimelineX(frameStartTime);
+  // This point marks the top left of the scrolled scene
+  // it is used to keep the same y position while scrolling
+  QGraphicsView* view = views().at(0);
+  QPointF scenePoint = view->mapToScene(QPoint(0,0));
+  view->ensureVisible(xPos, scenePoint.y(), frameWidth_, 0 , 0, 0);
+}
+
 void AeraVisualizerScene::setItemsVisible(int eventType, bool visible)
 {
   foreach(QGraphicsItem * item, items()) {
