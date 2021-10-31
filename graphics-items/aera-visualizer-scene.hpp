@@ -85,6 +85,7 @@ public:
   void zoomToItem(QGraphicsItem* item);
   void focusOnItem(QGraphicsItem* item);
   void centerOnItem(QGraphicsItem* item);
+  void scrollToTimestamp(core::Timestamp timestamp);
 
   /**
    * Get the X position on the timeline for the given timestamp.

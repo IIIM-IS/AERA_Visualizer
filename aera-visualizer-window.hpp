@@ -258,6 +258,7 @@ private:
   QAction* zoomHomeAction_;
   QAction* zoomToAction_;
 
+  static const QString SettingsKeyAutoScroll;
   static const QString SettingsKeySimulationsVisible;
   static const QString SettingsKeyNonSimulationsVisible;
   static const QString SettingsKeyEssenceFactsVisible;
