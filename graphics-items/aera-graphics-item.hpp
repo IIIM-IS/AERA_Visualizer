@@ -171,6 +171,13 @@ public:
    */
   void setItemAndArrowsAndHorizontalLinesVisible(bool visible);
 
+  /**
+   * Adjust the position of the item.
+   It moves the item below the lowest item under which it fits without colliding with other items from this timeframe.
+   */
+  void adjustItemYPosition();
+
+
   const QPen& getBorderNoHighlightPen() { return borderNoHighlightPen_;  }
 
   /**

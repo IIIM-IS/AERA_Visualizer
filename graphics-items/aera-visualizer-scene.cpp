@@ -262,6 +262,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
   addItem(item);
   // Adjust the position from the topLeft.
   item->setPos(aeraEvent->itemTopLeftPosition_ - item->boundingRect().topLeft());
+  item->adjustItemYPosition();
 }
 
 void AeraVisualizerScene::onViewMoved()
