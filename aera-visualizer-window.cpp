@@ -160,6 +160,8 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
   createActions();
   createMenus();
 
+  // Set mainScene_ to null so that setPlayTime will not try to auto-scroll it.
+  mainScene_ = 0;
   setPlayTime(replicodeObjects_.getTimeReference());
 
   createToolbars();
