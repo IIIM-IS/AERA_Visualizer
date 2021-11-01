@@ -389,6 +389,7 @@ void AeraGraphicsItem::setItemAndArrowsAndHorizontalLinesVisible(bool visible)
 {
   foreach(Arrow* arrow, arrows_) {
     if (visible) {
+      adjustItemYPosition();
       // Only set the arrow visible if the connected item is visible.
       if (arrow->startItem() == this && arrow->endItem()->isVisible() ||
           arrow->endItem() == this && arrow->startItem()->isVisible())
@@ -404,6 +405,59 @@ void AeraGraphicsItem::setItemAndArrowsAndHorizontalLinesVisible(bool visible)
     line->setVisible(visible);
   
   setVisible(visible);
+}
+
+void aera_visualizer::AeraGraphicsItem::adjustItemYPosition()
+{
+  // Only adjust positions for non-simulation items
+  if (AeraVisulizerWindow::simulationEventTypes_.find(getAeraEvent()->eventType_) !=
+      AeraVisulizerWindow::simulationEventTypes_.end()) {
+    return;
+  }
+  if (getAeraEvent()->itemInitialTopLeftPosition_ != getAeraEvent()->itemTopLeftPosition_) {
+    return;
+  }
+  // Margin between two items
+  float margin = 15;
+  // Lowest edge of all colliding items - this is under which we want to move the current item
+  float max_y_border = 0;
+  auto time = std::chrono::duration_cast<std::chrono::microseconds>(getAeraEvent()->time_ - replicodeObjects_.getTimeReference());
+  auto frame_time = getAeraEvent()->time_ - (time % replicodeObjects_.getSamplingPeriod());
+  while (true) {
+    for (auto it : collidingItems()) {
+      // Check whether the colliding item is an AeraGraphicsItem.
+      auto valid_item = dynamic_cast<AeraGraphicsItem*>(it);
+      if (!valid_item) {
+        continue;
+      }
+      if (valid_item->getAeraEvent()->itemInitialTopLeftPosition_ != valid_item->getAeraEvent()->itemTopLeftPosition_) {
+        continue;
+      }
+      // We do not care for sim-items
+      if (AeraVisulizerWindow::simulationEventTypes_.find(valid_item->getAeraEvent()->eventType_) !=
+        AeraVisulizerWindow::simulationEventTypes_.end()) {
+        continue;
+      }
+      // If the colliding item comes from a different time-stamp we do not want to adjust the position.
+      auto relative_time = std::chrono::duration_cast<std::chrono::microseconds>
+        (valid_item->getAeraEvent()->time_ - replicodeObjects_.getTimeReference());
+      auto valid_item_frame_time = valid_item->getAeraEvent()->time_ - (relative_time % replicodeObjects_.getSamplingPeriod());
+      if (valid_item_frame_time != frame_time) {
+        continue;
+      }
+      // Gets the y-position of the bottom edge of the collding item
+      float bottom_border = valid_item->pos().y() + valid_item->boundingRect().height() / 2;
+      if (max_y_border < bottom_border) {
+        max_y_border = bottom_border;
+      }
+    }
+    if (max_y_border < (pos().y() - boundingRect().height() / 2)) {
+      return;
+    }
+    // Move the current item below the lowest colliding item
+    setPos(QPointF(pos().x(), max_y_border + margin + boundingRect().height() / 2));
+    getAeraEvent()->itemInitialTopLeftPosition_ = getAeraEvent()->itemTopLeftPosition_;
+  }
 }
 
 bool AeraGraphicsItem::is_sim()
