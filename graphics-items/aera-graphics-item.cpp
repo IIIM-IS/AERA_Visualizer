@@ -387,24 +387,16 @@ void AeraGraphicsItem::addSourceCodeHtmlLinks(
 
 void AeraGraphicsItem::setItemAndArrowsAndHorizontalLinesVisible(bool visible)
 {
+  setVisible(visible);
+  if (visible) {
+    adjustItemYPosition();
+  }
   foreach(Arrow* arrow, arrows_) {
-    if (visible) {
-      adjustItemYPosition();
-      // Only set the arrow visible if the connected item is visible.
-      if (arrow->startItem() == this && arrow->endItem()->isVisible() ||
-          arrow->endItem() == this && arrow->startItem()->isVisible())
-        arrow->setVisible(true);
-      else
-        arrow->setVisible(false);
-    }
-    else
-      arrow->setVisible(false);
+    arrow->setVisible(arrow->startItem()->isVisible() && arrow->endItem()->isVisible());
   }
 
   foreach(AnchoredHorizontalLine* line, horizontalLines_)
     line->setVisible(visible);
-  
-  setVisible(visible);
 }
 
 void aera_visualizer::AeraGraphicsItem::adjustItemYPosition()
