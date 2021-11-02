@@ -105,7 +105,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     return error;
   dummyPreprocessedUserClasses.clear();
 
-  r_exec::InitOpcodes(metadata);
+  InitOpcodes(metadata);
   // Now() is called when constructing model controllers.
   r_exec::Now = Time::Get;
 
@@ -153,7 +153,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
   // Transfer objects from the compiler image to imageObjects.
   r_code::vector<Code*> imageObjects;
   // tempMem is only used internally for calling build_object.
-  r_exec::Mem<r_exec::LObject, r_exec::MemStatic> tempMem;
+  MemExec<LObject, MemStatic> tempMem;
   image.get_objects(&tempMem, imageObjects);
 
   progress.setLabelText(getProgressLabelText("Postprocessing code"));
@@ -193,14 +193,14 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
 
     switch (object->code(0).getDescriptor()) {
     case Atom::MODEL:
-      r_exec::_Mem::unpack_hlp(object);
+      _Mem::unpack_hlp(object);
       r_exec::ModelBase::Get()->load(object);
       break;
     case Atom::COMPOSITE_STATE:
-      r_exec::_Mem::unpack_hlp(object);
+      _Mem::unpack_hlp(object);
       break;
     case Atom::INSTANTIATED_PROGRAM: // refine the opcode depending on the inputs and the program type.
-      if (object->get_reference(0)->code(0).asOpcode() == r_exec::Opcodes::Pgm) {
+      if (object->get_reference(0)->code(0).asOpcode() == Opcodes::Pgm) {
 
         if (object->get_reference(0)->code(object->get_reference(0)->code(PGM_INPUTS).asIndex()).getAtomCount() == 0)
           object->code(0) = Atom::InstantiatedInputLessProgram(object->code(0).asOpcode(), object->code(0).getAtomCount());
@@ -213,9 +213,9 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     for (auto v = object->views_.begin(); v != object->views_.end(); ++v) {
 
       // init hosts' member_set.
-      r_exec::View* view = (r_exec::View*)*v;
+      View* view = (View*)*v;
       view->set_object(object);
-      r_exec::Group* host = view->get_host();
+      Group* host = view->get_host();
 
 #if 0 // debug: host is NULL.
       if (!host->load(view, object))
@@ -224,7 +224,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     }
   }
 
-  r_exec::_Mem::init_timings(timeReference_, objects_);
+  _Mem::init_timings(timeReference_, objects_);
 
   // We have to get the source code by decompiling the packet objects in objects_ (not from
   // the original decompiled code in decompiledFilePath) because variable names can be different.
