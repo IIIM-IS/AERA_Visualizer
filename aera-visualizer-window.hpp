@@ -162,7 +162,7 @@ public:
    */
   const AeraEvent* getAeraEvent(size_t i) const { return events_[i].get(); }
 
-  static const set<int> simulationEventTypes_;
+  static const std::set<int> simulationEventTypes_;
 
 protected:
   /**
@@ -219,7 +219,7 @@ private:
    * \param index (optional) The matches index for the first number. If omitted, use 1.
    * \return The timestamp.
    */
-  core::Timestamp getTimestamp(const smatch& matches, int index = 1);
+  core::Timestamp getTimestamp(const std::smatch& matches, int index = 1);
 
   /**
    * Enable the play timer to play events and set the playPauseButton_ icon.
@@ -288,7 +288,7 @@ private:
   int playTimerId_;
   bool isPlaying_;
   // The AeraEvent types where stepEvent will create a new AeraGraphicsItem.
-  static const set<int> newItemEventTypes_;
+  static const std::set<int> newItemEventTypes_;
 };
 
 }
