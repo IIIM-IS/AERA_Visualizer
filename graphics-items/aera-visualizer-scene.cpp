@@ -497,7 +497,7 @@ void AeraVisualizerScene::setAutoFocusItemsVisible(const string& property, bool 
 void AeraVisualizerScene::removeAllItemsByEventType(const set<int>& eventTypes)
 {
   // First find the items to delete without deleting, which modifies items().
-  std::vector<AeraGraphicsItem*> toDelete;
+  vector<AeraGraphicsItem*> toDelete;
   foreach(QGraphicsItem * item, items()) {
     auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
     if (aeraGraphicsItem &&

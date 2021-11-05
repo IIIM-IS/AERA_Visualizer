@@ -25,9 +25,6 @@
     <ClCompile Include="submodules\AERA\r_code\r_code.cpp">
       <Filter>r_code</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\AERA\r_code\vector.cpp">
-      <Filter>r_code</Filter>
-    </ClCompile>
     <ClCompile Include="submodules\AERA\r_code\code_utils.cpp">
       <Filter>r_code</Filter>
     </ClCompile>
@@ -312,9 +309,6 @@
     <ClInclude Include="submodules\AERA\r_code\utils.h">
       <Filter>r_code</Filter>
     </ClInclude>
-    <ClInclude Include="submodules\AERA\r_code\vector.h">
-      <Filter>r_code</Filter>
-    </ClInclude>
     <ClInclude Include="submodules\AERA\r_comp\class.h">
       <Filter>r_comp</Filter>
     </ClInclude>
@@ -531,6 +525,9 @@
     </ClInclude>
     <ClInclude Include="graphics-items\promoted-prediction-defeated-item.hpp">
       <Filter>graphics-items</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\AERA\r_code\resized_vector.h">
+      <Filter>r_code</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

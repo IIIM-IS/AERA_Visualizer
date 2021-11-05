@@ -151,7 +151,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
   }
 
   // Transfer objects from the compiler image to imageObjects.
-  r_code::vector<Code*> imageObjects;
+  resized_vector<Code*> imageObjects;
   // tempMem is only used internally for calling build_object.
   MemExec<LObject, MemStatic> tempMem;
   image.get_objects(&tempMem, imageObjects);

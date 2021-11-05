@@ -282,7 +282,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   progress.setMaximum(nLines);
 
   // pendingEvents is an ordered map keyed by event time. The value is a list of pending events at the time.
-  std::map<core::Timestamp, std::vector<shared_ptr<AeraEvent> > > pendingEvents;
+  std::map<core::Timestamp, vector<shared_ptr<AeraEvent> > > pendingEvents;
   ifstream runtimeOutputFile(runtimeOutputFilePath);
   int lineNumber = 0;
   string line;
@@ -509,7 +509,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
         // Put in pendingEvents to be added to events_ later.
         if (pendingEvents.find(event->time_) == pendingEvents.end())
           // Create the entry.
-          pendingEvents[event->time_] = std::vector<shared_ptr<AeraEvent> >();
+          pendingEvents[event->time_] = vector<shared_ptr<AeraEvent> >();
         pendingEvents[event->time_].push_back(event);
       }
     }
@@ -520,7 +520,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
 
       // Get the matching inputs.
       string inputOids = matches[4].str();
-      std::vector<Code*> inputs;
+      vector<Code*> inputs;
       bool gotAllInputs = true;
       while (regex_search(inputOids, matches, regex("( \\d+)"))) {
         auto input = replicodeObjects_.getObject(stoul(matches[1].str()));
@@ -542,7 +542,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
 
       // Get the matching inputs.
       string inputOids = matches[2].str();
-      std::vector<Code*> inputs;
+      vector<Code*> inputs;
       bool gotAllInputs = true;
       while (regex_search(inputOids, matches, regex("( \\d+)"))) {
         auto input = replicodeObjects_.getObject(stoul(matches[1].str()));
@@ -564,7 +564,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
 
       // Get the matching inputs.
       string inputOids = matches[2].str();
-      std::vector<Code*> inputs;
+      vector<Code*> inputs;
       bool gotAllInputs = true;
       while (regex_search(inputOids, matches, regex("( \\d+)"))) {
         auto input = replicodeObjects_.getObject(stoul(matches[1].str()));

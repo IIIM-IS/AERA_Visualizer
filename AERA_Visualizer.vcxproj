@@ -259,7 +259,6 @@
     <ClCompile Include="submodules\AERA\r_code\image_impl.cpp" />
     <ClCompile Include="submodules\AERA\r_code\object.cpp" />
     <ClCompile Include="submodules\AERA\r_code\r_code.cpp" />
-    <ClCompile Include="submodules\AERA\r_code\vector.cpp" />
     <ClCompile Include="submodules\AERA\r_comp\class.cpp" />
     <ClCompile Include="submodules\AERA\r_comp\compiler.cpp" />
     <ClCompile Include="submodules\AERA\r_comp\decompiler.cpp" />
@@ -383,10 +382,10 @@
     <ClInclude Include="submodules\AERA\r_code\list.h" />
     <ClInclude Include="submodules\AERA\r_code\object.h" />
     <ClInclude Include="submodules\AERA\r_code\replicode_defs.h" />
+    <ClInclude Include="submodules\AERA\r_code\resized_vector.h" />
     <ClInclude Include="submodules\AERA\r_code\r_code.h" />
     <ClInclude Include="submodules\AERA\r_code\time_buffer.h" />
     <ClInclude Include="submodules\AERA\r_code\utils.h" />
-    <ClInclude Include="submodules\AERA\r_code\vector.h" />
     <ClInclude Include="submodules\AERA\r_comp\class.h" />
     <ClInclude Include="submodules\AERA\r_comp\compiler.h" />
     <ClInclude Include="submodules\AERA\r_comp\decompiler.h" />
