@@ -261,15 +261,13 @@
     <ClCompile Include="graphics-items\predicted-instantiated-composite-state-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
-    <ClCompile Include="aera-checkbox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="graphics-items\promoted-prediction-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
     <ClCompile Include="graphics-items\promoted-prediction-defeated-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
+    <ClCompile Include="aera-checkbox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aera-event.hpp" />
@@ -596,9 +594,7 @@
     <QtMoc Include="aera-visualizer-window.hpp" />
     <QtMoc Include="aera-visualizer-window-base.hpp" />
     <QtMoc Include="explanation-log-window.hpp" />
-    <QtMoc Include="aera-checkbox.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
+    <QtMoc Include="aera-checkbox.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="submodules\AERA\r_exec\r_exec.vcxproj">
