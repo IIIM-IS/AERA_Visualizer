@@ -46,9 +46,6 @@
     <ClCompile Include="submodules\AERA\r_comp\segments.cpp">
       <Filter>r_comp</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\AERA\r_comp\string_utils.cpp">
-      <Filter>r_comp</Filter>
-    </ClCompile>
     <ClCompile Include="submodules\AERA\r_comp\structure_member.cpp">
       <Filter>r_comp</Filter>
     </ClCompile>
@@ -326,9 +323,6 @@
       <Filter>r_comp</Filter>
     </ClInclude>
     <ClInclude Include="submodules\AERA\r_comp\segments.h">
-      <Filter>r_comp</Filter>
-    </ClInclude>
-    <ClInclude Include="submodules\AERA\r_comp\string_utils.h">
       <Filter>r_comp</Filter>
     </ClInclude>
     <ClInclude Include="submodules\AERA\r_comp\structure_member.h">

@@ -265,7 +265,6 @@
     <ClCompile Include="submodules\AERA\r_comp\preprocessor.cpp" />
     <ClCompile Include="submodules\AERA\r_comp\r_comp.cpp" />
     <ClCompile Include="submodules\AERA\r_comp\segments.cpp" />
-    <ClCompile Include="submodules\AERA\r_comp\string_utils.cpp" />
     <ClCompile Include="submodules\AERA\r_comp\structure_member.cpp" />
     <ClCompile Include="submodules\AERA\r_exec\ast_controller.cpp" />
     <ClCompile Include="submodules\AERA\r_exec\ast_controller.tpl.cpp">
@@ -393,7 +392,6 @@
     <ClInclude Include="submodules\AERA\r_comp\preprocessor.h" />
     <ClInclude Include="submodules\AERA\r_comp\r_comp.h" />
     <ClInclude Include="submodules\AERA\r_comp\segments.h" />
-    <ClInclude Include="submodules\AERA\r_comp\string_utils.h" />
     <ClInclude Include="submodules\AERA\r_comp\structure_member.h" />
     <ClInclude Include="submodules\AERA\r_exec\ast_controller.h" />
     <ClInclude Include="submodules\AERA\r_exec\auto_focus.h" />
