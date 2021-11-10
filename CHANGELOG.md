@@ -1,4 +1,4 @@
-AERA_Visualizer_v0.2 (2020-06-19)
----------------------------------
+AERA_Visualizer-replicode-syntax-v1.2 (2020-06-19)
+--------------------------------------------------
 
-First release, compatible with AERA_v0.2 .
+First release, compatible with https://github.com/IIIM-IS/AERA/releases/tag/replicode-syntax-v1.2 .
