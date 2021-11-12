@@ -6,7 +6,7 @@ These are instructions to build and run the AERA Visualizer.
 Prerequisites
 =============
 
-* Required: Replicode
+* Required: AERA
 * Required: Qt Framework, version 5.14.2
 * Required: The AERA Visualizer code repository from https://github.com/IIIM-IS/AERA_Visualizer . Do a "recursive" clone to get submodules, e.g.:
 
@@ -15,7 +15,7 @@ Prerequisites
 Following are the detailed steps for each platform to install the prerequisites.
 
 ## Windows
-To install Replicode, see https://github.com/IIIM-IS/AERA/blob/master/INSTALL.md . Be sure
+To install AERA, see https://github.com/IIIM-IS/AERA/blob/master/INSTALL.md . Be sure
 to follow the instructions to set `WITH_DETAIL_OID` .
 
 To install Qt Framework:
