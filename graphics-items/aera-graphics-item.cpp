@@ -552,7 +552,24 @@ void AeraGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent)
 
 void AeraGraphicsItem::TextItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
 {
-  parent_->parent_->getParent()->textItemHoverMoveEvent(document(), event->pos());
+  auto window = parent_->parent_->getParent();
+  window->textItemHoverMoveEvent(document(), event->pos());
+
+  // If we are hovering a linked item, show the linked item as tooltip
+  auto url = document()->documentLayout()->anchorAt(event->pos());
+  if (url.startsWith("#detail_oid-")) {
+    uint64 detail_oid = url.mid(12).toULongLong();
+    auto object =  parent_->replicodeObjects_.getObjectByDetailOid(detail_oid);
+    if (object) {
+      AeraGraphicsItem *aeraGraphicsItem = window->getAeraGraphicsItem(object);
+      if (aeraGraphicsItem) {
+        parent_->setToolTip(aeraGraphicsItem->getHtml());
+      }
+    }
+  }
+  else {
+    parent_->setToolTip("");
+  }
 
   QGraphicsTextItem::hoverMoveEvent(event);
 }

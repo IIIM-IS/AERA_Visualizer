@@ -103,6 +103,7 @@ public:
   void addHorizontalLine(AnchoredHorizontalLine* line) { horizontalLines_.append(line); }
   void updateArrowsAndLines();
   AeraEvent* getAeraEvent() { return aeraEvent_; }
+  QString getHtml() { return textItem_->toHtml(); }
 
   /**
    * Change the Z value of this item to be slightly greater than other colliding AeraGraphicsItems.
