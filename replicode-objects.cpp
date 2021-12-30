@@ -250,7 +250,6 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
   }
   decompiler.decompile_references(&packedImage, &objectNames);
 
-  Timestamp::duration timeOffset = duration_cast<microseconds>(timeReference_.time_since_epoch());
   for (uint16 i = 0; i < packedImage.code_segment_.objects_.size(); ++i) {
     if (progress.wasCanceled())
       return "cancel";
@@ -261,7 +260,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     auto object = getObjectByDetailOid(packedImage.code_segment_.objects_[i]->detail_oid_);
     if (object) {
       std::ostringstream decompiledCode;
-      decompiler.decompile_object(i, &decompiledCode, timeOffset, false, false, false);
+      decompiler.decompile_object(i, &decompiledCode, timeReference_, false, false, false);
       auto source = decompiledCode.str();
 
       // Strip ending newlines.
