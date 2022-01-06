@@ -226,7 +226,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     }
   }
 
-  _Mem::init_timings(timeReference_, objects_);
+  _Mem::init_timestamps(timeReference_, objects_);
 
   // We have to get the source code by decompiling the packet objects in objects_ (not from
   // the original decompiled code in decompiledFilePath) because variable names can be different.
