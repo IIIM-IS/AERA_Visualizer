@@ -607,7 +607,8 @@ public:
    * \param time The time of the disable event.
    * \param model The model which did the reduction.
    * \param input The input fact (weak requirement) triggering the event.
-   * \param goal_requirement The original goal requirement (the target of the signalled SRMonitor).
+   * \param goal_requirement The original goal requirement (the target of the signalled SRMonitor), or null
+   * if not from SRMonitor.
    * \param strong_requirement The strong requirement which disabled the input (weak requirement).
    */
   ModelSimulatedPredictionFromRequirementDisabledEvent(core::Timestamp time, r_code::Code* model,
