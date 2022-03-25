@@ -159,7 +159,7 @@ void ExpandableGoalOrPredItem::setFactGoalOrPredFactValueHtml(const QString& pre
     valueHtml = InstantiatedCompositeStateItem::makeIcstMembersSource(value, replicodeObjects_);
   valueHtml_ = htmlify("right-pointing-triangle " + valueHtml, true);
   if (((_Fact*)factValue)->is_anti_fact())
-    valueHtml_ =  "<font color=\"red\">" + valueHtml_ + "</font>";
+    valueHtml_ =  "<font color=\"#ff4040\">" + valueHtml_ + "</font>";
   valueHtml_.replace("right-pointing-triangle", "<a href=\"#expand\">" + RightPointingTriangleHtml + "</a>");
 }
 

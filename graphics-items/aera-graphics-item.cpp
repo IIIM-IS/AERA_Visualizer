@@ -336,8 +336,8 @@ QString AeraGraphicsItem::htmlify(const QString& input, bool useNowrap)
     result.replace(find, replace);
   }
 
-  result.replace("|fact", "<font color=\"red\">|fact</font>");
-  result.replace("|pgm", "<font color=\"red\">|pgm</font>");
+  result.replace("|fact", "<b><font color=\"#ff4040\">|fact</font></b>");
+  result.replace("|pgm", "<b><font color=\"#ff4040\">|pgm</font></b>");
   result.replace("\n", "<br>");
   result.replace("\x01", "<br>");
 
