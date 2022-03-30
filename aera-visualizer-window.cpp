@@ -231,8 +231,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   regex modelImdlPredictionReductionRegex("^mdl \\d+ predict imdl -> mk.rdx (\\d+)$");
   // mdl 67: fact (352225) pred fact imdl -> fact 588 simulated pred, from goal req 533
   regex modelSimulatedPredictionFromGoalRequirementRegex("^mdl (\\d+): fact \\((\\d+)\\) pred fact imdl -> fact (\\d+) simulated pred, from goal req (\\d+)$");
-  // mdl 67: fact (697996) pred fact imdl, from goal req 1250, simulated pred disabled by fact (696754) pred |fact imdl
-  regex modelSimulatedPredictionDisabledByStrongRequirementRegex("^mdl (\\d+): fact \\((\\d+)\\) pred fact imdl(, from goal req (\\d+))?, simulated pred disabled by fact \\((\\d+)\\) pred \\|fact imdl$");
+  // mdl 67: fact (697996) pred fact imdl, simulated pred disabled by fact (696754) pred |fact imdl
+  regex modelSimulatedPredictionDisabledByStrongRequirementRegex("^mdl (\\d+): fact \\((\\d+)\\) pred fact imdl, simulated pred disabled by fact \\((\\d+)\\) pred \\|fact imdl$");
   // mdl 63 predict -> mk.rdx 68
   regex modelPredictionReductionRegex("^mdl \\d+ predict -> mk.rdx (\\d+)$");
   // mdl 41 abduce -> mk.rdx 97
@@ -417,14 +417,11 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
     else if (regex_search(lineAfterTimestamp, matches, modelSimulatedPredictionDisabledByStrongRequirementRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
       auto input = replicodeObjects_.getObjectByDetailOid(stoul(matches[2].str()));
-      Code* goal_requirement = 0;
-      if (matches[4].length() > 0)
-        goal_requirement = replicodeObjects_.getObject(stoul(matches[4].str()));
-      auto strong_requirement = replicodeObjects_.getObjectByDetailOid(stoul(matches[5].str()));
+      auto strong_requirement = replicodeObjects_.getObjectByDetailOid(stoul(matches[3].str()));
 
       if (model && input && strong_requirement)
         events_.push_back(make_shared<ModelSimulatedPredictionFromRequirementDisabledEvent>(
-          timestamp, model, input, goal_requirement, strong_requirement));
+          timestamp, model, input, strong_requirement));
     }
     else if (regex_search(lineAfterTimestamp, matches, modelPredictionReductionRegex)) {
       auto reduction = replicodeObjects_.getObject(stoul(matches[1].str()));
@@ -1010,14 +1007,6 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       if (strongRequirementItem)
         // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
         scene->addArrow(strongRequirementItem, newItem);
-
-      if (requirementDisabledEvent->goal_requirement_) {
-        // Add an arrow to the goal requirement.
-        auto goalRequirementItem = scene->getAeraGraphicsItem(requirementDisabledEvent->goal_requirement_);
-        if (goalRequirementItem)
-          // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
-          scene->addArrow(goalRequirementItem, newItem);
-      }
 
       visible = (simulationsCheckBox_->checkState() == Qt::Checked);
     }

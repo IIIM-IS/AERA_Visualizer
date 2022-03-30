@@ -607,15 +607,12 @@ public:
    * \param time The time of the disable event.
    * \param model The model which did the reduction.
    * \param input The input fact (weak requirement) triggering the event.
-   * \param goal_requirement The original goal requirement (the target of the signalled SRMonitor), or null
-   * if not from SRMonitor.
    * \param strong_requirement The strong requirement which disabled the input (weak requirement).
    */
   ModelSimulatedPredictionFromRequirementDisabledEvent(core::Timestamp time, r_code::Code* model,
-    r_code::Code* input, r_code::Code* goal_requirement, r_code::Code* strong_requirement)
+    r_code::Code* input, r_code::Code* strong_requirement)
     : AeraEvent(EVENT_TYPE, time, NULL),
     model_(model), input_((r_exec::_Fact*)input),
-    goal_requirement_((r_exec::_Fact*)goal_requirement),
     strong_requirement_((r_exec::_Fact*)strong_requirement)
   {}
 
@@ -625,7 +622,6 @@ public:
 
   r_code::Code* model_;
   r_exec::_Fact* input_;
-  r_exec::_Fact* goal_requirement_;
   r_exec::_Fact* strong_requirement_;
 };
 

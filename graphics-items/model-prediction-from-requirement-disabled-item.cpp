@@ -82,11 +82,7 @@ ModelPredictionFromRequirementDisabledItem::ModelPredictionFromRequirementDisabl
 void ModelPredictionFromRequirementDisabledItem::setMessageHtml()
 {
   expandedMessageHtml_ = "The input requirement " + 
-    makeHtmlLink(requirementDisabledEvent_->input_, replicodeObjects_) + 
-    (requirementDisabledEvent_->goal_requirement_ ? 
-     "matched the<br>goal requirement " + makeHtmlLink(requirementDisabledEvent_->goal_requirement_, replicodeObjects_) + ", but "
-     : "") +
-    "was disabled by<br>strong requirement " +
+    makeHtmlLink(requirementDisabledEvent_->input_, replicodeObjects_) + " was disabled by<br>strong requirement " +
     makeHtmlLink(requirementDisabledEvent_->strong_requirement_, replicodeObjects_) + ". No prediction.";
   QString messageHtml = "prediction disabled";
 
