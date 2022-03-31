@@ -1024,8 +1024,6 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     else if (event->eventType_ == CompositeStateSimulatedPredictionReduction::EVENT_TYPE) {
       auto reductionEvent = (CompositeStateSimulatedPredictionReduction*)event;
       newItem = new CompositeStatePredictionItem(reductionEvent, replicodeObjects_, scene);
-      if (reductionEvent->object_->get_oid() == 1426)
-        int debug1 = 1;
 
       // Add an arrow to the input fact.
       auto inputItem = scene->getAeraGraphicsItem(reductionEvent->input_);
