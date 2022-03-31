@@ -841,6 +841,56 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
   if (event->time_ > maximumTime)
     return Utils_MaxTime;
 
+#if 1
+  auto relativeTime = duration_cast<microseconds>(event->time_ - replicodeObjects_.getTimeReference());
+  auto frameStartTime = event->time_ - (relativeTime % replicodeObjects_.getSamplingPeriod());
+  bool isNewFrame = (iNextEvent_ <= 0 || frameStartTime > events_[iNextEvent_ - 1]->time_);
+  if (isNewFrame) {
+    auto thisFrameMaxTime = frameStartTime + replicodeObjects_.getSamplingPeriod() - microseconds(1);
+
+    // Set iCommand to the simulation event showing a ModelGoalReduction for a command (presumably the simulation's committed goal).
+    // TODO: What about multiple committed goals including for mandatory solutions?
+    int iCommand = -1;
+    for (size_t i = iNextEvent_; i < events_.size(); ++i) {
+      if (events_[i]->time_ > thisFrameMaxTime)
+        // We searched the frame but didn't find a command.
+        break;
+
+      if (events_[i]->eventType_ == ModelGoalReduction::EVENT_TYPE) {
+        auto value = ((ModelGoalReduction*)events_[i].get())->factGoal_->get_goal()->get_target()->get_reference(0);
+        if (value->code(0).asOpcode() == Opcodes::Cmd) {
+          iCommand = i;
+          break;
+        }
+      }
+    }
+
+    if (iCommand >= 0) {
+      // Start from the committed command and get the chain of inputs and set the simulation detail OIDs.
+      std::set<int> focusSimulationDetailOids;
+      int i = iCommand;
+      while (i >= iNextEvent_) {
+        focusSimulationDetailOids.insert(events_[i]->object_->get_detail_oid());
+
+        auto input = events_[i]->getInput();
+        if (!input)
+          // The end of the backward links, presumably the drive.
+          break;
+
+        // Keep searching backwards (back to the first simulation event) for the event of the input.
+        --i;
+        for (; i >= iNextEvent_; --i) {
+          if (events_[i]->object_ == input)
+            break;
+        }
+      }
+
+      // This will display the focus simulation items at the top.
+      mainScene_->setFocusSimulationDetailOids(focusSimulationDetailOids);
+    }
+  }
+#endif
+
   if (newItemEventTypes_.find(event->eventType_) != newItemEventTypes_.end()) {
     AeraGraphicsItem* newItem;
     bool visible = true;
@@ -1481,43 +1531,10 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
   else {
     if (firstEventIsSimulation) {
       // Not a new frame and the first event is a simulation, so we want to step all the simulations at once.
-      // Set iNonSimulation to the next non-simulation event. Also set iCommand to the simulation event showing a
-      // non-simulated goal for a command (presumably the simulation's committed goal).
-      // TODO: What about multiple committed goals including for mandatory solutions?
-      int iCommand = -1;
+      // Set iNonSimulation to the next non-simulation event.
       for (iNonSimulation = iNextStepEvent; iNonSimulation < events_.size(); ++iNonSimulation) {
         if (simulationEventTypes_.find(events_[iNonSimulation]->eventType_) == simulationEventTypes_.end())
           break;
-
-        if (events_[iNonSimulation]->eventType_ == ModelGoalReduction::EVENT_TYPE) {
-          auto value = ((ModelGoalReduction*)events_[iNonSimulation].get())->factGoal_->get_goal()->get_target()->get_reference(0);
-          if (value->code(0).asOpcode() == Opcodes::Cmd)
-            iCommand = iNonSimulation;
-        }
-      }
-
-      if (iCommand >= 0) {
-        // Start from the committed command and get the chain of inputs.
-        std::set<int> focusSimulationDetailOids;
-        int i = iCommand;
-        while (i >= iNextStepEvent) {
-          focusSimulationDetailOids.insert(events_[i]->object_->get_detail_oid());
-
-          auto input = events_[i]->getInput();
-          if (!input)
-            // The end of the backward links, presumably the drive.
-            break;
-
-          // Keep searching backwards (back to the first simulation event) for the event of the input.
-          --i;
-          for (; i >= iNextStepEvent; --i) {
-            if (events_[i]->object_ == input)
-              break;
-          }
-        }
-
-        // This will display the focus simulation items at the top.
-        mainScene_->setFocusSimulationDetailOids(focusSimulationDetailOids);
       }
     }
   }
