@@ -245,7 +245,7 @@ QString PredictionItem::makeHtml()
     auto imdl = modelReduction_->getFactImdl()->get_reference(0);
     auto mdl = imdl->get_reference(0);
     html += "<br>Input " + makeHtmlLink(modelReduction_->getCause()) +
-      " matched the LHS of model " + makeHtmlLink(mdl) + " and the prediction is the RHS of instantiated model <b>" +
+      " matched the LHS of model " + makeHtmlLink(mdl) + " and the prediction is the RHS instantiated with values shown in imdl <b>" +
       replicodeObjects_.getLabel(modelReduction_->getFactImdl()).c_str() + "</b>:<br>";
     html += factImdlHtml_;
     html += "<br><br>" + (showState_ == WHAT_MADE_THIS ? boundModelHtml_ : unboundModelHtml_);
