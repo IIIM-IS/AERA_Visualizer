@@ -246,7 +246,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   // mdl 57: fact 202 pred -> fact 227 simulated pred fact imdl, using req (745971)
   regex modelSimulatedPredictionRegex("^mdl (\\d+): fact (\\d+) pred -> fact (\\d+) simulated pred( fact imdl)?(?:, using req \\((\\d+)\\))?$");
   // mdl 63: fact 531 super_goal -> fact (332278) simulated pred start, using req (323845), ijt 0s:535ms:0us
-  regex modelSimulatedPredictionStartRegex("^mdl (\\d+): fact (\\d+) super_goal -> fact \\((\\d+)\\) simulated pred start, using req \\((\\d+)\\), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
+  regex modelSimulatedPredictionStartRegex("^mdl (\\d+): fact (\\d+) super_goal -> fact \\((\\d+)\\) simulated pred start(?:, using req \\((\\d+)\\))?, ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
   // cst 60: fact 195 -> fact 218 simulated pred fact icst [ 155 191]
   regex compositeStateSimulatedPredictionRegex("^cst (\\d+): fact (\\d+) -> fact (\\d+) simulated pred fact icst \\[([ \\d]+)\\]$");
   // fact 59 icst[52][ 50 55]
@@ -502,9 +502,11 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
       auto input = replicodeObjects_.getObject(stoul(matches[2].str()));
       auto factPred = replicodeObjects_.getObjectByDetailOid(stoul(matches[3].str()));
-      auto requirement = replicodeObjects_.getObjectByDetailOid(stoul(matches[4].str()));
+      Code* requirement = 0;
+      if (matches[4].length() > 0)
+        requirement = replicodeObjects_.getObjectByDetailOid(stoul(matches[4].str()));
 
-      if (model && factPred && input && requirement) {
+      if (model && factPred && input) {
         core::Timestamp injectionTime = getTimestamp(matches, 5);
         if (injectionTime < timestamp)
           // We don't expect this, but the runtime would not have injected earlier.
