@@ -232,7 +232,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   // mdl 67: fact (352225) pred fact imdl -> fact 588 simulated pred, from goal req 533
   regex modelSimulatedPredictionFromGoalRequirementRegex("^mdl (\\d+): fact \\((\\d+)\\) pred fact imdl -> fact (\\d+) simulated pred, from goal req (\\d+)$");
   // mdl 67: fact (697996) pred fact imdl, from goal req 1250, simulated pred disabled by fact (696754) pred |fact imdl
-  regex modelPredictionDisabledByStrongRequirementRegex("^mdl (\\d+): fact \\((\\d+)\\) pred fact imdl(, from goal req (\\d+))?, simulated pred disabled by fact \\((\\d+)\\) pred \\|fact imdl$");
+  regex modelPredictionDisabledByStrongRequirementRegex("^mdl (\\d+): fact \\((\\d+)\\) pred fact imdl(, from goal req (\\d+))?, (simulated )?pred disabled by fact \\((\\d+)\\) pred \\|fact imdl$");
   // mdl 63 predict -> mk.rdx 68
   regex modelPredictionReductionRegex("^mdl \\d+ predict -> mk.rdx (\\d+)$");
   // mdl 41 abduce -> mk.rdx 97
@@ -420,7 +420,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
       Code* goal_requirement = 0;
       if (matches[4].length() > 0)
         goal_requirement = replicodeObjects_.getObject(stoul(matches[4].str()));
-      auto strong_requirement = replicodeObjects_.getObjectByDetailOid(stoul(matches[5].str()));
+      auto strong_requirement = replicodeObjects_.getObjectByDetailOid(stoul(matches[6].str()));
 
       if (model && input && strong_requirement)
         events_.push_back(make_shared<ModelPredictionFromRequirementDisabledEvent>(
