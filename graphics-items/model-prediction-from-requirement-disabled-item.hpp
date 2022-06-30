@@ -62,14 +62,14 @@ class AeraVisualizerScene;
 
 /**
  * An ModelPredictionFromRequirementDisabledItem extends AeraGraphicsItem to show a
- * ModelSimulatedPredictionFromRequirementDisabledEvent with a clickable "expand triangle" which expands
+ * ModelPredictionFromRequirementDisabledEvent with a clickable "expand triangle" which expands
  * the item to show the full message.
  */
 class ModelPredictionFromRequirementDisabledItem : public AeraGraphicsItem
 {
 public:
   ModelPredictionFromRequirementDisabledItem(
-    ModelSimulatedPredictionFromRequirementDisabledEvent* requirementDisabledEvent,
+    ModelPredictionFromRequirementDisabledEvent* requirementDisabledEvent,
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 
 protected:
@@ -78,7 +78,7 @@ protected:
 private:
   void setMessageHtml();
 
-  ModelSimulatedPredictionFromRequirementDisabledEvent* requirementDisabledEvent_;
+  ModelPredictionFromRequirementDisabledEvent* requirementDisabledEvent_;
 
   QString expandedMessageHtml_;
   QString toolTipText_;

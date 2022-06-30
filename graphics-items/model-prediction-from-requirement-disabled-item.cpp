@@ -67,7 +67,7 @@ using namespace r_exec;
 namespace aera_visualizer {
 
 ModelPredictionFromRequirementDisabledItem::ModelPredictionFromRequirementDisabledItem(
-  ModelSimulatedPredictionFromRequirementDisabledEvent* requirementDisabledEvent,
+  ModelPredictionFromRequirementDisabledEvent* requirementDisabledEvent,
   ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent)
 : AeraGraphicsItem(requirementDisabledEvent, replicodeObjects, parent, ""),
   requirementDisabledEvent_(requirementDisabledEvent)

@@ -596,13 +596,13 @@ public:
 };
 
 /**
- * ModelSimulatedPredictionFromRequirementDisabledEvent is the event when a weak requirement is disabled by
+ * ModelPredictionFromRequirementDisabledEvent is the event when a weak requirement is disabled by
  * a strong requirement.
  */
-class ModelSimulatedPredictionFromRequirementDisabledEvent : public AeraEvent {
+class ModelPredictionFromRequirementDisabledEvent : public AeraEvent {
 public:
   /**
-   * Create a ModelSimulatedPredictionFromRequirementDisabledEvent. This sets object_ to NULL, since this is
+   * Create a ModelPredictionFromRequirementDisabledEvent. This sets object_ to NULL, since this is
    * an event for disabling the production of an output.
    * \param time The time of the disable event.
    * \param model The model which did the reduction.
@@ -611,7 +611,7 @@ public:
    * if not from SRMonitor.
    * \param strong_requirement The strong requirement which disabled the input (weak requirement).
    */
-  ModelSimulatedPredictionFromRequirementDisabledEvent(core::Timestamp time, r_code::Code* model,
+  ModelPredictionFromRequirementDisabledEvent(core::Timestamp time, r_code::Code* model,
     r_code::Code* input, r_code::Code* goal_requirement, r_code::Code* strong_requirement)
     : AeraEvent(EVENT_TYPE, time, NULL),
     model_(model), input_((r_exec::_Fact*)input),
