@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2021 Jeff Thompson
-//_/_/ Copyright (c) 2018-2021 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2021 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2022 Jeff Thompson
+//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -159,7 +159,7 @@ void ExpandableGoalOrPredItem::setFactGoalOrPredFactValueHtml(const QString& pre
     valueHtml = InstantiatedCompositeStateItem::makeIcstMembersSource(value, replicodeObjects_);
   valueHtml_ = htmlify("right-pointing-triangle " + valueHtml, true);
   if (((_Fact*)factValue)->is_anti_fact())
-    valueHtml_ =  "<font color=\"red\">" + valueHtml_ + "</font>";
+    valueHtml_ =  "<font color=\"#ff4040\">" + valueHtml_ + "</font>";
   valueHtml_.replace("right-pointing-triangle", "<a href=\"#expand\">" + RightPointingTriangleHtml + "</a>");
 }
 

@@ -2,11 +2,11 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2021 Jeff Thompson
-//_/_/ Copyright (c) 2018-2021 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2022 Jeff Thompson
+//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ Copyright (c) 2021 Leonard Eberding
-//_/_/ Copyright (c) 2018-2021 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -336,8 +336,8 @@ QString AeraGraphicsItem::htmlify(const QString& input, bool useNowrap)
     result.replace(find, replace);
   }
 
-  result.replace("|fact", "<font color=\"red\">|fact</font>");
-  result.replace("|pgm", "<font color=\"red\">|pgm</font>");
+  result.replace("|fact", "<b><font color=\"#ff4040\">|fact</font></b>");
+  result.replace("|pgm", "<b><font color=\"#ff4040\">|pgm</font></b>");
   result.replace("\n", "<br>");
   result.replace("\x01", "<br>");
 

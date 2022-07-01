@@ -2,10 +2,10 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2021 Jeff Thompson
-//_/_/ Copyright (c) 2018-2021 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2022 Jeff Thompson
+//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Leonard Eberding
-//_/_/ Copyright (c) 2018-2021 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -245,7 +245,7 @@ QString PredictionItem::makeHtml()
     auto imdl = modelReduction_->getFactImdl()->get_reference(0);
     auto mdl = imdl->get_reference(0);
     html += "<br>Input " + makeHtmlLink(modelReduction_->getCause()) +
-      " matched the LHS of model " + makeHtmlLink(mdl) + " and the prediction is the RHS of instantiated model <b>" +
+      " matched the LHS of model " + makeHtmlLink(mdl) + " and the prediction is the RHS instantiated with values shown in imdl <b>" +
       replicodeObjects_.getLabel(modelReduction_->getFactImdl()).c_str() + "</b>:<br>";
     html += factImdlHtml_;
     html += "<br><br>" + (showState_ == WHAT_MADE_THIS ? boundModelHtml_ : unboundModelHtml_);

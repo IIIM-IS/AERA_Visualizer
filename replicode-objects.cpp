@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2021 Jeff Thompson
-//_/_/ Copyright (c) 2018-2021 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2021 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2022 Jeff Thompson
+//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -226,7 +226,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     }
   }
 
-  _Mem::init_timings(timeReference_, objects_);
+  _Mem::init_timestamps(timeReference_, objects_);
 
   // We have to get the source code by decompiling the packet objects in objects_ (not from
   // the original decompiled code in decompiledFilePath) because variable names can be different.
@@ -250,7 +250,6 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
   }
   decompiler.decompile_references(&packedImage, &objectNames);
 
-  Timestamp::duration timeOffset = duration_cast<microseconds>(timeReference_.time_since_epoch());
   for (uint16 i = 0; i < packedImage.code_segment_.objects_.size(); ++i) {
     if (progress.wasCanceled())
       return "cancel";
@@ -261,7 +260,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     auto object = getObjectByDetailOid(packedImage.code_segment_.objects_[i]->detail_oid_);
     if (object) {
       std::ostringstream decompiledCode;
-      decompiler.decompile_object(i, &decompiledCode, timeOffset, false, false, false);
+      decompiler.decompile_object(i, &decompiledCode, timeReference_, false, false, false);
       auto source = decompiledCode.str();
 
       // Strip ending newlines.

@@ -2,10 +2,10 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2021 Jeff Thompson
-//_/_/ Copyright (c) 2018-2021 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2022 Jeff Thompson
+//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
-//_/_/ Copyright (c) 2018-2021 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -115,7 +115,7 @@ const set<int> AeraVisulizerWindow::simulationEventTypes_ = {
   DriveInjectEvent::EVENT_TYPE, ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,
   ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
   ModelSimulatedPredictionReductionFromGoalRequirement::EVENT_TYPE, SimulationCommitEvent ::EVENT_TYPE,
-  ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE, PromotedSimulatedPredictionEvent::EVENT_TYPE,
+  ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE, PromotedSimulatedPredictionEvent::EVENT_TYPE,
   PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE };
 
 const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
@@ -128,7 +128,7 @@ const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
   CompositeStateGoalReduction::EVENT_TYPE,
   ModelSimulatedPredictionReduction::EVENT_TYPE,
   ModelSimulatedPredictionReductionFromGoalRequirement::EVENT_TYPE,
-  ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE,
+  ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE,
   CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
   PredictionResultEvent::EVENT_TYPE,
   NewInstantiatedCompositeStateEvent::EVENT_TYPE,
@@ -232,7 +232,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   // mdl 67: fact (352225) pred fact imdl -> fact 588 simulated pred, from goal req 533
   regex modelSimulatedPredictionFromGoalRequirementRegex("^mdl (\\d+): fact \\((\\d+)\\) pred fact imdl -> fact (\\d+) simulated pred, from goal req (\\d+)$");
   // mdl 67: fact (697996) pred fact imdl, from goal req 1250, simulated pred disabled by fact (696754) pred |fact imdl
-  regex modelSimulatedPredictionDisabledByStrongRequirementRegex("^mdl (\\d+): fact \\((\\d+)\\) pred fact imdl, from goal req (\\d+), simulated pred disabled by fact \\((\\d+)\\) pred \\|fact imdl$");
+  regex modelPredictionDisabledByStrongRequirementRegex("^mdl (\\d+): fact \\((\\d+)\\) pred fact imdl(, from goal req (\\d+))?, (simulated )?pred disabled by fact \\((\\d+)\\) pred \\|fact imdl$");
   // mdl 63 predict -> mk.rdx 68
   regex modelPredictionReductionRegex("^mdl \\d+ predict -> mk.rdx (\\d+)$");
   // mdl 41 abduce -> mk.rdx 97
@@ -246,7 +246,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   // mdl 57: fact 202 pred -> fact 227 simulated pred fact imdl, using req (745971)
   regex modelSimulatedPredictionRegex("^mdl (\\d+): fact (\\d+) pred -> fact (\\d+) simulated pred( fact imdl)?(?:, using req \\((\\d+)\\))?$");
   // mdl 63: fact 531 super_goal -> fact (332278) simulated pred start, using req (323845), ijt 0s:535ms:0us
-  regex modelSimulatedPredictionStartRegex("^mdl (\\d+): fact (\\d+) super_goal -> fact \\((\\d+)\\) simulated pred start, using req \\((\\d+)\\), ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
+  regex modelSimulatedPredictionStartRegex("^mdl (\\d+): fact (\\d+) super_goal -> fact \\((\\d+)\\) simulated pred start(?:, using req \\((\\d+)\\))?, ijt (\\d+)s:(\\d+)ms:(\\d+)us$");
   // cst 60: fact 195 -> fact 218 simulated pred fact icst [ 155 191]
   regex compositeStateSimulatedPredictionRegex("^cst (\\d+): fact (\\d+) -> fact (\\d+) simulated pred fact icst \\[([ \\d]+)\\]$");
   // fact 59 icst[52][ 50 55]
@@ -414,14 +414,16 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
         events_.push_back(make_shared<ModelSimulatedPredictionReductionFromGoalRequirement>(
           timestamp, model, factPred, input, goal_requirement));
     }
-    else if (regex_search(lineAfterTimestamp, matches, modelSimulatedPredictionDisabledByStrongRequirementRegex)) {
+    else if (regex_search(lineAfterTimestamp, matches, modelPredictionDisabledByStrongRequirementRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
       auto input = replicodeObjects_.getObjectByDetailOid(stoul(matches[2].str()));
-      auto goal_requirement = replicodeObjects_.getObject(stoul(matches[3].str()));
-      auto strong_requirement = replicodeObjects_.getObjectByDetailOid(stoul(matches[4].str()));
+      Code* goal_requirement = 0;
+      if (matches[4].length() > 0)
+        goal_requirement = replicodeObjects_.getObject(stoul(matches[4].str()));
+      auto strong_requirement = replicodeObjects_.getObjectByDetailOid(stoul(matches[6].str()));
 
-      if (model && input && goal_requirement && strong_requirement)
-        events_.push_back(make_shared<ModelSimulatedPredictionFromRequirementDisabledEvent>(
+      if (model && input && strong_requirement)
+        events_.push_back(make_shared<ModelPredictionFromRequirementDisabledEvent>(
           timestamp, model, input, goal_requirement, strong_requirement));
     }
     else if (regex_search(lineAfterTimestamp, matches, modelPredictionReductionRegex)) {
@@ -500,9 +502,11 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
       auto input = replicodeObjects_.getObject(stoul(matches[2].str()));
       auto factPred = replicodeObjects_.getObjectByDetailOid(stoul(matches[3].str()));
-      auto requirement = replicodeObjects_.getObjectByDetailOid(stoul(matches[4].str()));
+      Code* requirement = 0;
+      if (matches[4].length() > 0)
+        requirement = replicodeObjects_.getObjectByDetailOid(stoul(matches[4].str()));
 
-      if (model && factPred && input && requirement) {
+      if (model && factPred && input) {
         core::Timestamp injectionTime = getTimestamp(matches, 5);
         if (injectionTime < timestamp)
           // We don't expect this, but the runtime would not have injected earlier.
@@ -839,6 +843,56 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
   if (event->time_ > maximumTime)
     return Utils_MaxTime;
 
+#if 1
+  auto relativeTime = duration_cast<microseconds>(event->time_ - replicodeObjects_.getTimeReference());
+  auto frameStartTime = event->time_ - (relativeTime % replicodeObjects_.getSamplingPeriod());
+  bool isNewFrame = (iNextEvent_ <= 0 || frameStartTime > events_[iNextEvent_ - 1]->time_);
+  if (isNewFrame) {
+    auto thisFrameMaxTime = frameStartTime + replicodeObjects_.getSamplingPeriod() - microseconds(1);
+
+    // Set iCommand to the simulation event showing a ModelGoalReduction for a command (presumably the simulation's committed goal).
+    // TODO: What about multiple committed goals including for mandatory solutions?
+    int iCommand = -1;
+    for (size_t i = iNextEvent_; i < events_.size(); ++i) {
+      if (events_[i]->time_ > thisFrameMaxTime)
+        // We searched the frame but didn't find a command.
+        break;
+
+      if (events_[i]->eventType_ == ModelGoalReduction::EVENT_TYPE) {
+        auto value = ((ModelGoalReduction*)events_[i].get())->factGoal_->get_goal()->get_target()->get_reference(0);
+        if (value->code(0).asOpcode() == Opcodes::Cmd) {
+          iCommand = i;
+          break;
+        }
+      }
+    }
+
+    if (iCommand >= 0) {
+      // Start from the committed command and get the chain of inputs and set the simulation detail OIDs.
+      std::set<int> focusSimulationDetailOids;
+      int i = iCommand;
+      while (i >= iNextEvent_) {
+        focusSimulationDetailOids.insert(events_[i]->object_->get_detail_oid());
+
+        auto input = events_[i]->getInput();
+        if (!input)
+          // The end of the backward links, presumably the drive.
+          break;
+
+        // Keep searching backwards (back to the first simulation event) for the event of the input.
+        --i;
+        for (; i >= iNextEvent_; --i) {
+          if (events_[i]->object_ == input)
+            break;
+        }
+      }
+
+      // This will display the focus simulation items at the top.
+      mainScene_->setFocusSimulationDetailOids(focusSimulationDetailOids);
+    }
+  }
+#endif
+
   if (newItemEventTypes_.find(event->eventType_) != newItemEventTypes_.end()) {
     AeraGraphicsItem* newItem;
     bool visible = true;
@@ -993,8 +1047,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 
       visible = (simulationsCheckBox_->checkState() == Qt::Checked);
     }
-    else if (event->eventType_ == ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE) {
-      auto requirementDisabledEvent = (ModelSimulatedPredictionFromRequirementDisabledEvent*)event;
+    else if (event->eventType_ == ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE) {
+      auto requirementDisabledEvent = (ModelPredictionFromRequirementDisabledEvent*)event;
       newItem = new ModelPredictionFromRequirementDisabledItem(requirementDisabledEvent, replicodeObjects_, scene);
 
       // Add an arrow to the input fact.
@@ -1009,19 +1063,19 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
         // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
         scene->addArrow(strongRequirementItem, newItem);
 
-      // Add an arrow to the goal requirement.
-      auto goalRequirementItem = scene->getAeraGraphicsItem(requirementDisabledEvent->goal_requirement_);
-      if (goalRequirementItem)
-        // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
-        scene->addArrow(goalRequirementItem, newItem);
+      if (requirementDisabledEvent->goal_requirement_) {
+        // Add an arrow to the goal requirement.
+        auto goalRequirementItem = scene->getAeraGraphicsItem(requirementDisabledEvent->goal_requirement_);
+        if (goalRequirementItem)
+          // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
+          scene->addArrow(goalRequirementItem, newItem);
+      }
 
       visible = (simulationsCheckBox_->checkState() == Qt::Checked);
     }
     else if (event->eventType_ == CompositeStateSimulatedPredictionReduction::EVENT_TYPE) {
       auto reductionEvent = (CompositeStateSimulatedPredictionReduction*)event;
       newItem = new CompositeStatePredictionItem(reductionEvent, replicodeObjects_, scene);
-      if (reductionEvent->object_->get_oid() == 1426)
-        int debug1 = 1;
 
       // Add an arrow to the input fact.
       auto inputItem = scene->getAeraGraphicsItem(reductionEvent->input_);
@@ -1479,43 +1533,10 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
   else {
     if (firstEventIsSimulation) {
       // Not a new frame and the first event is a simulation, so we want to step all the simulations at once.
-      // Set iNonSimulation to the next non-simulation event. Also set iCommand to the simulation event showing a
-      // non-simulated goal for a command (presumably the simulation's committed goal).
-      // TODO: What about multiple committed goals including for mandatory solutions?
-      int iCommand = -1;
+      // Set iNonSimulation to the next non-simulation event.
       for (iNonSimulation = iNextStepEvent; iNonSimulation < events_.size(); ++iNonSimulation) {
         if (simulationEventTypes_.find(events_[iNonSimulation]->eventType_) == simulationEventTypes_.end())
           break;
-
-        if (events_[iNonSimulation]->eventType_ == ModelGoalReduction::EVENT_TYPE) {
-          auto value = ((ModelGoalReduction*)events_[iNonSimulation].get())->factGoal_->get_goal()->get_target()->get_reference(0);
-          if (value->code(0).asOpcode() == Opcodes::Cmd)
-            iCommand = iNonSimulation;
-        }
-      }
-
-      if (iCommand >= 0) {
-        // Start from the committed command and get the chain of inputs.
-        std::set<int> focusSimulationDetailOids;
-        int i = iCommand;
-        while (i >= iNextStepEvent) {
-          focusSimulationDetailOids.insert(events_[i]->object_->get_detail_oid());
-
-          auto input = events_[i]->getInput();
-          if (!input)
-            // The end of the backward links, presumably the drive.
-            break;
-
-          // Keep searching backwards (back to the first simulation event) for the event of the input.
-          --i;
-          for (; i >= iNextStepEvent; --i) {
-            if (events_[i]->object_ == input)
-              break;
-          }
-        }
-
-        // This will display the focus simulation items at the top.
-        mainScene_->setFocusSimulationDetailOids(focusSimulationDetailOids);
       }
     }
   }

@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2021 Jeff Thompson
-//_/_/ Copyright (c) 2018-2021 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2021 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2022 Jeff Thompson
+//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -596,21 +596,22 @@ public:
 };
 
 /**
- * ModelSimulatedPredictionFromRequirementDisabledEvent is the event when a weak requirement is disabled by
+ * ModelPredictionFromRequirementDisabledEvent is the event when a weak requirement is disabled by
  * a strong requirement.
  */
-class ModelSimulatedPredictionFromRequirementDisabledEvent : public AeraEvent {
+class ModelPredictionFromRequirementDisabledEvent : public AeraEvent {
 public:
   /**
-   * Create a ModelSimulatedPredictionFromRequirementDisabledEvent. This sets object_ to NULL, since this is
+   * Create a ModelPredictionFromRequirementDisabledEvent. This sets object_ to NULL, since this is
    * an event for disabling the production of an output.
    * \param time The time of the disable event.
    * \param model The model which did the reduction.
    * \param input The input fact (weak requirement) triggering the event.
-   * \param goal_requirement The original goal requirement (the target of the signalled SRMonitor).
+   * \param goal_requirement The original goal requirement (the target of the signalled SRMonitor), or null
+   * if not from SRMonitor.
    * \param strong_requirement The strong requirement which disabled the input (weak requirement).
    */
-  ModelSimulatedPredictionFromRequirementDisabledEvent(core::Timestamp time, r_code::Code* model,
+  ModelPredictionFromRequirementDisabledEvent(core::Timestamp time, r_code::Code* model,
     r_code::Code* input, r_code::Code* goal_requirement, r_code::Code* strong_requirement)
     : AeraEvent(EVENT_TYPE, time, NULL),
     model_(model), input_((r_exec::_Fact*)input),

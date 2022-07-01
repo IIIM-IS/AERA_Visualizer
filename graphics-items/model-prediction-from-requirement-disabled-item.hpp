@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2021 Jeff Thompson
-//_/_/ Copyright (c) 2018-2021 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2021 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2022 Jeff Thompson
+//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -62,14 +62,14 @@ class AeraVisualizerScene;
 
 /**
  * An ModelPredictionFromRequirementDisabledItem extends AeraGraphicsItem to show a
- * ModelSimulatedPredictionFromRequirementDisabledEvent with a clickable "expand triangle" which expands
+ * ModelPredictionFromRequirementDisabledEvent with a clickable "expand triangle" which expands
  * the item to show the full message.
  */
 class ModelPredictionFromRequirementDisabledItem : public AeraGraphicsItem
 {
 public:
   ModelPredictionFromRequirementDisabledItem(
-    ModelSimulatedPredictionFromRequirementDisabledEvent* requirementDisabledEvent,
+    ModelPredictionFromRequirementDisabledEvent* requirementDisabledEvent,
     ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
 
 protected:
@@ -78,7 +78,7 @@ protected:
 private:
   void setMessageHtml();
 
-  ModelSimulatedPredictionFromRequirementDisabledEvent* requirementDisabledEvent_;
+  ModelPredictionFromRequirementDisabledEvent* requirementDisabledEvent_;
 
   QString expandedMessageHtml_;
   QString toolTipText_;

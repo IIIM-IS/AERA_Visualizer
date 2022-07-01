@@ -2,11 +2,11 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2021 Jeff Thompson
-//_/_/ Copyright (c) 2018-2021 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2022 Jeff Thompson
+//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ Copyright (c) 2021 Leonard Eberding
-//_/_/ Copyright (c) 2018-2021 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -158,7 +158,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     }
   }
 
-  item->setBrush(aeraEvent->eventType_ == ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE || 
+  item->setBrush(aeraEvent->eventType_ == ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE || 
                  aeraEvent->eventType_ == PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE || 
                  item->is_sim() ? simulatedItemColor_ : itemColor_);
   bool isFocusSimulation = (item->getAeraEvent()->object_ &&
@@ -217,9 +217,9 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     int verticalMargin = 15;
     if (isSimulationEventType) {
       // Position simulated items exactly.
-      if (aeraEvent->eventType_ == ModelSimulatedPredictionFromRequirementDisabledEvent::EVENT_TYPE)
+      if (aeraEvent->eventType_ == ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE)
         // Special case. aeraEvent->object_ is null, so use the strong_requirement.
-        left = getTimelineX(((_Fact*)((ModelSimulatedPredictionFromRequirementDisabledEvent*)aeraEvent)->strong_requirement_
+        left = getTimelineX(((_Fact*)((ModelPredictionFromRequirementDisabledEvent*)aeraEvent)->strong_requirement_
                                        ->get_reference(0)->get_reference(0))->get_after());
       else if (aeraEvent->eventType_ == PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE)
         // Special case. aeraEvent->object_ is null, so use the input_.
