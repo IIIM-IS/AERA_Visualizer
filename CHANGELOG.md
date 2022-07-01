@@ -1,8 +1,15 @@
-Interim change since AERA Visualizer Diagnostic Mode v0.1
----------------------------------------------------------
+AERA Visualizer Diagnostic Mode v0.2 (2022-07-01)
+-------------------------------------------------
+
+A release compatible with AERA Diagnostic Mode v0.2 .
+This is a maintentance release from Diagnostic Mode v0.1 .
+
+Bug fixes
+* Fix imulation item placement error https://github.com/IIIM-IS/AERA_Visualizer/issues/34
 
 Changes
-* Change the Replicode syntax to add durations, distinct from time stamps https://github.com/IIIM-IS/AERA/issues/138
+* BREAKING. Change the Replicode syntax to add durations, distinct from time stamps https://github.com/IIIM-IS/AERA/issues/138
+* Other enhancements. Please see https://github.com/IIIM-IS/AERA_Visualizer/issues?q=is%3Aissue+is%3Aclosed
 
 AERA Visualizer Diagnostic Mode v0.1 (2021-11-19)
 -------------------------------------------------
