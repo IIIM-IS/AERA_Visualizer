@@ -843,7 +843,6 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
   if (event->time_ > maximumTime)
     return Utils_MaxTime;
 
-#if 1
   auto relativeTime = duration_cast<microseconds>(event->time_ - replicodeObjects_.getTimeReference());
   auto frameStartTime = event->time_ - (relativeTime % replicodeObjects_.getSamplingPeriod());
   bool isNewFrame = (iNextEvent_ <= 0 || frameStartTime > events_[iNextEvent_ - 1]->time_);
@@ -891,7 +890,6 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       mainScene_->setFocusSimulationDetailOids(focusSimulationDetailOids);
     }
   }
-#endif
 
   if (newItemEventTypes_.find(event->eventType_) != newItemEventTypes_.end()) {
     AeraGraphicsItem* newItem;
