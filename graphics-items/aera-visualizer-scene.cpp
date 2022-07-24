@@ -96,7 +96,7 @@ AeraVisualizerScene::AeraVisualizerScene(
   lineColor_ = Qt::black;
   setBackgroundBrush(QColor(245, 245, 245));
   flashTimerId_ = 0;
-  setSceneRect(QRectF(0, 0, 20000, 20000));
+  setSceneRect(QRectF(0, 0, 20000, 100000));
 
   if (isMainScene_) {
     eventTypeFirstTop_[IoDeviceEjectEvent::EVENT_TYPE] = 20;
