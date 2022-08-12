@@ -271,8 +271,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   regex simulationCommitRegex("^sim commit: fact (\\d+) pred fact success -> fact \\((\\d+)\\) goal$");
   // fact 182 -> promoted simulated pred fact 250 w/ fact 247 timings
   regex simulationPromotedSimulatedPredictionRegex("^fact (\\d+) -> promoted simulated pred fact (\\d+) w/ fact (\\d+) timings$");
-  // promoted simulated fact 251 defeated by fact 253
-  regex simulationPromotedSimulatedPredictionDefeatedRegex("^promoted simulated fact (\\d+) defeated by fact (\\d+)");
+  // promoted simulated fact 251 with DefeasibleValidity(200773) defeated by fact 253
+  regex simulationPromotedSimulatedPredictionDefeatedRegex("^promoted simulated fact (\\d+) with DefeasibleValidity\\((\\d+)\\) defeated by fact (\\d+)");
 
   progress.setLabelText(replicodeObjects_.getProgressLabelText("Reading runtime output"));
 
@@ -644,7 +644,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
           timestamp, promotedFact, promotedFromFact,timingsFact));
     }
     else if (regex_search(lineAfterTimestamp, matches, simulationPromotedSimulatedPredictionDefeatedRegex)) {
-      auto input = replicodeObjects_.getObject(stoul(matches[2].str()));
+      auto input = replicodeObjects_.getObject(stoul(matches[3].str()));
       auto promotedFact = replicodeObjects_.getObject(stoul(matches[1].str()));
       if (input && promotedFact)
         events_.push_back(make_shared<PromotedSimulatedPredictionDefeatEvent>(
