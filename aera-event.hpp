@@ -54,6 +54,7 @@
 #ifndef AERA_EVENT_HPP
 #define AERA_EVENT_HPP
 
+#include <vector>
 #include <QPointF>
 #include "submodules/AERA/r_code/object.h"
 #include "submodules/AERA/r_exec/opcodes.h"
@@ -78,6 +79,8 @@ public:
    * \return The primary input, or null if not specified.
    */
   virtual r_code::Code* getInput() { return 0;  }
+
+  std::vector<r_code::Code*> otherInputs_;
 
   /**
    * A helper method to get the first item in the reduction's set of productions.
@@ -110,6 +113,12 @@ public:
   QPointF itemInitialTopLeftPosition_;
   // itemTopLeftPosition_ is used by "New" events to remember the screen position after undoing.
   QPointF itemTopLeftPosition_;
+
+protected:
+  void addOtherInput(r_code::Code* input) {
+    if (input)
+      otherInputs_.push_back(input);
+  }
 };
 
 class NewModelEvent : public AeraEvent {
@@ -402,7 +411,9 @@ public:
       model_(model), factPred_((r_exec::_Fact*)factPred),
       input_((r_exec::_Fact*)input), requirement_((r_exec::_Fact*)requirement),
       inputIsSuperGoal_(inputIsSuperGoal), factPredIsImdl_(factPredIsImdl)
-  {}
+  {
+    addOtherInput(requirement);
+  }
 
   r_code::Code* getInput() override { return input_; }
 
@@ -434,7 +445,12 @@ public:
     : AeraEvent(EVENT_TYPE, time, factPred),
     compositeState_(compositeState), factPred_((r_exec::_Fact*)factPred),
     input_((r_exec::_Fact*)input), inputs_(inputs)
-  {}
+  {
+    for (auto i = inputs.begin(); i != inputs.end(); ++i) {
+      if (*i != input)
+        addOtherInput(*i);
+    }
+  }
 
   r_code::Code* getInput() override { return input_; }
 
@@ -583,7 +599,9 @@ public:
     : AeraEvent(EVENT_TYPE, time, factPred),
     model_(model), factPred_((r_exec::_Fact*)factPred),
     input_((r_exec::_Fact*)input), goal_requirement_((r_exec::_Fact*)goal_requirement)
-  {}
+  {
+    addOtherInput(goal_requirement);
+  }
 
   r_code::Code* getInput() override { return input_; }
 
@@ -643,7 +661,9 @@ public:
     : AeraEvent(EVENT_TYPE, time, promotedFact),
     promotedFromFact_((r_exec::_Fact*)promotedFromFact),
     timingsFact_((r_exec::_Fact*)timingsFact)
-  {}
+  {
+    addOtherInput(promotedFromFact);
+  }
 
   r_code::Code* getInput() override { return timingsFact_; }
 
