@@ -142,6 +142,7 @@ const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
 
 const QString AeraVisulizerWindow::SettingsKeyAutoScroll = "AutoScroll";
 const QString AeraVisulizerWindow::SettingsKeySimulationsVisible = "simulationsVisible";
+const QString AeraVisulizerWindow::SettingsKeyAllSimulationInputsVisible = "allSimulationInputsVisible";
 const QString AeraVisulizerWindow::SettingsKeyNonSimulationsVisible = "nonSimulationsVisible";
 const QString AeraVisulizerWindow::SettingsKeyEssenceFactsVisible = "essenceFactsVisible";
 const QString AeraVisulizerWindow::SettingsKeyInstantiatedCompositeStatesVisible = "instantiatedCompositeStatesVisible";
@@ -869,9 +870,15 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     if (iCommand >= 0) {
       // Start from the committed command and get the chain of inputs and set the simulation detail OIDs.
       std::set<int> focusSimulationDetailOids;
+      std::set<int> otherDetailOids;
       int i = iCommand;
       while (i >= iNextEvent_) {
         focusSimulationDetailOids.insert(events_[i]->object_->get_detail_oid());
+        if (allSimulationInputsCheckBox_->checkState() == Qt::Checked) {
+          for (int j = 0; j < events_[i]->otherInputs_.size(); ++j)
+            // These will be checked below.
+            otherDetailOids.insert(events_[i]->otherInputs_[j]->get_detail_oid());
+        }
 
         auto input = events_[i]->getInput();
         if (!input)
@@ -881,8 +888,20 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
         // Keep searching backwards (back to the first simulation event) for the event of the input.
         --i;
         for (; i >= iNextEvent_; --i) {
-          if (events_[i]->object_ == input)
+          auto event = events_[i].get();
+          if (event->object_ == input)
             break;
+
+          if (allSimulationInputsCheckBox_->checkState() == Qt::Checked) {
+            if (event->object_ && otherDetailOids.erase(event->object_->get_detail_oid()) > 0) {
+              // Focus this event and queue up other inputs to focus on.
+              focusSimulationDetailOids.insert(event->object_->get_detail_oid());
+              if (event->getInput())
+                otherDetailOids.insert(event->getInput()->get_detail_oid());
+              for (int j = 0; j < event->otherInputs_.size(); ++j)
+                otherDetailOids.insert(event->otherInputs_[j]->get_detail_oid());
+            }
+          }
         }
       }
 
@@ -1715,10 +1734,16 @@ void AeraVisulizerWindow::createToolbars()
   simulationsCheckBox_ = new AeraCheckbox("Simulations", SettingsKeySimulationsVisible, this, Qt::Checked);
   simulationsCheckBox_->setColor(QColor("#ffffdc"));
   connect(simulationsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
+    allSimulationInputsCheckBox_->setEnabled(state == Qt::Checked);
+
     for (auto i = simulationEventTypes_.begin(); i != simulationEventTypes_.end(); ++i)
       mainScene_->setItemsVisible(*i, state == Qt::Checked);
     });
   toolbar->addWidget(simulationsCheckBox_);
+
+  allSimulationInputsCheckBox_ = new AeraCheckbox("All Inputs", SettingsKeyAllSimulationInputsVisible, this, Qt::Unchecked);
+  allSimulationInputsCheckBox_->setColor(QColor("#ffffdc"));
+  toolbar->addWidget(allSimulationInputsCheckBox_);
 
   // Separate the non-simulations check boxes.
   toolbar->addWidget(new QLabel("    ", this));

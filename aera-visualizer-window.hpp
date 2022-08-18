@@ -263,6 +263,7 @@ private:
 
   static const QString SettingsKeyAutoScroll;
   static const QString SettingsKeySimulationsVisible;
+  static const QString SettingsKeyAllSimulationInputsVisible;
   static const QString SettingsKeyNonSimulationsVisible;
   static const QString SettingsKeyEssenceFactsVisible;
   static const QString SettingsKeyInstantiatedCompositeStatesVisible;
@@ -270,6 +271,7 @@ private:
   static const QString SettingsKeyRequirementsVisible;
 
   AeraCheckbox* simulationsCheckBox_;
+  AeraCheckbox* allSimulationInputsCheckBox_;
   AeraCheckbox* nonSimulationsCheckBox_;
   AeraCheckbox* essenceFactsCheckBox_;
   AeraCheckbox* instantiatedCompositeStatesCheckBox_;
