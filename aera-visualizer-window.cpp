@@ -1200,7 +1200,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       auto defeatEvent = (PromotedSimulatedPredictionDefeatEvent*)event;
       newItem = new PromotedPredictionDefeatedItem(defeatEvent, replicodeObjects_, scene);
 
-      // Add an arrow to the input fact.
+      // Add an arrow from the input fact.
       auto inputItem = scene->getAeraGraphicsItem(defeatEvent->input_);
       if (inputItem)
         // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
@@ -1210,7 +1210,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       auto promotedItem = scene->getAeraGraphicsItem(defeatEvent->promotedFact_);
       if (promotedItem)
         // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
-        scene->addArrow(promotedItem, newItem);
+        scene->addArrow(newItem, promotedItem);
 
       visible = (simulationsCheckBox_->checkState() == Qt::Checked);
     }
