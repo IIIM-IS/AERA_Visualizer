@@ -214,8 +214,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   // The remaining regex expressions all start with a timestamp.
   regex timestampRegex("^(\\d+)s:(\\d+)ms:(\\d+)us (.+)$");
 
-  // -> mdl 53, MDLController(389)
-  regex newModelRegex("^-> mdl (\\d+), MDLController\\((\\d+)\\)$");
+  // -> mdl 194 strength:0 cnt:1 sr:1, MDLController(314)
+  regex newModelRegex("^-> mdl (\\d+) strength:([\\d\\.]+) cnt:(\\d+) sr:([\\d\\.]+), MDLController\\((\\d+)\\)$");
   // mdl 53 cnt:2 sr:1
   regex setEvidenceCountAndSuccessRateRegex("^mdl (\\d+) cnt:(\\d+) sr:([\\d\\.]+)$");
   // mdl 75 strength:1
@@ -341,10 +341,12 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
 
     if (regex_search(lineAfterTimestamp, matches, newModelRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
+      core::float32 strength = stof(matches[2].str());
+      core::float32 evidenceCount = stol(matches[3].str());
+      core::float32 successRate = stof(matches[4].str());
       if (model)
-        // Use the strength, count and success rate as initialized in _TPX::build_mdl_tail.
         events_.push_back(make_shared<NewModelEvent>(
-          timestamp, model, 0, 1, 1, stoll(matches[2].str())));
+          timestamp, model, strength, evidenceCount, successRate, stoll(matches[2].str())));
     }
     else if (regex_search(lineAfterTimestamp, matches, setEvidenceCountAndSuccessRateRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
