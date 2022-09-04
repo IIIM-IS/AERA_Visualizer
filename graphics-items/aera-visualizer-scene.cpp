@@ -137,7 +137,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       // Separate from the region of I/O device eject/inject events.
       auto y = eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE] - 5;
       auto line = addLine(sceneRect().left(), y, sceneRect().right(), y, QPen(Qt::darkGray, 1));
-      line->setZValue(-2000);
+      line->setZValue(100);
 
       // Add all the frame boundary lines and timestamps.
       for (auto frameTime = replicodeObjects_.getTimeReference(); true; frameTime += replicodeObjects_.getSamplingPeriod()) {
@@ -147,9 +147,9 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 
         auto line = addLine(frameLeft, sceneRect().top(), frameLeft, sceneRect().bottom(),
           QPen(Qt::lightGray, 1, Qt::DashLine));
-        line->setZValue(-2000);
+        line->setZValue(100);
         auto text = addText(replicodeObjects_.relativeTime(frameTime).c_str());
-        text->setZValue(-100);
+        text->setZValue(900);
         text->setDefaultTextColor(Qt::darkGray);
         text->setPos(frameLeft, 0);
         // Save the text so that we can adjust the position.
@@ -263,6 +263,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     // Save the initial position for "Reset Position".
     aeraEvent->itemInitialTopLeftPosition_ = aeraEvent->itemTopLeftPosition_;
 
+  item->setZValue(1000.0);
   addItem(item);
   // Adjust the position from the topLeft.
   item->setPos(aeraEvent->itemTopLeftPosition_ - item->boundingRect().topLeft());
@@ -324,7 +325,7 @@ void AeraVisualizerScene::addArrow(
 
   startItem->addArrow(arrow);
   endItem->addArrow(arrow);
-  arrow->setZValue(-1000.0);
+  arrow->setZValue(500.0);
   addItem(arrow);
   arrow->updatePosition();
 }
@@ -357,7 +358,7 @@ void AeraVisualizerScene::addHorizontalLine(AeraGraphicsItem* item)
 
     auto line = new AnchoredHorizontalLine(item, getTimelineX(after), getTimelineX(before));
     item->addHorizontalLine(line);
-    line->setZValue(-1001.0);
+    line->setZValue(499.0);
     addItem(line);
     line->updatePosition();
   }
