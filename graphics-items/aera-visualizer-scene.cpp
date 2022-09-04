@@ -60,6 +60,7 @@
 #include "anchored-horizontal-line.hpp"
 #include "model-item.hpp"
 #include "auto-focus-fact-item.hpp"
+#include "aera-graphics-item.hpp"
 #include "aera-visualizer-scene.hpp"
 
 #include <QGraphicsSceneMouseEvent>

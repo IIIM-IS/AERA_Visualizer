@@ -57,7 +57,6 @@
 
 #include <map>
 #include "../aera-event.hpp"
-#include "aera-graphics-item.hpp"
 #include "../replicode-objects.hpp"
 
 #include <QGraphicsScene>
@@ -71,6 +70,7 @@ class QColor;
 
 namespace aera_visualizer {
 
+class AeraGraphicsItem;
 class AeraVisulizerWindow;
 class ExplanationLogWindow;
 

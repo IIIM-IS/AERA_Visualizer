@@ -53,6 +53,7 @@
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 #include "arrow.hpp"
+#include "aera-graphics-item.hpp"
 #include "aera-visualizer-scene.hpp"
 
 #include <qmath.h>
