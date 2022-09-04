@@ -59,14 +59,17 @@ using namespace std;
 
 namespace aera_visualizer {
 
-AeraGraphicsItemGroup::AeraGraphicsItemGroup(AeraVisualizerScene* parent)
+AeraGraphicsItemGroup::AeraGraphicsItemGroup(AeraVisualizerScene* parent, const QString& title, const QColor& color)
 : parent_(parent),
   inCallback_(false)
 {
   setFlag(QGraphicsItem::ItemIsMovable, true);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
-  setBrush(QColor(0xA2, 0xDD, 0xF3));
-  setOpacity(.5);
+  setBrush(color);
+  setOpacity(.75);
+
+  auto textItem = new QGraphicsTextItem(this);
+  textItem->setHtml("<font size = \"+1\">" + title + "</font>");
 }
 
 void AeraGraphicsItemGroup::addChild(AeraGraphicsItem* child)
@@ -82,12 +85,12 @@ QVariant AeraGraphicsItemGroup::itemChange(GraphicsItemChange change, const QVar
 
   if (change == QGraphicsItem::ItemPositionChange) {
     // Only allow change in Y.
-    QPointF newToPoint(0, value.toPointF().y());
+    QPointF newToPoint(pos().x(), value.toPointF().y());
 
     for (auto child = children_.begin(); child != children_.end(); ++child) {
       // Deselect so that it doesn't move with the parent.
       (*child)->setSelected(false);
-      (*child)->setPos((*child)->pos() + (newToPoint - QPointF(0, pos().y())));
+      (*child)->setPos((*child)->pos().x(), (*child)->pos().y() + newToPoint.y() - pos().y());
     }
 
     return newToPoint;
@@ -114,8 +117,8 @@ void AeraGraphicsItemGroup::fitToChildren()
 
   const qreal margin = 10;
   if (childrenRect.width() != 0) {
-    setPos(0, 0);
-    setRect(childrenRect.adjusted(-margin, -margin, margin, margin));
+    setPos(childrenRect.left() - margin, childrenRect.top() - margin);
+    setRect(0, 0, childrenRect.width() + 2*margin, childrenRect.height() + 2 * margin);
   }
   inCallback_ = false;
 }

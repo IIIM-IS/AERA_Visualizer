@@ -71,8 +71,10 @@ public:
   /**
    * Create an AeraGraphicsItemGroup.
    * \param parent The parent AeraVisualizerScene.
+   * \param title The title shown in the corner.
+   * \param color The background color.
    */
-  AeraGraphicsItemGroup(AeraVisualizerScene* parent);
+  AeraGraphicsItemGroup(AeraVisualizerScene* parent, const QString& title, const QColor& color);
 
   void addChild(AeraGraphicsItem* child);
 
