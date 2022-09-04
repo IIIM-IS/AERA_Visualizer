@@ -265,6 +265,9 @@
       <Filter>graphics-items</Filter>
     </ClCompile>
     <ClCompile Include="aera-checkbox.cpp" />
+    <ClCompile Include="graphics-items\aera-graphics-item-group.cpp">
+      <Filter>graphics-items</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aera-event.hpp" />
@@ -520,6 +523,9 @@
     </ClInclude>
     <ClInclude Include="submodules\AERA\r_code\resized_vector.h">
       <Filter>r_code</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics-items\aera-graphics-item-group.hpp">
+      <Filter>graphics-items</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
