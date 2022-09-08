@@ -103,7 +103,7 @@ int main(int argv, char *args[])
 
   QString settingsFilePath0 = preferences.value("settingsFilePath").toString();
   if (settingsFilePath0 == "")
-    settingsFilePath0 = "../replicode/AERA/settings.xml";
+    settingsFilePath0 = "../AERA/AERA/settings.xml";
   QString settingsFilePath = QFileDialog::getOpenFileName(NULL,
     "Open AERA settings XML file", settingsFilePath0, "XML Files (*.xml);;All Files (*.*)");
   if (settingsFilePath == "")
