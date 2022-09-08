@@ -8,27 +8,32 @@ Prerequisites
 
 * Required: AERA
 * Required: Qt Framework, version 5.14.2
-* Required: The AERA Visualizer code repository from https://github.com/IIIM-IS/AERA_Visualizer . Do a "recursive" clone to get submodules, e.g.:
-
-    git clone --recursive https://github.com/IIIM-IS/AERA_Visualizer
+* Required: The AERA Visualizer code repository from https://github.com/IIIM-IS/AERA_Visualizer with submodules.
 
 Following are the detailed steps for each platform to install the prerequisites.
 
 ## Windows
-To install AERA, see https://github.com/IIIM-IS/AERA/blob/master/INSTALL.md . Be sure
-to follow the instructions to set `WITH_DETAIL_OID` .
+To install AERA and configure Visual Studio, see https://github.com/IIIM-IS/AERA/blob/master/INSTALL.md .
+Be sure to follow the instructions to set `WITH_DETAIL_OID` .
 
 To install Qt Framework:
 
-* Download and install from https://www.qt.io/download-qt-installer . In the
-  installer, select "Custom installation". Expand "Qt" and expand version
-  "5.14.2". Select your MSVC 64-bit version, e.g. "MSVC 2017 64.bit" When the installer is
-  finished, you can uncheck "Launch Qt Creator" since we don't need it. 
+* Download and install qt-opensource-windows-x86-5.14.2.exe from https://download.qt.io/archive/qt/5.14/5.14.2 .
+  In the installer on the "Select Components" tab, expand "Qt 5.14.2" and select "MSVC 2017 64-bit".
+  When the installer is finished, you can uncheck "Launch Qt Creator" since we don't need it. 
 * With Visual Studio closed, download and install the Qt Visual Studio Tools from
   https://marketplace.visualstudio.com/items?itemName=TheQtCompany.QtVisualStudioTools2019 .
+* To set the QTDIR environment variable do the following with Visual Studio closed:
+    * Open the System control panel.
+    * Click Advanced System Settings.
+    * Click Environment Variables.
+    * In the "System variables" section, click New...
+    * In Variable name enter `QTDIR` .
+    * In Variable value enter the directory such as `C:\Qt\Qt5.14.2\5.14.2\msvc2017_64` .
+    * Repeatedly click OK to close all the windows.
 * Launch Visual Studio. On the "splash" screen, click "continue without code". On the Extensions menu, click 
-  "Qt VS Tools" then "Options". On the "Qt Versions" tab, click "<add new Qt version>". Click the folder icon and 
-  select the path of the qmake executable, e.g. `C:\Qt\5.14.2\msvc2017_64\bin\qmake.exe` . Click "OK".
+  "Qt VS Tools" then "Qt Versions". Click "<add new Qt version>". Click the folder icon and 
+  select the path of the qmake executable, e.g. `C:\Qt\Qt5.14.2\5.14.2\msvc2017_64\qmake.exe` . Click "OK".
 
 To get the AERA Visualizer code repository, launch GitHub for Desktop and sign in to GitHub. In the File menu, 
 click "Clone a Repository". Click the URL tab and enter `https://github.com/IIIM-IS/AERA_Visualizer` . 
@@ -38,6 +43,7 @@ Build
 =====
 Launch Visual Studio and open the project `AERA_Visualizer.sln` from the cloned repository. E.g.:
 `C:\Users\Alice\Documents\GitHub\AERA_Visualizer\AERA_Visualizer.sln` .
+If a dialog box appears asking to retarget the Windows version, click cancel. 
 
 In the Solution Configurations drop-down, make sure you select Release (unless you plan to debug the Visualizer).
 On the Build menu, click Build Solution. (Don't worry about all the compiler warnings.)
@@ -63,7 +69,7 @@ you need to put the Qt bin folder in the system path as follows:
 * Click Environment Variables
 * In the "System variables" section, click Path and click Edit....
 * In the "Edit environment variable" window, click New.
-* Paste the path of the Qt bin folder that you used above. For example, `C:\Qt\5.14.2\msvc2017_64\bin`
+* Paste the path of the Qt bin folder that you used above. For example, `C:\Qt\Qt5.14.2\5.14.2\msvc2017_64\bin`
 * Repeatedly click OK to close all the windows.
 * Restart your computer to update the Path for the whole system.
 * After restart, open a Command Prompt and enter the following, changing `c:\Users\user\AERA_Visualizer` to
