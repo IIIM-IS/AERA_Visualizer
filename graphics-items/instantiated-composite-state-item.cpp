@@ -139,9 +139,9 @@ void InstantiatedCompositeStateItem::setBoundCstAndMembersHtml()
     return;
 
   string cstSource = CompositeStateItem::simplifyCstSource(replicodeObjects_.getSourceCode(cst));
-  // Get just the set of members, which start on the third line and are indented by three spaces.
+  // Get just the set of members, which start on the second line and are indented by three spaces.
   string cstMembersSource;
-  auto match = QRegularExpression("^.+\\n.+\\n((   .+\\n)+)").match(cstSource.c_str());
+  auto match = QRegularExpression("^.+\\n((   .+\\n)+)").match(cstSource.c_str());
   if (match.hasMatch())
     // Strip the ending \n .
     cstMembersSource = match.captured(1).mid(0, match.captured(1).size() - 1).toStdString();
