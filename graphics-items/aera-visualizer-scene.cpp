@@ -61,6 +61,7 @@
 #include "model-item.hpp"
 #include "auto-focus-fact-item.hpp"
 #include "aera-graphics-item.hpp"
+#include "aera-graphics-item-group.hpp"
 #include "aera-visualizer-scene.hpp"
 
 #include <QGraphicsSceneMouseEvent>
@@ -168,6 +169,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
   bool isSimulationEventType = 
     (AeraVisulizerWindow::simulationEventTypes_.find(item->getAeraEvent()->eventType_) !=
      AeraVisulizerWindow::simulationEventTypes_.end());
+  qreal otherSimulationNextTopOffset = 3000;
 
   if (qIsNaN(aeraEvent->itemTopLeftPosition_.x())) {
     // Assign an initial position.
@@ -180,7 +182,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       // Reset the top.
       eventTypeNextTop_.clear();
       focusSimulationNextTop_ = eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
-      otherSimulationNextTop_ = 3000 + eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
+      otherSimulationNextTop_ = otherSimulationNextTopOffset + eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
     }
 
     int eventType = 0;
