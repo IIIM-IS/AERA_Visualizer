@@ -54,30 +54,31 @@
 
 #include <fstream>
 #include <algorithm>
-#include "submodules/AERA/r_exec/opcodes.h"
+#include "aera-checkbox.h"
+#include "graphics-items/aera-visualizer-scene.hpp"
 #include "graphics-items/arrow.hpp"
-#include "graphics-items/model-item.hpp"
-#include "graphics-items/composite-state-item.hpp"
 #include "graphics-items/auto-focus-fact-item.hpp"
-#include "graphics-items/prediction-item.hpp"
-#include "graphics-items/model-goal-item.hpp"
 #include "graphics-items/composite-state-goal-item.hpp"
-#include "graphics-items/model-prediction-item.hpp"
+#include "graphics-items/composite-state-item.hpp"
+#include "graphics-items/composite-state-prediction-item.hpp"
+#include "graphics-items/drive-item.hpp"
+#include "graphics-items/instantiated-composite-state-item.hpp"
+#include "graphics-items/io-device-inject-eject-item.hpp"
+#include "graphics-items/model-goal-item.hpp"
 #include "graphics-items/model-imdl-prediction-item.hpp"
+#include "graphics-items/model-item.hpp"
 #include "graphics-items/model-prediction-from-requirement-item.hpp"
 #include "graphics-items/model-prediction-from-requirement-disabled-item.hpp"
-#include "graphics-items/composite-state-prediction-item.hpp"
-#include "graphics-items/prediction-result-item.hpp"
-#include "graphics-items/instantiated-composite-state-item.hpp"
+#include "graphics-items/model-prediction-item.hpp"
 #include "graphics-items/predicted-instantiated-composite-state-item.hpp"
-#include "graphics-items/io-device-inject-eject-item.hpp"
-#include "graphics-items/drive-item.hpp"
-#include "graphics-items/simulation-commit-item.hpp"
-#include "graphics-items/promoted-prediction-item.hpp"
+#include "graphics-items/prediction-item.hpp"
+#include "graphics-items/prediction-result-item.hpp"
 #include "graphics-items/promoted-prediction-defeated-item.hpp"
-#include "graphics-items/aera-visualizer-scene.hpp"
+#include "graphics-items/promoted-prediction-item.hpp"
+#include "graphics-items/simulation-commit-item.hpp"
+#include "submodules/AERA/r_exec/opcodes.h"
+
 #include "aera-visualizer-window.hpp"
-#include "aera-checkbox.h"
 
 #include <QtWidgets>
 #include <QProgressDialog>
@@ -112,33 +113,38 @@ protected:
 };
 
 const set<int> AeraVisulizerWindow::simulationEventTypes_ = {
-  DriveInjectEvent::EVENT_TYPE, ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,
-  ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
-  ModelSimulatedPredictionReductionFromGoalRequirement::EVENT_TYPE, SimulationCommitEvent ::EVENT_TYPE,
-  ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE, PromotedSimulatedPredictionEvent::EVENT_TYPE,
-  PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE };
-
-const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
-  NewModelEvent::EVENT_TYPE,
-  NewCompositeStateEvent::EVENT_TYPE,
-  AutoFocusNewObjectEvent::EVENT_TYPE,
-  ModelMkValPredictionReduction::EVENT_TYPE,
-  ModelImdlPredictionEvent::EVENT_TYPE,
-  ModelGoalReduction::EVENT_TYPE,
   CompositeStateGoalReduction::EVENT_TYPE,
+  CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
+  DriveInjectEvent::EVENT_TYPE,
+  ModelGoalReduction::EVENT_TYPE,
+  ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE,
   ModelSimulatedPredictionReduction::EVENT_TYPE,
   ModelSimulatedPredictionReductionFromGoalRequirement::EVENT_TYPE,
-  ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE,
-  CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
-  PredictionResultEvent::EVENT_TYPE,
-  NewInstantiatedCompositeStateEvent::EVENT_TYPE,
-  NewPredictedInstantiatedCompositeStateEvent::EVENT_TYPE,
-  IoDeviceInjectEvent::EVENT_TYPE,
-  IoDeviceEjectEvent::EVENT_TYPE,
-  DriveInjectEvent::EVENT_TYPE,
-  SimulationCommitEvent::EVENT_TYPE,
+  PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE,
   PromotedSimulatedPredictionEvent::EVENT_TYPE,
-  PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE };
+  SimulationCommitEvent::EVENT_TYPE };
+
+const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
+  AutoFocusNewObjectEvent::EVENT_TYPE,
+  CompositeStateGoalReduction::EVENT_TYPE,
+  CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
+  DriveInjectEvent::EVENT_TYPE,
+  IoDeviceEjectEvent::EVENT_TYPE,
+  IoDeviceInjectEvent::EVENT_TYPE,
+  ModelGoalReduction::EVENT_TYPE,
+  ModelImdlPredictionEvent::EVENT_TYPE,
+  ModelMkValPredictionReduction::EVENT_TYPE,
+  ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE,
+  ModelSimulatedPredictionReduction::EVENT_TYPE,
+  ModelSimulatedPredictionReductionFromGoalRequirement::EVENT_TYPE,
+  NewCompositeStateEvent::EVENT_TYPE,
+  NewInstantiatedCompositeStateEvent::EVENT_TYPE,
+  NewModelEvent::EVENT_TYPE,
+  NewPredictedInstantiatedCompositeStateEvent::EVENT_TYPE,
+  PredictionResultEvent::EVENT_TYPE,
+  PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE,
+  PromotedSimulatedPredictionEvent::EVENT_TYPE,
+  SimulationCommitEvent::EVENT_TYPE };
 
 const QString AeraVisulizerWindow::SettingsKeyAutoScroll = "AutoScroll";
 const QString AeraVisulizerWindow::SettingsKeySimulationsVisible = "simulationsVisible";
