@@ -80,11 +80,25 @@ public:
 
   void removeChild(AeraGraphicsItem* child);
 
+  /**
+   * This is called by the parent scene when its view moves.
+   */
+  void onParentViewMoved() {
+    setItemIsMovable();
+  }
+
 protected:
   QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
 private:
   void fitToChildren();
+
+  /**
+   * Check the parent's view port and allow to grab to move the group box
+   * if the scene background is visible at the top or bottom. This way the user
+   * is not "trapped" if zoomed in too much.
+   */
+  void setItemIsMovable();
 
   AeraVisualizerScene* parent_;
   std::set<AeraGraphicsItem*> children_;

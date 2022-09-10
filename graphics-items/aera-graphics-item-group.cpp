@@ -51,6 +51,7 @@
 //_/_/ 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
+#include <QGraphicsView>
 #include "aera-visualizer-scene.hpp"
 #include "aera-graphics-item.hpp"
 #include "aera-graphics-item-group.hpp"
@@ -87,6 +88,17 @@ void AeraGraphicsItemGroup::removeChild(AeraGraphicsItem* child)
   }
 }
 
+void AeraGraphicsItemGroup::setItemIsMovable()
+{
+  if (parent_->views().size() > 0) {
+    auto view = parent_->views().at(0);
+
+    int topYView = view->mapFromScene(0, pos().y() + boundingRect().top()).y();
+    int bottomYView = view->mapFromScene(0, pos().y() + boundingRect().bottom()).y();
+    setFlag(QGraphicsItem::ItemIsMovable, topYView > 30 || bottomYView < view->height() - 30);
+  }
+}
+
 QVariant AeraGraphicsItemGroup::itemChange(GraphicsItemChange change, const QVariant& value)
 {
   if (inCallback_)
@@ -101,6 +113,9 @@ QVariant AeraGraphicsItemGroup::itemChange(GraphicsItemChange change, const QVar
       (*child)->setSelected(false);
       (*child)->setPos((*child)->pos().x(), (*child)->pos().y() + newToPoint.y() - pos().y());
     }
+
+    // The move might have obscured the background scene, so setting ItemIsMovable false will move the scene.
+    setItemIsMovable();
 
     return newToPoint;
   }
