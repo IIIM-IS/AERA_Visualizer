@@ -83,9 +83,10 @@ const QString AeraGraphicsItem::DownPointingTriangleHtml = "<font size=\"+1\">&#
 
 AeraGraphicsItem::AeraGraphicsItem(
   AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent,
-  const QString& headerPrefix)
+  const QString& headerPrefix, QColor textItemTextColor)
 : parent_(parent),
   aeraEvent_(aeraEvent), replicodeObjects_(replicodeObjects),
+  textItemTextColor_(textItemTextColor),
   borderFlashCountdown_(AeraVisualizerScene::FLASH_COUNT),
   // The base class should call setTextItemAndPolygon()
   textItem_(0),
@@ -115,6 +116,7 @@ void AeraGraphicsItem::setTextItemAndPolygon(QString html, bool prependHeaderHtm
   if (textItem_)
     delete textItem_;
   textItem_ = new TextItem(this);
+  textItem_->setDefaultTextColor(textItemTextColor_);
   textItem_->setHtml(html);
   // adjustSize() is needed for right-aligned text.
   textItem_->adjustSize();

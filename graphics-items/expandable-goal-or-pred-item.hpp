@@ -76,10 +76,11 @@ public:
    * \param prefix The prefix to put before the fact label of factGoalOrPredFactValueHtml_,
    * for example "Model M6 =>".
    * \param parent The parent AeraVisualizerScene.
+   * \param textItemTextColor (optional) The text color when we recreate the textItem_ . If ommitted, use black.
    */
   ExpandableGoalOrPredItem(
     AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, const QString& prefix,
-    AeraVisualizerScene* parent);
+    AeraVisualizerScene* parent, QColor textItemTextColor = Qt::black);
 
 protected:
   void textItemLinkActivated(const QString& link) override;

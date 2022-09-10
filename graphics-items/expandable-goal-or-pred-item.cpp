@@ -69,8 +69,8 @@ namespace aera_visualizer {
 
 ExpandableGoalOrPredItem::ExpandableGoalOrPredItem(
   AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, const QString& prefix,
-  AeraVisualizerScene* parent)
-: AeraGraphicsItem(aeraEvent, replicodeObjects, parent, "")
+  AeraVisualizerScene* parent, QColor textItemTextColor)
+: AeraGraphicsItem(aeraEvent, replicodeObjects, parent, "", textItemTextColor)
 {
   setFactGoalOrPredFactValueHtml(prefix);
 

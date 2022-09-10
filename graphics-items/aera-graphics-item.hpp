@@ -93,10 +93,11 @@ public:
    * \param replicodeObjects The ReplicodeObjects used to get the detail OID and label.
    * \param parent The parent AeraVisualizerScene.
    * \param headerPrefix The prefix for headerHtml_ as described above.
+   * \param textItemTextColor (optional) The text color when we recreate the textItem_ . If ommitted, use black.
    */
   AeraGraphicsItem(
     AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects,
-    AeraVisualizerScene* parent, const QString& headerPrefix = "");
+    AeraVisualizerScene* parent, const QString& headerPrefix, QColor textItemTextColor = Qt::black);
 
   void removeArrowsAndHorizontalLines();
   void addArrow(Arrow* arrow) { arrows_.append(arrow); }
@@ -230,8 +231,8 @@ protected:
   void mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent) override;
 
   /**
-   * Set the textItem_ to the given html and create the border polygon. Connect
-   * the textItem_ to textItemLinkActivated, with default behavior which a derived class can override.
+   * Set the textItem_ to the given html and create the border polygon. Use the textItemTextColor given to the constructor.
+   * Connect the textItem_ to textItemLinkActivated, with default behavior which a derived class can override.
    * \param html The HTML for the textItem_.
    * \param prependHeaderHtml If false, use html as-is. If true, first set the text 
    * to html and adjust the size, then set the text to headerHtml_+html. We do this because
@@ -257,6 +258,7 @@ private:
   AeraEvent* aeraEvent_;
   QList<Arrow*> arrows_;
   QList<AnchoredHorizontalLine*> horizontalLines_;
+  QColor textItemTextColor_;
 };
 
 }
