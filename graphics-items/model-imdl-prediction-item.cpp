@@ -68,7 +68,7 @@ using namespace r_exec;
 
 namespace aera_visualizer {
 
-ImdlPredictionItem::ImdlPredictionItem(
+ModelImdlPredictionItem::ModelImdlPredictionItem(
   ModelImdlPredictionEvent* modelReduction, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
   : AeraGraphicsItem(modelReduction,
@@ -82,7 +82,7 @@ ImdlPredictionItem::ImdlPredictionItem(
   setTextItemAndPolygon(factPredFactImdlHtml_, true);
 }
 
-void ImdlPredictionItem::setFactPredFactImdlHtml()
+void ModelImdlPredictionItem::setFactPredFactImdlHtml()
 {
   auto pred = modelReduction_->object_->get_reference(0);
   auto factImdl = pred->get_reference(0);
@@ -126,7 +126,7 @@ void ImdlPredictionItem::setFactPredFactImdlHtml()
   highlightedFactPredFactImdlHtml_.replace("!imdl-end", "</font>");
 }
 
-void ImdlPredictionItem::textItemLinkActivated(const QString& link)
+void ModelImdlPredictionItem::textItemLinkActivated(const QString& link)
 {
   if (link == "#this") {
     auto menu = new QMenu();

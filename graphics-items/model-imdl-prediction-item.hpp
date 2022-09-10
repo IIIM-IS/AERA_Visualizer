@@ -60,10 +60,10 @@ namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
-class ImdlPredictionItem : public AeraGraphicsItem
+class ModelImdlPredictionItem : public AeraGraphicsItem
 {
 public:
-  ImdlPredictionItem(
+  ModelImdlPredictionItem(
     ModelImdlPredictionEvent* modelReduction, ReplicodeObjects& replicodeObjects,
     AeraVisualizerScene* parent);
 

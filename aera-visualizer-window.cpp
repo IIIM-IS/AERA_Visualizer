@@ -976,7 +976,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     }
     else if (event->eventType_ == ModelImdlPredictionEvent::EVENT_TYPE) {
       auto reductionEvent = (ModelImdlPredictionEvent*)event;
-      newItem = new ImdlPredictionItem(reductionEvent, replicodeObjects_, scene);
+      newItem = new ModelImdlPredictionItem(reductionEvent, replicodeObjects_, scene);
 
       // Add an arrow to the cause.
       auto causeItem = scene->getAeraGraphicsItem(reductionEvent->cause_);
