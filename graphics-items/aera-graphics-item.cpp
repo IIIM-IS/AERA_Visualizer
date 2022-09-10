@@ -80,6 +80,10 @@ const QString AeraGraphicsItem::SelectedRadioButtonHtml = "<font size=\"+2\">&#x
 const QString AeraGraphicsItem::UnselectedRadioButtonHtml = "<font size=\"+3\">&#x25CB;</font>";
 const QString AeraGraphicsItem::RightPointingTriangleHtml = "<font size=\"+2\">&#x25B6;</font>";
 const QString AeraGraphicsItem::DownPointingTriangleHtml = "<font size=\"+1\">&#x25BC;</font>";
+const QString AeraGraphicsItem::HourglassHtml = "<font size=\"+1\"><b>&#8987;</b></font>";
+const QString AeraGraphicsItem::StopSignHtml = "<font size=\"+1\"><b>&#128721;</b></font>";
+const QString AeraGraphicsItem::CheckMarkHtml = "<font size=\"+1\"><b>&#9989;</b></font>";
+const QString AeraGraphicsItem::RedXHtml = "<font size=\"+1\"><b>&#10060;</b></font>";
 
 AeraGraphicsItem::AeraGraphicsItem(
   AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent,

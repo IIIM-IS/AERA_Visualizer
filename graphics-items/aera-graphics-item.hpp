@@ -200,6 +200,10 @@ public:
   static const QString UnselectedRadioButtonHtml;
   static const QString RightPointingTriangleHtml;
   static const QString DownPointingTriangleHtml;
+  static const QString HourglassHtml;
+  static const QString StopSignHtml;
+  static const QString CheckMarkHtml;
+  static const QString RedXHtml;
 
   int borderFlashCountdown_;
 
