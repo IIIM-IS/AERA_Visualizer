@@ -78,6 +78,15 @@ void AeraGraphicsItemGroup::addChild(AeraGraphicsItem* child)
   fitToChildren();
 }
 
+void AeraGraphicsItemGroup::removeChild(AeraGraphicsItem* child)
+{
+  auto member = children_.find(child);
+  if (member != children_.end()) {
+    children_.erase(member);
+    fitToChildren();
+  }
+}
+
 QVariant AeraGraphicsItemGroup::itemChange(GraphicsItemChange change, const QVariant& value)
 {
   if (inCallback_)

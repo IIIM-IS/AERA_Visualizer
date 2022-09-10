@@ -78,6 +78,8 @@ public:
 
   void addChild(AeraGraphicsItem* child);
 
+  void removeChild(AeraGraphicsItem* child);
+
 protected:
   QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
