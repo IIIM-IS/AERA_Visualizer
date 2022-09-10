@@ -701,6 +701,31 @@ public:
   r_exec::_Fact* promotedFact_;
 };
 
+class AbaSentenceStep : public AeraEvent {
+public:
+  /**
+   * Create an AbaSentenceStep.
+   * \param time The reduction time.
+   * \param fact The fact produced by the step.
+   * \param isAssumption True if fact is an assumption.
+   * \param parent The fact which produced the step, or NULL if the first.
+   */
+  AbaSentenceStep(core::Timestamp time, r_code::Code* fact, bool isAssumption, r_code::Code* parent)
+    : AeraEvent(EVENT_TYPE, time, fact),
+    fact_((r_exec::_Fact*)fact),
+    isAssumption_(isAssumption),
+    parent_((r_exec::_Fact*)parent)
+  {}
+
+  r_code::Code* getInput() override { return parent_; }
+
+  static const int EVENT_TYPE = 28;
+
+  r_exec::_Fact* fact_;
+  bool isAssumption_;
+  r_exec::_Fact* parent_;
+};
+
 }
 
 #endif
