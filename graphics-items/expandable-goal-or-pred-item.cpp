@@ -75,7 +75,9 @@ ExpandableGoalOrPredItem::ExpandableGoalOrPredItem(
   setFactGoalOrPredFactValueHtml(prefix);
 
   // Determine the shape.
-  if (getAeraEvent()->object_->get_reference(0)->code(0).asOpcode() == Opcodes::Pred)
+  if (getAeraEvent()->eventType_ == AbaSentenceStep::EVENT_TYPE)
+    shape_ = SHAPE_RECTANGLE;
+  else if (getAeraEvent()->object_->get_reference(0)->code(0).asOpcode() == Opcodes::Pred)
     shape_ = SHAPE_PRED;
   else
     shape_ = SHAPE_GOAL;
@@ -86,25 +88,27 @@ ExpandableGoalOrPredItem::ExpandableGoalOrPredItem(
 
 void ExpandableGoalOrPredItem::setFactGoalOrPredFactValueHtml(const QString& prefix)
 {
-  auto goalOrPred = getAeraEvent()->object_->get_reference(0);
-  auto factValue = goalOrPred->get_reference(0);
+  Code* goalOrPred = ((_Fact*)getAeraEvent()->object_)->get_goal();
+  if (!goalOrPred)
+    goalOrPred = ((_Fact*)getAeraEvent()->object_)->get_pred();
+  auto factValue = (goalOrPred ? goalOrPred->get_reference(0) : getAeraEvent()->object_);
   auto value = factValue->get_reference(0);
   bool valueIsDrive = (value->code(0).asOpcode() == Opcodes::Ent);
 
   // Strip the ending confidence value and propagation of saliency threshold.
   regex saliencyRegex("\\s+[\\w\\:]+\\)$");
   regex confidenceAndSaliencyRegex("\\s+\\w+\\s+[\\w\\:]+\\)$");
-  string factGoalSource = regex_replace(replicodeObjects_.getSourceCode(getAeraEvent()->object_), confidenceAndSaliencyRegex, ")");
-  string goalOrPredSource = regex_replace(replicodeObjects_.getSourceCode(goalOrPred), saliencyRegex, ")");
+  string factGoalSource = (goalOrPred ? regex_replace(replicodeObjects_.getSourceCode(getAeraEvent()->object_), confidenceAndSaliencyRegex, ")") : "");
+  string goalOrPredSource = (goalOrPred ? regex_replace(replicodeObjects_.getSourceCode(goalOrPred), saliencyRegex, ")") : "");
   string factValueSource = regex_replace(replicodeObjects_.getSourceCode(factValue), confidenceAndSaliencyRegex, ")");
   string valueSource = regex_replace(replicodeObjects_.getSourceCode(value), saliencyRegex, ")");
 
-  QString goalOrPredLabel(replicodeObjects_.getLabel(goalOrPred).c_str());
+  QString goalOrPredLabel(goalOrPred ? replicodeObjects_.getLabel(goalOrPred).c_str() : "");
   QString factValueLabel(replicodeObjects_.getLabel(factValue).c_str());
   QString valueLabel(replicodeObjects_.getLabel(value).c_str());
 
-  QString goalOrPredHtml = QString(goalOrPredSource.c_str()).replace(factValueLabel, DownArrowHtml);
-  QString factGoalHtml = QString(factGoalSource.c_str()).replace(goalOrPredLabel, goalOrPredHtml);
+  QString goalOrPredHtml = (goalOrPred ? QString(goalOrPredSource.c_str()).replace(factValueLabel, DownArrowHtml) : "");
+  QString factGoalHtml = (goalOrPred ? QString(factGoalSource.c_str()).replace(goalOrPredLabel, goalOrPredHtml) : "");
   QString factValueHtml, valueHtml;
   if (valueIsDrive) {
     // The value is a single identifier.
@@ -117,18 +121,25 @@ void ExpandableGoalOrPredItem::setFactGoalOrPredFactValueHtml(const QString& pre
   }
   
   factGoalOrPredFactValueHtml_ = prefix + " <b><a href=\"#this\">" + replicodeObjects_.getLabel(getAeraEvent()->object_).c_str() + "</a></b>\n";
-  if (is_sim()) {
-    // All outer facts in a simulation have the same time, so don't show it.
-    factGoalOrPredFactValueHtml_ += goalOrPredHtml;
-    factGoalOrPredFactValueHtml_ += "\n      " + factValueHtml;
-    if (!valueIsDrive)
-      factGoalOrPredFactValueHtml_ += "\n          " + valueHtml;
+  if (goalOrPred) {
+    if (is_sim()) {
+      // All outer facts in a simulation have the same time, so don't show it.
+      factGoalOrPredFactValueHtml_ += goalOrPredHtml;
+      factGoalOrPredFactValueHtml_ += "\n      " + factValueHtml;
+      if (!valueIsDrive)
+        factGoalOrPredFactValueHtml_ += "\n          " + valueHtml;
+    }
+    else {
+      factGoalOrPredFactValueHtml_ += factGoalHtml;
+      factGoalOrPredFactValueHtml_ += "\n              " + factValueHtml;
+      if (!valueIsDrive)
+        factGoalOrPredFactValueHtml_ += "\n                  " + valueHtml;
+    }
   }
   else {
-    factGoalOrPredFactValueHtml_ += factGoalHtml;
-    factGoalOrPredFactValueHtml_ += "\n              " + factValueHtml;
-    if (!valueIsDrive)
-      factGoalOrPredFactValueHtml_ += "\n                  " + valueHtml;
+    // No goal or pred, just a solo fact.
+    factGoalOrPredFactValueHtml_ += factValueHtml;
+    factGoalOrPredFactValueHtml_ += "\n    " + valueHtml;
   }
 
   // Set toolTipText_ before adding links and buttons and other detail.
