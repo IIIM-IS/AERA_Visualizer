@@ -205,6 +205,36 @@ public:
   static const QString CheckMarkHtml;
   static const QString RedXHtml;
 
+  static const QColor Color_proponent_justifications;
+  static const QColor Color_proponent_asm_toBeProved;
+  static const QColor Color_proponent_asm;
+  static const QColor Color_proponent_nonAsm_toBeProved;
+  static const QColor Color_proponent_nonAsm;
+  static const QColor Color_opponent_finished_justification;
+  static const QColor Color_opponent_unfinished_justification;
+  static const QColor Color_opponent_ms_border;
+  static const QColor Color_opponent_ms_asm_culprit;
+  static const QColor Color_opponent_ms_asm_culprit_text;
+  static const QColor Color_opponent_ms_asm_defence;
+  static const QColor Color_opponent_ms_asm_defence_text;
+  static const QColor Color_opponent_ms_asm;
+  static const QColor Color_opponent_ms_asm_text;
+  static const QColor Color_opponent_ms_nonAsm;
+  static const QColor Color_opponent_ms_nonAsm_text;
+  static const QColor Color_opponent_ums_asm_defence;
+  static const QColor Color_opponent_ums_asm_defence_border;
+  static const QColor Color_opponent_ums_asm_defence_text;
+  static const QColor Color_opponent_ums_asm_culprit;
+  static const QColor Color_opponent_ums_asm_culprit_border;
+  static const QColor Color_opponent_ums_asm_culprit_text;
+  static const QColor Color_opponent_ums_asm;
+  static const QColor Color_opponent_ums_asm_border;
+  static const QColor Color_opponent_ums_asm_text;
+  static const QColor Color_opponent_ums_nonAsm;
+  static const QColor Color_opponent_ums_nonAsm_border;
+  static const QColor Color_opponent_ums_nonAsm_text;
+  static const QColor Color_attack_edge;
+
   int borderFlashCountdown_;
 
 protected:

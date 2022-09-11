@@ -85,6 +85,36 @@ const QString AeraGraphicsItem::StopSignHtml = "<font size=\"+1\"><b>&#128721;</
 const QString AeraGraphicsItem::CheckMarkHtml = "<font size=\"+1\"><b>&#9989;</b></font>";
 const QString AeraGraphicsItem::RedXHtml = "<font size=\"+1\"><b>&#10060;</b></font>";
 
+const QColor AeraGraphicsItem::Color_proponent_justifications(0xA2, 0xDD, 0xF3);
+const QColor AeraGraphicsItem::Color_proponent_asm_toBeProved(0x7C, 0x0A, 0xA2);
+const QColor AeraGraphicsItem::Color_proponent_asm(0x11, 0x77, 0x11);
+const QColor AeraGraphicsItem::Color_proponent_nonAsm_toBeProved(0x11, 0x11, 0x77);
+const QColor AeraGraphicsItem::Color_proponent_nonAsm(0x66, 0x66, 0x66);
+const QColor AeraGraphicsItem::Color_opponent_finished_justification(0xCC, 0xCC, 0xCC);
+const QColor AeraGraphicsItem::Color_opponent_unfinished_justification(0xFF, 0xFF, 0xFF);
+const QColor AeraGraphicsItem::Color_opponent_ms_border(0x00, 0x00, 0x00);
+const QColor AeraGraphicsItem::Color_opponent_ms_asm_culprit(0xCC, 0x99, 0x22);
+const QColor AeraGraphicsItem::Color_opponent_ms_asm_culprit_text(0xFF, 0xFF, 0xFF);
+const QColor AeraGraphicsItem::Color_opponent_ms_asm_defence(0x11, 0x77, 0x11);
+const QColor AeraGraphicsItem::Color_opponent_ms_asm_defence_text(0xFF, 0xFF, 0xFF);
+const QColor AeraGraphicsItem::Color_opponent_ms_asm(0x77, 0xBB, 0x77);
+const QColor AeraGraphicsItem::Color_opponent_ms_asm_text(0x00, 0x00, 0x00);
+const QColor AeraGraphicsItem::Color_opponent_ms_nonAsm(0x77, 0x77, 0x77);
+const QColor AeraGraphicsItem::Color_opponent_ms_nonAsm_text(0xFF, 0xFF, 0xFF);
+const QColor AeraGraphicsItem::Color_opponent_ums_asm_defence(0x11, 0x77, 0x11);
+const QColor AeraGraphicsItem::Color_opponent_ums_asm_defence_border(0x11, 0x77, 0x11);
+const QColor AeraGraphicsItem::Color_opponent_ums_asm_defence_text(0xFF, 0xFF, 0xFF);
+const QColor AeraGraphicsItem::Color_opponent_ums_asm_culprit(0xCC, 0x99, 0x22);
+const QColor AeraGraphicsItem::Color_opponent_ums_asm_culprit_border(0xCC, 0x99, 0x22);
+const QColor AeraGraphicsItem::Color_opponent_ums_asm_culprit_text(0xFF, 0xFF, 0xFF);
+const QColor AeraGraphicsItem::Color_opponent_ums_asm(0x77, 0xBB, 0x77);
+const QColor AeraGraphicsItem::Color_opponent_ums_asm_border(0x77, 0xBB, 0x77);
+const QColor AeraGraphicsItem::Color_opponent_ums_asm_text(0x00, 0x00, 0x00);
+const QColor AeraGraphicsItem::Color_opponent_ums_nonAsm(0xAA, 0xAA, 0xAA);
+const QColor AeraGraphicsItem::Color_opponent_ums_nonAsm_border(0xAA, 0xAA, 0xAA);
+const QColor AeraGraphicsItem::Color_opponent_ums_nonAsm_text(0x00, 0x00, 0x00);
+const QColor AeraGraphicsItem::Color_attack_edge(0xBB, 0x22, 0x22);
+
 AeraGraphicsItem::AeraGraphicsItem(
   AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent,
   const QString& headerPrefix, QColor textItemTextColor)
