@@ -107,11 +107,14 @@ QVariant AeraGraphicsItemGroup::itemChange(GraphicsItemChange change, const QVar
   if (change == QGraphicsItem::ItemPositionChange) {
     // Only allow change in Y.
     QPointF newToPoint(pos().x(), value.toPointF().y());
+    qreal deltaY = newToPoint.y() - pos().y();
 
     for (auto child = children_.begin(); child != children_.end(); ++child) {
       // Deselect so that it doesn't move with the parent.
       (*child)->setSelected(false);
-      (*child)->setPos((*child)->pos().x(), (*child)->pos().y() + newToPoint.y() - pos().y());
+      (*child)->setPos((*child)->pos().x(), (*child)->pos().y() + deltaY);
+      // Keep the initial position relative to this group.
+      (*child)->getAeraEvent()->itemInitialTopLeftPosition_ += QPointF(0, deltaY);
     }
 
     // The move might have obscured the background scene, so setting ItemIsMovable false will move the scene.
