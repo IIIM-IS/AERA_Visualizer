@@ -75,7 +75,7 @@ ExpandableGoalOrPredItem::ExpandableGoalOrPredItem(
   setFactGoalOrPredFactValueHtml(prefix);
 
   // Determine the shape.
-  if (getAeraEvent()->eventType_ == AbaSentenceStep::EVENT_TYPE)
+  if (getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE)
     shape_ = SHAPE_RECTANGLE;
   else if (getAeraEvent()->object_->get_reference(0)->code(0).asOpcode() == Opcodes::Pred)
     shape_ = SHAPE_PRED;

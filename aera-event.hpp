@@ -701,19 +701,21 @@ public:
   r_exec::_Fact* promotedFact_;
 };
 
-class AbaSentenceStep : public AeraEvent {
+class AbaAddSentence : public AeraEvent {
 public:
   /**
-   * Create an AbaSentenceStep.
+   * Create an AbaAddSentence event for a new (unmarked) sentence.
    * \param time The reduction time.
    * \param fact The fact produced by the step.
    * \param isAssumption True if fact is an assumption.
+   * \param isClaim True if fact is the claim of the graph.
    * \param parent The fact which produced the step, or NULL if the first.
    */
-  AbaSentenceStep(core::Timestamp time, r_code::Code* fact, bool isAssumption, r_code::Code* parent)
+  AbaAddSentence(core::Timestamp time, r_code::Code* fact, bool isAssumption, bool isClaim, r_code::Code* parent)
     : AeraEvent(EVENT_TYPE, time, fact),
     fact_((r_exec::_Fact*)fact),
     isAssumption_(isAssumption),
+    isClaim_(isClaim),
     parent_((r_exec::_Fact*)parent)
   {}
 
@@ -723,7 +725,25 @@ public:
 
   r_exec::_Fact* fact_;
   bool isAssumption_;
+  bool isClaim_;
   r_exec::_Fact* parent_;
+};
+
+class AbaMarkSentence : public AeraEvent {
+public:
+  /**
+   * Create an AbaMarkSentence event to mark an existing sentence.
+   * \param time The reduction time.
+   * \param fact The fact to be marked.
+   */
+  AbaMarkSentence(core::Timestamp time, r_code::Code* fact)
+    : AeraEvent(EVENT_TYPE, time, fact),
+    fact_((r_exec::_Fact*)fact)
+  {}
+
+  static const int EVENT_TYPE = 29;
+
+  r_exec::_Fact* fact_;
 };
 
 }
