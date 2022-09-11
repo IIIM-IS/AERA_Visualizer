@@ -142,10 +142,11 @@ void AeraGraphicsItemGroup::fitToChildren()
     }
   }
 
-  const qreal margin = 10;
+  const qreal width_margin = 20;
+  const qreal height_margin = 7;
   if (childrenRect.width() != 0) {
-    setPos(childrenRect.left() - margin, childrenRect.top() - margin);
-    setRect(0, 0, childrenRect.width() + 2*margin, childrenRect.height() + 2 * margin);
+    setPos(childrenRect.left() - width_margin, childrenRect.top() - height_margin);
+    setRect(0, 0, childrenRect.width() + 2*width_margin, childrenRect.height() + 2*height_margin);
   }
   inCallback_ = false;
 }
