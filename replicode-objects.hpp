@@ -175,6 +175,14 @@ public:
    */
   QString getProgressLabelText(const QString& message);
 
+  /**
+   * Parse the list of integers oids and use getObject() to add each to objects.
+   * \param oids The string with the list of OID integers, e.g. "12 14". This may be "".
+   * \param objects Add found objects. This does not first clear the vector.
+   * \return True for success, false if getObject() failed to find an OID
+   */
+  bool getObjects(std::string oids, std::vector<r_code::Code*>& objects);
+
 private:
   /**
    * Process the decompiled objects file to remove OIDs, detail OIDs and info lines starting with ">".
@@ -200,6 +208,7 @@ private:
   std::map<std::string, r_code::Code*> labelObject_;
   r_code::list<P<r_code::Code> > objects_;
   std::vector<QString> progressMessages_;
+  std::regex intMemberRegex_;
 };
 
 }
