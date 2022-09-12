@@ -709,13 +709,16 @@ public:
    * \param fact The fact produced by the step.
    * \param isAssumption True if fact is an assumption.
    * \param isClaim True if fact is the claim of the graph.
+   * \param opponentGraphId If > 0 this is a sentence in the opponent graph with this ID.
    * \param parent The fact which produced the step, or NULL if the first.
    */
-  AbaAddSentence(core::Timestamp time, r_code::Code* fact, bool isAssumption, bool isClaim, r_code::Code* parent)
+  AbaAddSentence(core::Timestamp time, r_code::Code* fact, bool isAssumption, bool isClaim,
+      int opponentGraphId, r_code::Code* parent)
     : AeraEvent(EVENT_TYPE, time, fact),
     fact_((r_exec::_Fact*)fact),
     isAssumption_(isAssumption),
     isClaim_(isClaim),
+    opponentGraphId_(opponentGraphId),
     parent_((r_exec::_Fact*)parent)
   {}
 
@@ -726,6 +729,7 @@ public:
   r_exec::_Fact* fact_;
   bool isAssumption_;
   bool isClaim_;
+  int opponentGraphId_;
   r_exec::_Fact* parent_;
 };
 
@@ -737,13 +741,35 @@ public:
    * \param fact The fact to be marked.
    */
   AbaMarkSentence(core::Timestamp time, r_code::Code* fact)
-    : AeraEvent(EVENT_TYPE, time, fact),
+    // Set the object_ NULL since there is already an AeraEvent for it.
+    : AeraEvent(EVENT_TYPE, time, NULL),
     fact_((r_exec::_Fact*)fact)
   {}
 
   static const int EVENT_TYPE = 29;
 
   r_exec::_Fact* fact_;
+};
+
+class AbaMarkedSentenceToParent : public AeraEvent {
+public:
+  /**
+   * Create an AbaMarkedSentenceToParent event for a link from a marked sentence to a parent.
+   * \param time The reduction time.
+   * \param markedFact The fact which is already marked.
+   * \param parent The parent fact which is justified by the markedFact.
+   */
+  AbaMarkedSentenceToParent(core::Timestamp time, r_code::Code* markedFact, r_code::Code* parent)
+    // Set the object_ NULL since there is already an AeraEvent for it.
+    : AeraEvent(EVENT_TYPE, time, NULL),
+    markedFact_((r_exec::_Fact*)markedFact),
+    parent_((r_exec::_Fact*)parent)
+  {}
+
+  static const int EVENT_TYPE = 30;
+
+  r_exec::_Fact* markedFact_;
+  r_exec::_Fact* parent_;
 };
 
 }
