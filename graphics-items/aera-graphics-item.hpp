@@ -286,9 +286,6 @@ protected:
   QPen borderNoHighlightPen_;
 
 private:
-  void removeArrow(Arrow* arrow);
-  void removeHorizontalLine(AnchoredHorizontalLine* line);
-
   AeraEvent* aeraEvent_;
   QList<Arrow*> arrows_;
   QList<AnchoredHorizontalLine*> horizontalLines_;

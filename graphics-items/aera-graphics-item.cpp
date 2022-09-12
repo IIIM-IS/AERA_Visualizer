@@ -88,7 +88,7 @@ const QString AeraGraphicsItem::RedXHtml = "<font size=\"+1\"><b>&#10060;</b></f
 const QColor AeraGraphicsItem::Color_proponent_justifications(0xA2, 0xDD, 0xF3);
 const QColor AeraGraphicsItem::Color_proponent_asm_toBeProved(0x7C, 0x0A, 0xA2);
 const QColor AeraGraphicsItem::Color_proponent_asm(0x11, 0x77, 0x11);
-const QColor AeraGraphicsItem::Color_proponent_nonAsm_toBeProved(0x11, 0x11, 0x77);
+const QColor AeraGraphicsItem::Color_proponent_nonAsm_toBeProved(0x61, 0x61, 0xA7);
 const QColor AeraGraphicsItem::Color_proponent_nonAsm(0x66, 0x66, 0x66);
 const QColor AeraGraphicsItem::Color_opponent_finished_justification(0xCC, 0xCC, 0xCC);
 const QColor AeraGraphicsItem::Color_opponent_unfinished_justification(0xFF, 0xFF, 0xFF);
@@ -99,7 +99,7 @@ const QColor AeraGraphicsItem::Color_opponent_ms_asm_defence(0x11, 0x77, 0x11);
 const QColor AeraGraphicsItem::Color_opponent_ms_asm_defence_text(0xFF, 0xFF, 0xFF);
 const QColor AeraGraphicsItem::Color_opponent_ms_asm(0x77, 0xBB, 0x77);
 const QColor AeraGraphicsItem::Color_opponent_ms_asm_text(0x00, 0x00, 0x00);
-const QColor AeraGraphicsItem::Color_opponent_ms_nonAsm(0x77, 0x77, 0x77);
+const QColor AeraGraphicsItem::Color_opponent_ms_nonAsm(0xB0, 0xB0, 0xB0);
 const QColor AeraGraphicsItem::Color_opponent_ms_nonAsm_text(0xFF, 0xFF, 0xFF);
 const QColor AeraGraphicsItem::Color_opponent_ums_asm_defence(0x11, 0x77, 0x11);
 const QColor AeraGraphicsItem::Color_opponent_ums_asm_defence_border(0x11, 0x77, 0x11);
@@ -221,10 +221,10 @@ void AeraGraphicsItem::removeArrowsAndHorizontalLines()
   foreach(Arrow* arrow, arrows_) {
     auto startItem = dynamic_cast<AeraGraphicsItem*>(arrow->startItem());
     if (startItem)
-      startItem->removeArrow(arrow);
+      startItem->arrows_.removeAll(arrow);
     auto endItem = dynamic_cast<AeraGraphicsItem*>(arrow->endItem());
     if (endItem)
-      endItem->removeArrow(arrow);
+      endItem->arrows_.removeAll(arrow);
     scene()->removeItem(arrow);
     delete arrow;
   }
@@ -232,24 +232,10 @@ void AeraGraphicsItem::removeArrowsAndHorizontalLines()
   foreach(AnchoredHorizontalLine* line, horizontalLines_) {
     auto item = dynamic_cast<AeraGraphicsItem*>(line->item());
     if (item)
-      item->removeHorizontalLine(line);
+      item->horizontalLines_.removeAll(line);
     scene()->removeItem(line);
     delete line;
   }
-}
-
-void AeraGraphicsItem::removeArrow(Arrow* arrow)
-{
-  int index = arrows_.indexOf(arrow);
-  if (index != -1)
-    arrows_.removeAt(index);
-}
-
-void AeraGraphicsItem::removeHorizontalLine(AnchoredHorizontalLine* line)
-{
-  int index = horizontalLines_.indexOf(line);
-  if (index != -1)
-    horizontalLines_.removeAt(index);
 }
 
 void AeraGraphicsItem::bringToFront()
@@ -595,7 +581,7 @@ void AeraGraphicsItem::TextItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
   auto url = document()->documentLayout()->anchorAt(event->pos());
   if (url.startsWith("#detail_oid-")) {
     uint64 detail_oid = url.mid(12).toULongLong();
-    auto object =  parent_->replicodeObjects_.getObjectByDetailOid(detail_oid);
+    auto object = parent_->replicodeObjects_.getObjectByDetailOid(detail_oid);
     if (object) {
       AeraGraphicsItem *aeraGraphicsItem = window->getAeraGraphicsItem(object);
       if (aeraGraphicsItem) {
