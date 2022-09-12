@@ -709,16 +709,17 @@ public:
    * \param fact The fact produced by the step.
    * \param isAssumption True if fact is an assumption.
    * \param isClaim True if fact is the claim of the graph.
-   * \param opponentGraphId If > 0 this is a sentence in the opponent graph with this ID.
+   * \param graphId If 0 this is the proponent graph, otherwise this is a sentence
+   * in the opponent graph with this ID.
    * \param parent The fact which produced the step, or NULL if the first.
    */
   AbaAddSentence(core::Timestamp time, r_code::Code* fact, bool isAssumption, bool isClaim,
-      int opponentGraphId, r_code::Code* parent)
+      int graphId, r_code::Code* parent)
     : AeraEvent(EVENT_TYPE, time, fact),
     fact_((r_exec::_Fact*)fact),
     isAssumption_(isAssumption),
     isClaim_(isClaim),
-    opponentGraphId_(opponentGraphId),
+    graphId_(graphId),
     parent_((r_exec::_Fact*)parent)
   {}
 
@@ -729,7 +730,7 @@ public:
   r_exec::_Fact* fact_;
   bool isAssumption_;
   bool isClaim_;
-  int opponentGraphId_;
+  int graphId_;
   r_exec::_Fact* parent_;
 };
 
