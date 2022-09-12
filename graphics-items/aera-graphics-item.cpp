@@ -232,6 +232,15 @@ void AeraGraphicsItem::removeAndDeleteArrow(Arrow* arrow)
   delete arrow;
 }
 
+void AeraGraphicsItem::removeAndDeleteArrowToObject(Code* object)
+{
+  foreach(Arrow* arrow, arrows_) {
+    auto endItem = dynamic_cast<AeraGraphicsItem*>(arrow->endItem());
+    if (endItem && endItem->getAeraEvent()->object_ == object)
+      removeAndDeleteArrow(arrow);
+  }
+}
+
 void AeraGraphicsItem::removeArrowsAndHorizontalLines()
 {
   foreach(Arrow* arrow, arrows_)

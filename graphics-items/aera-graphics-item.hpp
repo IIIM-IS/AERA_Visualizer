@@ -114,6 +114,13 @@ public:
   void removeAndDeleteArrow(Arrow* arrow);
 
   /**
+   * Search the list of arrows for an arrow to an item whose AeraEvent object is the
+   * given object and call removeAndDeleteArrow to remove and delete the Arrow.
+   * \param object The object in the Aera event of the Item at the end of the Arrow.
+   */
+  void removeAndDeleteArrowToObject(r_code::Code* object);
+
+  /**
    * Remove all arrows and horizontal lines and remove them from the parent scene.
    */
   void removeArrowsAndHorizontalLines();
