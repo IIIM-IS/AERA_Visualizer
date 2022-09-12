@@ -71,8 +71,10 @@ const QPen Arrow::RedArrowheadPen(QColor(255, 0, 0), 2, Qt::SolidLine, Qt::Round
 
 Arrow::Arrow(
   QGraphicsPolygonItem* startItem, QGraphicsPolygonItem* endItem,
-   const QPen& highlightArrowBasePen, const QPen& highlightArrowTipPen, AeraVisualizerScene* parent)
+   const QPen& highlightBodyPen, const QPen& highlightArrowBasePen,
+   const QPen& highlightArrowTipPen, AeraVisualizerScene* parent)
 : QGraphicsLineItem(),
+  highlightBodyPen_(highlightBodyPen),
   highlightArrowBasePen_(highlightArrowBasePen),
   highlightArrowTipPen_(highlightArrowTipPen)
 {

@@ -323,7 +323,7 @@ void AeraVisualizerScene::addArrow(
     hightlighArrowBasePen = Arrow::GreenArrowheadPen;
     hightlighArrowTipPen = Arrow::RedArrowheadPen;
   }
-  auto arrow = new Arrow(startItem, endItem, hightlighArrowBasePen, hightlighArrowTipPen, this);
+  auto arrow = new Arrow(startItem, endItem, Arrow::HighlightedPen, hightlighArrowBasePen, hightlighArrowTipPen, this);
 
   startItem->addArrow(arrow);
   endItem->addArrow(arrow);

@@ -553,7 +553,7 @@ void AeraGraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
   foreach(Arrow * arrow, arrows_) {
     // The arrow base and tip pens were given to the Arrow constructor as needed.
     arrow->setPens(
-      Arrow::HighlightedPen, arrow->getHighlightArrowBasePen(), arrow->getHighlightArrowTipPen());
+      arrow->getHighlightBodyPen(), arrow->getHighlightArrowBasePen(), arrow->getHighlightArrowTipPen());
     arrow->update();
   }
   foreach(AnchoredHorizontalLine* line, horizontalLines_) {
