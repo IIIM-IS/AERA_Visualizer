@@ -99,8 +99,24 @@ public:
     AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects,
     AeraVisualizerScene* parent, const QString& headerPrefix, QColor textItemTextColor = Qt::black);
 
-  void removeArrowsAndHorizontalLines();
+  /**
+   * Add the Arrow to the list of arrows. This does not take ownership
+   * or add to the parent scene.
+   * \param arrow The arrow to add.
+   */
   void addArrow(Arrow* arrow) { arrows_.append(arrow); }
+
+  /**
+   * Remove the Arrow from the list of arrows, delete it from the scene and delete the arrow.
+   * \param arrow The Arrow to remove from the list of arrows. If it is not in the
+   * list, then do nothing (do not delete it or remove from the parent scene).
+   */
+  void removeAndDeleteArrow(Arrow* arrow);
+
+  /**
+   * Remove all arrows and horizontal lines and remove them from the parent scene.
+   */
+  void removeArrowsAndHorizontalLines();
   void addHorizontalLine(AnchoredHorizontalLine* line) { horizontalLines_.append(line); }
   void updateArrowsAndLines();
   AeraEvent* getAeraEvent() { return aeraEvent_; }

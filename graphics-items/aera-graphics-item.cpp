@@ -216,18 +216,26 @@ void AeraGraphicsItem::setTextItemAndPolygon(QString html, bool prependHeaderHtm
   }
 }
 
+void AeraGraphicsItem::removeAndDeleteArrow(Arrow* arrow)
+{
+  int index = arrows_.indexOf(arrow);
+  if (index == -1)
+    return;
+
+  auto startItem = dynamic_cast<AeraGraphicsItem*>(arrow->startItem());
+  if (startItem)
+    startItem->arrows_.removeAll(arrow);
+  auto endItem = dynamic_cast<AeraGraphicsItem*>(arrow->endItem());
+  if (endItem)
+    endItem->arrows_.removeAll(arrow);
+  scene()->removeItem(arrow);
+  delete arrow;
+}
+
 void AeraGraphicsItem::removeArrowsAndHorizontalLines()
 {
-  foreach(Arrow* arrow, arrows_) {
-    auto startItem = dynamic_cast<AeraGraphicsItem*>(arrow->startItem());
-    if (startItem)
-      startItem->arrows_.removeAll(arrow);
-    auto endItem = dynamic_cast<AeraGraphicsItem*>(arrow->endItem());
-    if (endItem)
-      endItem->arrows_.removeAll(arrow);
-    scene()->removeItem(arrow);
-    delete arrow;
-  }
+  foreach(Arrow* arrow, arrows_)
+    removeAndDeleteArrow(arrow);
 
   foreach(AnchoredHorizontalLine* line, horizontalLines_) {
     auto item = dynamic_cast<AeraGraphicsItem*>(line->item());
