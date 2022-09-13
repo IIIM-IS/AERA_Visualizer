@@ -86,6 +86,8 @@ class AeraVisualizerScene;
 class AeraGraphicsItem : public QGraphicsPolygonItem
 {
 public:
+  typedef enum { STATUS_PROCESSING, STATUS_DONE } ProcessStatus;
+
   /**
    * Create an AeraGraphicsItem, and set headerHtml_ to a header with aeraEvent_->time_ and 
    * headerPrefix + the aeraEvent label with a "#this" link.
