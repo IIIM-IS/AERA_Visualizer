@@ -535,19 +535,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
       auto input = replicodeObjects_.getObject(stoul(matches[2].str()));
 
       // Get the matching inputs.
-      string inputOids = matches[4].str();
       vector<Code*> inputs;
-      bool gotAllInputs = true;
-      while (regex_search(inputOids, matches, regex("( \\d+)"))) {
-        auto input = replicodeObjects_.getObject(stoul(matches[1].str()));
-        if (!input) {
-          gotAllInputs = false;
-          break;
-        }
-        inputs.push_back(input);
-
-        inputOids = matches.suffix();
-      }
+      bool gotAllInputs = replicodeObjects_.getObjects(matches[4].str(), inputs);
 
       if (compositeState && factPred && input && gotAllInputs)
         events_.push_back(make_shared<CompositeStateSimulatedPredictionReduction>(
@@ -557,19 +546,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
       auto instantiatedCompositeState = replicodeObjects_.getObject(stoul(matches[1].str()));
 
       // Get the matching inputs.
-      string inputOids = matches[2].str();
       vector<Code*> inputs;
-      bool gotAllInputs = true;
-      while (regex_search(inputOids, matches, regex("( \\d+)"))) {
-        auto input = replicodeObjects_.getObject(stoul(matches[1].str()));
-        if (!input) {
-          gotAllInputs = false;
-          break;
-        }
-        inputs.push_back(input);
-
-        inputOids = matches.suffix();
-      }
+      bool gotAllInputs = replicodeObjects_.getObjects(matches[2].str(), inputs);;
 
       if (instantiatedCompositeState && gotAllInputs)
         events_.push_back(make_shared<NewInstantiatedCompositeStateEvent>(
@@ -1300,25 +1278,19 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     }
   }
   else if (event->eventType_ == PhaseInModelEvent::EVENT_TYPE) {
-    auto phaseInModelEvent = (PhaseInModelEvent*)event;
-
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(phaseInModelEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(event->object_));
     if (modelItem)
       // Set the background color.
       modelItem->setBrush(Qt::white);
   }
   else if (event->eventType_ == PhaseOutModelEvent::EVENT_TYPE) {
-    auto phaseOutModelEvent = (PhaseOutModelEvent*)event;
-
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(phaseOutModelEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(event->object_));
     if (modelItem)
       // Set the background color.
       modelItem->setBrush(phasedOutModelColor_);
   }
   else if (event->eventType_ == DeleteModelEvent::EVENT_TYPE) {
-    auto deleteModelEvent = (DeleteModelEvent*)event;
-
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(deleteModelEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(event->object_));
     if (modelItem)
       // Set the background color.
       modelItem->setBrush(Qt::gray);
@@ -1406,27 +1378,21 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
   }
   else if (event->eventType_ == PhaseInModelEvent::EVENT_TYPE) {
     // Find the ModelItem for this event and set its appearance to not phased out.
-    auto phaseInModelEvent = (PhaseInModelEvent*)event;
-
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(phaseInModelEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(event->object_));
     if (modelItem)
       // Set the background color. Assume the model was phased out before phase in.
       modelItem->setBrush(phasedOutModelColor_);
   }
   else if (event->eventType_ == PhaseOutModelEvent::EVENT_TYPE) {
     // Find the ModelItem for this event and set its appearance to not phased out.
-    auto phaseOutModelEvent = (PhaseOutModelEvent*)event;
-
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(phaseOutModelEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(event->object_));
     if (modelItem)
       // Set the background color.
       modelItem->setBrush(Qt::white);
   }
   else if (event->eventType_ == DeleteModelEvent::EVENT_TYPE) {
     // Find the ModelItem for this event and set its appearance to not deleted.
-    auto deleteModelEvent = (DeleteModelEvent*)event;
-
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(deleteModelEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(event->object_));
     if (modelItem)
       // Set the background color.
       modelItem->setBrush(Qt::white);
