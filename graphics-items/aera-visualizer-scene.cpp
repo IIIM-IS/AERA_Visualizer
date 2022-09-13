@@ -324,17 +324,24 @@ void AeraVisualizerScene::addArrow(
   if (startItem == endItem)
     return;
 
-  QPen hightlighArrowBasePen = Arrow::HighlightedPen;
-  QPen hightlighArrowTipPen = Arrow::HighlightedPen;
+  QPen highlightArrowBasePen = Arrow::HighlightedPen;
+  QPen highlightArrowTipPen = Arrow::HighlightedPen;
   if (lhsItem == startItem) {
-    hightlighArrowBasePen = Arrow::RedArrowheadPen;
-    hightlighArrowTipPen = Arrow::GreenArrowheadPen;
+    highlightArrowBasePen = Arrow::RedArrowheadPen;
+    highlightArrowTipPen = Arrow::GreenArrowheadPen;
   }
   else if (lhsItem == endItem) {
-    hightlighArrowBasePen = Arrow::GreenArrowheadPen;
-    hightlighArrowTipPen = Arrow::RedArrowheadPen;
+    highlightArrowBasePen = Arrow::GreenArrowheadPen;
+    highlightArrowTipPen = Arrow::RedArrowheadPen;
   }
-  auto arrow = new Arrow(startItem, endItem, Arrow::HighlightedPen, hightlighArrowBasePen, hightlighArrowTipPen, this);
+  addArrow(startItem, endItem, Arrow::HighlightedPen, highlightArrowBasePen, highlightArrowTipPen);
+}
+
+void AeraVisualizerScene::addArrow(
+    AeraGraphicsItem* startItem, AeraGraphicsItem* endItem, const QPen& highlightBodyPen,
+    const QPen& highlightArrowBasePen, const QPen& highlightArrowTipPen)
+{
+  auto arrow = new Arrow(startItem, endItem, highlightBodyPen, highlightArrowBasePen, highlightArrowTipPen, this);
 
   startItem->addArrow(arrow);
   endItem->addArrow(arrow);

@@ -138,6 +138,7 @@ private:
   void zoomViewHome();
   void addAeraGraphicsItem(AeraGraphicsItem* item);
   void removeAeraGraphicsItem(AeraGraphicsItem* item);
+
   /**
    * Add an Arrow to the scene.
    * \param startItem The Item for the start of the arrow.
@@ -148,6 +149,18 @@ private:
    * have highlight pens HighlightedPen.
    */
   void addArrow(AeraGraphicsItem* startItem, AeraGraphicsItem* endItem, AeraGraphicsItem* lhsItem = 0);
+
+  /**
+   * Add an Arrow to the scene.
+   * \param startItem The Item for the start of the arrow.
+   * \param endItem The Item for the end of the arrow.
+   * \param highlightBodyPen See the Arrow constructor.
+   * \param highlightArrowBasePen See the Arrow constructor.
+   * \param highlightArrowTipPen See the Arrow constructor.
+   */
+  void addArrow(AeraGraphicsItem* startItem, AeraGraphicsItem* endItem,
+    const QPen& highlightBodyPen, const QPen& highlightArrowBasePen, const QPen& highlightArrowTipPen);
+
   void addHorizontalLine(AeraGraphicsItem* item);
   /**
    * Get the AeraGraphicsItem whose getAeraEvent() has the given object.
