@@ -69,8 +69,9 @@ namespace aera_visualizer {
 
 ExpandableGoalOrPredItem::ExpandableGoalOrPredItem(
   AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, const QString& prefix,
-  AeraVisualizerScene* parent, QColor textItemTextColor)
-: AeraGraphicsItem(aeraEvent, replicodeObjects, parent, "", textItemTextColor)
+  AeraVisualizerScene* parent, QColor textItemTextColor, const QString& antiFactHtmlColor)
+: AeraGraphicsItem(aeraEvent, replicodeObjects, parent, "", textItemTextColor),
+  antiFactHtmlColor_(antiFactHtmlColor)
 {
   setFactGoalOrPredFactValueHtml(prefix);
 
@@ -170,7 +171,7 @@ void ExpandableGoalOrPredItem::setFactGoalOrPredFactValueHtml(const QString& pre
     valueHtml = InstantiatedCompositeStateItem::makeIcstMembersSource(value, replicodeObjects_);
   valueHtml_ = htmlify("right-pointing-triangle " + valueHtml, true);
   if (((_Fact*)factValue)->is_anti_fact())
-    valueHtml_ =  "<font color=\"#ff4040\">" + valueHtml_ + "</font>";
+    valueHtml_ =  "<font color=\"" + antiFactHtmlColor_ + "\">" + valueHtml_ + "</font>";
   valueHtml_.replace("right-pointing-triangle", "<a href=\"#expand\">" + RightPointingTriangleHtml + "</a>");
 }
 

@@ -77,10 +77,11 @@ public:
    * for example "Model M6 =>".
    * \param parent The parent AeraVisualizerScene.
    * \param textItemTextColor (optional) The text color when we recreate the textItem_ . If ommitted, use black.
+   * \param antiFactHtmlColor (optional) The text color for |fact and |pgm . If ommitted, use red.
    */
   ExpandableGoalOrPredItem(
     AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, const QString& prefix,
-    AeraVisualizerScene* parent, QColor textItemTextColor = Qt::black);
+    AeraVisualizerScene* parent, QColor textItemTextColor = Qt::black, const QString& antiFactHtmlColor = "#ff4040");
 
 protected:
   void textItemLinkActivated(const QString& link) override;
@@ -99,6 +100,7 @@ private:
   QString toolTipText_;
   QString valueHtml_;
   Shape shape_;
+  QString antiFactHtmlColor_;
 };
 
 }
