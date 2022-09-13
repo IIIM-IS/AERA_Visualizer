@@ -160,9 +160,13 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     }
   }
 
-  item->setBrush(aeraEvent->eventType_ == ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE || 
-                 aeraEvent->eventType_ == PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE || 
-                 item->is_sim() ? simulatedItemColor_ : itemColor_);
+  if (aeraEvent->eventType_ == AbaAddSentence::EVENT_TYPE) {
+    // The constructor already set the brush.
+  }
+  else
+    item->setBrush(aeraEvent->eventType_ == ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE ||
+                   aeraEvent->eventType_ == PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE ||
+                   item->is_sim() ? simulatedItemColor_ : itemColor_);
   bool isFocusSimulation = (item->getAeraEvent()->object_ &&
                             focusSimulationDetailOids_.find(item->getAeraEvent()->object_->get_detail_oid())
                             != focusSimulationDetailOids_.end());
@@ -229,13 +233,16 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
         left = getTimelineX(((_Fact*)((PromotedSimulatedPredictionDefeatEvent*)aeraEvent)->input_
                                        ->get_reference(0)->get_reference(0))->get_after());
       else {
-        // We know that a simulated item's object has the form (fact (goal_or_pred (fact ...)))
+        // We know that a simulated item's object usually has the form (fact (goal_or_pred (fact ...)))
         if (((_Fact*)aeraEvent->object_)->get_goal())
           // Position a goal at the time it needs to be achieved by.
           left = getTimelineX(((_Fact*)aeraEvent->object_->get_reference(0)->get_reference(0))->get_before()) -
-          item->boundingRect().width();
-        else
+            item->boundingRect().width();
+        else if (((_Fact*)aeraEvent->object_)->get_pred())
           left = getTimelineX(((_Fact*)aeraEvent->object_->get_reference(0)->get_reference(0))->get_after());
+        else
+          // No goal or pred, just a solo fact. Position like a goal.
+          left = getTimelineX(((_Fact*)aeraEvent->object_)->get_after());
       }
     }
     else {
@@ -270,6 +277,10 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
   // Adjust the position from the topLeft.
   item->setPos(aeraEvent->itemTopLeftPosition_ - item->boundingRect().topLeft());
   item->adjustItemYPosition();
+}
+
+void AeraVisualizerScene::removeAeraGraphicsItem(AeraGraphicsItem* item) {
+  removeItem(item);
 }
 
 void AeraVisualizerScene::onViewMoved()
@@ -514,7 +525,7 @@ void AeraVisualizerScene::removeAllItemsByEventType(const set<int>& eventTypes)
 
   for (auto item = toDelete.begin(); item != toDelete.end(); ++item) {
     (*item)->removeArrowsAndHorizontalLines();
-    removeItem(*item);
+    removeAeraGraphicsItem(*item);
     delete *item;
   }
 }

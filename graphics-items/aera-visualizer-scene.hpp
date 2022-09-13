@@ -137,11 +137,12 @@ private:
   void scaleViewBy(double factor);
   void zoomViewHome();
   void addAeraGraphicsItem(AeraGraphicsItem* item);
+  void removeAeraGraphicsItem(AeraGraphicsItem* item);
   /**
    * Add an Arrow to the scene.
    * \param startItem The Item for the start of the arrow.
    * \param endItem The Item for the end of the arrow.
-   * \param lhsItem (optional) This is either startItem or endItem:The arrowhead 
+   * \param lhsItem (optional) This is either startItem or endItem. The arrowhead 
    * next to lhsItem will have highlight pen RedArrowheadPen and the other item
    * will have highlight pen Green.ArrowheadPen . If omitted, both arrowheads will
    * have highlight pens HighlightedPen.

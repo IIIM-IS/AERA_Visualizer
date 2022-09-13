@@ -1360,7 +1360,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
     auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(scene->getAeraGraphicsItem(event->object_));
     if (aeraGraphicsItem) {
       aeraGraphicsItem->removeArrowsAndHorizontalLines();
-      scene->removeItem(aeraGraphicsItem);
+      scene->removeAeraGraphicsItem(aeraGraphicsItem);
       delete aeraGraphicsItem;
     }
   }
