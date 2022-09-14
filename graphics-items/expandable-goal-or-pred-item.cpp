@@ -76,12 +76,12 @@ ExpandableGoalOrPredItem::ExpandableGoalOrPredItem(
   setFactGoalOrPredFactValueHtml(prefix);
 
   // Determine the shape.
-  if (getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE)
-    shape_ = SHAPE_RECTANGLE;
-  else if (getAeraEvent()->object_->get_reference(0)->code(0).asOpcode() == Opcodes::Pred)
+  if (getAeraEvent()->object_->get_reference(0)->code(0).asOpcode() == Opcodes::Pred)
     shape_ = SHAPE_PRED;
-  else
+  else if (getAeraEvent()->object_->get_reference(0)->code(0).asOpcode() == Opcodes::Goal)
     shape_ = SHAPE_GOAL;
+  else
+    shape_ = SHAPE_RECTANGLE;
 
   setTextItemAndPolygon(valueHtml_, false, shape_);
   setToolTip(toolTipText_);
