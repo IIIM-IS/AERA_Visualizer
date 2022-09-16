@@ -740,16 +740,19 @@ public:
    * Create an AbaMarkSentence event to mark an existing sentence.
    * \param time The reduction time.
    * \param fact The fact to be marked.
+   * \param alsoMarkGraph (optional) If true, also mark the graph that the fact is in.
    */
-  AbaMarkSentence(core::Timestamp time, r_code::Code* fact)
+  AbaMarkSentence(core::Timestamp time, r_code::Code* fact, bool alsoMarkGraph = false)
     // Set the object_ NULL since there is already an AeraEvent for it.
     : AeraEvent(EVENT_TYPE, time, NULL),
-    fact_((r_exec::_Fact*)fact)
+    fact_((r_exec::_Fact*)fact),
+    alsoMarkGraph_(alsoMarkGraph)
   {}
 
   static const int EVENT_TYPE = 29;
 
   r_exec::_Fact* fact_;
+  bool alsoMarkGraph_;
 };
 
 class AbaMarkedSentenceToParent : public AeraEvent {
