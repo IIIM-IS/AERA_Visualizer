@@ -68,34 +68,35 @@ using namespace r_exec;
 namespace aera_visualizer {
 
 AbaSentenceItem::AbaSentenceItem(
-  AbaAddSentence* step, ReplicodeObjects& replicodeObjects,
+  AbaAddSentence* addEvent, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-: ExpandableGoalOrPredItem(step, replicodeObjects, "Step " + RightDoubleArrowHtml, parent, Qt::white),
-  step_(step)
+: ExpandableGoalOrPredItem(addEvent, replicodeObjects, "Step " + RightDoubleArrowHtml, parent,
+    Qt::white, "#ffc0c0"),
+  addEvent_(addEvent)
 {
-  if (step->object_->code(0).asOpcode() == Opcodes::Fact &&
-      step->object_->get_reference(0)->code(0).asOpcode() == Opcodes::Cmd)
+  if (addEvent->object_->code(0).asOpcode() == Opcodes::Fact &&
+      addEvent->object_->get_reference(0)->code(0).asOpcode() == Opcodes::Cmd)
     // Highlight causal events.
     setBrush(QColor(0x00, 0x99, 0x99));
   else {
-    if (step->graphId_ > 0) {
+    if (addEvent->graphId_ > 0) {
       // Get colors for the opponent graph.
-      if (step->isAssumption_)
+      if (addEvent->isAssumption_)
         setBrush(Color_opponent_ms_asm_culprit);
       else
         setBrush(Color_opponent_ms_nonAsm);
     }
     else {
-      if (step->isAssumption_)
-        setBrush(step->isClaim_ ? Color_proponent_asm_toBeProved : Color_proponent_asm);
+      if (addEvent->isAssumption_)
+        setBrush(addEvent->isClaim_ ? Color_proponent_asm_toBeProved : Color_proponent_asm);
       else
-        setBrush(step->isClaim_ ? Color_proponent_nonAsm_toBeProved : Color_proponent_nonAsm);
+        setBrush(addEvent->isClaim_ ? Color_proponent_nonAsm_toBeProved : Color_proponent_nonAsm);
     }
   }
 
   statusTextItem_ = new QGraphicsTextItem(this);
   statusTextItem_->setPos(boundingRect().left() - 2, boundingRect().top() - 12);
-  setStatus(STATUS_UNMARKED);
+  setStatus(STATUS_PROCESSING);
 }
 
 void AbaSentenceItem::textItemLinkActivated(const QString& link)

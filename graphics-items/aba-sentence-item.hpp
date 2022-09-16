@@ -69,23 +69,31 @@ class AbaSentenceItem : public ExpandableGoalOrPredItem
 {
 public:
   AbaSentenceItem(
-    AbaAddSentence* step, ReplicodeObjects& replicodeObjects,
+    AbaAddSentence* addEvent, ReplicodeObjects& replicodeObjects,
     AeraVisualizerScene* parent);
 
-  typedef enum { STATUS_UNMARKED, STATUS_MARKED } SentenceStatus;
-
-  void setStatus(SentenceStatus status) {
-    if (status == STATUS_MARKED)
+  void setStatus(ProcessStatus status) {
+    if (status == STATUS_DONE)
       statusTextItem_->setHtml(CheckMarkHtml);
     else
       statusTextItem_->setHtml(HourglassHtml);
+  }
+
+  bool isBetweenProponentAndOpponent(AeraGraphicsItem* other) {
+    if (other->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
+      auto otherEvent = (AbaAddSentence*)other->getAeraEvent();
+      return (addEvent_->graphId_ != otherEvent->graphId_ &&
+              (addEvent_->graphId_ == 0 || otherEvent->graphId_ == 0));
+    }
+
+    return false;
   }
 
 protected:
   void textItemLinkActivated(const QString& link) override;
 
 private:
-  AbaAddSentence* step_;
+  AbaAddSentence* addEvent_;
   QGraphicsTextItem* statusTextItem_;
 };
 
