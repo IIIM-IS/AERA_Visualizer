@@ -164,7 +164,6 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
   bool isSimulationEventType = 
     (AeraVisulizerWindow::simulationEventTypes_.find(item->getAeraEvent()->eventType_) !=
      AeraVisulizerWindow::simulationEventTypes_.end());
-  qreal otherSimulationNextTopOffset = 3000;
 
   if (qIsNaN(aeraEvent->itemTopLeftPosition_.x())) {
     // Assign an initial position.
@@ -177,7 +176,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       // Reset the top.
       eventTypeNextTop_.clear();
       focusSimulationNextTop_ = eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
-      otherSimulationNextTop_ = otherSimulationNextTopOffset + eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
+      otherSimulationNextTop_ = 3000 + eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
     }
 
     int eventType = 0;
@@ -211,8 +210,22 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       }
     }
 
-    qreal left;
+    // Set up eventTypeNextTop_ or simulation next top for the next item.
     int verticalMargin = 15;
+    if (aeraEvent->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
+        aeraEvent->eventType_ == IoDeviceEjectEvent::EVENT_TYPE)
+      verticalMargin = 5;
+    qreal nextTop = top + item->boundingRect().height() + verticalMargin;
+    if (isSimulationEventType) {
+      if (isFocusSimulation)
+        focusSimulationNextTop_ = nextTop;
+      else
+        otherSimulationNextTop_ = nextTop;
+    }
+    else
+      eventTypeNextTop_[eventType] = nextTop;
+
+    qreal left;
     if (isSimulationEventType) {
       // Position simulated items exactly.
       if (aeraEvent->eventType_ == ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE)
@@ -238,26 +251,13 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     }
     else {
       if (aeraEvent->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
-        aeraEvent->eventType_ == IoDeviceEjectEvent::EVENT_TYPE) {
+          aeraEvent->eventType_ == IoDeviceEjectEvent::EVENT_TYPE)
         // Allow inject/eject items to be on the frame boundary.
         left = thisFrameLeft_ + item->boundingRect().left();
-        verticalMargin = 5;
-      }
       else
         left = thisFrameLeft_ + 5;
     }
     aeraEvent->itemTopLeftPosition_ = QPointF(left, top);
-
-    // Set up eventTypeNextTop_ or simulation next top for the next item.
-    qreal nextTop = top + item->boundingRect().height() + verticalMargin;
-    if (isSimulationEventType) {
-      if (isFocusSimulation)
-        focusSimulationNextTop_ = nextTop;
-      else
-        otherSimulationNextTop_ = nextTop;
-    }
-    else
-      eventTypeNextTop_[eventType] = nextTop;
   }
 
   if (qIsNaN(aeraEvent->itemInitialTopLeftPosition_.x()))
