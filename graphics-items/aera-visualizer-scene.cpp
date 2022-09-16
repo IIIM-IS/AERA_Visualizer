@@ -93,8 +93,6 @@ AeraVisualizerScene::AeraVisualizerScene(
   valueUpFlashColor_("green"),
   valueDownFlashColor_("red")
 {
-  itemColor_ = Qt::white;
-  simulatedItemColor_ = QColor(255, 255, 220);
   lineColor_ = Qt::black;
   setBackgroundBrush(QColor(245, 245, 245));
   flashTimerId_ = 0;
@@ -160,13 +158,6 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     }
   }
 
-  if (aeraEvent->eventType_ == AbaAddSentence::EVENT_TYPE) {
-    // The constructor already set the brush.
-  }
-  else
-    item->setBrush(aeraEvent->eventType_ == ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE ||
-                   aeraEvent->eventType_ == PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE ||
-                   item->is_sim() ? simulatedItemColor_ : itemColor_);
   bool isFocusSimulation = (item->getAeraEvent()->object_ &&
                             focusSimulationDetailOids_.find(item->getAeraEvent()->object_->get_detail_oid())
                             != focusSimulationDetailOids_.end());

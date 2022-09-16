@@ -217,8 +217,6 @@ private:
   qreal otherSimulationNextTop_;
   Timestamp thisFrameTime_;
   qreal thisFrameLeft_;
-  QColor itemColor_;
-  QColor simulatedItemColor_;
   QColor lineColor_;
   QPen borderFlashPen_;
   QString noFlashColor_;

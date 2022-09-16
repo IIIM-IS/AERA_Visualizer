@@ -230,6 +230,9 @@ public:
   static const QString CheckMarkHtml;
   static const QString RedXHtml;
 
+  static const QColor DefaultItemColor;
+  static const QColor SimulatedItemColor;
+
   static const QColor Color_proponent_justifications;
   static const QColor Color_proponent_asm_toBeProved;
   static const QColor Color_proponent_asm;

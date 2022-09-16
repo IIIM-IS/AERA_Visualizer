@@ -85,6 +85,9 @@ const QString AeraGraphicsItem::StopSignHtml = "<font size=\"+1\"><b>&#128721;</
 const QString AeraGraphicsItem::CheckMarkHtml = "<font size=\"+1\"><b>&#9989;</b></font>";
 const QString AeraGraphicsItem::RedXHtml = "<font size=\"+1\"><b>&#10060;</b></font>";
 
+const QColor AeraGraphicsItem::DefaultItemColor(255, 255, 255);
+const QColor AeraGraphicsItem::SimulatedItemColor(255, 255, 220);
+
 const QColor AeraGraphicsItem::Color_proponent_justifications(0xA2, 0xDD, 0xF3);
 const QColor AeraGraphicsItem::Color_proponent_asm_toBeProved(0x7C, 0x0A, 0xA2);
 const QColor AeraGraphicsItem::Color_proponent_asm(0x11, 0x77, 0x11);
@@ -99,7 +102,7 @@ const QColor AeraGraphicsItem::Color_opponent_ms_asm_defence(0x11, 0x77, 0x11);
 const QColor AeraGraphicsItem::Color_opponent_ms_asm_defence_text(0xFF, 0xFF, 0xFF);
 const QColor AeraGraphicsItem::Color_opponent_ms_asm(0x77, 0xBB, 0x77);
 const QColor AeraGraphicsItem::Color_opponent_ms_asm_text(0x00, 0x00, 0x00);
-const QColor AeraGraphicsItem::Color_opponent_ms_nonAsm(0xB0, 0xB0, 0xB0);
+const QColor AeraGraphicsItem::Color_opponent_ms_nonAsm(0x90, 0x90, 0x90);
 const QColor AeraGraphicsItem::Color_opponent_ms_nonAsm_text(0xFF, 0xFF, 0xFF);
 const QColor AeraGraphicsItem::Color_opponent_ums_asm_defence(0x11, 0x77, 0x11);
 const QColor AeraGraphicsItem::Color_opponent_ums_asm_defence_border(0x11, 0x77, 0x11);
@@ -126,6 +129,7 @@ AeraGraphicsItem::AeraGraphicsItem(
   textItem_(0),
   borderNoHighlightPen_(Qt::black, 1)
 {
+  setBrush(is_sim() ? SimulatedItemColor : DefaultItemColor);
   setFlag(QGraphicsItem::ItemIsMovable, true);
   setFlag(QGraphicsItem::ItemIsSelectable, true);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);

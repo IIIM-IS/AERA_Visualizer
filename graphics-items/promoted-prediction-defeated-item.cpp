@@ -72,6 +72,7 @@ PromotedPredictionDefeatedItem::PromotedPredictionDefeatedItem(
 : AeraGraphicsItem(defeatEvent, replicodeObjects, parent, ""),
   defeatEvent_(defeatEvent)
 {
+  setBrush(SimulatedItemColor);
   borderNoHighlightPen_ = QPen(Qt::red, 2);
 
   setMessageHtml();
