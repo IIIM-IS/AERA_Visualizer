@@ -76,6 +76,12 @@ public:
    */
   AeraGraphicsItemGroup(AeraVisualizerScene* parent, const QString& title, const QColor& color);
 
+  /**
+   * Get the next top (as computed by addChild).
+   * \return The next top or qQNaN() if it hasn't been set yet.
+   */
+  qreal getNextTop() { return nextTop_; }
+
   void addChild(AeraGraphicsItem* child);
 
   void removeChild(AeraGraphicsItem* child);
@@ -102,6 +108,7 @@ private:
 
   AeraVisualizerScene* parent_;
   std::set<AeraGraphicsItem*> children_;
+  qreal nextTop_;
   bool inCallback_;
 };
 

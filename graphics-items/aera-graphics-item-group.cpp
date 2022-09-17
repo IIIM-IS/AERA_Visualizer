@@ -62,6 +62,7 @@ namespace aera_visualizer {
 
 AeraGraphicsItemGroup::AeraGraphicsItemGroup(AeraVisualizerScene* parent, const QString& title, const QColor& color)
 : parent_(parent),
+  nextTop_(qQNaN()),
   inCallback_(false)
 {
   setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -77,6 +78,10 @@ void AeraGraphicsItemGroup::addChild(AeraGraphicsItem* child)
 {
   children_.insert(child);
   fitToChildren();
+
+  qreal maybeNextTop = child->getAeraEvent()->itemTopLeftPosition_.y() + child->boundingRect().height() + 15;
+  if (qIsNaN(nextTop_) || maybeNextTop > nextTop_)
+    nextTop_ = maybeNextTop;
 }
 
 void AeraGraphicsItemGroup::removeChild(AeraGraphicsItem* child)
@@ -108,6 +113,7 @@ QVariant AeraGraphicsItemGroup::itemChange(GraphicsItemChange change, const QVar
     // Only allow change in Y.
     QPointF newToPoint(pos().x(), value.toPointF().y());
     qreal deltaY = newToPoint.y() - pos().y();
+    nextTop_ += deltaY;
 
     for (auto child = children_.begin(); child != children_.end(); ++child) {
       // Deselect so that it doesn't move with the parent.
@@ -117,7 +123,7 @@ QVariant AeraGraphicsItemGroup::itemChange(GraphicsItemChange change, const QVar
       (*child)->getAeraEvent()->itemInitialTopLeftPosition_ += QPointF(0, deltaY);
     }
 
-    // The move might have obscured the background scene, so setting ItemIsMovable false will move the scene.
+    // The move might have obscured the background scene, so setting ItemIsMovable false will move the scene (not this).
     setItemIsMovable();
 
     return newToPoint;
