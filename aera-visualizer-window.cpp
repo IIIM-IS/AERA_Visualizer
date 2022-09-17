@@ -292,7 +292,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   progress.setMaximum(nLines);
 
   // pendingEvents is an ordered map keyed by event time. The value is a list of pending events at the time.
-  std::map<core::Timestamp, vector<shared_ptr<AeraEvent> > > pendingEvents;
+  map<core::Timestamp, vector<shared_ptr<AeraEvent> > > pendingEvents;
   ifstream runtimeOutputFile(runtimeOutputFilePath);
   int lineNumber = 0;
   string line;
@@ -855,8 +855,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 
     if (iCommand >= 0) {
       // Start from the committed command and get the chain of inputs and set the simulation detail OIDs.
-      std::set<int> focusSimulationDetailOids;
-      std::set<int> otherDetailOids;
+      set<int> focusSimulationDetailOids;
+      set<int> otherDetailOids;
       int i = iCommand;
       while (i >= iNextEvent_) {
         focusSimulationDetailOids.insert(events_[i]->object_->get_detail_oid());
