@@ -89,6 +89,16 @@ public:
     return false;
   }
 
+  bool isBetweenOpponents(AeraGraphicsItem* other) {
+    if (other->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
+      auto otherEvent = (AbaAddSentence*)other->getAeraEvent();
+      return (addEvent_->graphId_ != otherEvent->graphId_ &&
+        addEvent_->graphId_ > 0 && otherEvent->graphId_ > 0);
+    }
+
+    return false;
+  }
+
 protected:
   void textItemLinkActivated(const QString& link) override;
 
