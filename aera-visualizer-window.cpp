@@ -55,6 +55,8 @@
 #include <fstream>
 #include <algorithm>
 #include "aera-checkbox.h"
+#include "graphics-items/aba-sentence-item.hpp"
+#include "graphics-items/aera-graphics-item-group.hpp"
 #include "graphics-items/aera-visualizer-scene.hpp"
 #include "graphics-items/arrow.hpp"
 #include "graphics-items/auto-focus-fact-item.hpp"
@@ -113,6 +115,9 @@ protected:
 };
 
 const set<int> AeraVisulizerWindow::simulationEventTypes_ = {
+  AbaAddSentence::EVENT_TYPE,
+  AbaMarkSentence::EVENT_TYPE,
+  AbaMarkedSentenceToParent::EVENT_TYPE,
   CompositeStateGoalReduction::EVENT_TYPE,
   CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
   DriveInjectEvent::EVENT_TYPE,
@@ -125,6 +130,7 @@ const set<int> AeraVisulizerWindow::simulationEventTypes_ = {
   SimulationCommitEvent::EVENT_TYPE };
 
 const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
+  AbaAddSentence::EVENT_TYPE,
   AutoFocusNewObjectEvent::EVENT_TYPE,
   CompositeStateGoalReduction::EVENT_TYPE,
   CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
@@ -280,6 +286,23 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   regex simulationPromotedSimulatedPredictionRegex("^fact (\\d+) -> promoted simulated pred fact (\\d+) w/ fact (\\d+) timings$");
   // promoted simulated fact 251 with DefeasibleValidity(200773) defeated by fact 253
   regex simulationPromotedSimulatedPredictionDefeatedRegex("^promoted simulated fact (\\d+) with DefeasibleValidity\\((\\d+)\\) defeated by fact (\\d+)");
+  // Step 0: Case init: S: 304
+  regex abaCaseInitStepRegex("^Step (\\d+): Case init: S: (\\d+)$");
+  // Step 10: Case 1.(i): A: 314, Contrary 322, NewGId 1
+  // TODO: Handle when the Contrary already exists.
+  regex abaCase1iStepRegex("^Step (\\d+): Case 1\\.\\(i\\): A: (\\d+), Contrary (\\d+), NewGId (\\d+)");
+  // Step 10: Case 1.(ii): S: 304, NewUnMarkedAs: [314 316], NewUnMarkedNonAs: [312], ExistingBody: [310]
+  regex abaCase1iiStepRegex("^Step (\\d+): Case 1\\.\\(ii\\): S: (\\d+), NewUnMarkedAs: \\[(.*)\\], NewUnMarkedNonAs: \\[(.*)\\], ExistingBody: \\[(.*)\\]$");
+  // Step 10: Case 2.(ia): A: 904, GId 1
+  regex abaCase2iaStepRegex("^Step (\\d+): Case 2\\.\\(ia\\): A: (\\d+), GId (\\d+)$");
+  // Step 10: Case 2.(ib): A: 904, GId 1, Culprit 864
+  regex abaCase2ibStepRegex("^Step (\\d+): Case 2\\.\\(ib\\): A: (\\d+), GId (\\d+), Culprit (\\d+)");
+  // Step 10: Case 2.(ic): A: 324, GId 1, Contrary 326 new? Y
+  regex abaCase2icStepRegex("^Step (\\d+): Case 2\\.\\(ic\\): A: (\\d+), GId (\\d+), Contrary (\\d+) new\\? (\\w)$");
+  // Step 10: Case 2.(ii): S: 322, GId 1, mark graph? N
+  regex abaCase2iiMarkStepRegex("^Step (\\d+): Case 2\\.\\(ii\\): S: (\\d+), GId (\\d+), mark graph\\? (\\w)$");
+  // Step 10: Case 2.(ii): S: 322, NewGId 1, NewUnMarkedAs: [324], NewUnMarkedNonAs: [312], ExistingBody: [310]
+  regex abaCase2iiStepRegex("^Step (\\d+): Case 2\\.\\(ii\\): S: (\\d+), NewGId (\\d+), NewUnMarkedAs: \\[(.*)\\], NewUnMarkedNonAs: \\[(.*)\\], ExistingBody: \\[(.*)\\]$");
 
   progress.setLabelText(replicodeObjects_.getProgressLabelText("Reading runtime output"));
 
@@ -293,6 +316,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
 
   // pendingEvents is an ordered map keyed by event time. The value is a list of pending events at the time.
   map<core::Timestamp, vector<shared_ptr<AeraEvent> > > pendingEvents;
+
   ifstream runtimeOutputFile(runtimeOutputFilePath);
   int lineNumber = 0;
   string line;
@@ -388,7 +412,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
       auto toObject = replicodeObjects_.getObject(stoul(matches[2].str()));
       // Skip auto-focus of the same fact (such as eject facts).
       // But show auto-focus of the same anti-fact (such as prediction failure).
-      if (fromObject && toObject /*debug && !(fromObject == toObject && fromObject->code(0).asOpcode() == Opcodes::Fact) */)
+      if (fromObject && toObject)
         events_.push_back(make_shared<AutoFocusNewObjectEvent>(
           timestamp, fromObject, toObject, matches[3].str()));
     }
@@ -637,6 +661,116 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
         events_.push_back(make_shared<PromotedSimulatedPredictionDefeatEvent>(
           timestamp, input, promotedFact));
     }
+    else if (regex_search(lineAfterTimestamp, matches, abaCaseInitStepRegex)) {
+      auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
+      if (fact) {
+        abaNewStep(stoul(matches[1].str()));
+        events_.push_back(make_shared<AbaAddSentence>(timestamp, fact, false, true, 0, (Code*)NULL));
+      }
+    }
+    else if (regex_search(lineAfterTimestamp, matches, abaCase1iStepRegex)) {
+      auto assumption = replicodeObjects_.getObject(stoul(matches[2].str()));
+      auto contrary = replicodeObjects_.getObject(stoul(matches[3].str()));
+      int newGId = stoul(matches[4].str());
+
+      if (assumption && newGId > 0 && contrary) {
+        abaNewStep(stoul(matches[1].str()));
+        // This step sets the assumption to marked.
+        events_.push_back(make_shared<AbaMarkSentence>(timestamp, assumption));
+        // TODO: If newGId == 0 then find the contrary in an existing group.
+        if (newGId > 0)
+          events_.push_back(make_shared<AbaAddSentence>(timestamp, contrary, false, true, newGId, assumption));
+      }
+    }
+    else if (regex_search(lineAfterTimestamp, matches, abaCase1iiStepRegex)) {
+      auto head = replicodeObjects_.getObject(stoul(matches[2].str()));
+      vector<Code*> newUnmarkedAssumptions;
+      vector<Code*> newUnmarkedNonAssumptions;
+      vector<Code*> existingBody;
+
+      if (head &&
+          replicodeObjects_.getObjects(matches[3].str(), newUnmarkedAssumptions) &&
+          replicodeObjects_.getObjects(matches[4].str(), newUnmarkedNonAssumptions) &&
+          replicodeObjects_.getObjects(matches[5].str(), existingBody)) {
+        abaNewStep(stoul(matches[1].str()));
+        // This step sets the head to marked.
+        events_.push_back(make_shared<AbaMarkSentence>(timestamp, head));
+
+        for (auto fact = existingBody.begin(); fact != existingBody.end(); ++fact)
+          events_.push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, *fact, head));
+        for (auto fact = newUnmarkedAssumptions.begin(); fact != newUnmarkedAssumptions.end(); ++fact)
+          events_.push_back(make_shared<AbaAddSentence>(timestamp, *fact, true, false, 0, head));
+        for (auto fact = newUnmarkedNonAssumptions.begin(); fact != newUnmarkedNonAssumptions.end(); ++fact)
+          events_.push_back(make_shared<AbaAddSentence>(timestamp, *fact, false, false, 0, head));
+      }
+    }
+    else if (regex_search(lineAfterTimestamp, matches, abaCase2iaStepRegex)) {
+      auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
+
+      if (fact) {
+        abaNewStep(stoul(matches[1].str()));
+        // (Don't mark the graph.)
+        events_.push_back(make_shared<AbaMarkSentence>(timestamp, fact, false));
+      }
+    }
+    else if (regex_search(lineAfterTimestamp, matches, abaCase2ibStepRegex)) {
+      auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
+      auto culprit = replicodeObjects_.getObject(stoul(matches[4].str()));
+
+      if (fact) {
+        abaNewStep(stoul(matches[1].str()));
+        // (Also mark the graph that the fact is in.)
+        events_.push_back(make_shared<AbaMarkSentence>(timestamp, fact, true));
+
+        if (culprit)
+          // The fact is the same as the culprit in a different graph.
+          events_.push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, fact, culprit));
+      }
+    }
+    else if (regex_search(lineAfterTimestamp, matches, abaCase2icStepRegex)) {
+      auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
+      auto contrary = replicodeObjects_.getObject(stoul(matches[4].str()));
+      bool contraryIsNew = (matches[5].str() == "Y");
+
+      if (fact && contrary) {
+        abaNewStep(stoul(matches[1].str()));
+        // (Also mark the graph that the fact is in.)
+        events_.push_back(make_shared<AbaMarkSentence>(timestamp, fact, true));
+        if (contraryIsNew)
+          events_.push_back(make_shared<AbaAddSentence>(timestamp, contrary, false, false, 0, fact));
+      }
+    }
+    else if (regex_search(lineAfterTimestamp, matches, abaCase2iiMarkStepRegex)) {
+      auto head = replicodeObjects_.getObject(stoul(matches[2].str()));
+      bool markGraph = (matches[3].str() == "Y");
+
+      if (head) {
+        abaNewStep(stoul(matches[1].str()));
+        // This step sets the head to marked. Further actions are in abaCase2iiStepRegex.
+        events_.push_back(make_shared<AbaMarkSentence>(timestamp, head, markGraph));
+      }
+    }
+    else if (regex_search(lineAfterTimestamp, matches, abaCase2iiStepRegex)) {
+      auto head = replicodeObjects_.getObject(stoul(matches[2].str()));
+      int newGraphId = stoul(matches[3].str());
+      vector<Code*> newUnmarkedAssumptions;
+      vector<Code*> newUnmarkedNonAssumptions;
+      vector<Code*> existingBody;
+
+      if (head &&
+          replicodeObjects_.getObjects(matches[4].str(), newUnmarkedAssumptions) &&
+          replicodeObjects_.getObjects(matches[5].str(), newUnmarkedNonAssumptions) &&
+          replicodeObjects_.getObjects(matches[6].str(), existingBody)) {
+        // We have already set the head to marked with abaCase2iiMarkStepRegex. Don't call abaNewStep or add AbaMarkSentence.
+
+        for (auto fact = existingBody.begin(); fact != existingBody.end(); ++fact)
+          events_.push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, *fact, head));
+        for (auto fact = newUnmarkedAssumptions.begin(); fact != newUnmarkedAssumptions.end(); ++fact)
+          events_.push_back(make_shared<AbaAddSentence>(timestamp, *fact, true, false, newGraphId, head));
+        for (auto fact = newUnmarkedNonAssumptions.begin(); fact != newUnmarkedNonAssumptions.end(); ++fact)
+          events_.push_back(make_shared<AbaAddSentence>(timestamp, *fact, false, false, newGraphId, head));
+      }
+    }
   }
 
   // Transfer any remaining pendingEvents to events_.
@@ -647,6 +781,23 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   pendingEvents.clear();
 
   return true;
+}
+
+void AeraVisulizerWindow::abaNewStep(int step)
+{
+  if (step < abaStepIndexes_.size()) {
+    // There are already events for this step. Erase them.
+    size_t eventIndex = abaStepIndexes_[step];
+    abaStepIndexes_.erase(abaStepIndexes_.begin() + step, abaStepIndexes_.end());
+    if (eventIndex < events_.size())
+      // TODO: What if there are non-ABA events?
+      events_.erase(events_.begin() + eventIndex, events_.end());
+  }
+
+  // Set abaStepIndexes_[step] to the next index in events_.
+  // This loop should only iterate once, but step may have skipped a step.
+  while (abaStepIndexes_.size() <= step)
+    abaStepIndexes_.push_back(events_.size());
 }
 
 void AeraVisulizerWindow::addStartupItems()
@@ -810,7 +961,9 @@ Timestamp AeraVisulizerWindow::getINextStepEvent
            event->eventType_ == SetModelStrengthEvent::EVENT_TYPE ||
            event->eventType_ == PhaseInModelEvent::EVENT_TYPE ||
            event->eventType_ == PhaseOutModelEvent::EVENT_TYPE ||
-           event->eventType_ == DeleteModelEvent::EVENT_TYPE) {
+           event->eventType_ == DeleteModelEvent::EVENT_TYPE ||
+           event->eventType_ == AbaMarkSentence::EVENT_TYPE ||
+           event->eventType_ == AbaMarkedSentenceToParent::EVENT_TYPE) {
     // We already set the default iNextStepEvent.
   }
   else
@@ -1200,6 +1353,27 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 
       visible = (simulationsCheckBox_->checkState() == Qt::Checked);
     }
+    else if (event->eventType_ == AbaAddSentence::EVENT_TYPE) {
+      auto addEvent = (AbaAddSentence*)event;
+      newItem = new AbaSentenceItem(addEvent, replicodeObjects_, scene);
+
+      // Add an arrow to the parent fact.
+      auto parentItem = scene->getAeraGraphicsItem(addEvent->parent_);
+      if (parentItem) {
+        if (((AbaSentenceItem*)newItem)->isBetweenProponentAndOpponent(parentItem))
+          scene->addArrow(newItem, parentItem, Arrow::RedArrowheadPen,
+            Arrow::RedArrowheadPen, Arrow::RedArrowheadPen);
+        else if (((AbaSentenceItem*)newItem)->isBetweenOpponents(parentItem))
+          scene->addArrow(newItem, parentItem, Arrow::GreenArrowheadPen,
+            Arrow::GreenArrowheadPen, Arrow::GreenArrowheadPen);
+        else
+          scene->addArrow(newItem, parentItem);
+      }
+
+      scene->addHorizontalLine(newItem);
+
+      visible = (simulationsCheckBox_->checkState() == Qt::Checked);
+    }
 
     // Add the new item.
     scene->addAeraGraphicsItem(newItem);
@@ -1294,6 +1468,44 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     if (modelItem)
       // Set the background color.
       modelItem->setBrush(Qt::gray);
+  }
+  else if (event->eventType_ == AbaMarkSentence::EVENT_TYPE) {
+    auto markEvent = (AbaMarkSentence*)event;
+    auto sentenceItem = dynamic_cast<AbaSentenceItem*>(mainScene_->getAeraGraphicsItem(markEvent->fact_));
+    if (sentenceItem) {
+      sentenceItem->setStatus(AeraGraphicsItem::STATUS_DONE);
+      if (sentenceItem->isVisible()) {
+        sentenceItem->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
+        mainScene_->establishFlashTimer();
+      }
+
+      if (markEvent->alsoMarkGraph_ && sentenceItem->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
+        auto graph = mainScene_->getItemGroup(((AbaAddSentence*)sentenceItem->getAeraEvent())->graphId_);
+        if (graph)
+          graph->setBrush(AeraGraphicsItem::Color_opponent_finished_justification);
+      }
+    }
+  }
+  else if (event->eventType_ == AbaMarkedSentenceToParent::EVENT_TYPE) {
+    auto markedSentenceItem = dynamic_cast<AbaSentenceItem*>
+      (mainScene_->getAeraGraphicsItem(((AbaMarkedSentenceToParent*)event)->markedFact_));
+    auto parentItem = mainScene_->getAeraGraphicsItem(((AbaMarkedSentenceToParent*)event)->parent_);
+    if (markedSentenceItem && parentItem) {
+      if (markedSentenceItem->isBetweenProponentAndOpponent(parentItem))
+        mainScene_->addArrow(markedSentenceItem, parentItem, Arrow::RedArrowheadPen,
+          Arrow::RedArrowheadPen, Arrow::RedArrowheadPen);
+      else if (markedSentenceItem->isBetweenOpponents(parentItem))
+        mainScene_->addArrow(markedSentenceItem, parentItem, Arrow::GreenArrowheadPen,
+          Arrow::GreenArrowheadPen, Arrow::GreenArrowheadPen);
+      else
+        mainScene_->addArrow(markedSentenceItem, parentItem);
+
+      if (markedSentenceItem->isVisible() && parentItem->isVisible()) {
+        markedSentenceItem->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
+        parentItem->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
+        mainScene_->establishFlashTimer();
+      }
+    }
   }
   else {
     // Skip this event.
@@ -1396,6 +1608,38 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
     if (modelItem)
       // Set the background color.
       modelItem->setBrush(Qt::white);
+  }
+  else if (event->eventType_ == AbaMarkSentence::EVENT_TYPE) {
+    auto markEvent = (AbaMarkSentence*)event;
+    auto sentenceItem = dynamic_cast<AbaSentenceItem*>(mainScene_->getAeraGraphicsItem(markEvent->fact_));
+    if (sentenceItem) {
+      // Revert to unmarked.
+      sentenceItem->setStatus(AeraGraphicsItem::STATUS_PROCESSING);
+      if (sentenceItem->isVisible()) {
+        sentenceItem->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
+        mainScene_->establishFlashTimer();
+      }
+
+      if (markEvent->alsoMarkGraph_ && sentenceItem->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
+        auto graph = mainScene_->getItemGroup(((AbaAddSentence*)sentenceItem->getAeraEvent())->graphId_);
+        if (graph)
+          // Revert to unmarked.
+          graph->setBrush(AeraGraphicsItem::Color_opponent_unfinished_justification);
+      }
+    }
+  }
+  else if (event->eventType_ == AbaMarkedSentenceToParent::EVENT_TYPE) {
+    auto markedSentenceItem = dynamic_cast<AbaSentenceItem*>(mainScene_->getAeraGraphicsItem(((AbaMarkedSentenceToParent*)event)->markedFact_));
+    auto parentItem = mainScene_->getAeraGraphicsItem(((AbaMarkedSentenceToParent*)event)->parent_);
+    if (markedSentenceItem) {
+      markedSentenceItem->removeAndDeleteArrowToObject(((AbaMarkedSentenceToParent*)event)->parent_);
+
+      if (parentItem && markedSentenceItem->isVisible() && parentItem->isVisible()) {
+        markedSentenceItem->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
+        parentItem->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
+        mainScene_->establishFlashTimer();
+      }
+    }
   }
   else
     // Skip this event.

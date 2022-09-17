@@ -245,6 +245,14 @@ private:
    */
   void setSliderToPlayTime();
 
+  /**
+   * If the step is already in abaStepIndexes_, get the event index and erase
+   * from events_ to the end. Set abaStepIndexes_[step] to the next index in events_.
+   * (We need this because the ABA derivation backtracks and repeats steps.)
+   * \param step The ABA step number.
+   */
+  void abaNewStep(int step);
+
   void playPauseButtonClickedImpl();
   void stepButtonClickedImpl();
   void stepBackButtonClickedImpl();
@@ -292,6 +300,8 @@ private:
   core::Timestamp playTime_;
   int playTimerId_;
   bool isPlaying_;
+  // abaStepIndexes has the index in events_ of the step number. See abaNewStep.
+  std::vector<size_t> abaStepIndexes_;
   // The AeraEvent types where stepEvent will create a new AeraGraphicsItem.
   static const std::set<int> newItemEventTypes_;
 };
