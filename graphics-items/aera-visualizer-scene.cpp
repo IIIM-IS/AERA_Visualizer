@@ -175,7 +175,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
         itemGroup = new AeraGraphicsItemGroup(
           this, "O" + QString::number(addSentence->graphId_), AeraGraphicsItem::Color_opponent_unfinished_justification);
       else
-        itemGroup = new AeraGraphicsItemGroup(this, "P1", AeraGraphicsItem::Color_proponent_justifications);
+        itemGroup = new AeraGraphicsItemGroup(this, "P", AeraGraphicsItem::Color_proponent_justifications);
 
       itemGroups_[addSentence->graphId_] = itemGroup;
       // Put in back of the grid lines.
