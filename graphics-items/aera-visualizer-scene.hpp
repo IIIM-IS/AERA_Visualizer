@@ -71,6 +71,7 @@ class QColor;
 namespace aera_visualizer {
 
 class AeraGraphicsItem;
+class AeraGraphicsItemGroup;
 class AeraVisulizerWindow;
 class ExplanationLogWindow;
 
@@ -114,6 +115,14 @@ public:
   void setFocusSimulationDetailOids(const std::set<int>& focusSimulationDetailOids)
   {
     focusSimulationDetailOids_ = focusSimulationDetailOids;
+  }
+
+  AeraGraphicsItemGroup* getItemGroup(int id) {
+    auto foundItemGroup = itemGroups_.find(id);
+    if (foundItemGroup != itemGroups_.end())
+      return foundItemGroup->second;
+    else
+      return NULL;
   }
 
   // The initial value for the flash countdown;
@@ -224,6 +233,8 @@ private:
   QString valueDownFlashColor_;
   int flashTimerId_;
   std::set<int> focusSimulationDetailOids_;
+  // The key is the group ID.
+  std::map<int, AeraGraphicsItemGroup*> itemGroups_;
   static const int frameWidth_ = 330;
 };
 

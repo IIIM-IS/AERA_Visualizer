@@ -165,6 +165,25 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     (AeraVisulizerWindow::simulationEventTypes_.find(item->getAeraEvent()->eventType_) !=
      AeraVisulizerWindow::simulationEventTypes_.end());
 
+  AeraGraphicsItemGroup* itemGroup = 0;
+  if (aeraEvent->eventType_ == AbaAddSentence::EVENT_TYPE) {
+    auto addSentence = (AbaAddSentence*)aeraEvent;
+
+    itemGroup = getItemGroup(addSentence->graphId_);
+    if (!itemGroup) {
+      if (addSentence->graphId_ > 0)
+        itemGroup = new AeraGraphicsItemGroup(
+          this, "O" + QString::number(addSentence->graphId_), AeraGraphicsItem::Color_opponent_unfinished_justification);
+      else
+        itemGroup = new AeraGraphicsItemGroup(this, "P1", AeraGraphicsItem::Color_proponent_justifications);
+
+      itemGroups_[addSentence->graphId_] = itemGroup;
+      // Put in back of the grid lines.
+      itemGroup->setZValue(-2100);
+      addItem(itemGroup);
+    }
+  }
+
   if (qIsNaN(aeraEvent->itemTopLeftPosition_.x())) {
     // Assign an initial position.
     // Only update positions based on time for the main scehe.
@@ -191,39 +210,51 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
         eventType = 0;
     }
 
+    // Compute top.
     qreal top;
-    if (isSimulationEventType)
-      // Ignore eventType and stack the simulated items in order.
-      top = (isFocusSimulation ? focusSimulationNextTop_ : otherSimulationNextTop_);
-    else {
-      if (eventTypeNextTop_.find(eventType) != eventTypeNextTop_.end())
-        top = eventTypeNextTop_[eventType];
-      else {
-        top = eventTypeFirstTop_[eventType];
-
-        if (thisFrameTime_ - replicodeObjects_.getTimeReference() < milliseconds(150) &&
-            eventType == AutoFocusNewObjectEvent::EVENT_TYPE &&
-            aeraEvent->object_->get_reference(0)->references_size() >= 2 &&
-            aeraEvent->object_->get_reference(0)->get_reference(1) == replicodeObjects_.getObject("essence"))
-          // Debug: The first essence item. Override to make the same types of values line up. Should use a layout algorithm.
-          top = 296;
+    if (itemGroup) {
+      if (qIsNaN(itemGroup->getNextTop())) {
+        top = focusSimulationNextTop_;
+        if (aeraEvent->eventType_ == AbaAddSentence::EVENT_TYPE && ((AbaAddSentence*)aeraEvent)->graphId_ > 0)
+          top = getItemGroup(0)->getNextTop() + 350 * ((AbaAddSentence*)aeraEvent)->graphId_;
       }
-    }
-
-    // Set up eventTypeNextTop_ or simulation next top for the next item.
-    int verticalMargin = 15;
-    if (aeraEvent->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
-        aeraEvent->eventType_ == IoDeviceEjectEvent::EVENT_TYPE)
-      verticalMargin = 5;
-    qreal nextTop = top + item->boundingRect().height() + verticalMargin;
-    if (isSimulationEventType) {
-      if (isFocusSimulation)
-        focusSimulationNextTop_ = nextTop;
       else
-        otherSimulationNextTop_ = nextTop;
+        top = itemGroup->getNextTop();
     }
-    else
-      eventTypeNextTop_[eventType] = nextTop;
+    else {
+      if (isSimulationEventType)
+        // Ignore eventType and stack the simulated items in order.
+        top = (isFocusSimulation ? focusSimulationNextTop_ : otherSimulationNextTop_);
+      else {
+        if (eventTypeNextTop_.find(eventType) != eventTypeNextTop_.end())
+          top = eventTypeNextTop_[eventType];
+        else {
+          top = eventTypeFirstTop_[eventType];
+
+          if (thisFrameTime_ - replicodeObjects_.getTimeReference() < milliseconds(150) &&
+              eventType == AutoFocusNewObjectEvent::EVENT_TYPE &&
+              aeraEvent->object_->get_reference(0)->references_size() >= 2 &&
+              aeraEvent->object_->get_reference(0)->get_reference(1) == replicodeObjects_.getObject("essence"))
+            // Debug: The first essence item. Override to make the same types of values line up. Should use a layout algorithm.
+            top = 296;
+        }
+      }
+
+      // Set up eventTypeNextTop_ or simulation next top for the next item.
+      int verticalMargin = 15;
+      if (aeraEvent->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
+          aeraEvent->eventType_ == IoDeviceEjectEvent::EVENT_TYPE)
+        verticalMargin = 5;
+      qreal nextTop = top + item->boundingRect().height() + verticalMargin;
+      if (isSimulationEventType) {
+        if (isFocusSimulation)
+          focusSimulationNextTop_ = nextTop;
+        else
+          otherSimulationNextTop_ = nextTop;
+      }
+      else
+        eventTypeNextTop_[eventType] = nextTop;
+    }
 
     qreal left;
     if (isSimulationEventType) {
@@ -268,9 +299,19 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
   // Adjust the position from the topLeft.
   item->setPos(aeraEvent->itemTopLeftPosition_ - item->boundingRect().topLeft());
   item->adjustItemYPosition();
+  if (itemGroup)
+    itemGroup->addChild(item);
 }
 
 void AeraVisualizerScene::removeAeraGraphicsItem(AeraGraphicsItem* item) {
+  if (item->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
+    auto itemGroup = getItemGroup(((AbaAddSentence*)item->getAeraEvent())->graphId_);
+    if (itemGroup) {
+      itemGroup->removeChild(item);
+      // TODO: Remove itemGroup if it is empty. (Remember its position for it we step forward again?)
+    }
+  }
+
   removeItem(item);
 }
 
@@ -281,6 +322,9 @@ void AeraVisualizerScene::onViewMoved()
     qreal sceneY = views().at(0)->mapToScene(0, 0).y();
     foreach(QGraphicsTextItem * text, timestampTexts_)
       text->setPos(text->x(), sceneY);
+
+    for (auto itemGroup = itemGroups_.begin(); itemGroup != itemGroups_.end(); ++itemGroup)
+      itemGroup->second->onParentViewMoved();
   }
 }
 
