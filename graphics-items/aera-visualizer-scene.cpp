@@ -213,13 +213,18 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     // Compute top.
     qreal top;
     if (itemGroup) {
-      if (qIsNaN(itemGroup->getNextTop())) {
-        top = focusSimulationNextTop_;
-        if (aeraEvent->eventType_ == AbaAddSentence::EVENT_TYPE && ((AbaAddSentence*)aeraEvent)->graphId_ > 0)
-          top = getItemGroup(0)->getNextTop() + 350 * ((AbaAddSentence*)aeraEvent)->graphId_;
-      }
-      else
+      if (!qIsNaN(itemGroup->getNextTop()))
         top = itemGroup->getNextTop();
+      else {
+        // First position for this group. Get the lowest nextTop of all the item groups.
+        top = focusSimulationNextTop_;
+        for (auto otherGroup = itemGroups_.begin(); otherGroup != itemGroups_.end(); ++otherGroup) {
+          if (!qIsNaN(otherGroup->second->getNextTop()))
+            top = max(top, otherGroup->second->getNextTop());
+        }
+      }
+
+      top += 10;
     }
     else {
       if (isSimulationEventType)
@@ -299,8 +304,20 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
   // Adjust the position from the topLeft.
   item->setPos(aeraEvent->itemTopLeftPosition_ - item->boundingRect().topLeft());
   item->adjustItemYPosition();
-  if (itemGroup)
+  if (itemGroup) {
+    qreal saveHeight = itemGroup->boundingRect().height();
     itemGroup->addChild(item);
+    
+    qreal deltaHeight = itemGroup->boundingRect().height() - saveHeight;
+    if (saveHeight > 1 && deltaHeight > 0) {
+      // Shift overlapping groups down by deltaHeight.
+      for (auto otherGroup = itemGroups_.begin(); otherGroup != itemGroups_.end(); ++otherGroup) {
+        if (otherGroup->second->pos().y() > itemGroup->pos().y())
+          otherGroup->second->setPos(otherGroup->second->pos().x(),
+                                     otherGroup->second->pos().y() + deltaHeight);
+      }
+    }
+  }
 }
 
 void AeraVisualizerScene::removeAeraGraphicsItem(AeraGraphicsItem* item) {
