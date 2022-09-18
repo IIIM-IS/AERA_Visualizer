@@ -388,7 +388,8 @@ void AeraVisualizerScene::addArrow(
 void AeraVisualizerScene::addHorizontalLine(AeraGraphicsItem* item)
 {
   if (item->getAeraEvent()->object_ &&
-      item->getAeraEvent()->object_->code(0).asOpcode() == r_exec::Opcodes::Fact) {
+      (item->getAeraEvent()->object_->code(0).asOpcode() == r_exec::Opcodes::Fact ||
+       item->getAeraEvent()->object_->code(0).asOpcode() == r_exec::Opcodes::AntiFact)) {
     auto fact = (_Fact*)item->getAeraEvent()->object_;
     Timestamp after, before;
 
