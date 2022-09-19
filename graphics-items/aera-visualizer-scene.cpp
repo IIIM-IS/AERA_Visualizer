@@ -512,13 +512,7 @@ void AeraVisualizerScene::zoomToItem(QGraphicsItem* item)
     qGraphicsView->scale(minimumZoomLevel, minimumZoomLevel);
   }
 
-  auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
-  if (aeraGraphicsItem) {
-    if (!aeraGraphicsItem->isVisible())
-      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(true);
-
-    aeraGraphicsItem->focus();
-  }
+  focusOnItem(item);
 }
 
 void AeraVisualizerScene::scrollToTimestamp(core::Timestamp timestamp) {
