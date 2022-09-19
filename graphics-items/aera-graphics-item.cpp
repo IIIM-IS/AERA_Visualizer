@@ -283,6 +283,8 @@ void AeraGraphicsItem::focus()
 {
   bringToFront();
   ensureVisible();
+  // First deselect other items so that moving the focused item doesn't unexpectedly move them with it.
+  parent_->clearSelection();
   setSelected(true);
 }
 
@@ -305,8 +307,7 @@ void AeraGraphicsItem::centerOn()
   else {
     qGraphicsView->centerOn(this);
   }
-  bringToFront();
-  setSelected(true);
+  focus();
 }
 
 void AeraGraphicsItem::ensureVisible()
