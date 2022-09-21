@@ -70,7 +70,8 @@ namespace aera_visualizer {
 AbaSentenceItem::AbaSentenceItem(
   AbaAddSentence* addEvent, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-: ExpandableGoalOrPredItem(addEvent, replicodeObjects, "Step " + RightDoubleArrowHtml, parent,
+: ExpandableGoalOrPredItem(addEvent, replicodeObjects,
+    QString("Case ") + addEvent->abaCase_.c_str() + " " + RightDoubleArrowHtml, parent,
     Qt::white, "#ffc0c0"),
   addEvent_(addEvent)
 {
@@ -106,6 +107,33 @@ void AbaSentenceItem::textItemLinkActivated(const QString& link)
     menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
     menu->addAction("Focus on This", [=]() { parent_->focusOnItem(this); });
     menu->addAction("Center on This", [=]() { parent_->centerOnItem(this); });
+    menu->addAction("What Made This?", [=]() {
+      QString explanation;
+      if (addEvent_->abaCase_ == "init")
+        explanation = "<b>Q: What made " + makeHtmlLink(addEvent_->fact_) +
+        " ?</b><br>This is the initial sentence to be proved.<br><br>";
+      else if (addEvent_->abaCase_ == "1.(i)")
+        explanation = "<b>Q: What made " + makeHtmlLink(addEvent_->fact_) +
+        " ?</b><br>Sentence " + makeHtmlLink(addEvent_->parent_) +
+        " is an assumption which is not already considered for attack, so a new opponent graph O" +
+        QString::number(addEvent_->graphId_) + " was created with this contrary as the claim.<br><br>";
+      else if (addEvent_->abaCase_ == "1.(ii)")
+        explanation = "<b>Q: What made " + makeHtmlLink(addEvent_->fact_) +
+        " ?</b><br>Sentence " + makeHtmlLink(addEvent_->parent_) +
+        " is not an assumption, so it is the head of a rule which is expanded by adding the body sentences, including this one." +
+        (addEvent_->isAssumption_ ? " Since this is a proponent assumption, it is also added to the defence set." : "") + "<br><br>";
+      else if (addEvent_->abaCase_ == "2.(ic)")
+        explanation = "<b>Q: What made " + makeHtmlLink(addEvent_->fact_) +
+        " ?</b><br>Sentence " + makeHtmlLink(addEvent_->parent_) +
+        " is an opponent assumption which is not already considered for attack and not in the defence set, so this contrary is added to the proponent graph. Sentence " +
+        replicodeObjects_.getLabel(addEvent_->parent_).c_str() + " is also added to the culprit set.<br><br>";
+      else if (addEvent_->abaCase_ == "2.(ii)")
+        explanation = "<b>Q: What made " + makeHtmlLink(addEvent_->fact_) +
+        " ?</b><br>Sentence " + makeHtmlLink(addEvent_->parent_) +
+        " is not an assumption, so it is the head of a rule which is expanded by adding the body sentences, including this one.<br><br>";
+
+      parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
+    });
 
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
