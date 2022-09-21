@@ -195,10 +195,11 @@ protected:
    * Decrement iNextEvent_ and undo the event at events_[iNextEvent_].
    * \param minimumTime if the time of previous event is less than minimumTime, don't
    * decrement iNextEvent_ and don't undo, and return Utils_MaxTime.
+   * \param Set foundGraphicsItem if the graphics item for the step was found.
    * \return The time of the previous event. If there is no previous event, then
    * return Utils_MaxTime.
    */
-  core::Timestamp unstepEvent(core::Timestamp minimumTime);
+  core::Timestamp unstepEvent(core::Timestamp minimumTime, bool& foundGraphicsItem);
 
   ExplanationLogWindow* explanationLogWindow_;
 
@@ -280,6 +281,7 @@ private:
 
   AeraCheckbox* simulationsCheckBox_;
   AeraCheckbox* allSimulationInputsCheckBox_;
+  AeraCheckbox* singleStepSimulationCheckBox_;
   AeraCheckbox* nonSimulationsCheckBox_;
   AeraCheckbox* essenceFactsCheckBox_;
   AeraCheckbox* instantiatedCompositeStatesCheckBox_;

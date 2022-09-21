@@ -1518,8 +1518,10 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
   return event->time_;
 }
 
-Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
+Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime, bool& foundGraphicsItem)
 {
+  foundGraphicsItem = false;
+
   if (iNextEvent_ == 0)
     // Return the value meaning no change.
     return Utils_MaxTime;
@@ -1534,7 +1536,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
   if (newItemEventTypes_.find(event->eventType_) != newItemEventTypes_.end()) {
     AeraVisualizerScene* scene;
     if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
-      event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
+        event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
       scene = modelsScene_;
     else
       scene = mainScene_;
@@ -1543,6 +1545,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
     // Note that the event saves the updated item position and will use it when recreating the item.
     auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(scene->getAeraGraphicsItem(event->object_));
     if (aeraGraphicsItem) {
+      foundGraphicsItem = true;
       aeraGraphicsItem->removeArrowsAndHorizontalLines();
       scene->removeAeraGraphicsItem(aeraGraphicsItem);
       delete aeraGraphicsItem;
@@ -1643,7 +1646,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
   }
   else
     // Skip this event.
-    return unstepEvent(minimumTime);
+    return unstepEvent(minimumTime, foundGraphicsItem);
 
   if (iNextEvent_ > 0)
     return events_[iNextEvent_ - 1]->time_;
@@ -1782,6 +1785,25 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
     eventTime = events_[iNextEvent_ - 1]->time_;
 
     if (simulationsCheckBox_->isChecked()) {
+      if (singleStepSimulationCheckBox_->isChecked() &&
+          simulationEventTypes_.find(events_[iNextEvent_ - 1]->eventType_) != simulationEventTypes_.end()) {
+        // Single-step through the simulation.
+        _Fact* markedFact = 0;
+        if (events_[iNextEvent_ - 1]->eventType_ == AbaMarkSentence::EVENT_TYPE)
+          markedFact = ((AbaMarkSentence*)events_[iNextEvent_ - 1].get())->fact_;
+        if (markedFact && iNextEvent_ < events_.size() &&
+          (events_[iNextEvent_]->eventType_ == AbaAddSentence::EVENT_TYPE &&
+            ((AbaAddSentence*)events_[iNextEvent_].get())->parent_ == markedFact
+            ||
+            events_[iNextEvent_]->eventType_ == AbaMarkedSentenceToParent::EVENT_TYPE &&
+            (((AbaMarkedSentenceToParent*)events_[iNextEvent_].get())->parent_ == markedFact ||
+              ((AbaMarkedSentenceToParent*)events_[iNextEvent_].get())->markedFact_ == markedFact))) {
+          // The next event will have an arrow with this. Don't break so that we show it right away.
+        }
+        else
+          break;
+      }
+
       if (isNewFrame) {
         // In a new frame, advance until the next item would be a simulation item that is not at the first event time.
         if (iNextEvent_ < events_.size() &&
@@ -1804,7 +1826,8 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
 void AeraVisulizerWindow::stepBackButtonClickedImpl()
 {
   stopPlay();
-  auto newTime = max(unstepEvent(Timestamp(seconds(0))), replicodeObjects_.getTimeReference());
+  bool foundGraphicsItem;
+  auto newTime = max(unstepEvent(Timestamp(seconds(0)), foundGraphicsItem), replicodeObjects_.getTimeReference());
   if (newTime == Utils_MaxTime)
     return;
   // Debug: How to step the children also?
@@ -1813,7 +1836,12 @@ void AeraVisulizerWindow::stepBackButtonClickedImpl()
   auto relativeTime = duration_cast<microseconds>(newTime - replicodeObjects_.getTimeReference());
   auto frameStartTime = newTime - (relativeTime % replicodeObjects_.getSamplingPeriod());
   while (true) {
-    auto localNewTime = unstepEvent(frameStartTime);
+    if (simulationsCheckBox_->isChecked() && singleStepSimulationCheckBox_->isChecked() && foundGraphicsItem &&
+        simulationEventTypes_.find(events_[iNextEvent_]->eventType_) != simulationEventTypes_.end())
+      // Single-step through the simulation.
+      break;
+
+    auto localNewTime = unstepEvent(frameStartTime, foundGraphicsItem);
     if (localNewTime == Utils_MaxTime)
       break;
     newTime = localNewTime;
@@ -1948,11 +1976,13 @@ void AeraVisulizerWindow::createToolbars()
   toolbar->addSeparator();
   toolbar->addWidget(new QLabel("Show/Hide: ", this));
 
+  const QColor simulationColor("#ffffdc");
   // Show simulations by default.
   simulationsCheckBox_ = new AeraCheckbox("Simulations", SettingsKeySimulationsVisible, this, Qt::Checked);
-  simulationsCheckBox_->setColor(QColor("#ffffdc"));
+  simulationsCheckBox_->setColor(simulationColor);
   connect(simulationsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     allSimulationInputsCheckBox_->setEnabled(state == Qt::Checked);
+    singleStepSimulationCheckBox_->setEnabled(state == Qt::Checked);
 
     for (auto i = simulationEventTypes_.begin(); i != simulationEventTypes_.end(); ++i)
       mainScene_->setItemsVisible(*i, state == Qt::Checked);
@@ -1960,8 +1990,12 @@ void AeraVisulizerWindow::createToolbars()
   toolbar->addWidget(simulationsCheckBox_);
 
   allSimulationInputsCheckBox_ = new AeraCheckbox("All Inputs", SettingsKeyAllSimulationInputsVisible, this, Qt::Unchecked);
-  allSimulationInputsCheckBox_->setColor(QColor("#ffffdc"));
+  allSimulationInputsCheckBox_->setColor(simulationColor);
   toolbar->addWidget(allSimulationInputsCheckBox_);
+
+  singleStepSimulationCheckBox_ = new AeraCheckbox("Single Step", SettingsKeyAllSimulationInputsVisible, this, Qt::Unchecked);
+  singleStepSimulationCheckBox_->setColor(simulationColor);
+  toolbar->addWidget(singleStepSimulationCheckBox_);
 
   // Separate the non-simulations check boxes.
   toolbar->addWidget(new QLabel("    ", this));
