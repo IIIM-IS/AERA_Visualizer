@@ -78,6 +78,8 @@ void AeraGraphicsItemGroup::addChild(AeraGraphicsItem* child)
 {
   children_.insert(child);
   fitToChildren();
+  if (child->isVisible())
+    setVisible(true);
 
   qreal maybeNextTop = child->getAeraEvent()->itemTopLeftPosition_.y() + child->boundingRect().height() + 15;
   if (qIsNaN(nextTop_) || maybeNextTop > nextTop_)
@@ -89,7 +91,12 @@ void AeraGraphicsItemGroup::removeChild(AeraGraphicsItem* child)
   auto member = children_.find(child);
   if (member != children_.end()) {
     children_.erase(member);
-    fitToChildren();
+
+    if (children_.size() > 0)
+      fitToChildren();
+    else
+      // The group is empty, so hide it.
+      setVisible(false);
   }
 }
 
