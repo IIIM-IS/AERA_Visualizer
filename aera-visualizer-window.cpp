@@ -665,7 +665,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
       auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
       if (fact) {
         abaNewStep(stoul(matches[1].str()));
-        events_.push_back(make_shared<AbaAddSentence>(timestamp, fact, false, true, 0, (Code*)NULL));
+        events_.push_back(make_shared<AbaAddSentence>(timestamp, fact, false, true, 0, (Code*)NULL, "init"));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase1iStepRegex)) {
@@ -679,7 +679,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
         events_.push_back(make_shared<AbaMarkSentence>(timestamp, assumption));
         // TODO: If newGId == 0 then find the contrary in an existing group.
         if (newGId > 0)
-          events_.push_back(make_shared<AbaAddSentence>(timestamp, contrary, false, true, newGId, assumption));
+          events_.push_back(make_shared<AbaAddSentence>(
+            timestamp, contrary, false, true, newGId, assumption, "1.(i)"));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase1iiStepRegex)) {
@@ -699,9 +700,9 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
         for (auto fact = existingBody.begin(); fact != existingBody.end(); ++fact)
           events_.push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, *fact, head));
         for (auto fact = newUnmarkedAssumptions.begin(); fact != newUnmarkedAssumptions.end(); ++fact)
-          events_.push_back(make_shared<AbaAddSentence>(timestamp, *fact, true, false, 0, head));
+          events_.push_back(make_shared<AbaAddSentence>(timestamp, *fact, true, false, 0, head, "1.(ii)"));
         for (auto fact = newUnmarkedNonAssumptions.begin(); fact != newUnmarkedNonAssumptions.end(); ++fact)
-          events_.push_back(make_shared<AbaAddSentence>(timestamp, *fact, false, false, 0, head));
+          events_.push_back(make_shared<AbaAddSentence>(timestamp, *fact, false, false, 0, head, "1.(ii)"));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase2iaStepRegex)) {
@@ -737,7 +738,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
         // (Also mark the graph that the fact is in.)
         events_.push_back(make_shared<AbaMarkSentence>(timestamp, fact, true));
         if (contraryIsNew)
-          events_.push_back(make_shared<AbaAddSentence>(timestamp, contrary, false, false, 0, fact));
+          events_.push_back(make_shared<AbaAddSentence>(
+            timestamp, contrary, false, false, 0, fact, "2.(ic)"));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase2iiMarkStepRegex)) {
@@ -766,9 +768,9 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
         for (auto fact = existingBody.begin(); fact != existingBody.end(); ++fact)
           events_.push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, *fact, head));
         for (auto fact = newUnmarkedAssumptions.begin(); fact != newUnmarkedAssumptions.end(); ++fact)
-          events_.push_back(make_shared<AbaAddSentence>(timestamp, *fact, true, false, newGraphId, head));
+          events_.push_back(make_shared<AbaAddSentence>(timestamp, *fact, true, false, newGraphId, head, "2.(ii)"));
         for (auto fact = newUnmarkedNonAssumptions.begin(); fact != newUnmarkedNonAssumptions.end(); ++fact)
-          events_.push_back(make_shared<AbaAddSentence>(timestamp, *fact, false, false, newGraphId, head));
+          events_.push_back(make_shared<AbaAddSentence>(timestamp, *fact, false, false, newGraphId, head, "2.(ii)"));
       }
     }
   }

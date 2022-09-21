@@ -712,15 +712,17 @@ public:
    * \param graphId If 0 this is the proponent graph, otherwise this is a sentence
    * in the opponent graph with this ID.
    * \param parent The fact which produced the step, or NULL if the first.
+   * \param abaCase The derivation case which produced the sentence.
    */
   AbaAddSentence(core::Timestamp time, r_code::Code* fact, bool isAssumption, bool isClaim,
-      int graphId, r_code::Code* parent)
+      int graphId, r_code::Code* parent, const std::string& abaCase)
     : AeraEvent(EVENT_TYPE, time, fact),
     fact_((r_exec::_Fact*)fact),
     isAssumption_(isAssumption),
     isClaim_(isClaim),
     graphId_(graphId),
-    parent_((r_exec::_Fact*)parent)
+    parent_((r_exec::_Fact*)parent),
+    abaCase_(abaCase)
   {}
 
   r_code::Code* getInput() override { return parent_; }
@@ -732,6 +734,7 @@ public:
   bool isClaim_;
   int graphId_;
   r_exec::_Fact* parent_;
+  std::string abaCase_;
 };
 
 class AbaMarkSentence : public AeraEvent {
