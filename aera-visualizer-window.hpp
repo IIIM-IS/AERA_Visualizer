@@ -273,6 +273,7 @@ private:
   static const QString SettingsKeyAutoScroll;
   static const QString SettingsKeySimulationsVisible;
   static const QString SettingsKeyAllSimulationInputsVisible;
+  static const QString SettingsKeySingleStepSimulationVisible;
   static const QString SettingsKeyNonSimulationsVisible;
   static const QString SettingsKeyEssenceFactsVisible;
   static const QString SettingsKeyInstantiatedCompositeStatesVisible;

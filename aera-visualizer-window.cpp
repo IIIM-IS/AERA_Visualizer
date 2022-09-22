@@ -155,6 +155,7 @@ const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
 const QString AeraVisulizerWindow::SettingsKeyAutoScroll = "AutoScroll";
 const QString AeraVisulizerWindow::SettingsKeySimulationsVisible = "simulationsVisible";
 const QString AeraVisulizerWindow::SettingsKeyAllSimulationInputsVisible = "allSimulationInputsVisible";
+const QString AeraVisulizerWindow::SettingsKeySingleStepSimulationVisible = "singleStepSimulationVisible";
 const QString AeraVisulizerWindow::SettingsKeyNonSimulationsVisible = "nonSimulationsVisible";
 const QString AeraVisulizerWindow::SettingsKeyEssenceFactsVisible = "essenceFactsVisible";
 const QString AeraVisulizerWindow::SettingsKeyInstantiatedCompositeStatesVisible = "instantiatedCompositeStatesVisible";
@@ -1995,7 +1996,7 @@ void AeraVisulizerWindow::createToolbars()
   allSimulationInputsCheckBox_->setColor(simulationColor);
   toolbar->addWidget(allSimulationInputsCheckBox_);
 
-  singleStepSimulationCheckBox_ = new AeraCheckbox("Single Step", SettingsKeyAllSimulationInputsVisible, this, Qt::Unchecked);
+  singleStepSimulationCheckBox_ = new AeraCheckbox("Single Step", SettingsKeySingleStepSimulationVisible, this, Qt::Unchecked);
   singleStepSimulationCheckBox_->setColor(simulationColor);
   toolbar->addWidget(singleStepSimulationCheckBox_);
 
