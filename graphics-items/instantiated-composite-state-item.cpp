@@ -190,7 +190,8 @@ void InstantiatedCompositeStateItem::setBoundCstAndMembersHtml()
   boundCstMembersHtml_ = htmlify(boundCstMembersHtml_);
 }
 
-QString InstantiatedCompositeStateItem::makeIcstMembersSource(Code* icst, ReplicodeObjects& replicodeObjects)
+QString InstantiatedCompositeStateItem::makeIcstMembersSource(
+  Code* icst, ReplicodeObjects& replicodeObjects, const QString& antiFactHtmlColor)
 {
   // TODO: Combine with setBoundCstAndMembersHtml.
   auto cst = icst->get_reference(0);
@@ -209,13 +210,15 @@ QString InstantiatedCompositeStateItem::makeIcstMembersSource(Code* icst, Replic
   string cstSource = CompositeStateItem::simplifyCstSource(replicodeObjects.getSourceCode(cst));
   // Get just the members, which are indented by three spaces. Get the value inside the (fact value ...).
   string cstMembersSource;
-  auto i = QRegularExpression("   \\(fact (\\([^\\n]+)\\n").globalMatch(cstSource.c_str());
+  auto i = QRegularExpression("   \\((\\|?fact) (\\([^\\n]+)\\n").globalMatch(cstSource.c_str());
   while (i.hasNext()) {
     auto match = i.next();
-    auto value = match.captured(1);
+    auto value = match.captured(2);
     // Strip the fact timings from the end.
     value = value.mid(0, value.length() - 1);
     value = value.mid(0, value.lastIndexOf(')') + 1);
+    if (match.captured(1) == "|fact")
+      value = "<font color=\"" + antiFactHtmlColor + "\">" + value + "</font>";
 
     if (cstMembersSource != "")
       cstMembersSource += "\n";
