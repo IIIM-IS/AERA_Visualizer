@@ -185,20 +185,49 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
                                cos(angle + -M_PI / 2)),
     angle);
 
-  if (isSelected())
-    painter->setPen(QPen(pen().color(), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
-  else
-    painter->setPen(pen());
-  painter->setBrush(pen().color());
-  painter->drawLine(line());
+  // If selected, change the border color of the start and end items as well as that of the arrow
+  // TO DO: Models aren't being highlighted properly
+  if (isSelected()) {
+      painter->setBrush(pen().color());
+      painter->setPen(QPen(QColor(255, 0, 0), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
+      startItem_->setPen(QPen(QColor(255, 0, 0), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
+      endItem_->setPen(QPen(QColor(255, 0, 0), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
+      //painter->setPen(QPen(pen().color(), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
+      //startItem_->setPen(QPen(pen().color(), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
+      //endItem_->setPen(QPen(pen().color(), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
 
-  painter->setPen(arrowBasePen_);
-  painter->setBrush(arrowBasePen_.color());
-  painter->drawPolygon(arrowBase_);
+      // Draw the line
+      painter->setBrush(pen().color());
+      painter->drawLine(line());
 
-  painter->setPen(arrowTipPen_);
-  painter->setBrush(arrowTipPen_.color());
-  painter->drawPolygon(arrowTip_);
+      // Draw the lower arrowhead
+      painter->setBrush(arrowBasePen_.color());
+      painter->drawPolygon(arrowBase_);
+
+      // Draw the upper arrowhead
+      painter->setBrush(arrowTipPen_.color());
+      painter->drawPolygon(arrowTip_);
+
+  } else {
+      // If not selected, revert to the normal pens
+      painter->setPen(pen());
+      startItem_->setPen(pen());
+      endItem_->setPen(pen());
+
+      // Draw the line
+      painter->setBrush(pen().color());
+      painter->drawLine(line());
+
+      // Draw the lower arrowhead
+      painter->setPen(arrowBasePen_);
+      painter->setBrush(arrowBasePen_.color());
+      painter->drawPolygon(arrowBase_);
+
+      // Draw the upper arrowhead
+      painter->setPen(arrowTipPen_);
+      painter->setBrush(arrowTipPen_.color());
+      painter->drawPolygon(arrowTip_);
+  }
 }
 
 QPointF Arrow::intersectItem(const QLineF& line, const QGraphicsPolygonItem& item)
