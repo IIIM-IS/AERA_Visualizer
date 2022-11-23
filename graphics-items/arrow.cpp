@@ -190,42 +190,33 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
   // If selected, change the border color of the start and end items as well as that of the arrow
   if (isSelected()) {
       // Set the colors for the arrow
-      painter->setBrush(pen().color());
-      painter->setPen(QPen(pen().color(), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
+      setPens(Arrow::HighlightedPen, getHighlightArrowBasePen(), getHighlightArrowTipPen());
+      painter->setPen(Arrow::HighlightedPen);
 
       // Set the colors for the objects on either end
-      startItem_->setPen(QPen(pen().color(), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
-      endItem_->setPen(QPen(pen().color(), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
-
-      // Draw the line
-      painter->setBrush(pen().color());
-      painter->drawLine(line());
-
-      // Draw the lower arrowhead
-      painter->setBrush(arrowBasePen_.color());
-      painter->drawPolygon(arrowBase_);
-
-      // Draw the upper arrowhead
-      painter->setBrush(arrowTipPen_.color());
-      painter->drawPolygon(arrowTip_);
+      startItem_->setPen(Arrow::HighlightedPen);
+      endItem_->setPen(Arrow::HighlightedPen);
 
       // Keep this updated so we can debounce the deselected state
       wasSelected = true;
 
   } else {
-
     // If we just deselected the arrow, recolor the objects at the ends
     if (wasSelected) {
+      // Reset the arrow's pens
+      setPens(Arrow::DefaultPen, Arrow::DefaultPen, Arrow::DefaultPen);
+
+      // Reset the end objects' pens
       startItem_->setPen(pen());
       endItem_->setPen(pen());
+
+      // Make sure we only do this once
       wasSelected = false;
     }
-
-    // If not selected, revert to the normal pens
-    painter->setPen(pen());
   }
 
   // Draw the line
+  painter->setPen(pen());
   painter->setBrush(pen().color());
   painter->drawLine(line());
 
