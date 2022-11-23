@@ -101,6 +101,9 @@ public:
     AeraVisualizerScene* parent)
   : Arrow(startItem, endItem, HighlightedPen, HighlightedPen, parent) {};
 
+  // Use this to track a "falling edge" on the select state
+  bool wasSelected;
+
   int type() const override { return Type; }
   QRectF boundingRect() const override;
   QPainterPath shape() const override;

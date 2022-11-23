@@ -160,41 +160,42 @@ void Arrow::updatePosition()
 void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
   QWidget* widget)
 {
-  if (startItem_->collidesWithItem(endItem_))
-    return;
+  // Only draw the arrow if the objects aren't overlapping
+  if (!startItem_->collidesWithItem(endItem_)) {
+    //  return;
 
-  // Add the boundingRect().center() so the arrow points to the center of the item.
-  QLineF centerLine(startItem_->pos() + startItem_->boundingRect().center(), 
-                    endItem_->pos() +   endItem_->boundingRect().center());
-  QPointF startIntersectPoint = intersectItem(centerLine, *startItem_);
-  QPointF endIntersectPoint = intersectItem(centerLine, *endItem_);
+    // Add the boundingRect().center() so the arrow points to the center of the item.
+    QLineF centerLine(startItem_->pos() + startItem_->boundingRect().center(),
+        endItem_->pos() + endItem_->boundingRect().center());
+    QPointF startIntersectPoint = intersectItem(centerLine, *startItem_);
+    QPointF endIntersectPoint = intersectItem(centerLine, *endItem_);
 
-  setLine(QLineF(endIntersectPoint, startIntersectPoint));
+    setLine(QLineF(endIntersectPoint, startIntersectPoint));
 
-  double angle = std::atan2(-line().dy(), line().dx());
-  // The tip of the arrowhead goes into the item a little, so move a little toward the base.
-  setArrowhead(
-    arrowTip_,
-    line().p1() - QPointF(sin(angle + -M_PI / 2),
-                          cos(angle + -M_PI / 2)),
-    angle);
-  // The tip of the arrowhead is at the base of the line, so move a little toward the tip.
-  setArrowhead(
-    arrowBase_, 
-    line().p2() + 10 * QPointF(sin(angle + -M_PI / 2), 
-                               cos(angle + -M_PI / 2)),
-    angle);
-
+    double angle = std::atan2(-line().dy(), line().dx());
+    // The tip of the arrowhead goes into the item a little, so move a little toward the base.
+    setArrowhead(
+        arrowTip_,
+        line().p1() - QPointF(sin(angle + -M_PI / 2),
+            cos(angle + -M_PI / 2)),
+        angle);
+    // The tip of the arrowhead is at the base of the line, so move a little toward the tip.
+    setArrowhead(
+        arrowBase_,
+        line().p2() + 10 * QPointF(sin(angle + -M_PI / 2),
+            cos(angle + -M_PI / 2)),
+        angle);
+  }
+    
   // If selected, change the border color of the start and end items as well as that of the arrow
-  // TO DO: Models aren't being highlighted properly
   if (isSelected()) {
+      // Set the colors for the arrow
       painter->setBrush(pen().color());
-      painter->setPen(QPen(QColor(255, 0, 0), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
-      startItem_->setPen(QPen(QColor(255, 0, 0), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
-      endItem_->setPen(QPen(QColor(255, 0, 0), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
-      //painter->setPen(QPen(pen().color(), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
-      //startItem_->setPen(QPen(pen().color(), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
-      //endItem_->setPen(QPen(pen().color(), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
+      painter->setPen(QPen(pen().color(), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
+
+      // Set the colors for the objects on either end
+      startItem_->setPen(QPen(pen().color(), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
+      endItem_->setPen(QPen(pen().color(), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
 
       // Draw the line
       painter->setBrush(pen().color());
@@ -207,27 +208,36 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
       // Draw the upper arrowhead
       painter->setBrush(arrowTipPen_.color());
       painter->drawPolygon(arrowTip_);
+
+      // Keep this updated so we can debounce the deselected state
+      wasSelected = true;
 
   } else {
-      // If not selected, revert to the normal pens
-      painter->setPen(pen());
+
+    // If we just deselected the arrow, recolor the objects at the ends
+    if (wasSelected) {
       startItem_->setPen(pen());
       endItem_->setPen(pen());
+      wasSelected = false;
+    }
 
-      // Draw the line
-      painter->setBrush(pen().color());
-      painter->drawLine(line());
-
-      // Draw the lower arrowhead
-      painter->setPen(arrowBasePen_);
-      painter->setBrush(arrowBasePen_.color());
-      painter->drawPolygon(arrowBase_);
-
-      // Draw the upper arrowhead
-      painter->setPen(arrowTipPen_);
-      painter->setBrush(arrowTipPen_.color());
-      painter->drawPolygon(arrowTip_);
+    // If not selected, revert to the normal pens
+    painter->setPen(pen());
   }
+
+  // Draw the line
+  painter->setBrush(pen().color());
+  painter->drawLine(line());
+
+  // Draw the lower arrowhead
+  painter->setPen(arrowBasePen_);
+  painter->setBrush(arrowBasePen_.color());
+  painter->drawPolygon(arrowBase_);
+
+  // Draw the upper arrowhead
+  painter->setPen(arrowTipPen_);
+  painter->setBrush(arrowTipPen_.color());
+  painter->drawPolygon(arrowTip_);
 }
 
 QPointF Arrow::intersectItem(const QLineF& line, const QGraphicsPolygonItem& item)
