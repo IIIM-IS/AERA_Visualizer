@@ -167,6 +167,9 @@ private:
   QPolygonF arrowTip_;
   QPen arrowBasePen_;
   QPen arrowTipPen_;
+  bool wasSelected_;        // Use this to track a "falling edge" on the select state
+  QPen startItemLastPen_;   // Used to restore pen settings after deselection
+  QPen endItemLastPen_;     // Used to restore pen settings after deselection
 };
 
 }
