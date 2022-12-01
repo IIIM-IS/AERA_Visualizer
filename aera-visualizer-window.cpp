@@ -114,7 +114,7 @@ protected:
   AeraVisualizerScene* scene_;
 };
 
-const set<int> AeraVisulizerWindow::simulationEventTypes_ = {
+const set<int> AeraVisualizerWindow::simulationEventTypes_ = {
   AbaAddSentence::EVENT_TYPE,
   AbaMarkSentence::EVENT_TYPE,
   AbaMarkedSentenceToParent::EVENT_TYPE,
@@ -129,7 +129,7 @@ const set<int> AeraVisulizerWindow::simulationEventTypes_ = {
   PromotedSimulatedPredictionEvent::EVENT_TYPE,
   SimulationCommitEvent::EVENT_TYPE };
 
-const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
+const set<int> AeraVisualizerWindow::newItemEventTypes_ = {
   AbaAddSentence::EVENT_TYPE,
   AutoFocusNewObjectEvent::EVENT_TYPE,
   CompositeStateGoalReduction::EVENT_TYPE,
@@ -152,18 +152,18 @@ const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
   PromotedSimulatedPredictionEvent::EVENT_TYPE,
   SimulationCommitEvent::EVENT_TYPE };
 
-const QString AeraVisulizerWindow::SettingsKeyAutoScroll = "AutoScroll";
-const QString AeraVisulizerWindow::SettingsKeySimulationsVisible = "simulationsVisible";
-const QString AeraVisulizerWindow::SettingsKeyAllSimulationInputsVisible = "allSimulationInputsVisible";
-const QString AeraVisulizerWindow::SettingsKeySingleStepSimulationVisible = "singleStepSimulationVisible";
-const QString AeraVisulizerWindow::SettingsKeyNonSimulationsVisible = "nonSimulationsVisible";
-const QString AeraVisulizerWindow::SettingsKeyEssenceFactsVisible = "essenceFactsVisible";
-const QString AeraVisulizerWindow::SettingsKeyInstantiatedCompositeStatesVisible = "instantiatedCompositeStatesVisible";
-const QString AeraVisulizerWindow::SettingsKeyPredictedInstantiatedCompositeStatesVisible = "predictedInstantiatedCompositeStatesVisible";
-const QString AeraVisulizerWindow::SettingsKeyRequirementsVisible = "requirementsVisible";
+const QString AeraVisualizerWindow::SettingsKeyAutoScroll = "AutoScroll";
+const QString AeraVisualizerWindow::SettingsKeySimulationsVisible = "simulationsVisible";
+const QString AeraVisualizerWindow::SettingsKeyAllSimulationInputsVisible = "allSimulationInputsVisible";
+const QString AeraVisualizerWindow::SettingsKeySingleStepSimulationVisible = "singleStepSimulationVisible";
+const QString AeraVisualizerWindow::SettingsKeyNonSimulationsVisible = "nonSimulationsVisible";
+const QString AeraVisualizerWindow::SettingsKeyEssenceFactsVisible = "essenceFactsVisible";
+const QString AeraVisualizerWindow::SettingsKeyInstantiatedCompositeStatesVisible = "instantiatedCompositeStatesVisible";
+const QString AeraVisualizerWindow::SettingsKeyPredictedInstantiatedCompositeStatesVisible = "predictedInstantiatedCompositeStatesVisible";
+const QString AeraVisualizerWindow::SettingsKeyRequirementsVisible = "requirementsVisible";
 
-AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
-: AeraVisulizerWindowBase(0, replicodeObjects),
+AeraVisualizerWindow::AeraVisualizerWindow(ReplicodeObjects& replicodeObjects)
+: AeraVisualizerWindowBase(0, replicodeObjects),
   iNextEvent_(0), explanationLogWindow_(0),
   essencePropertyObject_(replicodeObjects_.getObject("essence")),
   hoverHighlightItem_(0),
@@ -217,7 +217,7 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
   setUnifiedTitleAndToolBarOnMac(true);
 }
 
-bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgressDialog& progress)
+bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgressDialog& progress)
 {
   // load mdl 37, MDLController(113)
   regex loadModelRegex("^load mdl (\\d+), MDLController\\((\\d+)\\) strength:([\\d\\.]+) cnt:(\\d+) sr:([\\d\\.]+)$");
@@ -786,7 +786,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   return true;
 }
 
-void AeraVisulizerWindow::abaNewStep(int step)
+void AeraVisualizerWindow::abaNewStep(int step)
 {
   if (step < abaStepIndexes_.size()) {
     // There are already events for this step. Erase them.
@@ -803,7 +803,7 @@ void AeraVisulizerWindow::abaNewStep(int step)
     abaStepIndexes_.push_back(events_.size());
 }
 
-void AeraVisulizerWindow::addStartupItems()
+void AeraVisualizerWindow::addStartupItems()
 {
   for (int i = 0; i < startupEvents_.size(); ++i) {
     AeraEvent* event = startupEvents_[i].get();
@@ -822,7 +822,7 @@ void AeraVisulizerWindow::addStartupItems()
   }
 }
 
-Timestamp AeraVisulizerWindow::getTimestamp(const smatch& matches, int index)
+Timestamp AeraVisualizerWindow::getTimestamp(const smatch& matches, int index)
 {
   microseconds us(1000000 * stoll(matches[index].str()) +
                      1000 * stoll(matches[index + 1].str()) +
@@ -830,7 +830,7 @@ Timestamp AeraVisulizerWindow::getTimestamp(const smatch& matches, int index)
   return replicodeObjects_.getTimeReference() + us;
 }
 
-AeraGraphicsItem* AeraVisulizerWindow::getAeraGraphicsItem(Code* object, AeraVisualizerScene** scene)
+AeraGraphicsItem* AeraVisualizerWindow::getAeraGraphicsItem(Code* object, AeraVisualizerScene** scene)
 {
   if (scene)
     // Initialize to default NULL.
@@ -853,7 +853,7 @@ AeraGraphicsItem* AeraVisulizerWindow::getAeraGraphicsItem(Code* object, AeraVis
   return NULL;
 }
 
-void AeraVisulizerWindow::zoomToAeraGraphicsItem(Code* object)
+void AeraVisualizerWindow::zoomToAeraGraphicsItem(Code* object)
 {
   AeraVisualizerScene* scene;
   auto item = getAeraGraphicsItem(object, &scene);
@@ -866,7 +866,7 @@ void AeraVisulizerWindow::zoomToAeraGraphicsItem(Code* object)
   }
 }
 
-void AeraVisulizerWindow::focusOnAeraGraphicsItem(Code* object)
+void AeraVisualizerWindow::focusOnAeraGraphicsItem(Code* object)
 {
   AeraVisualizerScene* scene;
   auto item = getAeraGraphicsItem(object, &scene);
@@ -879,7 +879,7 @@ void AeraVisulizerWindow::focusOnAeraGraphicsItem(Code* object)
   }
 }
 
-void AeraVisulizerWindow::centerOnAeraGraphicsItem(Code* object)
+void AeraVisualizerWindow::centerOnAeraGraphicsItem(Code* object)
 {
   AeraVisualizerScene* scene;
   auto item = getAeraGraphicsItem(object, &scene);
@@ -892,7 +892,7 @@ void AeraVisulizerWindow::centerOnAeraGraphicsItem(Code* object)
   }
 }
 
-void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, QPointF position)
+void AeraVisualizerWindow::textItemHoverMoveEvent(const QTextDocument* document, QPointF position)
 {
   auto url = document->documentLayout()->anchorAt(position);
   if (url == "") {
@@ -937,7 +937,7 @@ void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, 
   }
 }
 
-Timestamp AeraVisulizerWindow::getINextStepEvent
+Timestamp AeraVisualizerWindow::getINextStepEvent
   (Timestamp maximumTime, size_t iNextEventStart, size_t& iNextStepEvent)
 {
   // TODO: This has to closely track stepEvent to duplicate its logic, so stepEvent should be
@@ -976,7 +976,7 @@ Timestamp AeraVisulizerWindow::getINextStepEvent
   return event->time_;
 }
 
-Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
+Timestamp AeraVisualizerWindow::stepEvent(Timestamp maximumTime)
 {
   if (iNextEvent_ >= events_.size())
     // Return the value meaning no change.
@@ -1521,7 +1521,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
   return event->time_;
 }
 
-Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime, bool& foundGraphicsItem)
+Timestamp AeraVisualizerWindow::unstepEvent(Timestamp minimumTime, bool& foundGraphicsItem)
 {
   foundGraphicsItem = false;
 
@@ -1658,7 +1658,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime, bool& foundGra
     return Timestamp(seconds(0));
 }
 
-void AeraVisulizerWindow::startPlay()
+void AeraVisualizerWindow::startPlay()
 {
   if (isPlaying_)
     // Already playing.
@@ -1669,10 +1669,10 @@ void AeraVisulizerWindow::startPlay()
     children_[i]->playPauseButton_->setIcon(pauseIcon_);
   isPlaying_ = true;
   if (playTimerId_ == 0)
-    playTimerId_ = startTimer(AeraVisulizer_playTimerTick.count());
+    playTimerId_ = startTimer(AeraVisualizer_playTimerTick.count());
 }
 
-void AeraVisulizerWindow::stopPlay()
+void AeraVisualizerWindow::stopPlay()
 {
   if (playTimerId_ != 0) {
     killTimer(playTimerId_);
@@ -1685,7 +1685,7 @@ void AeraVisulizerWindow::stopPlay()
   isPlaying_ = false;
 }
 
-void AeraVisulizerWindow::setPlayTime(Timestamp time)
+void AeraVisualizerWindow::setPlayTime(Timestamp time)
 {
   playTime_ = time;
 
@@ -1721,7 +1721,7 @@ void AeraVisulizerWindow::setPlayTime(Timestamp time)
   }
 }
 
-void AeraVisulizerWindow::setSliderToPlayTime()
+void AeraVisualizerWindow::setSliderToPlayTime()
 {
   if (events_.size() == 0) {
     playSlider_->setValue(0);
@@ -1739,7 +1739,7 @@ void AeraVisulizerWindow::setSliderToPlayTime()
     children_[i]->playSlider_->setValue(value);
 }
 
-void AeraVisulizerWindow::playPauseButtonClickedImpl()
+void AeraVisualizerWindow::playPauseButtonClickedImpl()
 {
   if (isPlaying_)
     stopPlay();
@@ -1747,7 +1747,7 @@ void AeraVisulizerWindow::playPauseButtonClickedImpl()
     startPlay();
 }
 
-void AeraVisulizerWindow::stepButtonClickedImpl()
+void AeraVisualizerWindow::stepButtonClickedImpl()
 {
   stopPlay();
   size_t iNextStepEvent;
@@ -1826,7 +1826,7 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
   setSliderToPlayTime();
 }
 
-void AeraVisulizerWindow::stepBackButtonClickedImpl()
+void AeraVisualizerWindow::stepBackButtonClickedImpl()
 {
   stopPlay();
   bool foundGraphicsItem;
@@ -1854,13 +1854,13 @@ void AeraVisulizerWindow::stepBackButtonClickedImpl()
   setSliderToPlayTime();
 }
 
-void AeraVisulizerWindow::playTimeLabelClickedImpl()
+void AeraVisualizerWindow::playTimeLabelClickedImpl()
 {
   showRelativeTime_ = !showRelativeTime_;
   setPlayTime(playTime_);
 }
 
-void AeraVisulizerWindow::timerEvent(QTimerEvent* event)
+void AeraVisualizerWindow::timerEvent(QTimerEvent* event)
 {
   // TODO: Make sure we don't re-enter.
 
@@ -1875,7 +1875,7 @@ void AeraVisulizerWindow::timerEvent(QTimerEvent* event)
 
   auto maximumEventTime = events_.back()->time_;
   // TODO: Make this track the passage of real clock time.
-  auto playTime = playTime_ + AeraVisulizer_playTimerTick;
+  auto playTime = playTime_ + AeraVisualizer_playTimerTick;
 
   // Step events while events_[iNextEvent_] is less than or equal to the playTime.
   // Debug: How to step the children also?
@@ -1891,22 +1891,22 @@ void AeraVisulizerWindow::timerEvent(QTimerEvent* event)
   setSliderToPlayTime();
 }
 
-void AeraVisulizerWindow::zoomIn()
+void AeraVisualizerWindow::zoomIn()
 {
   selectedScene_->scaleViewBy(1.09);
 }
 
-void AeraVisulizerWindow::zoomOut()
+void AeraVisualizerWindow::zoomOut()
 {
   selectedScene_->scaleViewBy(1 / 1.09);
 }
 
-void AeraVisulizerWindow::zoomHome()
+void AeraVisualizerWindow::zoomHome()
 {
   selectedScene_->zoomViewHome();
 }
 
-void AeraVisulizerWindow::zoomTo()
+void AeraVisualizerWindow::zoomTo()
 {
   bool ok;
   QString text = QInputDialog::getText(
@@ -1930,7 +1930,7 @@ void AeraVisulizerWindow::zoomTo()
   scene->zoomToItem(item);
 }
 
-void AeraVisulizerWindow::createActions()
+void AeraVisualizerWindow::createActions()
 {
   exitAction_ = new QAction(tr("E&xit"), this);
   exitAction_->setShortcuts(QKeySequence::Quit);
@@ -1953,7 +1953,7 @@ void AeraVisulizerWindow::createActions()
   connect(zoomToAction_, SIGNAL(triggered()), this, SLOT(zoomTo()));
 }
 
-void AeraVisulizerWindow::createMenus()
+void AeraVisualizerWindow::createMenus()
 {
   QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
   fileMenu->addAction(exitAction_);
@@ -1965,7 +1965,7 @@ void AeraVisulizerWindow::createMenus()
   viewMenu->addAction(zoomToAction_);
 }
 
-void AeraVisulizerWindow::createToolbars()
+void AeraVisualizerWindow::createToolbars()
 {
   QToolBar* toolbar = addToolBar(tr("Main"));
   toolbar->addAction(zoomInAction_);

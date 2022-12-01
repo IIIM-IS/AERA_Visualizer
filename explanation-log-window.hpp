@@ -59,10 +59,10 @@
 
 namespace aera_visualizer {
 /**
- * ExplanationLogWindow extends AeraVisulizerWindowBase to present the player
+ * ExplanationLogWindow extends AeraVisualizerWindowBase to present the player
  * control panel and the explanation log.
  */
-class ExplanationLogWindow : public AeraVisulizerWindowBase
+class ExplanationLogWindow : public AeraVisualizerWindowBase
 {
   Q_OBJECT
 
@@ -72,7 +72,7 @@ public:
    * \param parent The main parent window for this window.
    * \param replicodeObjects The ReplicodeObjects used to find objects.
    */
-  ExplanationLogWindow(AeraVisulizerWindow* mainWindow, ReplicodeObjects& replicodeObjects);
+  ExplanationLogWindow(AeraVisualizerWindow* mainWindow, ReplicodeObjects& replicodeObjects);
 
   void appendHtml(const QString& html)
   {

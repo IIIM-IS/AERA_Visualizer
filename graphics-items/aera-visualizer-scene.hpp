@@ -72,7 +72,7 @@ namespace aera_visualizer {
 
 class AeraGraphicsItem;
 class AeraGraphicsItemGroup;
-class AeraVisulizerWindow;
+class AeraVisualizerWindow;
 class ExplanationLogWindow;
 
 class AeraVisualizerScene : public QGraphicsScene
@@ -81,10 +81,10 @@ public:
   typedef std::function<void()> OnSceneSelected;
 
   explicit AeraVisualizerScene(
-    ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent, bool isMainScene,
+    ReplicodeObjects& replicodeObjects, AeraVisualizerWindow* parent, bool isMainScene,
     const OnSceneSelected& onSceneSelected);
 
-  AeraVisulizerWindow* getParent() { return parent_; }
+  AeraVisualizerWindow* getParent() { return parent_; }
 
   void zoomToItem(QGraphicsItem* item);
   void focusOnItem(QGraphicsItem* item);
@@ -137,7 +137,7 @@ protected:
 #endif
 
 private:
-  friend class AeraVisulizerWindow;
+  friend class AeraVisualizerWindow;
 
   /**
    * Scale the first QGraphicsView by the given factor.
@@ -211,7 +211,7 @@ private:
    */
   void removeAllItemsByEventType(const std::set<int>& eventTypes);
 
-  AeraVisulizerWindow* parent_;
+  AeraVisualizerWindow* parent_;
   ReplicodeObjects& replicodeObjects_;
   bool isMainScene_;
   OnSceneSelected onSceneSelected_;

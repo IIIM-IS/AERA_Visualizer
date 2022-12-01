@@ -65,8 +65,8 @@ using namespace r_exec;
 
 namespace aera_visualizer {
 
-ExplanationLogWindow::ExplanationLogWindow(AeraVisulizerWindow* mainWindow, ReplicodeObjects& replicodeObjects)
-  : AeraVisulizerWindowBase(mainWindow, replicodeObjects)
+ExplanationLogWindow::ExplanationLogWindow(AeraVisualizerWindow* mainWindow, ReplicodeObjects& replicodeObjects)
+  : AeraVisualizerWindowBase(mainWindow, replicodeObjects)
 {
   auto centralLayout = new QVBoxLayout();
   textBrowser_ = new TextBrowser(this);

@@ -79,19 +79,19 @@ namespace aera_visualizer {
 class ExplanationLogWindow;
 
 /**
- * AeraVisulizerWindow extends AeraVisulizerWindowBase to present the player
+ * AeraVisualizerWindow extends AeraVisualizerWindowBase to present the player
  * control panel and a window for visualizing the processing of AERA objects.
  */
-class AeraVisulizerWindow : public AeraVisulizerWindowBase
+class AeraVisualizerWindow : public AeraVisualizerWindowBase
 {
   Q_OBJECT
 
 public:
   /**
-   * Create an AeraVisulizerWindow. After creating the window, call addEvents().
+   * Create an AeraVisualizerWindow. After creating the window, call addEvents().
    * \param replicodeObjects The ReplicodeObjects used to find objects.
    */
-  AeraVisulizerWindow(ReplicodeObjects& replicodeObjects);
+  AeraVisualizerWindow(ReplicodeObjects& replicodeObjects);
 
   /**
    * Scan the runtimeOutputFilePath and add to startupEvents_ and events_. Call this once after creating the window.
@@ -210,7 +210,7 @@ private slots:
   void zoomTo();
 
 private:
-  friend class AeraVisulizerWindowBase;
+  friend class AeraVisualizerWindowBase;
   void createActions();
   void createMenus();
   void createToolbars();

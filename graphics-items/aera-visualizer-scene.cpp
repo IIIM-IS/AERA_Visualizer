@@ -77,7 +77,7 @@ using namespace r_exec;
 namespace aera_visualizer {
 
 AeraVisualizerScene::AeraVisualizerScene(
-  ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent, bool isMainScene,
+  ReplicodeObjects& replicodeObjects, AeraVisualizerWindow* parent, bool isMainScene,
   const OnSceneSelected& onSceneSelected)
 : QGraphicsScene(parent),
   parent_(parent),
@@ -162,8 +162,8 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
                             focusSimulationDetailOids_.find(item->getAeraEvent()->object_->get_detail_oid())
                             != focusSimulationDetailOids_.end());
   bool isSimulationEventType = 
-    (AeraVisulizerWindow::simulationEventTypes_.find(item->getAeraEvent()->eventType_) !=
-     AeraVisulizerWindow::simulationEventTypes_.end());
+    (AeraVisualizerWindow::simulationEventTypes_.find(item->getAeraEvent()->eventType_) !=
+     AeraVisualizerWindow::simulationEventTypes_.end());
 
   AeraGraphicsItemGroup* itemGroup = 0;
   if (aeraEvent->eventType_ == AbaAddSentence::EVENT_TYPE) {

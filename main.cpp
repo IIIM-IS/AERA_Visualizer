@@ -153,7 +153,7 @@ int main(int argv, char *args[])
     return -1;
   }
 
-  AeraVisulizerWindow mainWindow(replicodeObjects);
+  AeraVisualizerWindow mainWindow(replicodeObjects);
   mainWindow.setWindowIcon(QIcon(":/images/app.ico"));
 
   if (!mainWindow.addEvents(runtimeOutputFilePath, progress))

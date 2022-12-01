@@ -63,7 +63,7 @@ using namespace r_code;
 
 namespace aera_visualizer {
 
-AeraVisulizerWindowBase::AeraVisulizerWindowBase(AeraVisulizerWindow* mainWindow, ReplicodeObjects& replicodeObjects)
+AeraVisualizerWindowBase::AeraVisualizerWindowBase(AeraVisualizerWindow* mainWindow, ReplicodeObjects& replicodeObjects)
 : QMainWindow(mainWindow),
   mainWindow_(mainWindow),
   replicodeObjects_(replicodeObjects)
@@ -74,7 +74,7 @@ AeraVisulizerWindowBase::AeraVisulizerWindowBase(AeraVisulizerWindow* mainWindow
     mainWindow_->children_.push_back(this);
 }
 
-void AeraVisulizerWindowBase::createPlayerControlPanel()
+void AeraVisualizerWindowBase::createPlayerControlPanel()
 {
   QHBoxLayout* playerLayout = new QHBoxLayout();
   playIcon_ = QIcon(":/images/play.png");
@@ -112,46 +112,46 @@ void AeraVisulizerWindowBase::createPlayerControlPanel()
   playerControlPanel_->setLayout(playerLayout);
 }
 
-void AeraVisulizerWindowBase::playPauseButtonClicked()
+void AeraVisualizerWindowBase::playPauseButtonClicked()
 {
   if (mainWindow_)
     mainWindow_->playPauseButtonClickedImpl();
   else
     // This is the main window.
-    ((AeraVisulizerWindow*)this)->playPauseButtonClickedImpl();
+    ((AeraVisualizerWindow*)this)->playPauseButtonClickedImpl();
 }
 
-void AeraVisulizerWindowBase::stepButtonClicked()
+void AeraVisualizerWindowBase::stepButtonClicked()
 {
   if (mainWindow_)
     mainWindow_->stepButtonClickedImpl();
   else
     // This is the main window.
-    ((AeraVisulizerWindow*)this)->stepButtonClickedImpl();
+    ((AeraVisualizerWindow*)this)->stepButtonClickedImpl();
 }
 
-void AeraVisulizerWindowBase::stepBackButtonClicked()
+void AeraVisualizerWindowBase::stepBackButtonClicked()
 {
   if (mainWindow_)
     mainWindow_->stepBackButtonClickedImpl();
   else
     // This is the main window.
-    ((AeraVisulizerWindow*)this)->stepBackButtonClickedImpl();
+    ((AeraVisualizerWindow*)this)->stepBackButtonClickedImpl();
 }
 
-void AeraVisulizerWindowBase::playSliderValueChanged(int value)
+void AeraVisualizerWindowBase::playSliderValueChanged(int value)
 {
   // TODO: Implement to check if the user moved the slider,
   // stopPlay, update the play time.
 }
 
-void AeraVisulizerWindowBase::playTimeLabelClicked()
+void AeraVisualizerWindowBase::playTimeLabelClicked()
 {
   if (mainWindow_)
     mainWindow_->playTimeLabelClickedImpl();
   else
     // This is the main window.
-    ((AeraVisulizerWindow*)this)->playTimeLabelClickedImpl();
+    ((AeraVisualizerWindow*)this)->playTimeLabelClickedImpl();
 }
 
 ClickableLabel::ClickableLabel(const QString& text, QWidget* parent, Qt::WindowFlags f)

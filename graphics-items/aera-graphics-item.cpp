@@ -458,8 +458,8 @@ void AeraGraphicsItem::setItemAndArrowsAndHorizontalLinesVisible(bool visible)
 void aera_visualizer::AeraGraphicsItem::adjustItemYPosition()
 {
   // Only adjust positions for non-simulation items
-  if (AeraVisulizerWindow::simulationEventTypes_.find(getAeraEvent()->eventType_) !=
-      AeraVisulizerWindow::simulationEventTypes_.end()) {
+  if (AeraVisualizerWindow::simulationEventTypes_.find(getAeraEvent()->eventType_) !=
+      AeraVisualizerWindow::simulationEventTypes_.end()) {
     return;
   }
   if (getAeraEvent()->itemInitialTopLeftPosition_ != getAeraEvent()->itemTopLeftPosition_) {
@@ -482,8 +482,8 @@ void aera_visualizer::AeraGraphicsItem::adjustItemYPosition()
         continue;
       }
       // We do not care for sim-items
-      if (AeraVisulizerWindow::simulationEventTypes_.find(valid_item->getAeraEvent()->eventType_) !=
-        AeraVisulizerWindow::simulationEventTypes_.end()) {
+      if (AeraVisualizerWindow::simulationEventTypes_.find(valid_item->getAeraEvent()->eventType_) !=
+        AeraVisualizerWindow::simulationEventTypes_.end()) {
         continue;
       }
       // If the colliding item comes from a different time-stamp we do not want to adjust the position.
