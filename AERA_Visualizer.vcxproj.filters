@@ -559,6 +559,9 @@
     <Image Include="images\app.ico">
       <Filter>images</Filter>
     </Image>
+    <Image Include="images\zoom-to.png">
+      <Filter>images</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="aera_visualizer.qrc" />
