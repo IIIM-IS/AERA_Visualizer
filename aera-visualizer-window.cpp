@@ -1938,14 +1938,17 @@ void AeraVisualizerWindow::createActions()
 
   zoomInAction_ = new QAction(QIcon(":/images/zoom-in.png"), tr("Zoom In"), this);
   zoomInAction_->setStatusTip(tr("Zoom In"));
+  zoomInAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Equal));
   connect(zoomInAction_, SIGNAL(triggered()), this, SLOT(zoomIn()));
 
   zoomOutAction_ = new QAction(QIcon(":/images/zoom-out.png"), tr("Zoom Out"), this);
   zoomOutAction_->setStatusTip(tr("Zoom Out"));
+  zoomOutAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Minus));
   connect(zoomOutAction_, SIGNAL(triggered()), this, SLOT(zoomOut()));
 
   zoomHomeAction_ = new QAction(QIcon(":/images/zoom-home.png"), tr("Zoom Home"), this);
   zoomHomeAction_->setStatusTip(tr("Zoom to show all"));
+  zoomHomeAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Home));
   connect(zoomHomeAction_, SIGNAL(triggered()), this, SLOT(zoomHome()));
 
   zoomToAction_ = new QAction(QIcon(":/images/zoom-to.png"), tr("Zoom To"), this);
@@ -1960,18 +1963,18 @@ void AeraVisualizerWindow::createMenus()
   fileMenu->addAction(exitAction_);
 
   QMenu* viewMenu = menuBar()->addMenu(tr("&View"));
+  viewMenu->addAction(zoomHomeAction_);
   viewMenu->addAction(zoomInAction_);
   viewMenu->addAction(zoomOutAction_);
-  viewMenu->addAction(zoomHomeAction_);
   viewMenu->addAction(zoomToAction_);
 }
 
 void AeraVisualizerWindow::createToolbars()
 {
   QToolBar* toolbar = addToolBar(tr("Main"));
+  toolbar->addAction(zoomHomeAction_);
   toolbar->addAction(zoomInAction_);
   toolbar->addAction(zoomOutAction_);
-  toolbar->addAction(zoomHomeAction_);
   toolbar->addAction(zoomToAction_);
 
   toolbar->addSeparator();
