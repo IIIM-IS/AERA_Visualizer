@@ -1948,7 +1948,8 @@ void AeraVisualizerWindow::createActions()
   zoomHomeAction_->setStatusTip(tr("Zoom to show all"));
   connect(zoomHomeAction_, SIGNAL(triggered()), this, SLOT(zoomHome()));
 
-  zoomToAction_ = new QAction(tr("Zoom To..."), this);
+  zoomToAction_ = new QAction(QIcon(":/images/zoom-to.png"), tr("Zoom To"), this);
+  zoomToAction_->setStatusTip(tr("Zoom to a specific object"));
   zoomToAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
   connect(zoomToAction_, SIGNAL(triggered()), this, SLOT(zoomTo()));
 }
@@ -1971,6 +1972,7 @@ void AeraVisualizerWindow::createToolbars()
   toolbar->addAction(zoomInAction_);
   toolbar->addAction(zoomOutAction_);
   toolbar->addAction(zoomHomeAction_);
+  toolbar->addAction(zoomToAction_);
 
   toolbar->addSeparator();
   // Checkbox for auto scroll
