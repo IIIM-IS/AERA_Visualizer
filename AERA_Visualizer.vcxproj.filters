@@ -271,6 +271,7 @@
     <ClCompile Include="graphics-items\aba-sentence-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
+    <ClCompile Include="find-dialog.cpp" />
     <ClCompile Include="graphics-items\instantiated-model-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
@@ -610,6 +611,7 @@
     <QtMoc Include="aera-visualizer-window-base.hpp" />
     <QtMoc Include="explanation-log-window.hpp" />
     <QtMoc Include="aera-checkbox.h" />
+    <QtMoc Include="find-dialog.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="submodules\AERA\r_exec\r_exec.vcxproj">

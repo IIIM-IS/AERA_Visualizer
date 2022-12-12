@@ -143,6 +143,24 @@ public:
   }
 
   /**
+   * Get a list of objects that contain a specific substring in their labels
+   * \param searchString The partial label we're matching against
+   * \return A vector of matching labels (may be empty)
+   */
+  std::vector<std::string> getObjectsByLabelSubstring(const std::string& searchString) const
+  {
+    // Put matches here
+    std::vector<std::string> matches;
+
+    // Record all labels that contain searchString as a substring
+    for (std::pair<std::string, r_code::Code*> pair : labelObject_) {
+      if (pair.first.find(searchString) != std::string::npos)
+        matches.push_back(pair.first);
+    }
+    return matches;
+  }
+
+  /**
    * Get the object source code (from the decompiled objects file).
    * \param object The object.
    * \return The source code, or "" if not found. This does not have the label or view set.

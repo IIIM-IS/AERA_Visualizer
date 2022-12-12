@@ -218,6 +218,10 @@ public:
    */
   bool is_sim();
 
+  AeraVisualizerScene* getParentScene() {
+    return parent_;
+  }
+
   static const QString DownArrowHtml;
   static const QString RightArrowHtml;
   static const QString RightDoubleArrowHtml;

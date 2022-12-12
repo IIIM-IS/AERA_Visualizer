@@ -77,6 +77,7 @@ class QProgressDialog;
 namespace aera_visualizer {
 
 class ExplanationLogWindow;
+class FindDialog;
 
 /**
  * AeraVisualizerWindow extends AeraVisualizerWindowBase to present the player
@@ -115,6 +116,27 @@ public:
   }
 
   ExplanationLogWindow* getExplanationLogWindow() { return explanationLogWindow_;  }
+
+  void setFindWindow(FindDialog* zoomToWindow)
+  {
+    findDialog_ = zoomToWindow;
+  }
+  
+  // Modify some code from stepEvent so we can compute the current maximum visible time
+  Timestamp getFrameMaxTime() {
+    // Check if we've run off the end (or are not initialized)
+    if (iNextEvent_ >= events_.size())
+      return r_code::Utils_MaxTime;
+
+    // Get the next event and use it to compute the current frame's max time
+    AeraEvent* event = events_[iNextEvent_].get();
+    auto relativeTime = std::chrono::duration_cast<std::chrono::microseconds>(event->time_ - replicodeObjects_.getTimeReference());
+    auto frameStartTime = event->time_ - (relativeTime % replicodeObjects_.getSamplingPeriod());
+    Timestamp thisFrameMaxTime = frameStartTime + replicodeObjects_.getSamplingPeriod() - std::chrono::microseconds(1);
+
+    return thisFrameMaxTime;
+  }
+  
 
   /**
    * Check if one of the scenes has an AeraGraphicsItem for the object. You can use this to
@@ -202,12 +224,15 @@ protected:
   core::Timestamp unstepEvent(core::Timestamp minimumTime, bool& foundGraphicsItem);
 
   ExplanationLogWindow* explanationLogWindow_;
+  FindDialog* findDialog_;
 
 private slots:
   void zoomIn();
   void zoomOut();
   void zoomHome();
-  void zoomTo();
+  void find();
+  void zoomNext();
+  void zoomPrev();
 
 private:
   friend class AeraVisualizerWindowBase;
@@ -259,6 +284,7 @@ private:
   void stepBackButtonClickedImpl();
   void playTimeLabelClickedImpl();
   void timerEvent(QTimerEvent* event) override;
+  void closeEvent(QCloseEvent* event) override;
 
   AeraVisualizerScene* modelsScene_;
   AeraVisualizerScene* mainScene_;
@@ -268,7 +294,9 @@ private:
   QAction* zoomInAction_;
   QAction* zoomOutAction_;
   QAction* zoomHomeAction_;
-  QAction* zoomToAction_;
+  QAction* findAction_;
+  QAction* zoomNextAction_;
+  QAction* zoomPrevAction_;
 
   static const QString SettingsKeyAutoScroll;
   static const QString SettingsKeySimulationsVisible;

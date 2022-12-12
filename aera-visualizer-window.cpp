@@ -82,6 +82,7 @@
 #include "submodules/AERA/r_exec/opcodes.h"
 
 #include "aera-visualizer-window.hpp"
+#include "find-dialog.hpp"
 
 #include <QtWidgets>
 #include <QProgressDialog>
@@ -1909,6 +1910,11 @@ void AeraVisualizerWindow::timerEvent(QTimerEvent* event)
   setSliderToPlayTime();
 }
 
+void AeraVisualizerWindow::closeEvent(QCloseEvent* event) {
+  findDialog_->close();
+  event->accept();
+}
+
 void AeraVisualizerWindow::zoomIn()
 {
   selectedScene_->scaleViewBy(1.09);
@@ -1924,28 +1930,28 @@ void AeraVisualizerWindow::zoomHome()
   selectedScene_->zoomViewHome();
 }
 
-void AeraVisualizerWindow::zoomTo()
+void AeraVisualizerWindow::find()
+{   
+  // Don't open the dialog multiple times, just bring it forward
+  if (!findDialog_->isVisible()) {
+    findDialog_->show();
+  }
+  else {
+    findDialog_->activateWindow();
+  }
+  return;
+}
+
+void AeraVisualizerWindow::zoomNext()
 {
-  bool ok;
-  QString text = QInputDialog::getText(
-    this, tr("Zoom To..."), tr("Enter the object name:"), QLineEdit::Normal, "", &ok);
-  if (!ok || text == "")
-    return;
+  findDialog_->findNext();
+  return;
+}
 
-  auto object = replicodeObjects_.getObject(text.toStdString());
-  if (!object) {
-    QMessageBox::information(this, "Zoom To Error", "Cannot find object " + text, QMessageBox::Ok);
-    return;
-  }
-
-  AeraVisualizerScene* scene;
-  auto item = getAeraGraphicsItem(object, &scene);
-  if (!item || !item->isVisible()) {
-    QMessageBox::information(this, "Zoom To Error", "The item '" + text + "' is not visible", QMessageBox::Ok);
-    return;
-  }
-
-  scene->zoomToItem(item);
+void AeraVisualizerWindow::zoomPrev()
+{
+  findDialog_->findPrev();
+  return;
 }
 
 void AeraVisualizerWindow::createActions()
@@ -1969,10 +1975,20 @@ void AeraVisualizerWindow::createActions()
   zoomHomeAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Home));
   connect(zoomHomeAction_, SIGNAL(triggered()), this, SLOT(zoomHome()));
 
-  zoomToAction_ = new QAction(QIcon(":/images/zoom-to.png"), tr("Zoom To"), this);
-  zoomToAction_->setStatusTip(tr("Zoom to a specific object"));
-  zoomToAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
-  connect(zoomToAction_, SIGNAL(triggered()), this, SLOT(zoomTo()));
+  findAction_ = new QAction(QIcon(":/images/zoom-to.png"), tr("Find"), this);
+  findAction_->setStatusTip(tr("Find a specific object"));
+  findAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
+  connect(findAction_, SIGNAL(triggered()), this, SLOT(find()));
+
+  zoomNextAction_ = new QAction(tr("Zoom Next"), this);
+  zoomNextAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_G));
+  connect(zoomNextAction_, SIGNAL(triggered()), this, SLOT(zoomNext()));
+  this->addAction(zoomNextAction_);
+
+  zoomPrevAction_ = new QAction(tr("Zoom Prev"), this);
+  zoomPrevAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_G));
+  connect(zoomPrevAction_, SIGNAL(triggered()), this, SLOT(zoomPrev()));
+  this->addAction(zoomPrevAction_);
 }
 
 void AeraVisualizerWindow::createMenus()
@@ -1984,7 +2000,7 @@ void AeraVisualizerWindow::createMenus()
   viewMenu->addAction(zoomHomeAction_);
   viewMenu->addAction(zoomInAction_);
   viewMenu->addAction(zoomOutAction_);
-  viewMenu->addAction(zoomToAction_);
+  viewMenu->addAction(findAction_);
 }
 
 void AeraVisualizerWindow::createToolbars()
@@ -1993,7 +2009,7 @@ void AeraVisualizerWindow::createToolbars()
   toolbar->addAction(zoomHomeAction_);
   toolbar->addAction(zoomInAction_);
   toolbar->addAction(zoomOutAction_);
-  toolbar->addAction(zoomToAction_);
+  toolbar->addAction(findAction_);
 
   toolbar->addSeparator();
   // Checkbox for auto scroll
