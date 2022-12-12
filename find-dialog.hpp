@@ -83,14 +83,23 @@ class FindDialog : public QDialog
     */
     FindDialog(AeraVisualizerWindow* parentWindow, ReplicodeObjects& replicodeObjects);
 
+    // The stepEvent and unstepEvent functions in AeraVisualizerWindow use this to notify the
+    // find dialog that it should refresh its matches (don't put much here since it's called A LOT)
+    void reportStepEvent() {
+      timeSteppedFlag_ = true;
+      highlightAllFlag_ = true;
+    }
+
   public slots:
     void findNext();
     void findPrev();
+    void fitAll();
 
   private slots:
     void selectCompletion();
     void nextCompletion();
     void prevCompletion();
+    void highlightAllStateChange(bool newState);
 
   private:
     // Autocompleter wordlist (just a static list of built-in objects for now)
@@ -103,13 +112,26 @@ class FindDialog : public QDialog
     };
 
     // Used to update the status message
-    void FindDialog::setStatus(std::string message, bool alert = false);
+    void setStatus(std::string message, bool alert = false);
 
     // Get a new list of matches when there's a change in search term or visible objects
     void updateMatches();
 
     // Helper functions for buttons
     void highlightMatch(AeraGraphicsItem* item);
+
+    // Apply the highlight all effect. This is separate from the state changed handler
+    // so it can be used by other functions without needing to first update the matches
+    void applyHighlightAll(bool highlight);
+
+    // Use this to wipe highlights and search terms
+    void resetState();
+
+    // Catch this so we can unhighlight everything before closing the dialog
+    void reject();
+
+    // A debugging function for inspecting the matches_ vector
+    void printMatches(QString title);
 
     // References to the main window
     AeraVisualizerWindow* parentWindow_;
@@ -121,6 +143,7 @@ class FindDialog : public QDialog
     QCheckBox* wraparound_;
     QCheckBox* skipHidden_;
     QCheckBox* zoomTo_;
+    QCheckBox* highlightAll_;
     QLabel* status_;
 
     // Used to track autocompleter selection
@@ -131,7 +154,10 @@ class FindDialog : public QDialog
     std::string searchTerm_;
     std::vector<AeraGraphicsItem*> matches_;
     int n_ = 0;
-    Timestamp lastMaxTime_;
+
+    // Flags used by updateMatches
+    bool timeSteppedFlag_;    // Set this when any time change has ocurred
+    bool highlightAllFlag_;   // Set this when any refresh of the highlights needed
 };
 }
 

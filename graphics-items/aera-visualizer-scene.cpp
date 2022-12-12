@@ -450,6 +450,41 @@ AeraGraphicsItem* AeraVisualizerScene::getAeraGraphicsItem(Code* object)
   return 0;
 }
 
+// Redo highlights in case something's changed
+void AeraVisualizerScene::updateHighlights() {
+  double currentScale = views().at(0)->transform().m11();
+  double strokeScale = (std::max)(1.0, 1/currentScale);
+  
+  QPen scaledAllMatches(Qt::blue, 3 * strokeScale);
+  QPen scaledCurrentMatch(Qt::cyan, 3 * strokeScale);
+
+  // Do all the highlights
+  foreach(AeraGraphicsItem * item, allMatches_) {
+    if (item)
+      item->setPen(scaledAllMatches);
+  }
+
+  if (currentMatch_) {
+    currentMatch_->setPen(scaledCurrentMatch);
+  }
+}
+
+// Reset highlights and wipe the list
+void AeraVisualizerScene::unhighlightAll() {
+  foreach(AeraGraphicsItem * item, allMatches_) {
+    if (item)
+      item->restorePen();
+  }
+
+  if (currentMatch_)
+    currentMatch_->restorePen();
+
+  currentMatch_ = NULL;
+  allMatches_.clear();
+
+  updateHighlights();
+}
+
 void AeraVisualizerScene::scaleViewBy(double factor)
 {
   double currentScale = views().at(0)->transform().m11();
@@ -459,6 +494,8 @@ void AeraVisualizerScene::scaleViewBy(double factor)
   view->resetMatrix();
   view->translate(oldMatrix.dx(), oldMatrix.dy());
   view->scale(currentScale *= factor, currentScale *= factor);
+  
+  updateHighlights(); // Any zoom level change must update these
 }
 
 void AeraVisualizerScene::zoomViewHome()
@@ -476,6 +513,8 @@ void AeraVisualizerScene::zoomViewHome()
 
   if (boundingRect.width() != 0)
     views().at(0)->fitInView(boundingRect, Qt::KeepAspectRatio);
+
+  updateHighlights(); // Any zoom level change must update these
 }
 
 void AeraVisualizerScene::centerOnItem(QGraphicsItem *item) {
@@ -511,6 +550,8 @@ void AeraVisualizerScene::zoomToItem(QGraphicsItem* item)
     qGraphicsView->resetMatrix();
     qGraphicsView->scale(minimumZoomLevel, minimumZoomLevel);
   }
+
+  updateHighlights(); // Any zoom level change must update these
 
   focusOnItem(item);
 }

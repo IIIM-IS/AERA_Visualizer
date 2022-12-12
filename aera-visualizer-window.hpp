@@ -189,6 +189,14 @@ public:
 
   static const std::set<int> simulationEventTypes_;
 
+  AeraVisualizerScene* getMainScene() {
+    return mainScene_;
+  }
+
+  AeraVisualizerScene* getModelsScene() {
+    return modelsScene_;
+  }
+
 protected:
   /**
    * Set iNextStepEvent to the index in events_ of the next event that stepEvent will process.
@@ -231,8 +239,9 @@ private slots:
   void zoomOut();
   void zoomHome();
   void find();
-  void zoomNext();
-  void zoomPrev();
+  void findNext();
+  void findPrev();
+  void fitAll();
 
 private:
   friend class AeraVisualizerWindowBase;
@@ -295,8 +304,9 @@ private:
   QAction* zoomOutAction_;
   QAction* zoomHomeAction_;
   QAction* findAction_;
-  QAction* zoomNextAction_;
-  QAction* zoomPrevAction_;
+  QAction* findNextAction_;
+  QAction* findPrevAction_;
+  QAction* fitAllAction_;
 
   static const QString SettingsKeyAutoScroll;
   static const QString SettingsKeySimulationsVisible;

@@ -135,6 +135,16 @@ public:
       flashTimerId_ = startTimer(200);
   }
 
+  // Anything on this list will be highlighted
+  AeraGraphicsItem* currentMatch_ = NULL;
+  std::vector<AeraGraphicsItem*> allMatches_;
+
+  // Adjusts border weight depending on zoom level
+  void updateHighlights();
+
+  // Reset all boxes to normal
+  void unhighlightAll();
+
 protected:
   void mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent) override;
   void mouseReleaseEvent(QGraphicsSceneMouseEvent* mouseEvent) override;
