@@ -164,7 +164,7 @@ public:
    */
   std::string relativeTime(Timestamp timestamp) const
   {
-    return core::Time::ToString_seconds(timestamp - timeReference_);
+    return r_code::Utils::ToString_s_ms_us(timestamp, timeReference_);
   }
 
   /**
