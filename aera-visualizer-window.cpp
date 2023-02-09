@@ -65,6 +65,7 @@
 #include "graphics-items/composite-state-prediction-item.hpp"
 #include "graphics-items/drive-item.hpp"
 #include "graphics-items/instantiated-composite-state-item.hpp"
+#include "graphics-items/instantiated-model-item.hpp"
 #include "graphics-items/io-device-inject-eject-item.hpp"
 #include "graphics-items/model-goal-item.hpp"
 #include "graphics-items/model-imdl-prediction-item.hpp"
@@ -146,6 +147,7 @@ const set<int> AeraVisualizerWindow::newItemEventTypes_ = {
   NewCompositeStateEvent::EVENT_TYPE,
   NewInstantiatedCompositeStateEvent::EVENT_TYPE,
   NewModelEvent::EVENT_TYPE,
+  NewInstantiatedModelEvent::EVENT_TYPE,
   NewPredictedInstantiatedCompositeStateEvent::EVENT_TYPE,
   PredictionResultEvent::EVENT_TYPE,
   PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE,
@@ -159,6 +161,7 @@ const QString AeraVisualizerWindow::SettingsKeySingleStepSimulationVisible = "si
 const QString AeraVisualizerWindow::SettingsKeyNonSimulationsVisible = "nonSimulationsVisible";
 const QString AeraVisualizerWindow::SettingsKeyEssenceFactsVisible = "essenceFactsVisible";
 const QString AeraVisualizerWindow::SettingsKeyInstantiatedCompositeStatesVisible = "instantiatedCompositeStatesVisible";
+const QString AeraVisualizerWindow::SettingsKeyInstantiatedModelsVisible = "instantiatedModelsVisible";
 const QString AeraVisualizerWindow::SettingsKeyPredictedInstantiatedCompositeStatesVisible = "predictedInstantiatedCompositeStatesVisible";
 const QString AeraVisualizerWindow::SettingsKeyRequirementsVisible = "requirementsVisible";
 
@@ -486,6 +489,8 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
 
           events_.push_back(make_shared<ModelMkValPredictionReduction>(
             timestamp, reduction, imdlPredictionEventIndex));
+          events_.push_back(make_shared<NewInstantiatedModelEvent>(
+            timestamp, reduction, factPred));
         }
       }
     }
@@ -1377,6 +1382,19 @@ Timestamp AeraVisualizerWindow::stepEvent(Timestamp maximumTime)
 
       visible = (simulationsCheckBox_->checkState() == Qt::Checked);
     }
+    else if (event->eventType_ == NewInstantiatedModelEvent::EVENT_TYPE) {
+      auto newImdlEvent = (NewInstantiatedModelEvent*)event;
+      newItem = new ImdlItem(newImdlEvent, replicodeObjects_, scene);
+
+      visible = ((instantiatedModelsCheckBox_->checkState() == Qt::Checked));
+
+      // Add an arrow to the 'fact pred' of the 'fact pred fact imdl...'
+      if (newImdlEvent->factPred_) {
+        auto factItem = scene->getAeraGraphicsItem(newImdlEvent->factPred_);
+        if (factItem)
+          scene->addArrow(factItem, newItem);
+      }
+    }
 
     // Add the new item.
     scene->addAeraGraphicsItem(newItem);
@@ -2040,6 +2058,11 @@ void AeraVisualizerWindow::createToolbars()
   connect(instantiatedCompositeStatesCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     mainScene_->setItemsVisible(NewInstantiatedCompositeStateEvent::EVENT_TYPE, state == Qt::Checked); });
   toolbar->addWidget(instantiatedCompositeStatesCheckBox_);
+
+  instantiatedModelsCheckBox_ = new AeraCheckbox("Instantiated Models", SettingsKeyInstantiatedModelsVisible, this);
+  connect(instantiatedModelsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
+    mainScene_->setItemsVisible(NewInstantiatedModelEvent::EVENT_TYPE, state == Qt::Checked); });
+  toolbar->addWidget(instantiatedModelsCheckBox_);
 
   predictedInstantiatedCompositeStatesCheckBox_ = new AeraCheckbox("Pred. Instantiated Comp. States", SettingsKeyPredictedInstantiatedCompositeStatesVisible, this);
   connect(predictedInstantiatedCompositeStatesCheckBox_, &QCheckBox::stateChanged, [=](int state) {

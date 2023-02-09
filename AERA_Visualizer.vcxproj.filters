@@ -271,6 +271,9 @@
     <ClCompile Include="graphics-items\aba-sentence-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
+    <ClCompile Include="graphics-items\instantiated-model-item.cpp">
+      <Filter>graphics-items</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aera-event.hpp" />
@@ -531,6 +534,9 @@
       <Filter>graphics-items</Filter>
     </ClInclude>
     <ClInclude Include="graphics-items\aba-sentence-item.hpp">
+      <Filter>graphics-items</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics-items\instantiated-model-item.hpp">
       <Filter>graphics-items</Filter>
     </ClInclude>
   </ItemGroup>
