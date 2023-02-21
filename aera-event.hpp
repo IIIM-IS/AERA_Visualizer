@@ -303,11 +303,6 @@ public:
   r_code::Code* getFactImdl() { return reduction_->get_reference(MK_RDX_IHLP_REF); }
 
   /**
-   * Get the first value from the reduction, which is the (fact (imdl ..)).
-   */
-  r_code::Code* getFactImdl() { return reduction_->get_reference(reduction_->code(MK_RDX_CODE).asIndex()); }
-
-  /**
    * Get the cause from the reduction_, which is the first item in the set of inputs.
    * \return The cause.
    */
