@@ -277,6 +277,7 @@ private:
   static const QString SettingsKeyNonSimulationsVisible;
   static const QString SettingsKeyEssenceFactsVisible;
   static const QString SettingsKeyInstantiatedCompositeStatesVisible;
+  static const QString SettingsKeyInstantiatedModelsVisible;
   static const QString SettingsKeyPredictedInstantiatedCompositeStatesVisible;
   static const QString SettingsKeyRequirementsVisible;
 
@@ -286,6 +287,7 @@ private:
   AeraCheckbox* nonSimulationsCheckBox_;
   AeraCheckbox* essenceFactsCheckBox_;
   AeraCheckbox* instantiatedCompositeStatesCheckBox_;
+  AeraCheckbox* instantiatedModelsCheckBox_;
   AeraCheckbox* predictedInstantiatedCompositeStatesCheckBox_;
   AeraCheckbox* requirementsCheckBox_;
 

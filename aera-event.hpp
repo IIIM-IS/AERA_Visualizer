@@ -476,6 +476,39 @@ public:
   std::vector<r_code::Code*> inputs_;
 };
 
+/* Use NewInstantiatedModelEvent to display imdls separately from the items
+*  that produce them
+*/
+class NewInstantiatedModelEvent : public AeraEvent {
+public:
+  NewInstantiatedModelEvent(
+    core::Timestamp time, r_code::Code* reduction, r_code::Code* factPred)
+    : AeraEvent(EVENT_TYPE, time, reduction->get_reference(MK_RDX_IHLP_REF)),
+    factPred_(factPred),
+    factImdl_(reduction->get_reference(MK_RDX_IHLP_REF)),
+    imdl_(factImdl_->get_reference(0)),
+    baseModel_(factImdl_->get_reference(0)->get_reference(0)),
+    reduction_(reduction)
+  {}
+
+  static const int EVENT_TYPE = 31;
+
+  r_code::Code* factPred_;        // The fact from 'fact imdl ...'
+  r_code::Code* factImdl_;        // The fact from 'fact imdl ...'
+  r_code::Code* imdl_;            // The imdl from 'fact imdl ...'
+  r_code::Code* baseModel_;       // The mdl that's instantiated
+  r_code::Code* reduction_;       // The reduction that produces everything
+
+  /**
+   * Get the cause from the reduction_, which is the first item in the set of inputs.
+   * \return The cause.
+   */
+  r_code::Code* getCause() {
+    return reduction_->get_reference(
+      reduction_->code(reduction_->code(MK_RDX_INPUTS).asIndex() + 1).asIndex());
+  }
+};
+
 /* Use NewPredictedInstantiatedCompositeStateEvent for a new predicted (non-simulated) icst.
  */
 class NewPredictedInstantiatedCompositeStateEvent : public AeraEvent {
