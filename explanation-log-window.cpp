@@ -109,6 +109,12 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
         " will succeed when instantiated with the given template values.<br><br>";
       appendHtml(explanation);
     });
+    menu->addAction(QString("Zoom to ") + replicodeObjects_.getLabel(requirementFactPred).c_str(),
+      [=]() { mainWindow_->zoomToAeraGraphicsItem(requirementFactPred); });
+    menu->addAction(QString("Focus on ") + replicodeObjects_.getLabel(requirementFactPred).c_str(),
+      [=]() { mainWindow_->focusOnAeraGraphicsItem(requirementFactPred); });
+    menu->addAction(QString("Center on ") + replicodeObjects_.getLabel(requirementFactPred).c_str(),
+      [=]() { mainWindow_->centerOnAeraGraphicsItem(requirementFactPred); });
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
   }
