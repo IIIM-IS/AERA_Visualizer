@@ -54,6 +54,7 @@
 
 #include "aera-visualizer-window.hpp"
 #include "explanation-log-window.hpp"
+#include "find-dialog.hpp"
 #include "submodules/AERA/AERA/settings.h"
 
 #include <QApplication>
@@ -178,6 +179,10 @@ int main(int argv, char *args[])
   explanationLogWindow->setGeometry(left + width, top, explanationLogWindowWidth, height);
   explanationLogWindow->show();
 
+  // Set up the Find dialog but don't display it
+  auto findDialog = new FindDialog(&mainWindow, replicodeObjects);
+  mainWindow.setFindWindow(findDialog);
+  
   progress.close();
   mainWindow.show();
   mainWindow.addStartupItems();

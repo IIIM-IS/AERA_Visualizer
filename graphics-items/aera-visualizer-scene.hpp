@@ -128,6 +128,13 @@ public:
   // The initial value for the flash countdown;
   static const int FLASH_COUNT = 6;
 
+  // Start the flash timer, make it public so it's accessible by the Zoom To dialog
+  void establishFlashTimer()
+  {
+    if (flashTimerId_ == 0)
+      flashTimerId_ = startTimer(200);
+  }
+
 protected:
   void mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent) override;
   void mouseReleaseEvent(QGraphicsSceneMouseEvent* mouseEvent) override;
@@ -177,11 +184,6 @@ private:
    * \return The AeraGraphicsItem, or null if not found.
    */
   AeraGraphicsItem* getAeraGraphicsItem(r_code::Code* object);
-  void establishFlashTimer()
-  {
-    if (flashTimerId_ == 0)
-      flashTimerId_ = startTimer(200);
-  }
 
   /**
    * Find all items with the given event type, and call setItemAndArrowsAndHorizontalLinesVisible.
