@@ -90,16 +90,21 @@ class FindDialog : public QDialog
       highlightAllFlag_ = true;
     }
 
+
   public slots:
     void findNext();
     void findPrev();
     void fitAll();
+
 
   private slots:
     void selectCompletion();
     void nextCompletion();
     void prevCompletion();
     void highlightAllStateChange(bool newState);
+    void hiddenLinkHovered(const QString& link);
+    void hiddenLinkActivated(const QString& link);
+
 
   private:
     // Autocompleter wordlist (just a static list of built-in objects for now)
@@ -111,8 +116,22 @@ class FindDialog : public QDialog
       "S", "M", "G", "mk."
     };
 
+    // Stylesheets for status bar
+    QString alertStyleSheet_ =
+      "QLabel {"
+      " font-style: italic;"
+      " color: red;"
+      "}";
+
+    QString normalStyleSheet_ =
+      "QLabel {"
+      " font-style: italic;"
+      " color: dark-grey;"
+      "}";
+
     // Used to update the status message
-    void setStatus(std::string message, bool alert = false);
+    void setStatus(QString message);
+    void statusAlert(bool alert);
 
     // Get a new list of matches when there's a change in search term or visible objects
     void updateMatches();
@@ -159,6 +178,7 @@ class FindDialog : public QDialog
     bool timeSteppedFlag_;    // Set this when any time change has ocurred
     bool highlightAllFlag_;   // Set this when any refresh of the highlights needed
 };
+
 }
 
 #endif

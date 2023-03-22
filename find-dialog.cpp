@@ -89,6 +89,10 @@ namespace aera_visualizer {
     QPushButton* fitAllButton = new QPushButton("Fit all matches", this);
     status_ = new QLabel(this);
 
+    status_->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    connect(status_, SIGNAL(linkHovered(const QString)), this, SLOT(hiddenLinkHovered(const QString)));
+    connect(status_, SIGNAL(linkActivated(const QString)), this, SLOT(hiddenLinkActivated(const QString)));
+
     // Initialize and build the layouts
     QVBoxLayout* stack = new QVBoxLayout(this);
     QHBoxLayout* inputLayout = new QHBoxLayout(this);
@@ -205,7 +209,8 @@ namespace aera_visualizer {
     // Ignore empty inputs
     if (input_->text().isEmpty()) {
       resetState();
-      setStatus("Input must not be empty", true);
+      setStatus("Input must not be empty");
+      statusAlert(true);
       return;
     }
 
@@ -252,7 +257,8 @@ namespace aera_visualizer {
 
     // Handle no matches
     if (matches_.empty()) {
-      setStatus("Cannot find \"" + searchTerm_ + "\"", true);
+      setStatus("Cannot find \"" + QString::fromStdString(searchTerm_) + "\"");
+      statusAlert(true);
       n_ = 0;
       return;
     }
@@ -282,8 +288,10 @@ namespace aera_visualizer {
   void FindDialog::fitAll() {
     // In case something changes
     updateMatches();
-    if (!matches_.empty())
-      setStatus(std::to_string(n_ + 1) + " out of " + std::to_string(matches_.size()) + " matches");
+    if (!matches_.empty()) {
+      setStatus(QString::number(n_ + 1) + " out of " + QString::number(matches_.size()) + " matches");
+      statusAlert(false);
+    }
 
     // Get the bounding rect of all matches
     QRectF boundingRect;
@@ -318,17 +326,19 @@ namespace aera_visualizer {
     if (n_ >= matches_.size()){
       if (wraparound_->isChecked()) {
         n_ = 0;
-        setStatus(status_->text().toStdString()); // Clear any alert colors
+        statusAlert(false); // Clear any alert colors
       }
       else {
-        if (!matches_.empty())
-          setStatus("Reached end of output", true);
+        if (!matches_.empty()) {
+          setStatus("Reached end of output");
+          statusAlert(true);
+        }
         n_ = matches_.size();
         return;
       }
     }
     else {
-      setStatus(status_->text().toStdString()); // Clear any alert colors
+      statusAlert(false); // Clear any alert colors
     }
 
     // Get the current match
@@ -337,14 +347,21 @@ namespace aera_visualizer {
 
     // Make sure an item was actually found
     if (!item) {
-      setStatus("Could not get item for \"" + label + "\"", true);
+      setStatus("Could not get item for \"" + QString::fromStdString(label) + "\"");
       return;
     }
 
     // Deal with invisible items
     if (!item->isVisible()) {
       if (!skipHidden_->isChecked()) {
-        setStatus("\"" + label + "\" is invisible", true);
+        setStatus(item->makeHtmlLink(item->getAeraEvent()->object_, replicodeObjects_) + " is invisible");
+
+        // Unhighlight the last item
+        if (item->getParentScene()->currentMatch_) {
+          item->getParentScene()->currentMatch_->restorePen();
+          item->getParentScene()->currentMatch_ = NULL;
+          item->getParentScene()->updateHighlights();
+        }
       }
       else
         findNext();
@@ -372,17 +389,19 @@ namespace aera_visualizer {
     if (n_ < 0) {
       if (wraparound_->isChecked()) {
         n_ = matches_.size() - 1;
-        setStatus(status_->text().toStdString()); // Clear any alert colors
+        statusAlert(false); // Clear any alert colors
       }
       else {
-        if (!matches_.empty())
-          setStatus("Reached beginning of output", true);
+        if (!matches_.empty()) {
+          setStatus("Reached beginning of output");
+          statusAlert(true);
+        }
         n_ = 0;
         return;
       }
     }
     else {
-      setStatus(status_->text().toStdString()); // Clear any alert colors
+      statusAlert(false); // Clear any alert colors
     }
 
     // Get the current match
@@ -391,14 +410,21 @@ namespace aera_visualizer {
 
     // Make sure an item was actually found
     if (!item) {
-      setStatus("Could not get item for \"" + label + "\"", true);
+      setStatus("Could not get item for \"" + QString::fromStdString(label) + "\"");
       return;
     }
 
     // Deal with invisible items
     if (!item->isVisible()) {
       if (!skipHidden_->isChecked()) {
-        setStatus("\"" + label + "\" is invisible", true);
+        setStatus(item->makeHtmlLink(item->getAeraEvent()->object_, replicodeObjects_) + " is invisible");
+
+        // Unhighlight the last item
+        if (item->getParentScene()->currentMatch_) {
+          item->getParentScene()->currentMatch_->restorePen();
+          item->getParentScene()->currentMatch_ = NULL;
+          item->getParentScene()->updateHighlights();
+        }
       }
       else
         findPrev();
@@ -412,32 +438,57 @@ namespace aera_visualizer {
 
 
   // Update the status message
-  void FindDialog::setStatus(std::string message, bool alert) {
-    // Trim the label if it's too long (it's not a perfect solution but it works)
-    if (message.length() > 31) {
-      message = message.substr(0, 31);
-      message.append("...");
+  void FindDialog::setStatus(QString message) {
+    QFontMetrics metrics(status_->font());
+    QString elidedMessage;
+
+    // If there's a URL, we'll need to elide it specially
+    if (message.contains("</a>")) {
+      smatch regexmatches;
+      std::string msg = message.toStdString();
+
+      // Extract the tag from the message
+      regex_search(msg, regexmatches, regex("<a href.*\\\">"));
+      QString tag = QString::fromStdString(regexmatches[0].str());
+      message.replace(tag, "");
+
+      // Extract the name and the tail end of the message
+      int nameEnd = message.indexOf("</a>", 0);
+      QString name = message.left(nameEnd);
+      QString tail = message.mid(nameEnd + 4, message.length());
+
+      // Elide the name
+      QString elidedName = metrics.elidedText(name, Qt::ElideRight, status_->width() - metrics.width(tail));     
+
+      // Put it back together
+      elidedMessage = tag + elidedName + "</a>" + tail;
     }
 
+    // Normal messages can be elided simply
+    else
+      elidedMessage = metrics.elidedText(message, Qt::ElideRight, status_->width());
+    
     // Display the message
-    status_->setText(QString::fromStdString(message));
+    status_->setText(elidedMessage);
+  }
 
-    // Change colors and focus the window if there's an error/alert
+
+  // Change colors and focus the window if there's an error/alert
+  void FindDialog::statusAlert(bool alert) {
     if (alert) {
-      status_->setStyleSheet("font-style: italic; color: red;");
+      status_->setStyleSheet(alertStyleSheet_);
       this->activateWindow();
     }
     else {
-      status_->setStyleSheet("font-style: italic; color: dark-grey;");
+      status_->setStyleSheet(normalStyleSheet_);
     }
-    return;
   }
 
 
   // Highlight the current match
   void FindDialog::highlightMatch(AeraGraphicsItem* item) {
     // Update the progress label (counting from 1 not 0)
-    setStatus(std::to_string(n_ + 1) + " out of " + std::to_string(matches_.size()) + " matches");
+    setStatus(QString::number(n_ + 1) + " out of " + QString::number(matches_.size()) + " matches");
 
     // Highlight one specific item
     if (!highlightAll_->isChecked()) {
@@ -476,7 +527,7 @@ namespace aera_visualizer {
 
     // Update the status message if needed
     if (!matches_.empty())
-      setStatus(std::to_string(n_ + 1) + " out of " + std::to_string(matches_.size()) + " matches");
+      setStatus(QString::number(n_ + 1) + " out of " + QString::number(matches_.size()) + " matches");
   }
 
 
@@ -519,6 +570,7 @@ namespace aera_visualizer {
     matches_.clear();
     n_ = 0;
     setStatus("");
+    statusAlert(false);
   }
 
 
@@ -541,4 +593,60 @@ namespace aera_visualizer {
 
     QMessageBox::information(this, title, printVector);
   }
+  
+
+  // Borrow some code from AeraGraphicsItem to generate a tooltip when the user hovers over a link
+  void FindDialog::hiddenLinkHovered(const QString& link) {
+    if (link.startsWith("#detail_oid-")) {
+      uint64 detail_oid = link.mid(12).toULongLong();
+      auto object = replicodeObjects_.getObjectByDetailOid(detail_oid);
+      if (object) {
+        AeraGraphicsItem* aeraGraphicsItem = parentWindow_->getAeraGraphicsItem(object);
+        if (aeraGraphicsItem) {
+          status_->setToolTip(aeraGraphicsItem->getHtml());
+          //aeraGraphicsItem->hovere
+        }
+      }
+    }
+    else {
+      status_->setToolTip("");
+    }
+  }
+
+  // Borrow some code to generate a present a "Zoom To, Focus, Center" menu for hidden objects
+  void FindDialog::hiddenLinkActivated(const QString& link) {
+    if (link.startsWith("#detail_oid-")) {
+      uint64 detail_oid = link.mid(12).toULongLong();
+      auto object = replicodeObjects_.getObjectByDetailOid(detail_oid);
+      if (object) {
+        AeraGraphicsItem* aeraGraphicsItem = parentWindow_->getAeraGraphicsItem(object);
+        if (aeraGraphicsItem) {
+          auto menu = new QMenu();
+
+          menu->addAction("Zoom to This", [=]() {
+            aeraGraphicsItem->getParentScene()->zoomToItem(aeraGraphicsItem);
+            aeraGraphicsItem->getParentScene()->currentMatch_ = aeraGraphicsItem;
+            aeraGraphicsItem->getParentScene()->updateHighlights();
+          });
+          menu->addAction("Focus on This", [=]() {
+            aeraGraphicsItem->getParentScene()->focusOnItem(aeraGraphicsItem);
+            aeraGraphicsItem->getParentScene()->currentMatch_ = aeraGraphicsItem;
+            aeraGraphicsItem->getParentScene()->updateHighlights(); 
+          });
+          menu->addAction("Center on This", [=]() {
+            aeraGraphicsItem->getParentScene()->centerOnItem(aeraGraphicsItem);
+            aeraGraphicsItem->getParentScene()->currentMatch_ = aeraGraphicsItem;
+            aeraGraphicsItem->getParentScene()->updateHighlights();
+          });
+
+          menu->exec(QCursor::pos() - QPoint(10, 10));
+          delete menu;
+        }
+      }
+    }
+    else {
+      status_->setToolTip("");
+    }
+  }
+
 }
