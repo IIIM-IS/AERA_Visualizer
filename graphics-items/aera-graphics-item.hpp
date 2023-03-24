@@ -222,6 +222,18 @@ public:
     return parent_;
   }
 
+  /* Helper functions to save/restore original pen when we need to highlight this item */
+  void savePen() {
+    if (borderFlashCountdown_ > 0) // Don't restore the highlight pen
+      savedPen_ = getBorderNoHighlightPen();
+    else
+      savedPen_ = pen();
+  }
+
+  void restorePen() {
+    setPen(savedPen_);
+  }
+
   static const QString DownArrowHtml;
   static const QString RightArrowHtml;
   static const QString RightDoubleArrowHtml;
@@ -322,6 +334,7 @@ private:
   QList<Arrow*> arrows_;
   QList<AnchoredHorizontalLine*> horizontalLines_;
   QColor textItemTextColor_;
+  QPen savedPen_;
 };
 
 }

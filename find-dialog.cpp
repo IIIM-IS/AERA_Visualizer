@@ -83,8 +83,10 @@ namespace aera_visualizer {
     wraparound_ = new QCheckBox("&Wrap around", this);
     skipHidden_ = new QCheckBox("Skip &hidden items", this);
     zoomTo_ = new QCheckBox("&Zoom to items", this);
-    QPushButton* findNext = new QPushButton("Find Next", this);
-    QPushButton* findPrev = new QPushButton("Find Prev", this);
+    highlightAll_ = new QCheckBox("Highlight &all", this);
+    QPushButton* findNextButton = new QPushButton("Find Next", this);
+    QPushButton* findPrevButton = new QPushButton("Find Prev", this);
+    QPushButton* fitAllButton = new QPushButton("Fit all matches", this);
     status_ = new QLabel(this);
 
     // Initialize and build the layouts
@@ -103,8 +105,10 @@ namespace aera_visualizer {
     optionsLayout->addWidget(wraparound_);
     optionsLayout->addWidget(skipHidden_);
     optionsLayout->addWidget(zoomTo_);
-    buttonsLayout->addWidget(findNext);
-    buttonsLayout->addWidget(findPrev);
+    optionsLayout->addWidget(highlightAll_);
+    buttonsLayout->addWidget(findNextButton);
+    buttonsLayout->addWidget(findPrevButton);
+    buttonsLayout->addWidget(fitAllButton);
     buttonsLayout->addStretch();
 
     // Set up some initial values and placeholders
@@ -138,16 +142,20 @@ namespace aera_visualizer {
     // Connect the Find Next button and action
     QAction* findNextAction = new QAction(tr("Find Next"), this);
     findNextAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_G));
-    connect(findNext, SIGNAL(clicked()), this, SLOT(findNext()));
+    connect(findNextButton, SIGNAL(clicked()), this, SLOT(findNext()));
     connect(findNextAction, SIGNAL(triggered()), this, SLOT(findNext()));
     this->addAction(findNextAction);
 
     // Connect the Find Prev button and action
     QAction* findPrevAction = new QAction(tr("Find Prev"), this);
     findPrevAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_G));
-    connect(findPrev, SIGNAL(clicked()), this, SLOT(findPrev()));
+    connect(findPrevButton, SIGNAL(clicked()), this, SLOT(findPrev()));
     connect(findPrevAction, SIGNAL(triggered()), this, SLOT(findPrev()));
     this->addAction(findPrevAction);
+
+    // Connect the Fit All and Highlight All functions
+    connect(fitAllButton, SIGNAL(clicked()), this, SLOT(fitAll()));
+    connect(highlightAll_, SIGNAL(clicked(bool)), this, SLOT(highlightAllStateChange(bool)));
   }
 
 
@@ -182,6 +190,7 @@ namespace aera_visualizer {
     return;
   }
 
+
   // A helper function so we can sort items chronologically and by OID
   bool sortHelper(AeraGraphicsItem* item1, AeraGraphicsItem* item2) {
     if (item1->getAeraEvent()->time_ != item2->getAeraEvent()->time_)
@@ -190,16 +199,24 @@ namespace aera_visualizer {
       return item1->getAeraEvent()->object_->get_oid() < item2->getAeraEvent()->object_->get_oid();
   }
 
+
   // Find objects with labels that fit the input and have valid AeraGraphicsItems
   void FindDialog::updateMatches() {
-    // Check if the search term has changed
+    // Ignore empty inputs
+    if (input_->text().isEmpty()) {
+      resetState();
+      setStatus("Input must not be empty", true);
+      return;
+    }
+
+    // Skip the refresh if any of these conditions are true
+    if (input_->text().toStdString() == lastSearch_ && !timeSteppedFlag_ && !highlightAllFlag_)
+      return;
+
+    // Get the new search term if necessary
     if (input_->text().toStdString() != lastSearch_) {
       status_->setText("");                         // Clear the status message
       searchTerm_ = input_->text().toStdString();   // Take in new input
-
-      // Ignore empty inputs
-      if (searchTerm_ == "")
-        return;
 
       // Strip whitespace and update the input
       int firstCharacter = searchTerm_.find_first_not_of(" ");
@@ -209,15 +226,12 @@ namespace aera_visualizer {
 
       lastSearch_ = searchTerm_;  // Record this as the most recent search term
       n_ = 0;                     // Restart Find scan
+      highlightAllFlag_ = true;   // This'll need to be redone
     }
 
-    // If the search term and time are the same, don't update
-    else if (parentWindow_->getFrameMaxTime() == lastMaxTime_) {
-      return;
-    }
-
-    // Record this so we can check if the time changed
-    lastMaxTime_ = parentWindow_->getFrameMaxTime();
+    // Reset highlights
+    parentWindow_->getMainScene()->unhighlightAll();
+    parentWindow_->getModelsScene()->unhighlightAll();
 
     // Search for matching object labels
     std::vector<std::string> labels = replicodeObjects_.getObjectsByLabelSubstring(searchTerm_);
@@ -239,35 +253,66 @@ namespace aera_visualizer {
     // Handle no matches
     if (matches_.empty()) {
       setStatus("Cannot find \"" + searchTerm_ + "\"", true);
+      n_ = 0;
       return;
     }
 
-    // Sort items and return
-    sort(matches_.begin(), matches_.end(), sortHelper);
+    // Sort the matches
+    else {
+      sort(matches_.begin(), matches_.end(), sortHelper);
+    }
+
+    // If time was rolled back, go back to the most recent match that's still visible
+    n_ = (std::min)(n_, (int) matches_.size() - 1);
+
+    // Reapply "Highlight all" effect if requested
+    if (highlightAllFlag_) {
+      applyHighlightAll(highlightAll_->isChecked());
+      highlightAllFlag_ = false;
+    }
+
+    // Clear timeSteppedFlag_
+    timeSteppedFlag_ = false;
+
     return;
   }
 
 
-  void FindDialog::highlightMatch(AeraGraphicsItem* item) {
-    // Update the progress label (counting from 1 not 0)
-    setStatus(std::to_string(n_ + 1) + " out of " + std::to_string(matches_.size()) + " matches");
+  // Fit all matches in the frame (same thing as AeraVisualizerScene::zoomViewHome())
+  void FindDialog::fitAll() {
+    // In case something changes
+    updateMatches();
+    if (!matches_.empty())
+      setStatus(std::to_string(n_ + 1) + " out of " + std::to_string(matches_.size()) + " matches");
 
-    // Flash found items, set the flash timer to twice as long to so it's easier to see
-    item->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT * 2;
-    item->getParentScene()->establishFlashTimer();
+    // Get the bounding rect of all matches
+    QRectF boundingRect;
+    foreach(QGraphicsItem * item, matches_) {
+      if (dynamic_cast<AeraGraphicsItem*>(item) && item->isVisible()) {
+        if (boundingRect.width() == 0)
+          boundingRect = item->sceneBoundingRect();
+        else
+          boundingRect = boundingRect.united(item->sceneBoundingRect());
+      }
+    }
 
-    // Zoom to the item if desired
-    if (zoomTo_->isChecked()) {
-      item->focus();
-      item->getParentScene()->zoomToItem(item);
+    if (boundingRect.width() != 0) {
+      matches_.at(0)->getParentScene()->views().at(0)->fitInView(boundingRect, Qt::KeepAspectRatio);
+      matches_.at(0)->getParentScene()->updateHighlights();
     }
   }
 
 
   // Look for the next object in the list that matches the name entered
   void FindDialog::findNext() {
-    n_++;             // Go to the next match 
+    n_++;             // Increment first
     updateMatches();  // Update the matches if necessary
+
+    // Stop if there are no matches to go through
+    if (matches_.empty()) {
+      n_ = 0;
+      return;
+    }
 
     // Check if we've run out of (visible) matches and wrap around if applicable
     if (n_ >= matches_.size()){
@@ -276,7 +321,8 @@ namespace aera_visualizer {
         setStatus(status_->text().toStdString()); // Clear any alert colors
       }
       else {
-        setStatus("Reached end of output", true);
+        if (!matches_.empty())
+          setStatus("Reached end of output", true);
         n_ = matches_.size();
         return;
       }
@@ -297,8 +343,9 @@ namespace aera_visualizer {
 
     // Deal with invisible items
     if (!item->isVisible()) {
-      if (!skipHidden_->isChecked())
+      if (!skipHidden_->isChecked()) {
         setStatus("\"" + label + "\" is invisible", true);
+      }
       else
         findNext();
     }
@@ -312,8 +359,14 @@ namespace aera_visualizer {
 
   // Look for the last object in the list that matches the name entered
   void FindDialog::findPrev() {
-    n_--;             // Go to the last match
+    n_--;             // Decrement first
     updateMatches();  // Update the matches if necessary
+
+    // Stop if there are no matches to go through
+    if (matches_.empty()) {
+      n_ = 0;
+      return;
+    }
 
     // Check if we've run out of (visible) matches and wrap around if applicable
     if (n_ < 0) {
@@ -322,8 +375,9 @@ namespace aera_visualizer {
         setStatus(status_->text().toStdString()); // Clear any alert colors
       }
       else {
-        setStatus("Reached beginning of output", true);
-        n_ = -1;
+        if (!matches_.empty())
+          setStatus("Reached beginning of output", true);
+        n_ = 0;
         return;
       }
     }
@@ -343,8 +397,9 @@ namespace aera_visualizer {
 
     // Deal with invisible items
     if (!item->isVisible()) {
-      if (!skipHidden_->isChecked())
+      if (!skipHidden_->isChecked()) {
         setStatus("\"" + label + "\" is invisible", true);
+      }
       else
         findPrev();
     }
@@ -376,5 +431,114 @@ namespace aera_visualizer {
       status_->setStyleSheet("font-style: italic; color: dark-grey;");
     }
     return;
+  }
+
+
+  // Highlight the current match
+  void FindDialog::highlightMatch(AeraGraphicsItem* item) {
+    // Update the progress label (counting from 1 not 0)
+    setStatus(std::to_string(n_ + 1) + " out of " + std::to_string(matches_.size()) + " matches");
+
+    // Highlight one specific item
+    if (!highlightAll_->isChecked()) {
+      // Unhighlight the old item
+      if (item->getParentScene()->currentMatch_)
+        item->getParentScene()->currentMatch_->restorePen();
+
+      // Highlight the new item
+      item->getParentScene()->currentMatch_ = item;
+      item->savePen();
+
+    }
+    else {
+      item->getParentScene()->currentMatch_ = item;
+    }
+
+    // Zoom to the item if desired
+    if (zoomTo_->isChecked()) {
+      item->focus();
+      item->getParentScene()->zoomToItem(item);
+    }
+    else {
+      item->getParentScene()->updateHighlights();
+    }
+  }
+
+
+  // Handle state changes on the highlightAll_ checkbox. This checks for matches first
+  // just in case the highlightAll_ checkbox is activated after a time/search term change
+  void FindDialog::highlightAllStateChange(bool newState) {
+
+    // Set this flag so the highlight effect is applied in updateMatches
+    highlightAllFlag_ = true;
+    // Just in case time has changed or something
+    updateMatches();
+
+    // Update the status message if needed
+    if (!matches_.empty())
+      setStatus(std::to_string(n_ + 1) + " out of " + std::to_string(matches_.size()) + " matches");
+  }
+
+
+  // Apply the highlight all effect. This doesn't refresh matches first so it can be used anywhere
+  void FindDialog::applyHighlightAll(bool highlight) {   
+    // Wipe all highlights
+    if (highlight == false) {
+      parentWindow_->getMainScene()->unhighlightAll();
+      parentWindow_->getModelsScene()->unhighlightAll();
+    }
+
+    // Save each item's pen and add it to the relevant list
+    else {
+      foreach(AeraGraphicsItem * item, matches_) {
+        if (n_ < matches_.size() && item != matches_.at(n_))
+          item->savePen();
+        item->getParentScene()->allMatches_.push_back(item);
+        item->borderFlashCountdown_ = 0; // Don't flash if highlighting
+      }
+    }
+
+    // Reapply current highlight if needed
+    if (n_ < matches_.size() && n_ >= 0)
+      matches_.at(n_)->getParentScene()->currentMatch_ = matches_.at(n_);
+
+    // Draw the highlights
+    parentWindow_->getMainScene()->updateHighlights();
+    parentWindow_->getModelsScene()->updateHighlights();
+  }
+
+
+  // Wipe highlights and search status
+  void FindDialog::resetState() {
+    parentWindow_->getModelsScene()->unhighlightAll();
+    parentWindow_->getMainScene()->unhighlightAll();
+
+    lastSearch_ = "";
+    input_->setText("");
+
+    matches_.clear();
+    n_ = 0;
+    setStatus("");
+  }
+
+
+  // Reset everything on close
+  void FindDialog::reject() {
+    resetState();
+    QDialog::reject();
+  }
+
+
+  // A simple function for debugging
+  void FindDialog::printMatches(QString title = "Contents of matches_") {
+    QString printVector = "";
+
+    for (int i = 0; i < matches_.size(); i++) {
+      AeraGraphicsItem* item = matches_.at(i);
+      std::string label = replicodeObjects_.getLabel(item->getAeraEvent()->object_);
+      printVector += QString::fromStdString(std::to_string(i)) + " -> " + QString::fromStdString(label) + "\n";
+    }
+
+    QMessageBox::information(this, title, printVector);
   }
 }

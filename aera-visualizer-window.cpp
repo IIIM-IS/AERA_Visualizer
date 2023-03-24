@@ -992,6 +992,9 @@ Timestamp AeraVisualizerWindow::stepEvent(Timestamp maximumTime)
   if (event->time_ > maximumTime)
     return Utils_MaxTime;
 
+  // Report the change in time to the find dialog
+  findDialog_->reportStepEvent();
+
   auto relativeTime = duration_cast<microseconds>(event->time_ - replicodeObjects_.getTimeReference());
   auto frameStartTime = event->time_ - (relativeTime % replicodeObjects_.getSamplingPeriod());
   bool isNewFrame = (iNextEvent_ <= 0 || frameStartTime > events_[iNextEvent_ - 1]->time_);
@@ -1554,6 +1557,9 @@ Timestamp AeraVisualizerWindow::unstepEvent(Timestamp minimumTime, bool& foundGr
 
   --iNextEvent_;
 
+  // Report the change in time to the find dialog
+  findDialog_->reportStepEvent();
+
   AeraEvent* event = events_[iNextEvent_].get();
   if (newItemEventTypes_.find(event->eventType_) != newItemEventTypes_.end()) {
     AeraVisualizerScene* scene;
@@ -1570,6 +1576,15 @@ Timestamp AeraVisualizerWindow::unstepEvent(Timestamp minimumTime, bool& foundGr
       foundGraphicsItem = true;
       aeraGraphicsItem->removeArrowsAndHorizontalLines();
       scene->removeAeraGraphicsItem(aeraGraphicsItem);
+
+      // If this item was highlighted, remove it and null it out
+      if (scene->currentMatch_ == aeraGraphicsItem)
+        scene->currentMatch_ = NULL;
+      for (int i = 0; i < scene->allMatches_.size(); i++) {
+        if (scene->allMatches_.at(i) == aeraGraphicsItem)
+          scene->allMatches_.erase(scene->allMatches_.begin() + i);
+      }
+
       delete aeraGraphicsItem;
     }
   }
@@ -1931,7 +1946,7 @@ void AeraVisualizerWindow::zoomHome()
 }
 
 void AeraVisualizerWindow::find()
-{   
+{
   // Don't open the dialog multiple times, just bring it forward
   if (!findDialog_->isVisible()) {
     findDialog_->show();
@@ -1942,15 +1957,20 @@ void AeraVisualizerWindow::find()
   return;
 }
 
-void AeraVisualizerWindow::zoomNext()
+void AeraVisualizerWindow::findNext()
 {
   findDialog_->findNext();
   return;
 }
 
-void AeraVisualizerWindow::zoomPrev()
+void AeraVisualizerWindow::findPrev()
 {
   findDialog_->findPrev();
+  return;
+}
+
+void AeraVisualizerWindow::fitAll() {
+  findDialog_->fitAll();
   return;
 }
 
@@ -1980,15 +2000,20 @@ void AeraVisualizerWindow::createActions()
   findAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
   connect(findAction_, SIGNAL(triggered()), this, SLOT(find()));
 
-  zoomNextAction_ = new QAction(tr("Zoom Next"), this);
-  zoomNextAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_G));
-  connect(zoomNextAction_, SIGNAL(triggered()), this, SLOT(zoomNext()));
-  this->addAction(zoomNextAction_);
+  findNextAction_ = new QAction(tr("Find Next"), this);
+  findNextAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_G));
+  connect(findNextAction_, SIGNAL(triggered()), this, SLOT(findNext()));
+  this->addAction(findNextAction_);
 
-  zoomPrevAction_ = new QAction(tr("Zoom Prev"), this);
-  zoomPrevAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_G));
-  connect(zoomPrevAction_, SIGNAL(triggered()), this, SLOT(zoomPrev()));
-  this->addAction(zoomPrevAction_);
+  findPrevAction_ = new QAction(tr("Find Prev"), this);
+  findPrevAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_G));
+  connect(findPrevAction_, SIGNAL(triggered()), this, SLOT(findPrev()));
+  this->addAction(findPrevAction_);
+
+  fitAllAction_ = new QAction(tr("Fit All Matches"), this);
+  fitAllAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Home));
+  connect(fitAllAction_, SIGNAL(triggered()), this, SLOT(fitAll()));
+  this->addAction(fitAllAction_);
 }
 
 void AeraVisualizerWindow::createMenus()
@@ -2001,6 +2026,12 @@ void AeraVisualizerWindow::createMenus()
   viewMenu->addAction(zoomInAction_);
   viewMenu->addAction(zoomOutAction_);
   viewMenu->addAction(findAction_);
+
+  QMenu* findMenu = menuBar()->addMenu(tr("Fin&d"));
+  findMenu->addAction(findAction_);
+  findMenu->addAction(findNextAction_);
+  findMenu->addAction(findPrevAction_);
+  findMenu->addAction(fitAllAction_);
 }
 
 void AeraVisualizerWindow::createToolbars()
