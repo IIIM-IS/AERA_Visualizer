@@ -270,9 +270,7 @@ public:
    * \param time The reduction time.
    * \param factPred The (fact (pred (fact (imdl ...)))).
    * \param predictingModel The model which made the prediction.
-   * TODO: Get this from an mk.rdx, which Replicode currently doesn't make.
    * \param cause The input cause for the prediction.
-   * TODO: Get this from a mk.rdx, which Replicode currently doesn't make.
    */
   ModelImdlPredictionEvent(core::Timestamp time, r_code::Code* factPred,
     r_code::Code* predictingModel, r_code::Code* cause)
@@ -297,14 +295,11 @@ public:
    * (mk.rdx fact_imdl [fact_cause fact_requirement] [fact_pred]) .
    * \param time The reduction time.
    * \param reduction The model reduction which points to the (fact (pred ...)) and the cause.
-   * \param imdlPredictionEventIndex The index in the events_ list of the previous prediction whose 
-   * object_ is this->getRequirement(), or -1 if this->getRequirement() is NULL.
-   * TODO: This should be the detail_oid of an mk.rdx, which Replicode currently doesn't make.
    */
-  ModelMkValPredictionReduction(core::Timestamp time, r_code::Code* reduction, int imdlPredictionEventIndex)
+  ModelMkValPredictionReduction(core::Timestamp time, r_code::Code* reduction)
     // The prediction is the first item in the set of productions.
     : AeraEvent(EVENT_TYPE, time, getFirstProduction(reduction)),
-    reduction_(reduction), imdlPredictionEventIndex_(imdlPredictionEventIndex)
+    reduction_(reduction)
   {}
 
   static const int EVENT_TYPE = 12;

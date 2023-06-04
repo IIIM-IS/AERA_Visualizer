@@ -475,21 +475,7 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
         auto valueOpcode = value->code(0).asOpcode();
 
         if (valueOpcode == Opcodes::MkVal) {
-          int imdlPredictionEventIndex = -1;
-          auto requirement = AeraEvent::getSecondInput(reduction);
-          if (requirement) {
-            // Search events_ backwards for the previous prediction whose object_ is this->getRequirement().
-            for (int i = events_.size() - 1; i >= 0; --i) {
-              if (events_[i]->eventType_ == ModelImdlPredictionEvent::EVENT_TYPE &&
-                  ((ModelImdlPredictionEvent*)events_[i].get())->object_ == requirement) {
-                imdlPredictionEventIndex = i;
-                break;
-              }
-            }
-          }
-
-          events_.push_back(make_shared<ModelMkValPredictionReduction>(
-            timestamp, reduction, imdlPredictionEventIndex));
+          events_.push_back(make_shared<ModelMkValPredictionReduction>(timestamp, reduction));
           events_.push_back(make_shared<NewInstantiatedModelEvent>(
             timestamp, reduction, factPred));
         }
