@@ -631,6 +631,12 @@ void AeraVisualizerScene::wheelEvent(QGraphicsSceneWheelEvent* event)
   if (event->modifiers() == Qt::ControlModifier) {
     // Accept the event to override other behavior.
     event->accept();
+    QGraphicsView* view = views().at(0);
+    
+    // Zoom around the mouse
+    view->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+
+    // Scale
     scaleViewBy(pow((double)2, event->delta() / 1000.0));
   }
 }

@@ -1932,11 +1932,21 @@ void AeraVisualizerWindow::closeEvent(QCloseEvent* event) {
 
 void AeraVisualizerWindow::zoomIn()
 {
+  // Make sure zoom is focused on the center of the screen
+  QGraphicsView* view = selectedScene_->views().at(0);
+  view->setTransformationAnchor(QGraphicsView::AnchorViewCenter);
+
+  // Zoom in
   selectedScene_->scaleViewBy(1.09);
 }
 
 void AeraVisualizerWindow::zoomOut()
 {
+  // Make sure zoom is focused on the center of the screen
+  QGraphicsView* view = selectedScene_->views().at(0);
+  view->setTransformationAnchor(QGraphicsView::AnchorViewCenter);
+
+  // Zoom out
   selectedScene_->scaleViewBy(1 / 1.09);
 }
 
