@@ -89,7 +89,6 @@ void InstantiatedCompositeStateItem::getIcstOrImdlValues(
   templateValues = QStringList();
   exposedValues = QStringList();
 
-  smatch matches;
   // Debug: Handle the case when a value is also an array or has a string with space or '[' or ']'.
   // (icst cst_61 |[] [b 20] false 1)
   QRegExp ihlpRegEx("^\\(i\\w+ \\w+ \\|?\\[([^\\]]*)\\] \\|?\\[([^\\]]*)\\] [\\w:]+ [\\w:]+\\)$");
