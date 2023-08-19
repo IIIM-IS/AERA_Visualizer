@@ -293,9 +293,9 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
   regex simulationPromotedSimulatedPredictionDefeatedRegex("^promoted simulated fact (\\d+) with DefeasibleValidity\\((\\d+)\\) defeated by fact (\\d+)");
   // Step 0: Case init: S: 304
   regex abaCaseInitStepRegex("^Step (\\d+): Case init: S: (\\d+)$");
-  // Step 10: Case 1.(i): A: 314, Contrary 322, NewGId 1
+  // Step 10: Case 1.(i): A: 314, Contrary 322 has body? Y, NewGId 1
   // TODO: Handle when the Contrary already exists.
-  regex abaCase1iStepRegex("^Step (\\d+): Case 1\\.\\(i\\): A: (\\d+), Contrary (\\d+), NewGId (\\d+)");
+  regex abaCase1iStepRegex("^Step (\\d+): Case 1\\.\\(i\\): A: (\\d+), Contrary (\\d+) has body\\? (\\w), NewGId (\\d+)");
   // Step 10: Case 1.(ii): S: 304, NewUnMarkedAs: [314 316], NewUnMarkedNonAs: [312], ExistingBody: [310]
   regex abaCase1iiStepRegex("^Step (\\d+): Case 1\\.\\(ii\\): S: (\\d+), NewUnMarkedAs: \\[(.*)\\], NewUnMarkedNonAs: \\[(.*)\\], ExistingBody: \\[(.*)\\]$");
   // Step 10: Case 2.(ia): A: 904, GId 1
@@ -664,7 +664,8 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
     else if (regex_search(lineAfterTimestamp, matches, abaCase1iStepRegex)) {
       auto assumption = replicodeObjects_.getObject(stoul(matches[2].str()));
       auto contrary = replicodeObjects_.getObject(stoul(matches[3].str()));
-      int newGId = stoul(matches[4].str());
+      bool contraryHasBody = (matches[4].str() == "Y");
+      int newGId = stoul(matches[5].str());
 
       if (assumption && newGId > 0 && contrary) {
         abaNewStep(stoul(matches[1].str()));
