@@ -51,6 +51,8 @@
 //_/_/ 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
+#include <fstream>
+#include <sstream>
 #include <regex>
 #include <algorithm>
 #include <QRegularExpression>
@@ -58,11 +60,13 @@
 #include "aera-visualizer-scene.hpp"
 #include "model-item.hpp"
 #include "composite-state-item.hpp"
+#include "../submodules/AERA/r_comp/preprocessor.h"
 #include "instantiated-composite-state-item.hpp"
 
 using namespace std;
 using namespace core;
 using namespace r_code;
+using namespace r_comp;
 using namespace r_exec;
 
 namespace aera_visualizer {
@@ -89,15 +93,23 @@ void InstantiatedCompositeStateItem::getIcstOrImdlValues(
   templateValues = QStringList();
   exposedValues = QStringList();
 
-  // Debug: Handle the case when a value is also an array or has a string with space or '[' or ']'.
-  // (icst cst_61 |[] [b 20] false 1)
-  QRegExp ihlpRegEx("^\\(i\\w+ \\w+ \\|?\\[([^\\]]*)\\] \\|?\\[([^\\]]*)\\] [\\w:]+ [\\w:]+\\)$");
-  if (source.indexOf(ihlpRegEx) >= 0) {
-    if (ihlpRegEx.capturedTexts()[1] != "")
-      templateValues = ihlpRegEx.capturedTexts()[1].split(' ');
-    if (ihlpRegEx.capturedTexts()[2] != "")
-      exposedValues = ihlpRegEx.capturedTexts()[2].split(' ');
-  }
+  // Parse the icst.
+  // TODO: Maybe this should be done once in ReplicodeObjects.
+  RepliStruct root(RepliStruct::Root);
+  uint32 a = 0, b = 0;
+  istringstream stream(source.toStdString());
+  root.parse(&stream, "", a, b);
+
+  // Advance an iterator to the template args.
+  auto i = (*root.args_.begin())->args_.begin();
+  ++i;
+  for (auto arg = (*i)->args_.begin(); arg != (*i)->args_.end(); ++arg)
+    templateValues.push_back((*arg)->print().c_str());
+
+  // Advance to the exposed args.
+  ++i;
+  for (auto arg = (*i)->args_.begin(); arg != (*i)->args_.end(); ++arg)
+    exposedValues.push_back((*arg)->print().c_str());
 }
 
 void InstantiatedCompositeStateItem::setFactIcstHtml()
