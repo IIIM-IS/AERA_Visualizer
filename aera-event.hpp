@@ -103,6 +103,8 @@ public:
     uint16 input_set_index = reduction->code(MK_RDX_INPUTS).asIndex();
     if (reduction->code(input_set_index).getAtomCount() < 2)
       return NULL;
+    if (reduction->code(input_set_index + 2).getDescriptor() != Atom::R_PTR)
+      return NULL;
     return reduction->get_reference(reduction->code(input_set_index + 2).asIndex());
   }
 
@@ -316,10 +318,16 @@ public:
   }
 
   /**
-   * Get the requirement from the reduction_, which is the second item in the set of inputs.
+   * Get the requirement from the reduction_, where the second item in the set of inputs is
+   * the mk.rdx for the requirement (so we get the mk.rdx production).
    * \return The requirement, or NULL if the set of inputs has less than two items.
    */
-  r_code::Code* getRequirement() { return getSecondInput(reduction_); }
+  r_code::Code* getRequirement() {
+    r_code::Code* req_mk_rdx = getSecondInput(reduction_);
+    if (!req_mk_rdx || req_mk_rdx->code(0).asOpcode() != r_exec::Opcodes::MkRdx)
+      return NULL;
+    return ((r_exec::MkRdx*)req_mk_rdx)->get_first_production();
+  }
 
   r_code::Code* getFactPred() { return object_; }
 
