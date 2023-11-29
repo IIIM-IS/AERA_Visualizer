@@ -298,7 +298,7 @@ public:
    * \param time The reduction time.
    * \param reduction The model reduction which points to the (fact (pred ...)) and the cause.
    */
-  ModelMkValPredictionReduction(core::Timestamp time, r_code::Code* reduction)
+  ModelMkValPredictionReduction(core::Timestamp time, r_exec::MkRdx* reduction)
     // The prediction is the first item in the set of productions.
     : AeraEvent(EVENT_TYPE, time, getFirstProduction(reduction)),
     reduction_(reduction)
@@ -312,10 +312,7 @@ public:
    * Get the cause from the reduction_, which is the first item in the set of inputs.
    * \return The cause.
    */
-  r_code::Code* getCause() {
-    return reduction_->get_reference(
-      reduction_->code(reduction_->code(MK_RDX_INPUTS).asIndex() + 1).asIndex());
-  }
+  r_code::Code* getCause() { return reduction_->get_first_input(); }
 
   /**
    * Get the requirement from the reduction_, where the second item in the set of inputs is
@@ -331,7 +328,7 @@ public:
 
   r_code::Code* getFactPred() { return object_; }
 
-  r_code::Code* reduction_;
+  r_exec::MkRdx* reduction_;
   int imdlPredictionEventIndex_;
 };
 
@@ -710,7 +707,7 @@ public:
 class NewInstantiatedModelEvent : public AeraEvent {
 public:
   NewInstantiatedModelEvent(
-    core::Timestamp time, r_code::Code* reduction, r_code::Code* factPred)
+    core::Timestamp time, r_exec::MkRdx* reduction, r_code::Code* factPred)
     : AeraEvent(EVENT_TYPE, time, reduction->get_reference(MK_RDX_IHLP_REF)),
     factPred_(factPred),
     factImdl_(reduction->get_reference(MK_RDX_IHLP_REF)),
@@ -725,16 +722,13 @@ public:
   r_code::Code* factImdl_;        // The fact from 'fact imdl ...'
   r_code::Code* imdl_;            // The imdl from 'fact imdl ...'
   r_code::Code* baseModel_;       // The mdl that's instantiated
-  r_code::Code* reduction_;       // The reduction that produces everything
+  r_exec::MkRdx* reduction_;       // The reduction that produces everything
 
   /**
    * Get the cause from the reduction_, which is the first item in the set of inputs.
    * \return The cause.
    */
-  r_code::Code* getCause() {
-    return reduction_->get_reference(
-      reduction_->code(reduction_->code(MK_RDX_INPUTS).asIndex() + 1).asIndex());
-  }
+  r_code::Code* getCause() { return reduction_->get_first_input(); }
 };
 
 class AbaAddSentence : public AeraEvent {

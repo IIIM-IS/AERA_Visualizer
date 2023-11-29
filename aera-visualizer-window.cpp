@@ -465,8 +465,8 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
           timestamp, model, input, goal_requirement, strong_requirement));
     }
     else if (regex_search(lineAfterTimestamp, matches, modelPredictionReductionRegex)) {
-      auto reduction = replicodeObjects_.getObject(stoul(matches[1].str()));
-      if (reduction) {
+      auto reduction = (MkRdx*)replicodeObjects_.getObject(stoul(matches[1].str()));
+      if (reduction && reduction->code(0).asOpcode() == Opcodes::MkRdx) {
         // Check the type of prediction.
         auto factPred = AeraEvent::getFirstProduction(reduction);
         auto pred = factPred->get_reference(0);
