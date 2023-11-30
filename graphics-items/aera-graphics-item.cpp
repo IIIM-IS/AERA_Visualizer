@@ -410,6 +410,7 @@ void AeraGraphicsItem::addSourceCodeHtmlLinks(
     auto referencedObject = object->get_reference(i);
     if (!(referencedObject->code(0).asOpcode() == Opcodes::Mdl ||
           referencedObject->code(0).asOpcode() == Opcodes::Cst ||
+          referencedObject->code(0).asOpcode() == Opcodes::MkRdx ||
           referencedObject->code(0).asOpcode() == Opcodes::Fact ||
           referencedObject->code(0).asOpcode() == Opcodes::AntiFact))
       continue;
