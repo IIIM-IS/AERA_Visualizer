@@ -731,6 +731,21 @@ public:
   r_code::Code* getCause() { return reduction_->get_first_input(); }
 };
 
+/* NewReductionMarkerEvent is the event when a mk.rdx is produced.
+ * \param time The time of the reduction event.
+ * \param mk_rdx The mk.rdx object.
+ */
+class NewReductionMarkerEvent : public AeraEvent {
+public:
+  NewReductionMarkerEvent(core::Timestamp time, r_exec::MkRdx* mk_rdx)
+    : AeraEvent(EVENT_TYPE, time, mk_rdx), mk_rdx_(mk_rdx)
+  {}
+
+  static const int EVENT_TYPE = 29;
+
+  r_exec::MkRdx* mk_rdx_;
+};
+
 class AbaAddSentence : public AeraEvent {
 public:
   /**
@@ -757,7 +772,7 @@ public:
 
   r_code::Code* getInput() override { return parent_; }
 
-  static const int EVENT_TYPE = 29;
+  static const int EVENT_TYPE = 30;
 
   r_exec::_Fact* fact_;
   bool isAssumption_;
@@ -782,7 +797,7 @@ public:
     alsoMarkGraph_(alsoMarkGraph)
   {}
 
-  static const int EVENT_TYPE = 30;
+  static const int EVENT_TYPE = 31;
 
   r_exec::_Fact* fact_;
   bool alsoMarkGraph_;
@@ -803,7 +818,7 @@ public:
     parent_((r_exec::_Fact*)parent)
   {}
 
-  static const int EVENT_TYPE = 31;
+  static const int EVENT_TYPE = 32;
 
   r_exec::_Fact* markedFact_;
   r_exec::_Fact* parent_;
