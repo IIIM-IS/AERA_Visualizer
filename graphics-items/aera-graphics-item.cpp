@@ -427,10 +427,22 @@ void AeraGraphicsItem::addSourceCodeHtmlLinks(
     html.replace(
       " " + referencedLabel + "<br>",
       " " + makeHtmlLink(referencedObject, replicodeObjects) + "<br>");
-    // The same for at the end of a list.
+    // The same for at the end of an object.
     html.replace(
       " " + referencedLabel + ")",
       " " + makeHtmlLink(referencedObject, replicodeObjects) + ")");
+    // The same for at the beginning of a list.
+    html.replace(
+      "[" + referencedLabel + " ",
+      "[" + makeHtmlLink(referencedObject, replicodeObjects) + " ");
+    // The same for at the end of a list.
+    html.replace(
+      " " + referencedLabel + "]",
+      " " + makeHtmlLink(referencedObject, replicodeObjects) + "]");
+    // The same for at the only one in a list.
+    html.replace(
+      "[" + referencedLabel + "]",
+      "[" + makeHtmlLink(referencedObject, replicodeObjects) + "]");
   }
 }
 
