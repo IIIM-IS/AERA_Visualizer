@@ -78,6 +78,7 @@
 #include "graphics-items/prediction-result-item.hpp"
 #include "graphics-items/promoted-prediction-defeated-item.hpp"
 #include "graphics-items/promoted-prediction-item.hpp"
+#include "graphics-items/reduction-marker-item.hpp"
 #include "graphics-items/simulation-commit-item.hpp"
 #include "submodules/AERA/r_exec/opcodes.h"
 
@@ -142,6 +143,7 @@ const set<int> AeraVisualizerWindow::newItemEventTypes_ = {
   ModelGoalReduction::EVENT_TYPE,
   ModelImdlPredictionEvent::EVENT_TYPE,
   ModelMkValPredictionReduction::EVENT_TYPE,
+  NewReductionMarkerEvent::EVENT_TYPE,
   ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE,
   ModelSimulatedPredictionReduction::EVENT_TYPE,
   ModelSimulatedPredictionReductionFromGoalRequirement::EVENT_TYPE,
@@ -479,6 +481,8 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
           events_.push_back(make_shared<NewInstantiatedModelEvent>(
             timestamp, reduction, factPred));
         }
+
+        events_.push_back(make_shared<NewReductionMarkerEvent>(timestamp, reduction));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, modelAbductionReductionRegex)) {
@@ -1071,6 +1075,13 @@ Timestamp AeraVisualizerWindow::stepEvent(Timestamp maximumTime)
     }
     else if (event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
       newItem = new CompositeStateItem((NewCompositeStateEvent*)event, replicodeObjects_, scene);
+    else if (event->eventType_ == NewReductionMarkerEvent::EVENT_TYPE) {
+      auto newReductionMarkerEvent = (NewReductionMarkerEvent*)event;
+
+      newItem = new ReductionMarkerItem(newReductionMarkerEvent, replicodeObjects_, scene);
+
+      visible = (nonSimulationsCheckBox_->checkState() == Qt::Checked);
+    }
     else if (event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE) {
       auto autoFocusEvent = (AutoFocusNewObjectEvent*)event;
       if (event->time_ == replicodeObjects_.getTimeReference()) {
