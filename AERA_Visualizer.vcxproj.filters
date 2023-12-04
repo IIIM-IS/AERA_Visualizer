@@ -275,6 +275,9 @@
     <ClCompile Include="graphics-items\instantiated-model-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
+    <ClCompile Include="graphics-items\reduction-marker-item.cpp">
+      <Filter>graphics-items</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aera-event.hpp" />
@@ -538,6 +541,9 @@
       <Filter>graphics-items</Filter>
     </ClInclude>
     <ClInclude Include="graphics-items\instantiated-model-item.hpp">
+      <Filter>graphics-items</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics-items\reduction-marker-item.hpp">
       <Filter>graphics-items</Filter>
     </ClInclude>
   </ItemGroup>
