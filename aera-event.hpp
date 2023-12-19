@@ -754,8 +754,8 @@ public:
    * \param fact The fact produced by the step.
    * \param isAssumption True if fact is an assumption.
    * \param isClaim True if fact is the claim of the graph.
-   * \param graphId If 0 this is the proponent graph, otherwise this is a sentence
-   * in the opponent graph with this ID.
+   * \param graphId S*100 + ID, where S is the solution number and ID is 0 for proponent graph,
+   * otherwise the opponent graph ID (within the solution).
    * \param parent The fact which produced the step, or NULL if the first.
    * \param abaCase The derivation case which produced the sentence.
    */

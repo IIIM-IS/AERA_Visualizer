@@ -80,7 +80,7 @@ AbaSentenceItem::AbaSentenceItem(
     // Highlight causal events.
     setBrush(QColor(0x00, 0x99, 0x99));
   else {
-    if (addEvent->graphId_ > 0) {
+    if (addEvent->graphId_ % 100 > 0) {
       // Get colors for the opponent graph.
       if (addEvent->isAssumption_)
         setBrush(Color_opponent_ms_asm_culprit);

@@ -71,6 +71,7 @@ AeraGraphicsItemGroup::AeraGraphicsItemGroup(AeraVisualizerScene* parent, const 
   setOpacity(.75);
 
   auto textItem = new QGraphicsTextItem(this);
+  textItem->setPos(-3, -6);
   textItem->setHtml("<font size = \"+1\">" + title + "</font>");
 }
 

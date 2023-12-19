@@ -82,18 +82,28 @@ public:
   bool isBetweenProponentAndOpponent(AeraGraphicsItem* other) {
     if (other->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
       auto otherEvent = (AbaAddSentence*)other->getAeraEvent();
-      return (addEvent_->graphId_ != otherEvent->graphId_ &&
-              (addEvent_->graphId_ == 0 || otherEvent->graphId_ == 0));
+      return (addEvent_->graphId_ % 100 == 0 && otherEvent->graphId_ % 100 != 0 ||
+              addEvent_->graphId_ % 100 != 0 && otherEvent->graphId_ % 100 == 0);
     }
 
     return false;
   }
 
-  bool isBetweenOpponents(AeraGraphicsItem* other) {
+  bool isBetweenProponentGraphs(AeraGraphicsItem* other) {
     if (other->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
       auto otherEvent = (AbaAddSentence*)other->getAeraEvent();
       return (addEvent_->graphId_ != otherEvent->graphId_ &&
-        addEvent_->graphId_ > 0 && otherEvent->graphId_ > 0);
+        addEvent_->graphId_ % 100 == 0 && otherEvent->graphId_ % 100 == 0);
+    }
+
+    return false;
+  }
+
+  bool isBetweenOpponentGraphs(AeraGraphicsItem* other) {
+    if (other->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
+      auto otherEvent = (AbaAddSentence*)other->getAeraEvent();
+      return (addEvent_->graphId_ != otherEvent->graphId_ &&
+        addEvent_->graphId_ % 100 != 0 && otherEvent->graphId_ % 100 != 0);
     }
 
     return false;

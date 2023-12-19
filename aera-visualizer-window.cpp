@@ -327,6 +327,7 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
   ifstream runtimeOutputFile(runtimeOutputFilePath);
   int lineNumber = 0;
   string line;
+  int abaSolutionId = 0;
   while (getline(runtimeOutputFile, line)) {
     if (progress.wasCanceled())
       return false;
@@ -662,7 +663,8 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
       auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
       if (fact) {
         abaNewStep(stoul(matches[1].str()));
-        events_.push_back(make_shared<AbaAddSentence>(timestamp, fact, false, true, 0, (Code*)NULL, "init"));
+        events_.push_back(make_shared<AbaAddSentence>(
+          timestamp, fact, false, true, abaSolutionId * 100, (Code*)NULL, "init"));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase1iStepRegex)) {
@@ -678,7 +680,7 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
         // TODO: If newGId == 0 then find the contrary in an existing group.
         if (newGId > 0)
           events_.push_back(make_shared<AbaAddSentence>(
-            timestamp, contrary, false, true, newGId, assumption, "1.(i)"));
+            timestamp, contrary, false, true, abaSolutionId * 100 + newGId, assumption, "1.(i)"));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase1iiStepRegex)) {
@@ -698,9 +700,11 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
         for (auto fact = existingBody.begin(); fact != existingBody.end(); ++fact)
           events_.push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, *fact, head));
         for (auto fact = newUnmarkedAssumptions.begin(); fact != newUnmarkedAssumptions.end(); ++fact)
-          events_.push_back(make_shared<AbaAddSentence>(timestamp, *fact, true, false, 0, head, "1.(ii)"));
+          events_.push_back(make_shared<AbaAddSentence>(
+            timestamp, *fact, true, false, abaSolutionId * 100, head, "1.(ii)"));
         for (auto fact = newUnmarkedNonAssumptions.begin(); fact != newUnmarkedNonAssumptions.end(); ++fact)
-          events_.push_back(make_shared<AbaAddSentence>(timestamp, *fact, false, false, 0, head, "1.(ii)"));
+          events_.push_back(make_shared<AbaAddSentence>(
+            timestamp, *fact, false, false, abaSolutionId * 100, head, "1.(ii)"));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase2iaStepRegex)) {
@@ -737,7 +741,7 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
         events_.push_back(make_shared<AbaMarkSentence>(timestamp, fact, true));
         if (contraryIsNew)
           events_.push_back(make_shared<AbaAddSentence>(
-            timestamp, contrary, false, false, 0, fact, "2.(ic)"));
+            timestamp, contrary, false, false, abaSolutionId * 100, fact, "2.(ic)"));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase2iiMarkStepRegex)) {
@@ -766,9 +770,11 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
         for (auto fact = existingBody.begin(); fact != existingBody.end(); ++fact)
           events_.push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, *fact, head));
         for (auto fact = newUnmarkedAssumptions.begin(); fact != newUnmarkedAssumptions.end(); ++fact)
-          events_.push_back(make_shared<AbaAddSentence>(timestamp, *fact, true, false, newGraphId, head, "2.(ii)"));
+          events_.push_back(make_shared<AbaAddSentence>(
+            timestamp, *fact, true, false, abaSolutionId * 100 + newGraphId, head, "2.(ii)"));
         for (auto fact = newUnmarkedNonAssumptions.begin(); fact != newUnmarkedNonAssumptions.end(); ++fact)
-          events_.push_back(make_shared<AbaAddSentence>(timestamp, *fact, false, false, newGraphId, head, "2.(ii)"));
+          events_.push_back(make_shared<AbaAddSentence>(
+            timestamp, *fact, false, false, abaSolutionId * 100 + newGraphId, head, "2.(ii)"));
       }
     }
   }
@@ -1373,7 +1379,8 @@ Timestamp AeraVisualizerWindow::stepEvent(Timestamp maximumTime)
         if (((AbaSentenceItem*)newItem)->isBetweenProponentAndOpponent(parentItem))
           scene->addArrow(newItem, parentItem, Arrow::RedArrowheadPen,
             Arrow::RedArrowheadPen, Arrow::RedArrowheadPen);
-        else if (((AbaSentenceItem*)newItem)->isBetweenOpponents(parentItem))
+        else if (((AbaSentenceItem*)newItem)->isBetweenProponentGraphs(parentItem) ||
+                 ((AbaSentenceItem*)newItem)->isBetweenOpponentGraphs(parentItem))
           scene->addArrow(newItem, parentItem, Arrow::GreenArrowheadPen,
             Arrow::GreenArrowheadPen, Arrow::GreenArrowheadPen);
         else
@@ -1517,7 +1524,8 @@ Timestamp AeraVisualizerWindow::stepEvent(Timestamp maximumTime)
       if (markedSentenceItem->isBetweenProponentAndOpponent(parentItem))
         mainScene_->addArrow(markedSentenceItem, parentItem, Arrow::RedArrowheadPen,
           Arrow::RedArrowheadPen, Arrow::RedArrowheadPen);
-      else if (markedSentenceItem->isBetweenOpponents(parentItem))
+      else if (markedSentenceItem->isBetweenProponentGraphs(parentItem) ||
+               markedSentenceItem->isBetweenOpponentGraphs(parentItem))
         mainScene_->addArrow(markedSentenceItem, parentItem, Arrow::GreenArrowheadPen,
           Arrow::GreenArrowheadPen, Arrow::GreenArrowheadPen);
       else
