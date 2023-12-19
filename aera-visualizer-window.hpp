@@ -282,7 +282,8 @@ private:
 
   /**
    * If the step is already in abaStepIndexes_, get the event index and erase
-   * from events_ to the end. Set abaStepIndexes_[step] to the next index in events_.
+   * from abaEvents_ to the end, and adjust newAbaEventsStartIndex_ down to the new size
+   * of abaEvents_ . Set abaStepIndexes_[step] to the next index in abaEvents_.
    * (We need this because the ABA derivation backtracks and repeats steps.)
    * \param step The ABA step number.
    */
@@ -343,7 +344,11 @@ private:
   core::Timestamp playTime_;
   int playTimerId_;
   bool isPlaying_;
-  // abaStepIndexes has the index in events_ of the step number. See abaNewStep.
+  // Accumulate ABA events here until a solution is found and the entries are copied to events_ .
+  std::vector<std::shared_ptr<AeraEvent> > abaEvents_;
+  // The index of new abaEvents_ entries (after copying events for a previous solution).
+  size_t newAbaEventsStartIndex_;
+  // abaStepIndexes has the index in abaEvents_ of the step number. See abaNewStep.
   std::vector<size_t> abaStepIndexes_;
   // The AeraEvent types where stepEvent will create a new AeraGraphicsItem.
   static const std::set<int> newItemEventTypes_;
