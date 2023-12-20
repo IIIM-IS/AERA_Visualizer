@@ -1084,8 +1084,6 @@ Timestamp AeraVisualizerWindow::stepEvent(Timestamp maximumTime)
     else
       scene = mainScene_;
 
-    if (event->object_->get_oid() == 320)
-      int debug1 = 1;
     if (event->eventType_ == NewModelEvent::EVENT_TYPE) {
       auto newModelEvent = (NewModelEvent*)event;
 
