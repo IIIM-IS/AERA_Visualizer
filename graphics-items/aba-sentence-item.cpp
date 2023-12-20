@@ -116,7 +116,8 @@ void AbaSentenceItem::textItemLinkActivated(const QString& link)
         explanation = "<b>Q: What made " + makeHtmlLink(addEvent_->fact_) +
         " ?</b><br>Sentence " + makeHtmlLink(addEvent_->parent_) +
         " is an assumption which is not already considered for attack, so a new opponent graph O" +
-        QString::number(addEvent_->graphId_) + " was created with this contrary as the claim.<br><br>";
+        QString::number(addEvent_->graphId_ / 100) + ":" + QString::number(addEvent_->graphId_ % 100) +
+        " was created with this contrary as the claim.<br><br>";
       else if (addEvent_->abaCase_ == "1.(ii)")
         explanation = "<b>Q: What made " + makeHtmlLink(addEvent_->fact_) +
         " ?</b><br>Sentence " + makeHtmlLink(addEvent_->parent_) +
