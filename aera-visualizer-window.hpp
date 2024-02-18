@@ -73,6 +73,7 @@ class QComboBox;
 class QLineEdit;
 class QGraphicsView;
 class QProgressDialog;
+class QString;
 
 namespace aera_visualizer {
 
@@ -350,6 +351,7 @@ private:
   size_t newAbaEventsStartIndex_;
   // abaStepIndexes has the index in abaEvents_ of the step number. See abaNewStep.
   std::vector<size_t> abaStepIndexes_;
+  std::map<int, QString> bindings_;
   // The AeraEvent types where stepEvent will create a new AeraGraphicsItem.
   static const std::set<int> newItemEventTypes_;
 };
