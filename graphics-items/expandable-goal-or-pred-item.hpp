@@ -54,6 +54,8 @@
 #ifndef EXPANDABLE_GOAL_OR_PRED_ITEM_HPP
 #define EXPANDABLE_GOAL_OR_PRED_ITEM_HPP
 
+#include <set>
+#include <utility>
 #include "aera-graphics-item.hpp"
 
 namespace aera_visualizer {
@@ -83,6 +85,45 @@ public:
     AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, const QString& prefix,
     AeraVisualizerScene* parent, QColor textItemTextColor = Qt::black, const QString& antiFactHtmlColor = "#ff4040");
 
+  /**
+   * Add the binding and replace all (var varNumber) with the value in factGoalOrPredFactValueHtml_,
+   * toolTipText_ and valueHtml_.
+   */
+  void setBinding(int varNumber, const QString& value)
+  {
+    // TODO: Preprocess to know which var numbers this needs.
+
+    bindings_[varNumber] = value;
+    replaceBindingsFromSaved(saveFactGoalOrPredFactValueHtml_, factGoalOrPredFactValueHtml_);
+    replaceBindingsFromSaved(saveToolTipText_, toolTipText_);
+    replaceBindingsFromSaved(saveValueHtml_, valueHtml_);
+
+    // TODO: Handle the case when it is expanded.
+    setTextItemAndPolygon(valueHtml_, false, shape_);
+    setToolTip(toolTipText_);
+  }
+
+  /**
+   * Remove the binding and update the text.
+   */
+  void removeBinding(int varNumber)
+  {
+    // TODO: Preprocess to know which var numbers this needs.
+
+    auto entry = bindings_.find(varNumber);
+    if (entry == bindings_.end())
+      return;
+
+    bindings_.erase(entry);
+    replaceBindingsFromSaved(saveFactGoalOrPredFactValueHtml_, factGoalOrPredFactValueHtml_);
+    replaceBindingsFromSaved(saveToolTipText_, toolTipText_);
+    replaceBindingsFromSaved(saveValueHtml_, valueHtml_);
+
+    // TODO: Handle the case when it is expanded.
+    setTextItemAndPolygon(valueHtml_, false, shape_);
+    setToolTip(toolTipText_);
+  }
+
 protected:
   void textItemLinkActivated(const QString& link) override;
 
@@ -92,15 +133,22 @@ private:
    * from getAeraEvet()->object_, and set toolTipText_ to the value before adding links.
    * Also set valueHtml_ to the HTML source code for the value. These include linked triangle shapes to
    * expand and unexpand, handled by textItemLinkActivated.
+   * Also set saveFactGoalOrPredFactValueHtml_, saveToolTipText_ and saveValueHtml_ to the respective initial values.
    * \param prefix The prefix to put before the fact label of factGoalOrPredFactValueHtml_, e.g. "Model M6 =>".
    */
   void setFactGoalOrPredFactValueHtml(const QString& prefix);
 
+  void replaceBindingsFromSaved(const QString& saved, QString& result);
+
   QString factGoalOrPredFactValueHtml_;
   QString toolTipText_;
   QString valueHtml_;
+  QString saveFactGoalOrPredFactValueHtml_;
+  QString saveToolTipText_;
+  QString saveValueHtml_;
   Shape shape_;
   QString antiFactHtmlColor_;
+  std::map<int, QString> bindings_;
 };
 
 }

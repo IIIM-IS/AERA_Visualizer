@@ -173,6 +173,10 @@ void ExpandableGoalOrPredItem::setFactGoalOrPredFactValueHtml(const QString& pre
   if (((_Fact*)factValue)->is_anti_fact())
     valueHtml_ =  "<font color=\"" + antiFactHtmlColor_ + "\">" + valueHtml_ + "</font>";
   valueHtml_.replace("right-pointing-triangle", "<a href=\"#expand\">" + RightPointingTriangleHtml + "</a>");
+
+  saveFactGoalOrPredFactValueHtml_ = factGoalOrPredFactValueHtml_;
+  saveToolTipText_ = toolTipText_;
+  saveValueHtml_ = valueHtml_;
 }
 
 void ExpandableGoalOrPredItem::textItemLinkActivated(const QString& link)
@@ -190,6 +194,13 @@ void ExpandableGoalOrPredItem::textItemLinkActivated(const QString& link)
   else
     // For #detail_oid- and others, defer to the base class.
     AeraGraphicsItem::textItemLinkActivated(link);
+}
+
+void ExpandableGoalOrPredItem::replaceBindingsFromSaved(const QString& saved, QString& result)
+{
+  result = saved;
+  for (pair<int, QString> pair : bindings_)
+    result.replace("(var " + QString::number(pair.first) + ")", pair.second);
 }
 
 }
