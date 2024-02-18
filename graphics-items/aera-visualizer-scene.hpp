@@ -223,6 +223,10 @@ private:
    */
   void removeAllItemsByEventType(const std::set<int>& eventTypes);
 
+  void abaSetBinding(int varNumber, const QString& text);
+
+  void abaRemoveBinding(int varNumber);
+
   AeraVisualizerWindow* parent_;
   ReplicodeObjects& replicodeObjects_;
   bool isMainScene_;

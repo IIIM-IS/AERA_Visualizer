@@ -62,6 +62,7 @@
 #include "auto-focus-fact-item.hpp"
 #include "aera-graphics-item.hpp"
 #include "aera-graphics-item-group.hpp"
+#include "aba-sentence-item.hpp"
 #include "aera-visualizer-scene.hpp"
 
 #include <QGraphicsSceneMouseEvent>
@@ -625,6 +626,24 @@ void AeraVisualizerScene::removeAllItemsByEventType(const set<int>& eventTypes)
     (*item)->removeArrowsAndHorizontalLines();
     removeAeraGraphicsItem(*item);
     delete *item;
+  }
+}
+
+void AeraVisualizerScene::abaSetBinding(int varNumber, const QString& text)
+{
+  foreach(QGraphicsItem * item, items()) {
+    auto abaItem = dynamic_cast<AbaSentenceItem*>(item);
+    if (abaItem)
+      abaItem->setBinding(varNumber, text);
+  }
+}
+
+void AeraVisualizerScene::abaRemoveBinding(int varNumber)
+{
+  foreach(QGraphicsItem * item, items()) {
+    auto abaItem = dynamic_cast<AbaSentenceItem*>(item);
+    if (abaItem)
+      abaItem->removeBinding(varNumber);
   }
 }
 
