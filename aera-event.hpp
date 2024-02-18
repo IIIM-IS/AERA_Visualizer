@@ -56,6 +56,7 @@
 
 #include <vector>
 #include <QPointF>
+#include <QString>
 #include "submodules/AERA/r_code/object.h"
 #include "submodules/AERA/r_exec/opcodes.h"
 #include "submodules/AERA/r_exec/factory.h"
@@ -822,6 +823,27 @@ public:
 
   r_exec::_Fact* markedFact_;
   r_exec::_Fact* parent_;
+};
+
+class AbaBindVariable : public AeraEvent {
+public:
+  /**
+   * Create an AbaBindVariable event for binding a variable.
+   * \param time The reduction time.
+   * \param varNumber The variable number.
+   * \param value The bound value.
+   */
+  AbaBindVariable(core::Timestamp time, int varNumber, const QString& value)
+    // Set the object_ NULL since there is already an AeraEvent for it.
+    : AeraEvent(EVENT_TYPE, time, NULL),
+    varNumber_(varNumber),
+    value_(value)
+  {}
+
+  static const int EVENT_TYPE = 33;
+
+  int varNumber_;
+  QString value_;
 };
 
 }
