@@ -110,6 +110,8 @@ public:
   }
 
 protected:
+  void setTextItemAndPolygon(QString html, bool prependHeaderHtml, Shape shape = SHAPE_RECTANGLE, qreal targetWidth = 0) override;
+
   void textItemLinkActivated(const QString& link) override;
 
 private:

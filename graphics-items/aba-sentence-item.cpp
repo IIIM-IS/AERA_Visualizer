@@ -70,7 +70,8 @@ namespace aera_visualizer {
 AbaSentenceItem::AbaSentenceItem(
   AbaAddSentence* addEvent, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-: ExpandableGoalOrPredItem(addEvent, replicodeObjects,
+: statusTextItem_(0),
+  ExpandableGoalOrPredItem(addEvent, replicodeObjects,
     QString("Case ") + addEvent->abaCase_.c_str() + " " + RightDoubleArrowHtml, parent,
     Qt::white, "#ffc0c0"),
   addEvent_(addEvent)
@@ -98,6 +99,14 @@ AbaSentenceItem::AbaSentenceItem(
   statusTextItem_ = new QGraphicsTextItem(this);
   statusTextItem_->setPos(boundingRect().left() - 2, boundingRect().top() - 12);
   setStatus(STATUS_PROCESSING);
+}
+
+void AbaSentenceItem::setTextItemAndPolygon(QString html, bool prependHeaderHtml, Shape shape, qreal targetWidth)
+{
+  ExpandableGoalOrPredItem::setTextItemAndPolygon(html, prependHeaderHtml, shape, targetWidth);
+  if (statusTextItem_)
+    // Restore the position of the status text.
+    statusTextItem_->setPos(boundingRect().left() - 2, boundingRect().top() - 12);
 }
 
 void AbaSentenceItem::textItemLinkActivated(const QString& link)
@@ -138,10 +147,6 @@ void AbaSentenceItem::textItemLinkActivated(const QString& link)
 
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
-  }
-  if (link == "#expand" || link == "#unexpand") {
-    ExpandableGoalOrPredItem::textItemLinkActivated(link);
-    statusTextItem_->setPos(boundingRect().left() - 2, boundingRect().top() - 12);
   }
   else
     // For #detail_oid- and others, defer to the base class.
