@@ -319,7 +319,7 @@ protected:
    * \param targetWidth (optional) The target screen width of the item. If omitted of if this is 
    * less than the default width based on the item contents, then it is ignored.
    */
-  void setTextItemAndPolygon(QString html, bool prependHeaderHtml, Shape shape = SHAPE_RECTANGLE, qreal targetWidth = 0);
+  virtual void setTextItemAndPolygon(QString html, bool prependHeaderHtml, Shape shape = SHAPE_RECTANGLE, qreal targetWidth = 0);
 
   virtual void textItemLinkActivated(const QString& link);
 
