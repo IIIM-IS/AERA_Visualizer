@@ -114,7 +114,7 @@ void Arrow::moveEndsSideBySide()
   // Updates the position of other arrows connected to end item
   auto aeraGraphicsEndItem = dynamic_cast<AeraGraphicsItem*>(endItem_);
   if (aeraGraphicsEndItem) {
-    aeraGraphicsEndItem->updateArrowsAndLines();
+    aeraGraphicsEndItem->updateArrowsAndLine();
   }
 
   // Fit the view with the newly positioned side-by-side items

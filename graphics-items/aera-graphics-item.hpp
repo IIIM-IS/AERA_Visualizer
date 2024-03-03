@@ -123,11 +123,11 @@ public:
   void removeAndDeleteArrowToObject(r_code::Code* object);
 
   /**
-   * Remove all arrows and horizontal lines and remove them from the parent scene.
+   * Remove all arrows and horizontal line and remove them from the parent scene.
    */
-  void removeArrowsAndHorizontalLines();
-  void addHorizontalLine(AnchoredHorizontalLine* line) { horizontalLines_.append(line); }
-  void updateArrowsAndLines();
+  void removeArrowsAndHorizontalLine();
+  void setHorizontalLine(AnchoredHorizontalLine* line);
+  void updateArrowsAndLine();
   AeraEvent* getAeraEvent() { return aeraEvent_; }
   QString getHtml() { return textItem_->toHtml(); }
 
@@ -197,10 +197,10 @@ public:
   }
 
   /**
-   * Set the the visible state of this item and the connected arrows and anchored horizontal lines.
+   * Set the the visible state of this item and the connected arrows and anchored horizontal line.
    * \param visible The visible state.
    */
-  void setItemAndArrowsAndHorizontalLinesVisible(bool visible);
+  void setItemAndArrowsAndHorizontalLineVisible(bool visible);
 
   /**
    * Adjust the position of the item.
@@ -332,7 +332,7 @@ protected:
 private:
   AeraEvent* aeraEvent_;
   QList<Arrow*> arrows_;
-  QList<AnchoredHorizontalLine*> horizontalLines_;
+  AnchoredHorizontalLine* horizontalLine_;
   QColor textItemTextColor_;
   QPen savedPen_;
 };

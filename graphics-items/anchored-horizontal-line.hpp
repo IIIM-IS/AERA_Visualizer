@@ -80,7 +80,6 @@ public:
   int type() const override { return Type; }
   QRectF boundingRect() const override;
   QPainterPath shape() const override;
-  QGraphicsPolygonItem* item() const { return item_; }
 
   void updatePosition();
 

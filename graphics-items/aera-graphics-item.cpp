@@ -127,6 +127,7 @@ AeraGraphicsItem::AeraGraphicsItem(
   borderFlashCountdown_(AeraVisualizerScene::FLASH_COUNT),
   // The base class should call setTextItemAndPolygon()
   textItem_(0),
+  horizontalLine_(0),
   borderNoHighlightPen_(Qt::black, 1)
 {
   setBrush(is_sim() ? SimulatedItemColor : DefaultItemColor);
@@ -245,18 +246,24 @@ void AeraGraphicsItem::removeAndDeleteArrowToObject(Code* object)
   }
 }
 
-void AeraGraphicsItem::removeArrowsAndHorizontalLines()
+void AeraGraphicsItem::removeArrowsAndHorizontalLine()
 {
   foreach(Arrow* arrow, arrows_)
     removeAndDeleteArrow(arrow);
 
-  foreach(AnchoredHorizontalLine* line, horizontalLines_) {
-    auto item = dynamic_cast<AeraGraphicsItem*>(line->item());
-    if (item)
-      item->horizontalLines_.removeAll(line);
-    scene()->removeItem(line);
-    delete line;
+  if (horizontalLine_) {
+    scene()->removeItem(horizontalLine_);
+    delete horizontalLine_;
+    horizontalLine_ = 0;
   }
+}
+
+void AeraGraphicsItem::setHorizontalLine(AnchoredHorizontalLine* line) {
+  if (horizontalLine_) {
+    scene()->removeItem(horizontalLine_);
+    delete horizontalLine_;
+  }
+  horizontalLine_ = line;
 }
 
 void AeraGraphicsItem::bringToFront()
@@ -338,12 +345,12 @@ void AeraGraphicsItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
   delete menu;
 }
 
-void AeraGraphicsItem::updateArrowsAndLines()
+void AeraGraphicsItem::updateArrowsAndLine()
 {
   foreach(Arrow * arrow, arrows_)
     arrow->updatePosition();
-  foreach(AnchoredHorizontalLine * line, horizontalLines_)
-    line->updatePosition();
+  if (horizontalLine_)
+    horizontalLine_->updatePosition();
 }
 
 QVariant AeraGraphicsItem::itemChange(GraphicsItemChange change, const QVariant& value)
@@ -351,7 +358,7 @@ QVariant AeraGraphicsItem::itemChange(GraphicsItemChange change, const QVariant&
   if (change == QGraphicsItem::ItemPositionChange) {
     aeraEvent_->itemTopLeftPosition_ = boundingRect().topLeft() + value.toPointF();
 
-    updateArrowsAndLines();
+    updateArrowsAndLine();
   }
 
   return value;
@@ -446,7 +453,7 @@ void AeraGraphicsItem::addSourceCodeHtmlLinks(
   }
 }
 
-void AeraGraphicsItem::setItemAndArrowsAndHorizontalLinesVisible(bool visible)
+void AeraGraphicsItem::setItemAndArrowsAndHorizontalLineVisible(bool visible)
 {
   foreach(Arrow* arrow, arrows_) {
     if (visible) {
@@ -462,8 +469,8 @@ void AeraGraphicsItem::setItemAndArrowsAndHorizontalLinesVisible(bool visible)
       arrow->setVisible(false);
   }
 
-  foreach(AnchoredHorizontalLine* line, horizontalLines_)
-    line->setVisible(visible);
+  if (horizontalLine_)
+    horizontalLine_->setVisible(visible);
   
   setVisible(visible);
 }
@@ -567,16 +574,16 @@ void AeraGraphicsItem::textItemLinkActivated(const QString& link)
 
 void AeraGraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
-  // Highlight connected arrows and horizontal lines.
+  // Highlight connected arrows and horizontal line.
   foreach(Arrow * arrow, arrows_) {
     // The arrow base and tip pens were given to the Arrow constructor as needed.
     arrow->setPens(
       arrow->getHighlightBodyPen(), arrow->getHighlightArrowBasePen(), arrow->getHighlightArrowTipPen());
     arrow->update();
   }
-  foreach(AnchoredHorizontalLine* line, horizontalLines_) {
-    line->setPen(AnchoredHorizontalLine::HighlightedPen);
-    line->update();
+  if (horizontalLine_) {
+    horizontalLine_->setPen(AnchoredHorizontalLine::HighlightedPen);
+    horizontalLine_->update();
   }
 
   QGraphicsPolygonItem::hoverEnterEvent(event);
@@ -584,14 +591,14 @@ void AeraGraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 
 void AeraGraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
-  // Reset highlighting of connected arrows and horizontal lines.
+  // Reset highlighting of connected arrows and horizontal line.
   foreach(Arrow * arrow, arrows_) {
     arrow->setPens(Arrow::DefaultPen, Arrow::DefaultPen, Arrow::DefaultPen);
     arrow->update();
   }
-  foreach(AnchoredHorizontalLine* line, horizontalLines_) {
-    line->setPen(AnchoredHorizontalLine::DefaultPen);
-    line->update();
+  if (horizontalLine_) {
+    horizontalLine_->setPen(AnchoredHorizontalLine::DefaultPen);
+    horizontalLine_->update();
   }
 
   QGraphicsPolygonItem::hoverLeaveEvent(event);

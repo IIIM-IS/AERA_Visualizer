@@ -933,7 +933,7 @@ void AeraVisualizerWindow::textItemHoverMoveEvent(const QTextDocument* document,
     if (hoverHighlightItem_) {
       // Clear the previous highlighting and restore the visible state.
       hoverHighlightItem_->setPen(hoverHighlightItem_->getBorderNoHighlightPen());
-      hoverHighlightItem_->setItemAndArrowsAndHorizontalLinesVisible(hoverHighlightItemWasVisible_);
+      hoverHighlightItem_->setItemAndArrowsAndHorizontalLineVisible(hoverHighlightItemWasVisible_);
       hoverHighlightItem_ = 0;
     }
 
@@ -953,7 +953,7 @@ void AeraVisualizerWindow::textItemHoverMoveEvent(const QTextDocument* document,
       if (hoverHighlightItem_) {
         // Unhighlight a previous object.
         hoverHighlightItem_->setPen(hoverHighlightItem_->getBorderNoHighlightPen());
-        hoverHighlightItem_->setItemAndArrowsAndHorizontalLinesVisible(hoverHighlightItemWasVisible_);
+        hoverHighlightItem_->setItemAndArrowsAndHorizontalLineVisible(hoverHighlightItemWasVisible_);
         hoverHighlightItem_ = 0;
       }
 
@@ -962,7 +962,7 @@ void AeraVisualizerWindow::textItemHoverMoveEvent(const QTextDocument* document,
         hoverHighlightItemWasVisible_ = hoverHighlightItem_->isVisible();
         if (!hoverHighlightItemWasVisible_)
           // Make the item visible while we hover.
-          hoverHighlightItem_->setItemAndArrowsAndHorizontalLinesVisible(true);
+          hoverHighlightItem_->setItemAndArrowsAndHorizontalLineVisible(true);
 
         hoverHighlightItem_->setPen(itemBorderHighlightPen_);
       }
@@ -1464,8 +1464,8 @@ Timestamp AeraVisualizerWindow::stepEvent(Timestamp maximumTime)
       }
     }
 
-    // Call setItemAndArrowsAndHorizontalLinesVisible, even if visible is true because we need to hide arrows to non-visible items.
-    newItem->setItemAndArrowsAndHorizontalLinesVisible(visible);
+    // Call setItemAndArrowsAndHorizontalLineVisible, even if visible is true because we need to hide arrows to non-visible items.
+    newItem->setItemAndArrowsAndHorizontalLineVisible(visible);
 
     if (visible)
       // Only flash if visible.
@@ -1624,7 +1624,7 @@ Timestamp AeraVisualizerWindow::unstepEvent(Timestamp minimumTime, bool& foundGr
     auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(scene->getAeraGraphicsItem(event->object_));
     if (aeraGraphicsItem) {
       foundGraphicsItem = true;
-      aeraGraphicsItem->removeArrowsAndHorizontalLines();
+      aeraGraphicsItem->removeArrowsAndHorizontalLine();
       scene->removeAeraGraphicsItem(aeraGraphicsItem);
 
       // If this item was highlighted, remove it and null it out

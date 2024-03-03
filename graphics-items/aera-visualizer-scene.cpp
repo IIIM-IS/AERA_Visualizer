@@ -434,7 +434,7 @@ void AeraVisualizerScene::addHorizontalLine(AeraGraphicsItem* item)
     }
 
     auto line = new AnchoredHorizontalLine(item, getTimelineX(after), getTimelineX(before));
-    item->addHorizontalLine(line);
+    item->setHorizontalLine(line);
     line->setZValue(-1001.0);
     addItem(line);
     line->updatePosition();
@@ -525,7 +525,7 @@ void AeraVisualizerScene::centerOnItem(QGraphicsItem *item) {
   auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
   if (aeraGraphicsItem) {
     if (!aeraGraphicsItem->isVisible())
-      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(true);
+      aeraGraphicsItem->setItemAndArrowsAndHorizontalLineVisible(true);
 
     aeraGraphicsItem->centerOn();
   }
@@ -536,7 +536,7 @@ void AeraVisualizerScene::focusOnItem(QGraphicsItem* item)
   auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
   if (aeraGraphicsItem) {
     if (!aeraGraphicsItem->isVisible())
-      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(true);
+      aeraGraphicsItem->setItemAndArrowsAndHorizontalLineVisible(true);
 
     aeraGraphicsItem->focus();
   }
@@ -576,7 +576,7 @@ void AeraVisualizerScene::setItemsVisible(int eventType, bool visible)
   foreach(QGraphicsItem * item, items()) {
     auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
     if (aeraGraphicsItem && aeraGraphicsItem->getAeraEvent()->eventType_ == eventType)
-      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(visible);
+      aeraGraphicsItem->setItemAndArrowsAndHorizontalLineVisible(visible);
   }
 }
 
@@ -586,7 +586,7 @@ void AeraVisualizerScene::setNonItemsVisible(const set<int>& notEventTypes, bool
     auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
     if (aeraGraphicsItem && 
         notEventTypes.find(aeraGraphicsItem->getAeraEvent()->eventType_) == notEventTypes.end())
-      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(visible);
+      aeraGraphicsItem->setItemAndArrowsAndHorizontalLineVisible(visible);
   }
 }
 
@@ -606,7 +606,7 @@ void AeraVisualizerScene::setAutoFocusItemsVisible(const string& property, bool 
 
       auto mkValProperty = mkVal->get_reference(1);
       if (mkValProperty == propertyObject)
-        autoFocusItem->setItemAndArrowsAndHorizontalLinesVisible(visible);
+        autoFocusItem->setItemAndArrowsAndHorizontalLineVisible(visible);
     }
   }
 }
@@ -623,7 +623,7 @@ void AeraVisualizerScene::removeAllItemsByEventType(const set<int>& eventTypes)
   }
 
   for (auto item = toDelete.begin(); item != toDelete.end(); ++item) {
-    (*item)->removeArrowsAndHorizontalLines();
+    (*item)->removeArrowsAndHorizontalLine();
     removeAeraGraphicsItem(*item);
     delete *item;
   }
