@@ -328,11 +328,11 @@ protected:
   QString headerHtml_;
   TextItem* textItem_;
   QPen borderNoHighlightPen_;
+  AnchoredHorizontalLine* horizontalLine_;
 
 private:
   AeraEvent* aeraEvent_;
   QList<Arrow*> arrows_;
-  AnchoredHorizontalLine* horizontalLine_;
   QColor textItemTextColor_;
   QPen savedPen_;
 };
