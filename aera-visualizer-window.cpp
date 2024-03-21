@@ -826,7 +826,8 @@ void AeraVisualizerWindow::abaNewStep(int step)
     abaStepIndexes_.erase(abaStepIndexes_.begin() + step, abaStepIndexes_.end());
     if (eventIndex < abaEvents_.size()) {
       abaEvents_.erase(abaEvents_.begin() + eventIndex, abaEvents_.end());
-      newAbaEventsStartIndex_ = abaEvents_.size();
+      if (abaEvents_.size() < newAbaEventsStartIndex_)
+        newAbaEventsStartIndex_ = abaEvents_.size();
     }
   }
 
