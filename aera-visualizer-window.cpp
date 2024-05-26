@@ -302,8 +302,8 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
   regex abaCase1iStepRegex("^Step (\\d+): Case 1\\.\\(i\\): A: (\\d+), Contrary (\\d+) has body\\? (\\w), NewGId (\\d+)");
   // Step 10: Case 1.(ii): S: 304, NewUnMarkedAs: [314 316], NewUnMarkedNonAs: [312], ExistingBody: [310]
   regex abaCase1iiStepRegex("^Step (\\d+): Case 1\\.\\(ii\\): S: (\\d+), NewUnMarkedAs: \\[(.*)\\], NewUnMarkedNonAs: \\[(.*)\\], ExistingBody: \\[(.*)\\]$");
-  // Step 10: Case 1.(iii): (var 1) = h
-  regex abaCase1Or2iiiStepRegex("^Step (\\d+): Case [12]\\.\\(iii\\): \\(var (\\d+)\\) <?= (-?[\\.\\w]+)$");
+  // Step 10: Case 1.(iii): (= (var 3) 15.000000)
+  regex abaCase1Or2iiiStepRegex("^Step (\\d+): Case [12]\\.\\(iii\\): \\(<?= \\(var (\\d+)\\) (-?[\\.\\w]+)\\)$");
   // Step 10: Case 2.(ia): A: 904, GId 1
   regex abaCase2iaStepRegex("^Step (\\d+): Case 2\\.\\(ia\\): A: (\\d+), GId (\\d+)$");
   // Step 10: Case 2.(ib): A: 904, GId 1, Culprit 864
