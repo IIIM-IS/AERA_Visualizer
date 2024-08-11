@@ -688,7 +688,7 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
         // TODO: Maybe add option to show singleton opponent graphs where contraryHasBody is false.
         if (newGId > 0 && contraryHasBody)
           abaEvents_.push_back(make_shared<AbaAddSentence>(
-            timestamp, contrary, false, true, abaSolutionId * 100 + newGId, assumption, "1.(i)"));
+            timestamp, contrary, false, true, abaSolutionId * 100 + newGId, assumption, "1.(i) Step" + matches[1].str()));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase1iiStepRegex)) {
@@ -709,10 +709,10 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
           abaEvents_.push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, *fact, head));
         for (auto fact = newUnmarkedAssumptions.begin(); fact != newUnmarkedAssumptions.end(); ++fact)
           abaEvents_.push_back(make_shared<AbaAddSentence>(
-            timestamp, *fact, true, false, abaSolutionId * 100, head, "1.(ii)"));
+            timestamp, *fact, true, false, abaSolutionId * 100, head, "1.(ii) Step" + matches[1].str()));
         for (auto fact = newUnmarkedNonAssumptions.begin(); fact != newUnmarkedNonAssumptions.end(); ++fact)
           abaEvents_.push_back(make_shared<AbaAddSentence>(
-            timestamp, *fact, false, false, abaSolutionId * 100, head, "1.(ii)"));
+            timestamp, *fact, false, false, abaSolutionId * 100, head, "1.(ii) Step" + matches[1].str()));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase1Or2iiiStepRegex)) {
@@ -761,7 +761,7 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
         abaEvents_.push_back(make_shared<AbaMarkSentence>(timestamp, fact, true));
         if (contraryIsNew)
           abaEvents_.push_back(make_shared<AbaAddSentence>(
-            timestamp, contrary, false, false, abaSolutionId * 100, fact, "2.(ic)"));
+            timestamp, contrary, false, false, abaSolutionId * 100, fact, "2.(ic) Step" + matches[1].str()));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase2iiMarkStepRegex)) {
@@ -791,10 +791,10 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
           abaEvents_.push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, *fact, head));
         for (auto fact = newUnmarkedAssumptions.begin(); fact != newUnmarkedAssumptions.end(); ++fact)
           abaEvents_.push_back(make_shared<AbaAddSentence>(
-            timestamp, *fact, true, false, abaSolutionId * 100 + newGraphId, head, "2.(ii)"));
+            timestamp, *fact, true, false, abaSolutionId * 100 + newGraphId, head, "2.(ii) Step" + matches[1].str()));
         for (auto fact = newUnmarkedNonAssumptions.begin(); fact != newUnmarkedNonAssumptions.end(); ++fact)
           abaEvents_.push_back(make_shared<AbaAddSentence>(
-            timestamp, *fact, false, false, abaSolutionId * 100 + newGraphId, head, "2.(ii)"));
+            timestamp, *fact, false, false, abaSolutionId * 100 + newGraphId, head, "2.(ii) Step" + matches[1].str()));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaSolutionFound)) {
