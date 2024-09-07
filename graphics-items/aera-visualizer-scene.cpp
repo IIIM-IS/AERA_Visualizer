@@ -190,7 +190,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 
   if (qIsNaN(aeraEvent->itemTopLeftPosition_.x())) {
     // Assign an initial position.
-    // Only update positions based on time for the main scehe.
+    // Only update positions based on time for the main scene.
     if (isMainScene_ && aeraEvent->time_ >= thisFrameTime_ + replicodeObjects_.getSamplingPeriod()) {
       // Start a new frame (or the first frame).
       auto relativeTime = duration_cast<microseconds>(aeraEvent->time_ - replicodeObjects_.getTimeReference());
@@ -633,8 +633,14 @@ void AeraVisualizerScene::abaSetBinding(int varNumber, const QString& text)
 {
   foreach(QGraphicsItem * item, items()) {
     auto abaItem = dynamic_cast<AbaSentenceItem*>(item);
-    if (abaItem)
-      abaItem->setBinding(varNumber, text);
+    if (abaItem) {
+      if (abaItem->setBinding(varNumber, text)) {
+        // The item was changed, so re-fit the group box.
+        auto itemGroup = getItemGroup(((AbaAddSentence*)abaItem->getAeraEvent())->graphId_);
+        if (itemGroup)
+          itemGroup->fitToChildren();
+      }
+    }
   }
 }
 
