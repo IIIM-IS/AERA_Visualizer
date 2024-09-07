@@ -58,9 +58,11 @@
 #include "../submodules/AERA/r_exec/factory.h"
 #include "aera-visualizer-scene.hpp"
 #include "instantiated-composite-state-item.hpp"
+#include "anchored-horizontal-line.hpp"
 #include "expandable-goal-or-pred-item.hpp"
 
 using namespace std;
+using namespace std::chrono;
 using namespace core;
 using namespace r_code;
 using namespace r_exec;
@@ -73,6 +75,13 @@ ExpandableGoalOrPredItem::ExpandableGoalOrPredItem(
 : AeraGraphicsItem(aeraEvent, replicodeObjects, parent, "", textItemTextColor),
   antiFactHtmlColor_(antiFactHtmlColor)
 {
+  afterVarNumber_ = -1;
+  beforeVarNumber_ = -1;
+  if (((_Fact*)aeraEvent->object_)->is_fact() || ((_Fact*)aeraEvent->object_)->is_anti_fact()) {
+    afterVarNumber_ = ((_Fact*)aeraEvent->object_)->get_after_var();
+    beforeVarNumber_ = ((_Fact*)aeraEvent->object_)->get_before_var();
+  }
+
   setFactGoalOrPredFactValueHtml(prefix);
 
   // Determine the shape.
@@ -194,6 +203,51 @@ void ExpandableGoalOrPredItem::textItemLinkActivated(const QString& link)
   else
     // For #detail_oid- and others, defer to the base class.
     AeraGraphicsItem::textItemLinkActivated(link);
+}
+
+bool ExpandableGoalOrPredItem::setBinding(int varNumber, const QString& value)
+{
+  // TODO: Preprocess to know which var numbers this needs.
+
+  auto saveBinding = bindings_[varNumber];
+  int ms;
+  bool isInt = false;
+  if (!value.contains("."))
+    ms = value.toInt(&isInt);
+  if (isInt) {
+    // Interpret the int as a timestamp.
+    bindings_[varNumber] = Utils::ToString_s_ms_us(Timestamp(milliseconds(ms)), Timestamp()).c_str();
+    if (varNumber == afterVarNumber_) {
+      // TODO: Update itemTopLeftPosition_ and itemInitialTopLeftPosition_.
+      // TODO: Adjust group boundary.
+      qreal left = parent_->getTimelineX(replicodeObjects_.getTimeReference() + milliseconds(ms));
+      setPos(left - boundingRect().topLeft().x(), pos().y());
+      if (horizontalLine_)
+        horizontalLine_->setLeft(left);
+    }
+    if (varNumber == beforeVarNumber_) {
+      // TODO: Update itemTopLeftPosition_ and itemInitialTopLeftPosition_.
+      // TODO: Adjust group boundary.
+      qreal right = parent_->getTimelineX(replicodeObjects_.getTimeReference() + milliseconds(ms));
+      if (bindings_.find(afterVarNumber_) == bindings_.end())
+        // There is no after value yet. Right-justify the item to the before value.
+        setPos(right - boundingRect().width() - boundingRect().topLeft().x(), pos().y());
+      if (horizontalLine_)
+        horizontalLine_->setRight(right);
+    }
+  }
+  else
+    bindings_[varNumber] = value;
+
+  replaceBindingsFromSaved(saveFactGoalOrPredFactValueHtml_, factGoalOrPredFactValueHtml_);
+  replaceBindingsFromSaved(saveToolTipText_, toolTipText_);
+  replaceBindingsFromSaved(saveValueHtml_, valueHtml_);
+
+  // TODO: Handle the case when it is expanded.
+  setTextItemAndPolygon(valueHtml_, false, shape_);
+  setToolTip(toolTipText_);
+
+  return bindings_[varNumber] != saveBinding;
 }
 
 void ExpandableGoalOrPredItem::replaceBindingsFromSaved(const QString& saved, QString& result)

@@ -88,20 +88,9 @@ public:
   /**
    * Add the binding and replace all (var varNumber) with the value in factGoalOrPredFactValueHtml_,
    * toolTipText_ and valueHtml_.
+   * \return true if the binding changed, false if not.
    */
-  void setBinding(int varNumber, const QString& value)
-  {
-    // TODO: Preprocess to know which var numbers this needs.
-
-    bindings_[varNumber] = value;
-    replaceBindingsFromSaved(saveFactGoalOrPredFactValueHtml_, factGoalOrPredFactValueHtml_);
-    replaceBindingsFromSaved(saveToolTipText_, toolTipText_);
-    replaceBindingsFromSaved(saveValueHtml_, valueHtml_);
-
-    // TODO: Handle the case when it is expanded.
-    setTextItemAndPolygon(valueHtml_, false, shape_);
-    setToolTip(toolTipText_);
-  }
+  bool setBinding(int varNumber, const QString& value);
 
   /**
    * Remove the binding and update the text.
@@ -149,6 +138,8 @@ private:
   Shape shape_;
   QString antiFactHtmlColor_;
   std::map<int, QString> bindings_;
+  int afterVarNumber_;
+  int beforeVarNumber_;
 };
 
 }
