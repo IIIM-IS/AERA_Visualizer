@@ -72,7 +72,9 @@ AbaSentenceItem::AbaSentenceItem(
   AeraVisualizerScene* parent)
 : statusTextItem_(0),
   ExpandableGoalOrPredItem(addEvent, replicodeObjects,
-    QString("Case ") + addEvent->abaCase_.c_str() + " " + RightDoubleArrowHtml, parent,
+    QString("Case ") + addEvent->abaCase_.c_str() + 
+    (addEvent->step_ > 0 ? " Step " + QString::number(addEvent->step_) : QString("")) +
+    " " + RightDoubleArrowHtml, parent,
     Qt::white, "#ffc0c0"),
   addEvent_(addEvent)
 {
