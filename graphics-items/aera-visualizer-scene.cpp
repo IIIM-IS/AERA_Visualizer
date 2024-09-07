@@ -631,17 +631,23 @@ void AeraVisualizerScene::removeAllItemsByEventType(const set<int>& eventTypes)
 
 void AeraVisualizerScene::abaSetBinding(int varNumber, const QString& text)
 {
+  set<AeraGraphicsItemGroup*> toRefit;
+
   foreach(QGraphicsItem * item, items()) {
     auto abaItem = dynamic_cast<AbaSentenceItem*>(item);
     if (abaItem) {
       if (abaItem->setBinding(varNumber, text)) {
-        // The item was changed, so re-fit the group box.
+        // The item was changed, so need to re-fit its group box.
         auto itemGroup = getItemGroup(((AbaAddSentence*)abaItem->getAeraEvent())->graphId_);
         if (itemGroup)
-          itemGroup->fitToChildren();
+          // fitToChildren is expensive, so only call it later, once for each group.
+          toRefit.insert(itemGroup);
       }
     }
   }
+
+  for (auto itemGroup = toRefit.begin(); itemGroup != toRefit.end(); itemGroup++)
+    (*itemGroup)->fitToChildren();
 }
 
 void AeraVisualizerScene::abaRemoveBinding(int varNumber)
