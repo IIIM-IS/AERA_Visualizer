@@ -86,6 +86,8 @@ public:
 
   void removeChild(AeraGraphicsItem* child);
 
+  void fitToChildren();
+
   /**
    * This is called by the parent scene when its view moves.
    */
@@ -97,8 +99,6 @@ protected:
   QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
 private:
-  void fitToChildren();
-
   /**
    * Check the parent's view port and allow to grab to move the group box
    * if the scene background is visible at the top or bottom. This way the user
