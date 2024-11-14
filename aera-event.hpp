@@ -104,7 +104,7 @@ public:
     uint16 input_set_index = reduction->code(MK_RDX_INPUTS).asIndex();
     if (reduction->code(input_set_index).getAtomCount() < 2)
       return NULL;
-    if (reduction->code(input_set_index + 2).getDescriptor() != Atom::R_PTR)
+    if (reduction->code(input_set_index + 2).getDescriptor() != r_code::Atom::R_PTR)
       return NULL;
     return reduction->get_reference(reduction->code(input_set_index + 2).asIndex());
   }
