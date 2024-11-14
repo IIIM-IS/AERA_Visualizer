@@ -77,6 +77,16 @@ public:
 
   AnchoredHorizontalLine(QGraphicsPolygonItem* item, qreal left, qreal right, QGraphicsItem* parent = 0);
 
+  void setLeft(qreal left) {
+    left_ = left;
+    updatePosition();
+  }
+
+  void setRight(qreal right) {
+    right_ = right;
+    updatePosition();
+  }
+
   int type() const override { return Type; }
   QRectF boundingRect() const override;
   QPainterPath shape() const override;
