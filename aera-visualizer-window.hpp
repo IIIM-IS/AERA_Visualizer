@@ -236,6 +236,7 @@ protected:
   FindDialog* findDialog_;
 
 private slots:
+  void saveMainWindowImage();
   void zoomIn();
   void zoomOut();
   void zoomHome();
@@ -301,6 +302,7 @@ private:
   AeraVisualizerScene* mainScene_;
   AeraVisualizerScene* selectedScene_;
 
+  QAction* saveMainWindowImageAction_;
   QAction* exitAction_;
   QAction* zoomInAction_;
   QAction* zoomOutAction_;

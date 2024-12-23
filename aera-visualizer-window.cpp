@@ -1991,6 +1991,19 @@ void AeraVisualizerWindow::closeEvent(QCloseEvent* event) {
   event->accept();
 }
 
+void AeraVisualizerWindow::saveMainWindowImage()
+{
+  auto fileName = QFileDialog::getSaveFileName(this, "Save image", QDir::homePath(), "PNG (*.png)");
+  if (!fileName.isNull()) {
+    QImage image(mainScene_->sceneRect().size().toSize(), QImage::Format_ARGB32);
+    image.fill(Qt::transparent);
+
+    QPainter painter(&image);
+    mainScene_->render(&painter);
+    image.save(fileName, "PNG", 0);
+  }
+}
+
 void AeraVisualizerWindow::zoomIn()
 {
   // Make sure zoom is focused on the center of the screen
@@ -2047,6 +2060,9 @@ void AeraVisualizerWindow::fitAll() {
 
 void AeraVisualizerWindow::createActions()
 {
+  saveMainWindowImageAction_ = new QAction(tr("&Save Main Window Image"), this);
+  connect(saveMainWindowImageAction_, SIGNAL(triggered()), this, SLOT(saveMainWindowImage()));
+
   exitAction_ = new QAction(tr("E&xit"), this);
   exitAction_->setShortcuts(QKeySequence::Quit);
   connect(exitAction_, SIGNAL(triggered()), this, SLOT(close()));
@@ -2090,6 +2106,7 @@ void AeraVisualizerWindow::createActions()
 void AeraVisualizerWindow::createMenus()
 {
   QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
+  fileMenu->addAction(saveMainWindowImageAction_);
   fileMenu->addAction(exitAction_);
 
   QMenu* viewMenu = menuBar()->addMenu(tr("&View"));
