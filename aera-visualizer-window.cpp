@@ -1995,12 +1995,23 @@ void AeraVisualizerWindow::saveMainWindowImage()
 {
   auto fileName = QFileDialog::getSaveFileName(this, "Save image", QDir::homePath(), "PNG (*.png)");
   if (!fileName.isNull()) {
-    QImage image(mainScene_->sceneRect().size().toSize(), QImage::Format_ARGB32);
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    QApplication::processEvents();
+
+    // Get the bounding rect including the top-left plus all AeraGraphicsItem. This excludes lines such as frame boundaries.
+    QRectF boundingRect(0, 0, 100, 100);
+    foreach(auto item, mainScene_->items()) {
+      if (dynamic_cast<AeraGraphicsItem*>(item) && item->isVisible())
+          boundingRect = boundingRect.united(item->sceneBoundingRect());
+    }
+
+    QImage image(boundingRect.size().toSize(), QImage::Format_ARGB32);
     image.fill(Qt::transparent);
 
     QPainter painter(&image);
-    mainScene_->render(&painter);
+    mainScene_->render(&painter, QRectF(), boundingRect);
     image.save(fileName, "PNG", 0);
+    QApplication::restoreOverrideCursor();
   }
 }
 
