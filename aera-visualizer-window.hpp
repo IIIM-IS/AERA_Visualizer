@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ http://www.iiim.is
 //_/_/
@@ -73,25 +73,27 @@ class QComboBox;
 class QLineEdit;
 class QGraphicsView;
 class QProgressDialog;
+class QString;
 
 namespace aera_visualizer {
 
 class ExplanationLogWindow;
+class FindDialog;
 
 /**
- * AeraVisulizerWindow extends AeraVisulizerWindowBase to present the player
+ * AeraVisualizerWindow extends AeraVisualizerWindowBase to present the player
  * control panel and a window for visualizing the processing of AERA objects.
  */
-class AeraVisulizerWindow : public AeraVisulizerWindowBase
+class AeraVisualizerWindow : public AeraVisualizerWindowBase
 {
   Q_OBJECT
 
 public:
   /**
-   * Create an AeraVisulizerWindow. After creating the window, call addEvents().
+   * Create an AeraVisualizerWindow. After creating the window, call addEvents().
    * \param replicodeObjects The ReplicodeObjects used to find objects.
    */
-  AeraVisulizerWindow(ReplicodeObjects& replicodeObjects);
+  AeraVisualizerWindow(ReplicodeObjects& replicodeObjects);
 
   /**
    * Scan the runtimeOutputFilePath and add to startupEvents_ and events_. Call this once after creating the window.
@@ -115,6 +117,27 @@ public:
   }
 
   ExplanationLogWindow* getExplanationLogWindow() { return explanationLogWindow_;  }
+
+  void setFindWindow(FindDialog* zoomToWindow)
+  {
+    findDialog_ = zoomToWindow;
+  }
+  
+  // Modify some code from stepEvent so we can compute the current maximum visible time
+  Timestamp getFrameMaxTime() {
+    // Check if we've run off the end (or are not initialized)
+    if (iNextEvent_ >= events_.size())
+      return r_code::Utils_MaxTime;
+
+    // Get the next event and use it to compute the current frame's max time
+    AeraEvent* event = events_[iNextEvent_].get();
+    auto relativeTime = std::chrono::duration_cast<std::chrono::microseconds>(event->time_ - replicodeObjects_.getTimeReference());
+    auto frameStartTime = event->time_ - (relativeTime % replicodeObjects_.getSamplingPeriod());
+    Timestamp thisFrameMaxTime = frameStartTime + replicodeObjects_.getSamplingPeriod() - std::chrono::microseconds(1);
+
+    return thisFrameMaxTime;
+  }
+  
 
   /**
    * Check if one of the scenes has an AeraGraphicsItem for the object. You can use this to
@@ -167,6 +190,14 @@ public:
 
   static const std::set<int> simulationEventTypes_;
 
+  AeraVisualizerScene* getMainScene() {
+    return mainScene_;
+  }
+
+  AeraVisualizerScene* getModelsScene() {
+    return modelsScene_;
+  }
+
 protected:
   /**
    * Set iNextStepEvent to the index in events_ of the next event that stepEvent will process.
@@ -195,21 +226,27 @@ protected:
    * Decrement iNextEvent_ and undo the event at events_[iNextEvent_].
    * \param minimumTime if the time of previous event is less than minimumTime, don't
    * decrement iNextEvent_ and don't undo, and return Utils_MaxTime.
+   * \param Set foundGraphicsItem if the graphics item for the step was found.
    * \return The time of the previous event. If there is no previous event, then
    * return Utils_MaxTime.
    */
-  core::Timestamp unstepEvent(core::Timestamp minimumTime);
+  core::Timestamp unstepEvent(core::Timestamp minimumTime, bool& foundGraphicsItem);
 
   ExplanationLogWindow* explanationLogWindow_;
+  FindDialog* findDialog_;
 
 private slots:
+  void saveMainWindowImage();
   void zoomIn();
   void zoomOut();
   void zoomHome();
-  void zoomTo();
+  void find();
+  void findNext();
+  void findPrev();
+  void fitAll();
 
 private:
-  friend class AeraVisulizerWindowBase;
+  friend class AeraVisualizerWindowBase;
   void createActions();
   void createMenus();
   void createToolbars();
@@ -245,34 +282,54 @@ private:
    */
   void setSliderToPlayTime();
 
+  /**
+   * If the step is already in abaStepIndexes_, get the event index and erase
+   * from abaEvents_ to the end, and adjust newAbaEventsStartIndex_ down to the new size
+   * of abaEvents_ . Set abaStepIndexes_[step] to the next index in abaEvents_.
+   * (We need this because the ABA derivation backtracks and repeats steps.)
+   * \param step The ABA step number.
+   */
+  void abaNewStep(int step);
+
   void playPauseButtonClickedImpl();
   void stepButtonClickedImpl();
   void stepBackButtonClickedImpl();
   void playTimeLabelClickedImpl();
   void timerEvent(QTimerEvent* event) override;
+  void closeEvent(QCloseEvent* event) override;
 
   AeraVisualizerScene* modelsScene_;
   AeraVisualizerScene* mainScene_;
   AeraVisualizerScene* selectedScene_;
 
+  QAction* saveMainWindowImageAction_;
   QAction* exitAction_;
   QAction* zoomInAction_;
   QAction* zoomOutAction_;
   QAction* zoomHomeAction_;
-  QAction* zoomToAction_;
+  QAction* findAction_;
+  QAction* findNextAction_;
+  QAction* findPrevAction_;
+  QAction* fitAllAction_;
 
   static const QString SettingsKeyAutoScroll;
   static const QString SettingsKeySimulationsVisible;
+  static const QString SettingsKeyAllSimulationInputsVisible;
+  static const QString SettingsKeySingleStepSimulationVisible;
   static const QString SettingsKeyNonSimulationsVisible;
   static const QString SettingsKeyEssenceFactsVisible;
   static const QString SettingsKeyInstantiatedCompositeStatesVisible;
+  static const QString SettingsKeyInstantiatedModelsVisible;
   static const QString SettingsKeyPredictedInstantiatedCompositeStatesVisible;
   static const QString SettingsKeyRequirementsVisible;
 
   AeraCheckbox* simulationsCheckBox_;
+  AeraCheckbox* allSimulationInputsCheckBox_;
+  AeraCheckbox* singleStepSimulationCheckBox_;
   AeraCheckbox* nonSimulationsCheckBox_;
   AeraCheckbox* essenceFactsCheckBox_;
   AeraCheckbox* instantiatedCompositeStatesCheckBox_;
+  AeraCheckbox* instantiatedModelsCheckBox_;
   AeraCheckbox* predictedInstantiatedCompositeStatesCheckBox_;
   AeraCheckbox* requirementsCheckBox_;
 
@@ -290,6 +347,13 @@ private:
   core::Timestamp playTime_;
   int playTimerId_;
   bool isPlaying_;
+  // Accumulate ABA events here until a solution is found and the entries are copied to events_ .
+  std::vector<std::shared_ptr<AeraEvent> > abaEvents_;
+  // The index of new abaEvents_ entries (after copying events for a previous solution).
+  size_t newAbaEventsStartIndex_;
+  // abaStepIndexes has the index in abaEvents_ of the step number. See abaNewStep.
+  std::vector<size_t> abaStepIndexes_;
+  std::map<int, QString> bindings_;
   // The AeraEvent types where stepEvent will create a new AeraGraphicsItem.
   static const std::set<int> newItemEventTypes_;
 };

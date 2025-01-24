@@ -265,6 +265,19 @@
       <Filter>graphics-items</Filter>
     </ClCompile>
     <ClCompile Include="aera-checkbox.cpp" />
+    <ClCompile Include="graphics-items\aera-graphics-item-group.cpp">
+      <Filter>graphics-items</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics-items\aba-sentence-item.cpp">
+      <Filter>graphics-items</Filter>
+    </ClCompile>
+    <ClCompile Include="find-dialog.cpp" />
+    <ClCompile Include="graphics-items\instantiated-model-item.cpp">
+      <Filter>graphics-items</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics-items\reduction-marker-item.cpp">
+      <Filter>graphics-items</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aera-event.hpp" />
@@ -521,6 +534,18 @@
     <ClInclude Include="submodules\AERA\r_code\resized_vector.h">
       <Filter>r_code</Filter>
     </ClInclude>
+    <ClInclude Include="graphics-items\aera-graphics-item-group.hpp">
+      <Filter>graphics-items</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics-items\aba-sentence-item.hpp">
+      <Filter>graphics-items</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics-items\instantiated-model-item.hpp">
+      <Filter>graphics-items</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics-items\reduction-marker-item.hpp">
+      <Filter>graphics-items</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="images\pause.png">
@@ -545,6 +570,9 @@
       <Filter>images</Filter>
     </Image>
     <Image Include="images\app.ico">
+      <Filter>images</Filter>
+    </Image>
+    <Image Include="images\zoom-to.png">
       <Filter>images</Filter>
     </Image>
   </ItemGroup>
@@ -589,6 +617,7 @@
     <QtMoc Include="aera-visualizer-window-base.hpp" />
     <QtMoc Include="explanation-log-window.hpp" />
     <QtMoc Include="aera-checkbox.h" />
+    <QtMoc Include="find-dialog.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="submodules\AERA\r_exec\r_exec.vcxproj">

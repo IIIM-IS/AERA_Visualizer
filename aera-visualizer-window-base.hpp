@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -65,7 +65,7 @@
 
 namespace aera_visualizer {
 
-class AeraVisulizerWindow;
+class AeraVisualizerWindow;
 
 // https://wiki.qt.io/Clickable_QLabel
 class ClickableLabel : public QLabel {
@@ -80,28 +80,28 @@ signals:
   void clicked();
 
 protected:
-  void mousePressEvent(QMouseEvent* event);
+  void mousePressEvent(QMouseEvent* event) override;
 };
 
 /**
- * AeraVisulizerWindowBase extends QMainWindow and is a base class for
- * visualizer windows like AeraVisulizerWindow which manages the player
+ * AeraVisualizerWindowBase extends QMainWindow and is a base class for
+ * visualizer windows like AeraVisualizerWindow which manages the player
  * control panel of the main window and derived windows.
  */
-class AeraVisulizerWindowBase : public QMainWindow
+class AeraVisualizerWindowBase : public QMainWindow
 {
   Q_OBJECT
 
 protected:
   /**
-   * Create an AeraVisulizerWindowBase and create the player control panel widget. This is 
+   * Create an AeraVisualizerWindowBase and create the player control panel widget. This is 
    * called by the derived class, which should add getPlayerControlPanel() to its window.
    * \param mainWindow The main parent window for this window, or 0 if this is already
    * The main window.
    * \param runtimeOutputFilePath The file path of the runtime output,
    * typically ending in "runtime_out.txt".
    */
-  AeraVisulizerWindowBase(AeraVisulizerWindow* mainWindow, ReplicodeObjects& replicodeObjects);
+  AeraVisualizerWindowBase(AeraVisualizerWindow* mainWindow, ReplicodeObjects& replicodeObjects);
 
   /**
    * Get the player control panel widget which has a play button, slider bar and time label.
@@ -109,7 +109,7 @@ protected:
    */
   QWidget* getPlayerControlPanel() { return playerControlPanel_;  }
 
-  AeraVisulizerWindow* mainWindow_;
+  AeraVisualizerWindow* mainWindow_;
   ReplicodeObjects& replicodeObjects_;
 
 private slots:
@@ -120,7 +120,7 @@ private slots:
   void playTimeLabelClicked();
 
 private:
-  friend class AeraVisulizerWindow;
+  friend class AeraVisualizerWindow;
   void createPlayerControlPanel();
 
   QIcon playIcon_;
@@ -131,11 +131,11 @@ private:
   QSlider* playSlider_;
   ClickableLabel* playTimeLabel_;
 
-  std::vector<AeraVisulizerWindowBase*> children_;
+  std::vector<AeraVisualizerWindowBase*> children_;
   QWidget* playerControlPanel_;
 };
 
-static const std::chrono::milliseconds AeraVisulizer_playTimerTick(100);
+static const std::chrono::milliseconds AeraVisualizer_playTimerTick(100);
 
 }
 

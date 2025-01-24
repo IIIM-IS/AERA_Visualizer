@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2025 Jeff Thompson
-//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2022-2025 Jeff Thompson
+//_/_/ Copyright (c) 2022-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2022-2025 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -51,38 +51,72 @@
 //_/_/ 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-#ifndef MODEL_PREDICTION_FROM_REQUIREMENT_DISABLED_ITEM_HPP
-#define MODEL_PREDICTION_FROM_REQUIREMENT_DISABLED_ITEM_HPP
+#ifndef ABA_SENTENCE_ITEM_HPP
+#define ABA_SENTENCE_ITEM_HPP
 
-#include "aera-graphics-item.hpp"
+#include "expandable-goal-or-pred-item.hpp"
 
 namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
 /**
- * An ModelPredictionFromRequirementDisabledItem extends AeraGraphicsItem to show a
- * ModelPredictionFromRequirementDisabledEvent with a clickable "expand triangle" which expands
- * the item to show the full message.
+ * An AbaSentenceItem represents a sentence in an ABA derivation. The
+ * AbaAddSentence event has info such as the graph ID of the graph the
+ * sentence is in.
  */
-class ModelPredictionFromRequirementDisabledItem : public AeraGraphicsItem
+class AbaSentenceItem : public ExpandableGoalOrPredItem
 {
 public:
-  ModelPredictionFromRequirementDisabledItem(
-    ModelPredictionFromRequirementDisabledEvent* requirementDisabledEvent,
-    ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
+  AbaSentenceItem(
+    AbaAddSentence* addEvent, ReplicodeObjects& replicodeObjects,
+    AeraVisualizerScene* parent);
+
+  void setStatus(ProcessStatus status) {
+    if (status == STATUS_DONE)
+      statusTextItem_->setHtml(CheckMarkHtml);
+    else
+      statusTextItem_->setHtml(HourglassHtml);
+  }
+
+  bool isBetweenProponentAndOpponent(AeraGraphicsItem* other) {
+    if (other->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
+      auto otherEvent = (AbaAddSentence*)other->getAeraEvent();
+      return (addEvent_->graphId_ % 100 == 0 && otherEvent->graphId_ % 100 != 0 ||
+              addEvent_->graphId_ % 100 != 0 && otherEvent->graphId_ % 100 == 0);
+    }
+
+    return false;
+  }
+
+  bool isBetweenProponentGraphs(AeraGraphicsItem* other) {
+    if (other->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
+      auto otherEvent = (AbaAddSentence*)other->getAeraEvent();
+      return (addEvent_->graphId_ != otherEvent->graphId_ &&
+        addEvent_->graphId_ % 100 == 0 && otherEvent->graphId_ % 100 == 0);
+    }
+
+    return false;
+  }
+
+  bool isBetweenOpponentGraphs(AeraGraphicsItem* other) {
+    if (other->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
+      auto otherEvent = (AbaAddSentence*)other->getAeraEvent();
+      return (addEvent_->graphId_ != otherEvent->graphId_ &&
+        addEvent_->graphId_ % 100 != 0 && otherEvent->graphId_ % 100 != 0);
+    }
+
+    return false;
+  }
 
 protected:
+  void setTextItemAndPolygon(QString html, bool prependHeaderHtml, Shape shape = SHAPE_RECTANGLE, qreal targetWidth = 0) override;
+
   void textItemLinkActivated(const QString& link) override;
 
 private:
-  void setMessageHtml();
-
-  ModelPredictionFromRequirementDisabledEvent* requirementDisabledEvent_;
-
-  QString expandedMessageHtml_;
-  QString toolTipText_;
-  QString messageHtml_;
+  AbaAddSentence* addEvent_;
+  QGraphicsTextItem* statusTextItem_;
 };
 
 }

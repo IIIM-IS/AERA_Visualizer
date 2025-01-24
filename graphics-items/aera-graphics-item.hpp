@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ Copyright (c) 2021 Leonard Eberding
 //_/_/ http://www.iiim.is
@@ -86,6 +86,8 @@ class AeraVisualizerScene;
 class AeraGraphicsItem : public QGraphicsPolygonItem
 {
 public:
+  typedef enum { STATUS_PROCESSING, STATUS_DONE } ProcessStatus;
+
   /**
    * Create an AeraGraphicsItem, and set headerHtml_ to a header with aeraEvent_->time_ and 
    * headerPrefix + the aeraEvent label with a "#this" link.
@@ -93,15 +95,39 @@ public:
    * \param replicodeObjects The ReplicodeObjects used to get the detail OID and label.
    * \param parent The parent AeraVisualizerScene.
    * \param headerPrefix The prefix for headerHtml_ as described above.
+   * \param textItemTextColor (optional) The text color when we recreate the textItem_ . If ommitted, use black.
    */
   AeraGraphicsItem(
     AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects,
-    AeraVisualizerScene* parent, const QString& headerPrefix = "");
+    AeraVisualizerScene* parent, const QString& headerPrefix, QColor textItemTextColor = Qt::black);
 
-  void removeArrowsAndHorizontalLines();
+  /**
+   * Add the Arrow to the list of arrows. This does not take ownership
+   * or add to the parent scene.
+   * \param arrow The arrow to add.
+   */
   void addArrow(Arrow* arrow) { arrows_.append(arrow); }
-  void addHorizontalLine(AnchoredHorizontalLine* line) { horizontalLines_.append(line); }
-  void updateArrowsAndLines();
+
+  /**
+   * Remove the Arrow from the list of arrows, delete it from the scene and delete the arrow.
+   * \param arrow The Arrow to remove from the list of arrows. If it is not in the
+   * list, then do nothing (do not delete it or remove from the parent scene).
+   */
+  void removeAndDeleteArrow(Arrow* arrow);
+
+  /**
+   * Search the list of arrows for an arrow to an item whose AeraEvent object is the
+   * given object and call removeAndDeleteArrow to remove and delete the Arrow.
+   * \param object The object in the Aera event of the Item at the end of the Arrow.
+   */
+  void removeAndDeleteArrowToObject(r_code::Code* object);
+
+  /**
+   * Remove all arrows and horizontal line and remove them from the parent scene.
+   */
+  void removeArrowsAndHorizontalLine();
+  void setHorizontalLine(AnchoredHorizontalLine* line);
+  void updateArrowsAndLine();
   AeraEvent* getAeraEvent() { return aeraEvent_; }
   QString getHtml() { return textItem_->toHtml(); }
 
@@ -171,10 +197,10 @@ public:
   }
 
   /**
-   * Set the the visible state of this item and the connected arrows and anchored horizontal lines.
+   * Set the the visible state of this item and the connected arrows and anchored horizontal line.
    * \param visible The visible state.
    */
-  void setItemAndArrowsAndHorizontalLinesVisible(bool visible);
+  void setItemAndArrowsAndHorizontalLineVisible(bool visible);
 
   /**
    * Adjust the position of the item.
@@ -192,6 +218,22 @@ public:
    */
   bool is_sim();
 
+  AeraVisualizerScene* getParentScene() {
+    return parent_;
+  }
+
+  /* Helper functions to save/restore original pen when we need to highlight this item */
+  void savePen() {
+    if (borderFlashCountdown_ > 0) // Don't restore the highlight pen
+      savedPen_ = getBorderNoHighlightPen();
+    else
+      savedPen_ = pen();
+  }
+
+  void restorePen() {
+    setPen(savedPen_);
+  }
+
   static const QString DownArrowHtml;
   static const QString RightArrowHtml;
   static const QString RightDoubleArrowHtml;
@@ -199,6 +241,43 @@ public:
   static const QString UnselectedRadioButtonHtml;
   static const QString RightPointingTriangleHtml;
   static const QString DownPointingTriangleHtml;
+  static const QString HourglassHtml;
+  static const QString StopSignHtml;
+  static const QString CheckMarkHtml;
+  static const QString RedXHtml;
+
+  static const QColor DefaultItemColor;
+  static const QColor SimulatedItemColor;
+
+  static const QColor Color_proponent_justifications;
+  static const QColor Color_proponent_asm_toBeProved;
+  static const QColor Color_proponent_asm;
+  static const QColor Color_proponent_nonAsm_toBeProved;
+  static const QColor Color_proponent_nonAsm;
+  static const QColor Color_opponent_finished_justification;
+  static const QColor Color_opponent_unfinished_justification;
+  static const QColor Color_opponent_ms_border;
+  static const QColor Color_opponent_ms_asm_culprit;
+  static const QColor Color_opponent_ms_asm_culprit_text;
+  static const QColor Color_opponent_ms_asm_defence;
+  static const QColor Color_opponent_ms_asm_defence_text;
+  static const QColor Color_opponent_ms_asm;
+  static const QColor Color_opponent_ms_asm_text;
+  static const QColor Color_opponent_ms_nonAsm;
+  static const QColor Color_opponent_ms_nonAsm_text;
+  static const QColor Color_opponent_ums_asm_defence;
+  static const QColor Color_opponent_ums_asm_defence_border;
+  static const QColor Color_opponent_ums_asm_defence_text;
+  static const QColor Color_opponent_ums_asm_culprit;
+  static const QColor Color_opponent_ums_asm_culprit_border;
+  static const QColor Color_opponent_ums_asm_culprit_text;
+  static const QColor Color_opponent_ums_asm;
+  static const QColor Color_opponent_ums_asm_border;
+  static const QColor Color_opponent_ums_asm_text;
+  static const QColor Color_opponent_ums_nonAsm;
+  static const QColor Color_opponent_ums_nonAsm_border;
+  static const QColor Color_opponent_ums_nonAsm_text;
+  static const QColor Color_attack_edge;
 
   int borderFlashCountdown_;
 
@@ -230,8 +309,8 @@ protected:
   void mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent) override;
 
   /**
-   * Set the textItem_ to the given html and create the border polygon. Connect
-   * the textItem_ to textItemLinkActivated, with default behavior which a derived class can override.
+   * Set the textItem_ to the given html and create the border polygon. Use the textItemTextColor given to the constructor.
+   * Connect the textItem_ to textItemLinkActivated, with default behavior which a derived class can override.
    * \param html The HTML for the textItem_.
    * \param prependHeaderHtml If false, use html as-is. If true, first set the text 
    * to html and adjust the size, then set the text to headerHtml_+html. We do this because
@@ -240,7 +319,7 @@ protected:
    * \param targetWidth (optional) The target screen width of the item. If omitted of if this is 
    * less than the default width based on the item contents, then it is ignored.
    */
-  void setTextItemAndPolygon(QString html, bool prependHeaderHtml, Shape shape = SHAPE_RECTANGLE, qreal targetWidth = 0);
+  virtual void setTextItemAndPolygon(QString html, bool prependHeaderHtml, Shape shape = SHAPE_RECTANGLE, qreal targetWidth = 0);
 
   virtual void textItemLinkActivated(const QString& link);
 
@@ -249,14 +328,13 @@ protected:
   QString headerHtml_;
   TextItem* textItem_;
   QPen borderNoHighlightPen_;
+  AnchoredHorizontalLine* horizontalLine_;
 
 private:
-  void removeArrow(Arrow* arrow);
-  void removeHorizontalLine(AnchoredHorizontalLine* line);
-
   AeraEvent* aeraEvent_;
   QList<Arrow*> arrows_;
-  QList<AnchoredHorizontalLine*> horizontalLines_;
+  QColor textItemTextColor_;
+  QPen savedPen_;
 };
 
 }

@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ http://www.iiim.is
 //_/_/
@@ -65,8 +65,8 @@ using namespace r_exec;
 
 namespace aera_visualizer {
 
-ExplanationLogWindow::ExplanationLogWindow(AeraVisulizerWindow* mainWindow, ReplicodeObjects& replicodeObjects)
-  : AeraVisulizerWindowBase(mainWindow, replicodeObjects)
+ExplanationLogWindow::ExplanationLogWindow(AeraVisualizerWindow* mainWindow, ReplicodeObjects& replicodeObjects)
+  : AeraVisualizerWindowBase(mainWindow, replicodeObjects)
 {
   auto centralLayout = new QVBoxLayout();
   textBrowser_ = new TextBrowser(this);
@@ -109,6 +109,12 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
         " will succeed when instantiated with the given template values.<br><br>";
       appendHtml(explanation);
     });
+    menu->addAction(QString("Zoom to ") + replicodeObjects_.getLabel(requirementFactPred).c_str(),
+      [=]() { mainWindow_->zoomToAeraGraphicsItem(requirementFactPred); });
+    menu->addAction(QString("Focus on ") + replicodeObjects_.getLabel(requirementFactPred).c_str(),
+      [=]() { mainWindow_->focusOnAeraGraphicsItem(requirementFactPred); });
+    menu->addAction(QString("Center on ") + replicodeObjects_.getLabel(requirementFactPred).c_str(),
+      [=]() { mainWindow_->centerOnAeraGraphicsItem(requirementFactPred); });
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
   }

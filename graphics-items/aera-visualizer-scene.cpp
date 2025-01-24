@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ Copyright (c) 2021 Leonard Eberding
 //_/_/ http://www.iiim.is
@@ -60,6 +60,9 @@
 #include "anchored-horizontal-line.hpp"
 #include "model-item.hpp"
 #include "auto-focus-fact-item.hpp"
+#include "aera-graphics-item.hpp"
+#include "aera-graphics-item-group.hpp"
+#include "aba-sentence-item.hpp"
 #include "aera-visualizer-scene.hpp"
 
 #include <QGraphicsSceneMouseEvent>
@@ -75,7 +78,7 @@ using namespace r_exec;
 namespace aera_visualizer {
 
 AeraVisualizerScene::AeraVisualizerScene(
-  ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent, bool isMainScene,
+  ReplicodeObjects& replicodeObjects, AeraVisualizerWindow* parent, bool isMainScene,
   const OnSceneSelected& onSceneSelected)
 : QGraphicsScene(parent),
   parent_(parent),
@@ -91,12 +94,10 @@ AeraVisualizerScene::AeraVisualizerScene(
   valueUpFlashColor_("green"),
   valueDownFlashColor_("red")
 {
-  itemColor_ = Qt::white;
-  simulatedItemColor_ = QColor(255, 255, 220);
   lineColor_ = Qt::black;
   setBackgroundBrush(QColor(245, 245, 245));
   flashTimerId_ = 0;
-  setSceneRect(QRectF(0, 0, 20000, 20000));
+  setSceneRect(QRectF(0, 0, 20000, 100000));
 
   if (isMainScene_) {
     eventTypeFirstTop_[IoDeviceEjectEvent::EVENT_TYPE] = 20;
@@ -158,19 +159,38 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
     }
   }
 
-  item->setBrush(aeraEvent->eventType_ == ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE || 
-                 aeraEvent->eventType_ == PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE || 
-                 item->is_sim() ? simulatedItemColor_ : itemColor_);
   bool isFocusSimulation = (item->getAeraEvent()->object_ &&
                             focusSimulationDetailOids_.find(item->getAeraEvent()->object_->get_detail_oid())
                             != focusSimulationDetailOids_.end());
   bool isSimulationEventType = 
-    (AeraVisulizerWindow::simulationEventTypes_.find(item->getAeraEvent()->eventType_) !=
-     AeraVisulizerWindow::simulationEventTypes_.end());
+    (AeraVisualizerWindow::simulationEventTypes_.find(item->getAeraEvent()->eventType_) !=
+     AeraVisualizerWindow::simulationEventTypes_.end());
+
+  AeraGraphicsItemGroup* itemGroup = 0;
+  if (aeraEvent->eventType_ == AbaAddSentence::EVENT_TYPE) {
+    auto addSentence = (AbaAddSentence*)aeraEvent;
+
+    itemGroup = getItemGroup(addSentence->graphId_);
+    if (!itemGroup) {
+      int solutionId = addSentence->graphId_ / 100;
+      if (addSentence->graphId_ % 100 != 0)
+        itemGroup = new AeraGraphicsItemGroup(
+          this, "O" + QString::number(solutionId) + ":" + QString::number(addSentence->graphId_ % 100),
+          AeraGraphicsItem::Color_opponent_unfinished_justification);
+      else
+        itemGroup = new AeraGraphicsItemGroup(
+          this, "P" + QString::number(solutionId), AeraGraphicsItem::Color_proponent_justifications);
+
+      itemGroups_[addSentence->graphId_] = itemGroup;
+      // Put in back of the grid lines.
+      itemGroup->setZValue(-2100);
+      addItem(itemGroup);
+    }
+  }
 
   if (qIsNaN(aeraEvent->itemTopLeftPosition_.x())) {
     // Assign an initial position.
-    // Only update positions based on time for the main scehe.
+    // Only update positions based on time for the main scene.
     if (isMainScene_ && aeraEvent->time_ >= thisFrameTime_ + replicodeObjects_.getSamplingPeriod()) {
       // Start a new frame (or the first frame).
       auto relativeTime = duration_cast<microseconds>(aeraEvent->time_ - replicodeObjects_.getTimeReference());
@@ -179,7 +199,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       // Reset the top.
       eventTypeNextTop_.clear();
       focusSimulationNextTop_ = eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
-      otherSimulationNextTop_ = 1750 + eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
+      otherSimulationNextTop_ = 3000 + eventTypeFirstTop_[AutoFocusNewObjectEvent::EVENT_TYPE];
     }
 
     int eventType = 0;
@@ -194,27 +214,58 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
         eventType = 0;
     }
 
+    // Compute top.
     qreal top;
-    if (isSimulationEventType)
-      // Ignore eventType and stack the simulated items in order.
-      top = (isFocusSimulation ? focusSimulationNextTop_ : otherSimulationNextTop_);
-    else {
-      if (eventTypeNextTop_.find(eventType) != eventTypeNextTop_.end())
-        top = eventTypeNextTop_[eventType];
+    if (itemGroup) {
+      if (!qIsNaN(itemGroup->getNextTop()))
+        top = itemGroup->getNextTop();
       else {
-        top = eventTypeFirstTop_[eventType];
-
-        if (thisFrameTime_ - replicodeObjects_.getTimeReference() < milliseconds(150) &&
-            eventType == AutoFocusNewObjectEvent::EVENT_TYPE &&
-            aeraEvent->object_->get_reference(0)->references_size() >= 2 &&
-            aeraEvent->object_->get_reference(0)->get_reference(1) == replicodeObjects_.getObject("essence"))
-          // Debug: The first essence item. Override to make the same types of values line up. Should use a layout algorithm.
-          top = 296;
+        // First position for this group. Get the lowest nextTop of all the item groups.
+        top = focusSimulationNextTop_;
+        for (auto otherGroup = itemGroups_.begin(); otherGroup != itemGroups_.end(); ++otherGroup) {
+          if (!qIsNaN(otherGroup->second->getNextTop()))
+            top = max(top, otherGroup->second->getNextTop());
+        }
       }
+
+      top += 10;
+    }
+    else {
+      if (isSimulationEventType)
+        // Ignore eventType and stack the simulated items in order.
+        top = (isFocusSimulation ? focusSimulationNextTop_ : otherSimulationNextTop_);
+      else {
+        if (eventTypeNextTop_.find(eventType) != eventTypeNextTop_.end())
+          top = eventTypeNextTop_[eventType];
+        else {
+          top = eventTypeFirstTop_[eventType];
+
+          if (thisFrameTime_ - replicodeObjects_.getTimeReference() < milliseconds(150) &&
+              eventType == AutoFocusNewObjectEvent::EVENT_TYPE &&
+              aeraEvent->object_->get_reference(0)->references_size() >= 2 &&
+              aeraEvent->object_->get_reference(0)->get_reference(1) == replicodeObjects_.getObject("essence"))
+            // Debug: The first essence item. Override to make the same types of values line up. Should use a layout algorithm.
+            top = 296;
+        }
+      }
+
+      // Set up eventTypeNextTop_ or simulation next top for the next item.
+      int verticalMargin = 15;
+      if (aeraEvent->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
+          aeraEvent->eventType_ == IoDeviceEjectEvent::EVENT_TYPE)
+        verticalMargin = 5;
+      qreal nextTop = top + item->boundingRect().height() + verticalMargin;
+      if (isSimulationEventType) {
+        if (isFocusSimulation)
+          focusSimulationNextTop_ = nextTop;
+        else
+          otherSimulationNextTop_ = nextTop;
+      }
+      else
+        eventTypeNextTop_[eventType] = nextTop;
     }
 
     qreal left;
-    int verticalMargin = 15;
     if (isSimulationEventType) {
       // Position simulated items exactly.
       if (aeraEvent->eventType_ == ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE)
@@ -226,37 +277,27 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
         left = getTimelineX(((_Fact*)((PromotedSimulatedPredictionDefeatEvent*)aeraEvent)->input_
                                        ->get_reference(0)->get_reference(0))->get_after());
       else {
-        // We know that a simulated item's object has the form (fact (goal_or_pred (fact ...)))
+        // We know that a simulated item's object usually has the form (fact (goal_or_pred (fact ...)))
         if (((_Fact*)aeraEvent->object_)->get_goal())
           // Position a goal at the time it needs to be achieved by.
           left = getTimelineX(((_Fact*)aeraEvent->object_->get_reference(0)->get_reference(0))->get_before()) -
-          item->boundingRect().width();
-        else
+            item->boundingRect().width();
+        else if (((_Fact*)aeraEvent->object_)->get_pred())
           left = getTimelineX(((_Fact*)aeraEvent->object_->get_reference(0)->get_reference(0))->get_after());
+        else
+          // No goal or pred, just a solo fact. Position like a goal.
+          left = getTimelineX(((_Fact*)aeraEvent->object_)->get_after());
       }
     }
     else {
       if (aeraEvent->eventType_ == IoDeviceInjectEvent::EVENT_TYPE ||
-        aeraEvent->eventType_ == IoDeviceEjectEvent::EVENT_TYPE) {
+          aeraEvent->eventType_ == IoDeviceEjectEvent::EVENT_TYPE)
         // Allow inject/eject items to be on the frame boundary.
         left = thisFrameLeft_ + item->boundingRect().left();
-        verticalMargin = 5;
-      }
       else
         left = thisFrameLeft_ + 5;
     }
     aeraEvent->itemTopLeftPosition_ = QPointF(left, top);
-
-    // Set up eventTypeNextTop_ or simulation next top for the next item.
-    qreal nextTop = top + item->boundingRect().height() + verticalMargin;
-    if (isSimulationEventType) {
-      if (isFocusSimulation)
-        focusSimulationNextTop_ = nextTop;
-      else
-        otherSimulationNextTop_ = nextTop;
-    }
-    else
-      eventTypeNextTop_[eventType] = nextTop;
   }
 
   if (qIsNaN(aeraEvent->itemInitialTopLeftPosition_.x()))
@@ -267,6 +308,32 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
   // Adjust the position from the topLeft.
   item->setPos(aeraEvent->itemTopLeftPosition_ - item->boundingRect().topLeft());
   item->adjustItemYPosition();
+  if (itemGroup) {
+    qreal saveHeight = itemGroup->boundingRect().height();
+    itemGroup->addChild(item);
+    
+    qreal deltaHeight = itemGroup->boundingRect().height() - saveHeight;
+    if (saveHeight > 1 && deltaHeight > 0) {
+      // Shift overlapping groups down by deltaHeight.
+      for (auto otherGroup = itemGroups_.begin(); otherGroup != itemGroups_.end(); ++otherGroup) {
+        if (otherGroup->second->pos().y() > itemGroup->pos().y())
+          otherGroup->second->setPos(otherGroup->second->pos().x(),
+                                     otherGroup->second->pos().y() + deltaHeight);
+      }
+    }
+  }
+}
+
+void AeraVisualizerScene::removeAeraGraphicsItem(AeraGraphicsItem* item) {
+  if (item->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
+    auto itemGroup = getItemGroup(((AbaAddSentence*)item->getAeraEvent())->graphId_);
+    if (itemGroup) {
+      itemGroup->removeChild(item);
+      // TODO: Remove itemGroup if it is empty. (Remember its position for it we step forward again?)
+    }
+  }
+
+  removeItem(item);
 }
 
 void AeraVisualizerScene::onViewMoved()
@@ -276,6 +343,9 @@ void AeraVisualizerScene::onViewMoved()
     qreal sceneY = views().at(0)->mapToScene(0, 0).y();
     foreach(QGraphicsTextItem * text, timestampTexts_)
       text->setPos(text->x(), sceneY);
+
+    for (auto itemGroup = itemGroups_.begin(); itemGroup != itemGroups_.end(); ++itemGroup)
+      itemGroup->second->onParentViewMoved();
   }
 }
 
@@ -310,17 +380,24 @@ void AeraVisualizerScene::addArrow(
   if (startItem == endItem)
     return;
 
-  QPen hightlighArrowBasePen = Arrow::HighlightedPen;
-  QPen hightlighArrowTipPen = Arrow::HighlightedPen;
+  QPen highlightArrowBasePen = Arrow::HighlightedPen;
+  QPen highlightArrowTipPen = Arrow::HighlightedPen;
   if (lhsItem == startItem) {
-    hightlighArrowBasePen = Arrow::RedArrowheadPen;
-    hightlighArrowTipPen = Arrow::GreenArrowheadPen;
+    highlightArrowBasePen = Arrow::RedArrowheadPen;
+    highlightArrowTipPen = Arrow::GreenArrowheadPen;
   }
   else if (lhsItem == endItem) {
-    hightlighArrowBasePen = Arrow::GreenArrowheadPen;
-    hightlighArrowTipPen = Arrow::RedArrowheadPen;
+    highlightArrowBasePen = Arrow::GreenArrowheadPen;
+    highlightArrowTipPen = Arrow::RedArrowheadPen;
   }
-  auto arrow = new Arrow(startItem, endItem, hightlighArrowBasePen, hightlighArrowTipPen, this);
+  addArrow(startItem, endItem, Arrow::HighlightedPen, highlightArrowBasePen, highlightArrowTipPen);
+}
+
+void AeraVisualizerScene::addArrow(
+    AeraGraphicsItem* startItem, AeraGraphicsItem* endItem, const QPen& highlightBodyPen,
+    const QPen& highlightArrowBasePen, const QPen& highlightArrowTipPen)
+{
+  auto arrow = new Arrow(startItem, endItem, highlightBodyPen, highlightArrowBasePen, highlightArrowTipPen, this);
 
   startItem->addArrow(arrow);
   endItem->addArrow(arrow);
@@ -332,7 +409,8 @@ void AeraVisualizerScene::addArrow(
 void AeraVisualizerScene::addHorizontalLine(AeraGraphicsItem* item)
 {
   if (item->getAeraEvent()->object_ &&
-      item->getAeraEvent()->object_->code(0).asOpcode() == r_exec::Opcodes::Fact) {
+      (item->getAeraEvent()->object_->code(0).asOpcode() == r_exec::Opcodes::Fact ||
+       item->getAeraEvent()->object_->code(0).asOpcode() == r_exec::Opcodes::AntiFact)) {
     auto fact = (_Fact*)item->getAeraEvent()->object_;
     Timestamp after, before;
 
@@ -356,7 +434,7 @@ void AeraVisualizerScene::addHorizontalLine(AeraGraphicsItem* item)
     }
 
     auto line = new AnchoredHorizontalLine(item, getTimelineX(after), getTimelineX(before));
-    item->addHorizontalLine(line);
+    item->setHorizontalLine(line);
     line->setZValue(-1001.0);
     addItem(line);
     line->updatePosition();
@@ -376,6 +454,41 @@ AeraGraphicsItem* AeraVisualizerScene::getAeraGraphicsItem(Code* object)
   return 0;
 }
 
+// Redo highlights in case something's changed
+void AeraVisualizerScene::updateHighlights() {
+  double currentScale = views().at(0)->transform().m11();
+  double strokeScale = (std::max)(1.0, 1/currentScale);
+  
+  QPen scaledAllMatches(Qt::blue, 3 * strokeScale);
+  QPen scaledCurrentMatch(Qt::cyan, 3 * strokeScale);
+
+  // Do all the highlights
+  foreach(AeraGraphicsItem * item, allMatches_) {
+    if (item)
+      item->setPen(scaledAllMatches);
+  }
+
+  if (currentMatch_) {
+    currentMatch_->setPen(scaledCurrentMatch);
+  }
+}
+
+// Reset highlights and wipe the list
+void AeraVisualizerScene::unhighlightAll() {
+  foreach(AeraGraphicsItem * item, allMatches_) {
+    if (item)
+      item->restorePen();
+  }
+
+  if (currentMatch_)
+    currentMatch_->restorePen();
+
+  currentMatch_ = NULL;
+  allMatches_.clear();
+
+  updateHighlights();
+}
+
 void AeraVisualizerScene::scaleViewBy(double factor)
 {
   double currentScale = views().at(0)->transform().m11();
@@ -385,6 +498,8 @@ void AeraVisualizerScene::scaleViewBy(double factor)
   view->resetMatrix();
   view->translate(oldMatrix.dx(), oldMatrix.dy());
   view->scale(currentScale *= factor, currentScale *= factor);
+  
+  updateHighlights(); // Any zoom level change must update these
 }
 
 void AeraVisualizerScene::zoomViewHome()
@@ -402,13 +517,15 @@ void AeraVisualizerScene::zoomViewHome()
 
   if (boundingRect.width() != 0)
     views().at(0)->fitInView(boundingRect, Qt::KeepAspectRatio);
+
+  updateHighlights(); // Any zoom level change must update these
 }
 
 void AeraVisualizerScene::centerOnItem(QGraphicsItem *item) {
   auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
   if (aeraGraphicsItem) {
     if (!aeraGraphicsItem->isVisible())
-      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(true);
+      aeraGraphicsItem->setItemAndArrowsAndHorizontalLineVisible(true);
 
     aeraGraphicsItem->centerOn();
   }
@@ -419,7 +536,7 @@ void AeraVisualizerScene::focusOnItem(QGraphicsItem* item)
   auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
   if (aeraGraphicsItem) {
     if (!aeraGraphicsItem->isVisible())
-      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(true);
+      aeraGraphicsItem->setItemAndArrowsAndHorizontalLineVisible(true);
 
     aeraGraphicsItem->focus();
   }
@@ -438,13 +555,9 @@ void AeraVisualizerScene::zoomToItem(QGraphicsItem* item)
     qGraphicsView->scale(minimumZoomLevel, minimumZoomLevel);
   }
 
-  auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
-  if (aeraGraphicsItem) {
-    if (!aeraGraphicsItem->isVisible())
-      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(true);
+  updateHighlights(); // Any zoom level change must update these
 
-    aeraGraphicsItem->focus();
-  }
+  focusOnItem(item);
 }
 
 void AeraVisualizerScene::scrollToTimestamp(core::Timestamp timestamp) {
@@ -463,7 +576,7 @@ void AeraVisualizerScene::setItemsVisible(int eventType, bool visible)
   foreach(QGraphicsItem * item, items()) {
     auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
     if (aeraGraphicsItem && aeraGraphicsItem->getAeraEvent()->eventType_ == eventType)
-      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(visible);
+      aeraGraphicsItem->setItemAndArrowsAndHorizontalLineVisible(visible);
   }
 }
 
@@ -473,7 +586,7 @@ void AeraVisualizerScene::setNonItemsVisible(const set<int>& notEventTypes, bool
     auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
     if (aeraGraphicsItem && 
         notEventTypes.find(aeraGraphicsItem->getAeraEvent()->eventType_) == notEventTypes.end())
-      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(visible);
+      aeraGraphicsItem->setItemAndArrowsAndHorizontalLineVisible(visible);
   }
 }
 
@@ -493,7 +606,7 @@ void AeraVisualizerScene::setAutoFocusItemsVisible(const string& property, bool 
 
       auto mkValProperty = mkVal->get_reference(1);
       if (mkValProperty == propertyObject)
-        autoFocusItem->setItemAndArrowsAndHorizontalLinesVisible(visible);
+        autoFocusItem->setItemAndArrowsAndHorizontalLineVisible(visible);
     }
   }
 }
@@ -510,9 +623,39 @@ void AeraVisualizerScene::removeAllItemsByEventType(const set<int>& eventTypes)
   }
 
   for (auto item = toDelete.begin(); item != toDelete.end(); ++item) {
-    (*item)->removeArrowsAndHorizontalLines();
-    removeItem(*item);
+    (*item)->removeArrowsAndHorizontalLine();
+    removeAeraGraphicsItem(*item);
     delete *item;
+  }
+}
+
+void AeraVisualizerScene::abaSetBinding(int varNumber, const QString& text)
+{
+  set<AeraGraphicsItemGroup*> toRefit;
+
+  foreach(QGraphicsItem * item, items()) {
+    auto abaItem = dynamic_cast<AbaSentenceItem*>(item);
+    if (abaItem) {
+      if (abaItem->setBinding(varNumber, text)) {
+        // The item was changed, so need to re-fit its group box.
+        auto itemGroup = getItemGroup(((AbaAddSentence*)abaItem->getAeraEvent())->graphId_);
+        if (itemGroup)
+          // fitToChildren is expensive, so only call it later, once for each group.
+          toRefit.insert(itemGroup);
+      }
+    }
+  }
+
+  for (auto itemGroup = toRefit.begin(); itemGroup != toRefit.end(); itemGroup++)
+    (*itemGroup)->fitToChildren();
+}
+
+void AeraVisualizerScene::abaRemoveBinding(int varNumber)
+{
+  foreach(QGraphicsItem * item, items()) {
+    auto abaItem = dynamic_cast<AbaSentenceItem*>(item);
+    if (abaItem)
+      abaItem->removeBinding(varNumber);
   }
 }
 
@@ -522,6 +665,12 @@ void AeraVisualizerScene::wheelEvent(QGraphicsSceneWheelEvent* event)
   if (event->modifiers() == Qt::ControlModifier) {
     // Accept the event to override other behavior.
     event->accept();
+    QGraphicsView* view = views().at(0);
+    
+    // Zoom around the mouse
+    view->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+
+    // Scale
     scaleViewBy(pow((double)2, event->delta() / 1000.0));
   }
 }

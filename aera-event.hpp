@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -54,7 +54,9 @@
 #ifndef AERA_EVENT_HPP
 #define AERA_EVENT_HPP
 
+#include <vector>
 #include <QPointF>
+#include <QString>
 #include "submodules/AERA/r_code/object.h"
 #include "submodules/AERA/r_exec/opcodes.h"
 #include "submodules/AERA/r_exec/factory.h"
@@ -79,6 +81,8 @@ public:
    */
   virtual r_code::Code* getInput() { return 0;  }
 
+  std::vector<r_code::Code*> otherInputs_;
+
   /**
    * A helper method to get the first item in the reduction's set of productions.
    * \param reduction The mk.rdx reduction.
@@ -100,6 +104,8 @@ public:
     uint16 input_set_index = reduction->code(MK_RDX_INPUTS).asIndex();
     if (reduction->code(input_set_index).getAtomCount() < 2)
       return NULL;
+    if (reduction->code(input_set_index + 2).getDescriptor() != r_code::Atom::R_PTR)
+      return NULL;
     return reduction->get_reference(reduction->code(input_set_index + 2).asIndex());
   }
 
@@ -110,6 +116,12 @@ public:
   QPointF itemInitialTopLeftPosition_;
   // itemTopLeftPosition_ is used by "New" events to remember the screen position after undoing.
   QPointF itemTopLeftPosition_;
+
+protected:
+  void addOtherInput(r_code::Code* input) {
+    if (input)
+      otherInputs_.push_back(input);
+  }
 };
 
 class NewModelEvent : public AeraEvent {
@@ -261,9 +273,7 @@ public:
    * \param time The reduction time.
    * \param factPred The (fact (pred (fact (imdl ...)))).
    * \param predictingModel The model which made the prediction.
-   * TODO: Get this from an mk.rdx, which Replicode currently doesn't make.
    * \param cause The input cause for the prediction.
-   * TODO: Get this from a mk.rdx, which Replicode currently doesn't make.
    */
   ModelImdlPredictionEvent(core::Timestamp time, r_code::Code* factPred,
     r_code::Code* predictingModel, r_code::Code* cause)
@@ -288,14 +298,11 @@ public:
    * (mk.rdx fact_imdl [fact_cause fact_requirement] [fact_pred]) .
    * \param time The reduction time.
    * \param reduction The model reduction which points to the (fact (pred ...)) and the cause.
-   * \param imdlPredictionEventIndex The index in the events_ list of the previous prediction whose 
-   * object_ is this->getRequirement(), or -1 if this->getRequirement() is NULL.
-   * TODO: This should be the detail_oid of an mk.rdx, which Replicode currently doesn't make.
    */
-  ModelMkValPredictionReduction(core::Timestamp time, r_code::Code* reduction, int imdlPredictionEventIndex)
+  ModelMkValPredictionReduction(core::Timestamp time, r_exec::MkRdx* reduction)
     // The prediction is the first item in the set of productions.
     : AeraEvent(EVENT_TYPE, time, getFirstProduction(reduction)),
-    reduction_(reduction), imdlPredictionEventIndex_(imdlPredictionEventIndex)
+    reduction_(reduction)
   {}
 
   static const int EVENT_TYPE = 12;
@@ -306,20 +313,23 @@ public:
    * Get the cause from the reduction_, which is the first item in the set of inputs.
    * \return The cause.
    */
-  r_code::Code* getCause() {
-    return reduction_->get_reference(
-      reduction_->code(reduction_->code(MK_RDX_INPUTS).asIndex() + 1).asIndex());
-  }
+  r_code::Code* getCause() { return reduction_->get_first_input(); }
 
   /**
-   * Get the requirement from the reduction_, which is the second item in the set of inputs.
+   * Get the requirement from the reduction_, where the second item in the set of inputs is
+   * the mk.rdx for the requirement (so we get the mk.rdx production).
    * \return The requirement, or NULL if the set of inputs has less than two items.
    */
-  r_code::Code* getRequirement() { return getSecondInput(reduction_); }
+  r_code::Code* getRequirement() {
+    r_code::Code* req_mk_rdx = getSecondInput(reduction_);
+    if (!req_mk_rdx || req_mk_rdx->code(0).asOpcode() != r_exec::Opcodes::MkRdx)
+      return NULL;
+    return ((r_exec::MkRdx*)req_mk_rdx)->get_first_production();
+  }
 
   r_code::Code* getFactPred() { return object_; }
 
-  r_code::Code* reduction_;
+  r_exec::MkRdx* reduction_;
   int imdlPredictionEventIndex_;
 };
 
@@ -402,7 +412,9 @@ public:
       model_(model), factPred_((r_exec::_Fact*)factPred),
       input_((r_exec::_Fact*)input), requirement_((r_exec::_Fact*)requirement),
       inputIsSuperGoal_(inputIsSuperGoal), factPredIsImdl_(factPredIsImdl)
-  {}
+  {
+    addOtherInput(requirement);
+  }
 
   r_code::Code* getInput() override { return input_; }
 
@@ -434,7 +446,12 @@ public:
     : AeraEvent(EVENT_TYPE, time, factPred),
     compositeState_(compositeState), factPred_((r_exec::_Fact*)factPred),
     input_((r_exec::_Fact*)input), inputs_(inputs)
-  {}
+  {
+    for (auto i = inputs.begin(); i != inputs.end(); ++i) {
+      if (*i != input)
+        addOtherInput(*i);
+    }
+  }
 
   r_code::Code* getInput() override { return input_; }
 
@@ -583,7 +600,9 @@ public:
     : AeraEvent(EVENT_TYPE, time, factPred),
     model_(model), factPred_((r_exec::_Fact*)factPred),
     input_((r_exec::_Fact*)input), goal_requirement_((r_exec::_Fact*)goal_requirement)
-  {}
+  {
+    addOtherInput(goal_requirement);
+  }
 
   r_code::Code* getInput() override { return input_; }
 
@@ -643,7 +662,9 @@ public:
     : AeraEvent(EVENT_TYPE, time, promotedFact),
     promotedFromFact_((r_exec::_Fact*)promotedFromFact),
     timingsFact_((r_exec::_Fact*)timingsFact)
-  {}
+  {
+    addOtherInput(promotedFromFact);
+  }
 
   r_code::Code* getInput() override { return timingsFact_; }
 
@@ -679,6 +700,153 @@ public:
   r_code::Code* model_;
   r_exec::_Fact* input_;
   r_exec::_Fact* promotedFact_;
+};
+
+/* Use NewInstantiatedModelEvent to display imdls separately from the items
+*  that produce them
+*/
+class NewInstantiatedModelEvent : public AeraEvent {
+public:
+  NewInstantiatedModelEvent(
+    core::Timestamp time, r_exec::MkRdx* reduction, r_code::Code* factPred)
+    : AeraEvent(EVENT_TYPE, time, reduction->get_reference(MK_RDX_IHLP_REF)),
+    factPred_(factPred),
+    factImdl_(reduction->get_reference(MK_RDX_IHLP_REF)),
+    imdl_(factImdl_->get_reference(0)),
+    baseModel_(factImdl_->get_reference(0)->get_reference(0)),
+    reduction_(reduction)
+  {}
+
+  static const int EVENT_TYPE = 28;
+
+  r_code::Code* factPred_;        // The fact from 'fact imdl ...'
+  r_code::Code* factImdl_;        // The fact from 'fact imdl ...'
+  r_code::Code* imdl_;            // The imdl from 'fact imdl ...'
+  r_code::Code* baseModel_;       // The mdl that's instantiated
+  r_exec::MkRdx* reduction_;       // The reduction that produces everything
+
+  /**
+   * Get the cause from the reduction_, which is the first item in the set of inputs.
+   * \return The cause.
+   */
+  r_code::Code* getCause() { return reduction_->get_first_input(); }
+};
+
+/* NewReductionMarkerEvent is the event when a mk.rdx is produced.
+ * \param time The time of the reduction event.
+ * \param mk_rdx The mk.rdx object.
+ */
+class NewReductionMarkerEvent : public AeraEvent {
+public:
+  NewReductionMarkerEvent(core::Timestamp time, r_exec::MkRdx* mk_rdx)
+    : AeraEvent(EVENT_TYPE, time, mk_rdx), mk_rdx_(mk_rdx)
+  {}
+
+  static const int EVENT_TYPE = 29;
+
+  r_exec::MkRdx* mk_rdx_;
+};
+
+class AbaAddSentence : public AeraEvent {
+public:
+  /**
+   * Create an AbaAddSentence event for a new (unmarked) sentence.
+   * \param time The reduction time.
+   * \param fact The fact produced by the step.
+   * \param isAssumption True if fact is an assumption.
+   * \param isClaim True if fact is the claim of the graph.
+   * \param graphId S*100 + ID, where S is the solution number and ID is 0 for proponent graph,
+   * otherwise the opponent graph ID (within the solution).
+   * \param parent The fact which produced the step, or NULL if the first.
+   * \param abaCase The derivation case which produced the sentence.
+   * \param step (optional) The step number to print, if greater than zero.
+   */
+  AbaAddSentence(core::Timestamp time, r_code::Code* fact, bool isAssumption, bool isClaim,
+      int graphId, r_code::Code* parent, const std::string& abaCase, int step = 0)
+    : AeraEvent(EVENT_TYPE, time, fact),
+    fact_((r_exec::_Fact*)fact),
+    isAssumption_(isAssumption),
+    isClaim_(isClaim),
+    graphId_(graphId),
+    parent_((r_exec::_Fact*)parent),
+    abaCase_(abaCase),
+    step_(step)
+  {}
+
+  r_code::Code* getInput() override { return parent_; }
+
+  static const int EVENT_TYPE = 30;
+
+  r_exec::_Fact* fact_;
+  bool isAssumption_;
+  bool isClaim_;
+  int graphId_;
+  r_exec::_Fact* parent_;
+  std::string abaCase_;
+  int step_;
+};
+
+class AbaMarkSentence : public AeraEvent {
+public:
+  /**
+   * Create an AbaMarkSentence event to mark an existing sentence.
+   * \param time The reduction time.
+   * \param fact The fact to be marked.
+   * \param alsoMarkGraph (optional) If true, also mark the graph that the fact is in.
+   */
+  AbaMarkSentence(core::Timestamp time, r_code::Code* fact, bool alsoMarkGraph = false)
+    // Set the object_ NULL since there is already an AeraEvent for it.
+    : AeraEvent(EVENT_TYPE, time, NULL),
+    fact_((r_exec::_Fact*)fact),
+    alsoMarkGraph_(alsoMarkGraph)
+  {}
+
+  static const int EVENT_TYPE = 31;
+
+  r_exec::_Fact* fact_;
+  bool alsoMarkGraph_;
+};
+
+class AbaMarkedSentenceToParent : public AeraEvent {
+public:
+  /**
+   * Create an AbaMarkedSentenceToParent event for a link from a marked sentence to a parent.
+   * \param time The reduction time.
+   * \param markedFact The fact which is already marked.
+   * \param parent The parent fact which is justified by the markedFact.
+   */
+  AbaMarkedSentenceToParent(core::Timestamp time, r_code::Code* markedFact, r_code::Code* parent)
+    // Set the object_ NULL since there is already an AeraEvent for it.
+    : AeraEvent(EVENT_TYPE, time, NULL),
+    markedFact_((r_exec::_Fact*)markedFact),
+    parent_((r_exec::_Fact*)parent)
+  {}
+
+  static const int EVENT_TYPE = 32;
+
+  r_exec::_Fact* markedFact_;
+  r_exec::_Fact* parent_;
+};
+
+class AbaBindVariable : public AeraEvent {
+public:
+  /**
+   * Create an AbaBindVariable event for binding a variable.
+   * \param time The reduction time.
+   * \param varNumber The variable number.
+   * \param value The bound value.
+   */
+  AbaBindVariable(core::Timestamp time, int varNumber, const QString& value)
+    // Set the object_ NULL since there is already an AeraEvent for it.
+    : AeraEvent(EVENT_TYPE, time, NULL),
+    varNumber_(varNumber),
+    value_(value)
+  {}
+
+  static const int EVENT_TYPE = 33;
+
+  int varNumber_;
+  QString value_;
 };
 
 }

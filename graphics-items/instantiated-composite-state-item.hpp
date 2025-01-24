@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -79,7 +79,15 @@ public:
   static void getIcstOrImdlValues(
     const QString& source, QStringList& templateValues, QStringList& exposedValues);
 
-  static QString makeIcstMembersSource(r_code::Code* icst, ReplicodeObjects& replicodeObjects);
+  /**
+   * Make an HTML string for just the members of the icst, using the cst source.
+   * \param icst The icst.
+   * \param replicodeObjects
+   * \param antiFactHtmlColor (optional) The text color for |fact and |pgm . If ommitted, use red.
+   * \return The HTML string.
+   */
+  static QString makeIcstMembersSource(
+    r_code::Code* icst, ReplicodeObjects& replicodeObjects, const QString& antiFactHtmlColor = "#ff4040");
 
 protected:
   void textItemLinkActivated(const QString& link) override;

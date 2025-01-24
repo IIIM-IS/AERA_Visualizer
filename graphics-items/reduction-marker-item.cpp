@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2025 Jeff Thompson
-//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2023-2025 Jeff Thompson
+//_/_/ Copyright (c) 2023-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2023-2025 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -51,40 +51,40 @@
 //_/_/ 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-#ifndef MODEL_PREDICTION_FROM_REQUIREMENT_DISABLED_ITEM_HPP
-#define MODEL_PREDICTION_FROM_REQUIREMENT_DISABLED_ITEM_HPP
+#include <regex>
+#include <QMenu>
+#include "explanation-log-window.hpp"
+#include "../aera-visualizer-window.hpp"
+#include "aera-visualizer-scene.hpp"
+#include "reduction-marker-item.hpp"
 
-#include "aera-graphics-item.hpp"
+using namespace std;
+using namespace core;
+using namespace r_code;
 
 namespace aera_visualizer {
 
-class AeraVisualizerScene;
-
-/**
- * An ModelPredictionFromRequirementDisabledItem extends AeraGraphicsItem to show a
- * ModelPredictionFromRequirementDisabledEvent with a clickable "expand triangle" which expands
- * the item to show the full message.
- */
-class ModelPredictionFromRequirementDisabledItem : public AeraGraphicsItem
+ReductionMarkerItem::ReductionMarkerItem(
+  NewReductionMarkerEvent* newReductionMarkerEvent, ReplicodeObjects& replicodeObjects,
+  AeraVisualizerScene* parent)
+  : AeraGraphicsItem(newReductionMarkerEvent, replicodeObjects, parent, "Reduction Marker"),
+  newReductionMarkerEvent_(newReductionMarkerEvent)
 {
-public:
-  ModelPredictionFromRequirementDisabledItem(
-    ModelPredictionFromRequirementDisabledEvent* requirementDisabledEvent,
-    ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
-
-protected:
-  void textItemLinkActivated(const QString& link) override;
-
-private:
-  void setMessageHtml();
-
-  ModelPredictionFromRequirementDisabledEvent* requirementDisabledEvent_;
-
-  QString expandedMessageHtml_;
-  QString toolTipText_;
-  QString messageHtml_;
-};
-
+  setMkRdxHtml();
+  setTextItemAndPolygon(mkRdxHtml_, true);
 }
 
-#endif
+void ReductionMarkerItem::setMkRdxHtml()
+{
+  // Strip the ending propagation of saliency threshold.
+  regex saliencyRegex("\\s+[\\w\\:]+\\)$");
+  string mkRdxSource = regex_replace(
+    replicodeObjects_.getSourceCode(newReductionMarkerEvent_->object_), saliencyRegex, ")");
+
+  mkRdxHtml_ = QString(mkRdxSource.c_str());
+
+  addSourceCodeHtmlLinks(newReductionMarkerEvent_->object_, mkRdxHtml_);
+  mkRdxHtml_ = htmlify(mkRdxHtml_);
+}
+
+}

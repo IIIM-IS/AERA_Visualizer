@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -51,6 +51,8 @@
 //_/_/ 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
+#include <fstream>
+#include <sstream>
 #include <regex>
 #include <algorithm>
 #include <QRegularExpression>
@@ -58,11 +60,13 @@
 #include "aera-visualizer-scene.hpp"
 #include "model-item.hpp"
 #include "composite-state-item.hpp"
+#include "../submodules/AERA/r_comp/preprocessor.h"
 #include "instantiated-composite-state-item.hpp"
 
 using namespace std;
 using namespace core;
 using namespace r_code;
+using namespace r_comp;
 using namespace r_exec;
 
 namespace aera_visualizer {
@@ -89,16 +93,23 @@ void InstantiatedCompositeStateItem::getIcstOrImdlValues(
   templateValues = QStringList();
   exposedValues = QStringList();
 
-  smatch matches;
-  // Debug: Handle the case when a value is also an array or has a string with space or '[' or ']'.
-  // (icst cst_61 |[] [b 20] false 1)
-  QRegExp ihlpRegEx("^\\(i\\w+ \\w+ \\|?\\[([^\\]]*)\\] \\|?\\[([^\\]]*)\\] [\\w:]+ [\\w:]+\\)$");
-  if (source.indexOf(ihlpRegEx) >= 0) {
-    if (ihlpRegEx.capturedTexts()[1] != "")
-      templateValues = ihlpRegEx.capturedTexts()[1].split(' ');
-    if (ihlpRegEx.capturedTexts()[2] != "")
-      exposedValues = ihlpRegEx.capturedTexts()[2].split(' ');
-  }
+  // Parse the icst.
+  // TODO: Maybe this should be done once in ReplicodeObjects.
+  RepliStruct root(RepliStruct::Root);
+  uint32 a = 0, b = 0;
+  istringstream stream(source.toStdString());
+  root.parse(&stream, "", a, b);
+
+  // Advance an iterator to the template args.
+  auto i = (*root.args_.begin())->args_.begin();
+  ++i;
+  for (auto arg = (*i)->args_.begin(); arg != (*i)->args_.end(); ++arg)
+    templateValues.push_back((*arg)->print().c_str());
+
+  // Advance to the exposed args.
+  ++i;
+  for (auto arg = (*i)->args_.begin(); arg != (*i)->args_.end(); ++arg)
+    exposedValues.push_back((*arg)->print().c_str());
 }
 
 void InstantiatedCompositeStateItem::setFactIcstHtml()
@@ -139,9 +150,9 @@ void InstantiatedCompositeStateItem::setBoundCstAndMembersHtml()
     return;
 
   string cstSource = CompositeStateItem::simplifyCstSource(replicodeObjects_.getSourceCode(cst));
-  // Get just the set of members, which start on the third line and are indented by three spaces.
+  // Get just the set of members, which start on the second line and are indented by three spaces.
   string cstMembersSource;
-  auto match = QRegularExpression("^.+\\n.+\\n((   .+\\n)+)").match(cstSource.c_str());
+  auto match = QRegularExpression("^.+\\n((   .+\\n)+)").match(cstSource.c_str());
   if (match.hasMatch())
     // Strip the ending \n .
     cstMembersSource = match.captured(1).mid(0, match.captured(1).size() - 1).toStdString();
@@ -190,7 +201,8 @@ void InstantiatedCompositeStateItem::setBoundCstAndMembersHtml()
   boundCstMembersHtml_ = htmlify(boundCstMembersHtml_);
 }
 
-QString InstantiatedCompositeStateItem::makeIcstMembersSource(Code* icst, ReplicodeObjects& replicodeObjects)
+QString InstantiatedCompositeStateItem::makeIcstMembersSource(
+  Code* icst, ReplicodeObjects& replicodeObjects, const QString& antiFactHtmlColor)
 {
   // TODO: Combine with setBoundCstAndMembersHtml.
   auto cst = icst->get_reference(0);
@@ -209,13 +221,15 @@ QString InstantiatedCompositeStateItem::makeIcstMembersSource(Code* icst, Replic
   string cstSource = CompositeStateItem::simplifyCstSource(replicodeObjects.getSourceCode(cst));
   // Get just the members, which are indented by three spaces. Get the value inside the (fact value ...).
   string cstMembersSource;
-  auto i = QRegularExpression("   \\(fact (\\([^\\n]+)\\n").globalMatch(cstSource.c_str());
+  auto i = QRegularExpression("   \\((\\|?fact) (\\([^\\n]+)\\n").globalMatch(cstSource.c_str());
   while (i.hasNext()) {
     auto match = i.next();
-    auto value = match.captured(1);
+    auto value = match.captured(2);
     // Strip the fact timings from the end.
     value = value.mid(0, value.length() - 1);
     value = value.mid(0, value.lastIndexOf(')') + 1);
+    if (match.captured(1) == "|fact")
+      value = "<font color=\"" + antiFactHtmlColor + "\">" + value + "</font>";
 
     if (cstMembersSource != "")
       cstMembersSource += "\n";

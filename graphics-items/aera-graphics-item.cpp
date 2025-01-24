@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ Copyright (c) 2021 Leonard Eberding
 //_/_/ http://www.iiim.is
@@ -80,17 +80,57 @@ const QString AeraGraphicsItem::SelectedRadioButtonHtml = "<font size=\"+2\">&#x
 const QString AeraGraphicsItem::UnselectedRadioButtonHtml = "<font size=\"+3\">&#x25CB;</font>";
 const QString AeraGraphicsItem::RightPointingTriangleHtml = "<font size=\"+2\">&#x25B6;</font>";
 const QString AeraGraphicsItem::DownPointingTriangleHtml = "<font size=\"+1\">&#x25BC;</font>";
+const QString AeraGraphicsItem::HourglassHtml = "<font size=\"+1\"><b>&#8987;</b></font>";
+const QString AeraGraphicsItem::StopSignHtml = "<font size=\"+1\"><b>&#128721;</b></font>";
+const QString AeraGraphicsItem::CheckMarkHtml = "<font size=\"+1\"><b>&#9989;</b></font>";
+const QString AeraGraphicsItem::RedXHtml = "<font size=\"+1\"><b>&#10060;</b></font>";
+
+const QColor AeraGraphicsItem::DefaultItemColor(255, 255, 255);
+const QColor AeraGraphicsItem::SimulatedItemColor(255, 255, 220);
+
+const QColor AeraGraphicsItem::Color_proponent_justifications(0xA2, 0xDD, 0xF3);
+const QColor AeraGraphicsItem::Color_proponent_asm_toBeProved(0x7C, 0x0A, 0xA2);
+const QColor AeraGraphicsItem::Color_proponent_asm(0x11, 0x77, 0x11);
+const QColor AeraGraphicsItem::Color_proponent_nonAsm_toBeProved(0x61, 0x61, 0xA7);
+const QColor AeraGraphicsItem::Color_proponent_nonAsm(0x66, 0x66, 0x66);
+const QColor AeraGraphicsItem::Color_opponent_finished_justification(0xCC, 0xCC, 0xCC);
+const QColor AeraGraphicsItem::Color_opponent_unfinished_justification(0xFF, 0xFF, 0xFF);
+const QColor AeraGraphicsItem::Color_opponent_ms_border(0x00, 0x00, 0x00);
+const QColor AeraGraphicsItem::Color_opponent_ms_asm_culprit(0xCC, 0x99, 0x22);
+const QColor AeraGraphicsItem::Color_opponent_ms_asm_culprit_text(0xFF, 0xFF, 0xFF);
+const QColor AeraGraphicsItem::Color_opponent_ms_asm_defence(0x11, 0x77, 0x11);
+const QColor AeraGraphicsItem::Color_opponent_ms_asm_defence_text(0xFF, 0xFF, 0xFF);
+const QColor AeraGraphicsItem::Color_opponent_ms_asm(0x77, 0xBB, 0x77);
+const QColor AeraGraphicsItem::Color_opponent_ms_asm_text(0x00, 0x00, 0x00);
+const QColor AeraGraphicsItem::Color_opponent_ms_nonAsm(0x90, 0x90, 0x90);
+const QColor AeraGraphicsItem::Color_opponent_ms_nonAsm_text(0xFF, 0xFF, 0xFF);
+const QColor AeraGraphicsItem::Color_opponent_ums_asm_defence(0x11, 0x77, 0x11);
+const QColor AeraGraphicsItem::Color_opponent_ums_asm_defence_border(0x11, 0x77, 0x11);
+const QColor AeraGraphicsItem::Color_opponent_ums_asm_defence_text(0xFF, 0xFF, 0xFF);
+const QColor AeraGraphicsItem::Color_opponent_ums_asm_culprit(0xCC, 0x99, 0x22);
+const QColor AeraGraphicsItem::Color_opponent_ums_asm_culprit_border(0xCC, 0x99, 0x22);
+const QColor AeraGraphicsItem::Color_opponent_ums_asm_culprit_text(0xFF, 0xFF, 0xFF);
+const QColor AeraGraphicsItem::Color_opponent_ums_asm(0x77, 0xBB, 0x77);
+const QColor AeraGraphicsItem::Color_opponent_ums_asm_border(0x77, 0xBB, 0x77);
+const QColor AeraGraphicsItem::Color_opponent_ums_asm_text(0x00, 0x00, 0x00);
+const QColor AeraGraphicsItem::Color_opponent_ums_nonAsm(0xAA, 0xAA, 0xAA);
+const QColor AeraGraphicsItem::Color_opponent_ums_nonAsm_border(0xAA, 0xAA, 0xAA);
+const QColor AeraGraphicsItem::Color_opponent_ums_nonAsm_text(0x00, 0x00, 0x00);
+const QColor AeraGraphicsItem::Color_attack_edge(0xBB, 0x22, 0x22);
 
 AeraGraphicsItem::AeraGraphicsItem(
   AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent,
-  const QString& headerPrefix)
+  const QString& headerPrefix, QColor textItemTextColor)
 : parent_(parent),
   aeraEvent_(aeraEvent), replicodeObjects_(replicodeObjects),
+  textItemTextColor_(textItemTextColor),
   borderFlashCountdown_(AeraVisualizerScene::FLASH_COUNT),
   // The base class should call setTextItemAndPolygon()
   textItem_(0),
+  horizontalLine_(0),
   borderNoHighlightPen_(Qt::black, 1)
 {
+  setBrush(is_sim() ? SimulatedItemColor : DefaultItemColor);
   setFlag(QGraphicsItem::ItemIsMovable, true);
   setFlag(QGraphicsItem::ItemIsSelectable, true);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
@@ -115,6 +155,7 @@ void AeraGraphicsItem::setTextItemAndPolygon(QString html, bool prependHeaderHtm
   if (textItem_)
     delete textItem_;
   textItem_ = new TextItem(this);
+  textItem_->setDefaultTextColor(textItemTextColor_);
   textItem_->setHtml(html);
   // adjustSize() is needed for right-aligned text.
   textItem_->adjustSize();
@@ -180,40 +221,49 @@ void AeraGraphicsItem::setTextItemAndPolygon(QString html, bool prependHeaderHtm
   }
 }
 
-void AeraGraphicsItem::removeArrowsAndHorizontalLines()
-{
-  foreach(Arrow* arrow, arrows_) {
-    auto startItem = dynamic_cast<AeraGraphicsItem*>(arrow->startItem());
-    if (startItem)
-      startItem->removeArrow(arrow);
-    auto endItem = dynamic_cast<AeraGraphicsItem*>(arrow->endItem());
-    if (endItem)
-      endItem->removeArrow(arrow);
-    scene()->removeItem(arrow);
-    delete arrow;
-  }
-
-  foreach(AnchoredHorizontalLine* line, horizontalLines_) {
-    auto item = dynamic_cast<AeraGraphicsItem*>(line->item());
-    if (item)
-      item->removeHorizontalLine(line);
-    scene()->removeItem(line);
-    delete line;
-  }
-}
-
-void AeraGraphicsItem::removeArrow(Arrow* arrow)
+void AeraGraphicsItem::removeAndDeleteArrow(Arrow* arrow)
 {
   int index = arrows_.indexOf(arrow);
-  if (index != -1)
-    arrows_.removeAt(index);
+  if (index == -1)
+    return;
+
+  auto startItem = dynamic_cast<AeraGraphicsItem*>(arrow->startItem());
+  if (startItem)
+    startItem->arrows_.removeAll(arrow);
+  auto endItem = dynamic_cast<AeraGraphicsItem*>(arrow->endItem());
+  if (endItem)
+    endItem->arrows_.removeAll(arrow);
+  scene()->removeItem(arrow);
+  delete arrow;
 }
 
-void AeraGraphicsItem::removeHorizontalLine(AnchoredHorizontalLine* line)
+void AeraGraphicsItem::removeAndDeleteArrowToObject(Code* object)
 {
-  int index = horizontalLines_.indexOf(line);
-  if (index != -1)
-    horizontalLines_.removeAt(index);
+  foreach(Arrow* arrow, arrows_) {
+    auto endItem = dynamic_cast<AeraGraphicsItem*>(arrow->endItem());
+    if (endItem && endItem->getAeraEvent()->object_ == object)
+      removeAndDeleteArrow(arrow);
+  }
+}
+
+void AeraGraphicsItem::removeArrowsAndHorizontalLine()
+{
+  foreach(Arrow* arrow, arrows_)
+    removeAndDeleteArrow(arrow);
+
+  if (horizontalLine_) {
+    scene()->removeItem(horizontalLine_);
+    delete horizontalLine_;
+    horizontalLine_ = 0;
+  }
+}
+
+void AeraGraphicsItem::setHorizontalLine(AnchoredHorizontalLine* line) {
+  if (horizontalLine_) {
+    scene()->removeItem(horizontalLine_);
+    delete horizontalLine_;
+  }
+  horizontalLine_ = line;
 }
 
 void AeraGraphicsItem::bringToFront()
@@ -240,6 +290,8 @@ void AeraGraphicsItem::focus()
 {
   bringToFront();
   ensureVisible();
+  // First deselect other items so that moving the focused item doesn't unexpectedly move them with it.
+  parent_->clearSelection();
   setSelected(true);
 }
 
@@ -262,8 +314,7 @@ void AeraGraphicsItem::centerOn()
   else {
     qGraphicsView->centerOn(this);
   }
-  bringToFront();
-  setSelected(true);
+  focus();
 }
 
 void AeraGraphicsItem::ensureVisible()
@@ -294,12 +345,12 @@ void AeraGraphicsItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
   delete menu;
 }
 
-void AeraGraphicsItem::updateArrowsAndLines()
+void AeraGraphicsItem::updateArrowsAndLine()
 {
   foreach(Arrow * arrow, arrows_)
     arrow->updatePosition();
-  foreach(AnchoredHorizontalLine * line, horizontalLines_)
-    line->updatePosition();
+  if (horizontalLine_)
+    horizontalLine_->updatePosition();
 }
 
 QVariant AeraGraphicsItem::itemChange(GraphicsItemChange change, const QVariant& value)
@@ -307,7 +358,7 @@ QVariant AeraGraphicsItem::itemChange(GraphicsItemChange change, const QVariant&
   if (change == QGraphicsItem::ItemPositionChange) {
     aeraEvent_->itemTopLeftPosition_ = boundingRect().topLeft() + value.toPointF();
 
-    updateArrowsAndLines();
+    updateArrowsAndLine();
   }
 
   return value;
@@ -366,6 +417,7 @@ void AeraGraphicsItem::addSourceCodeHtmlLinks(
     auto referencedObject = object->get_reference(i);
     if (!(referencedObject->code(0).asOpcode() == Opcodes::Mdl ||
           referencedObject->code(0).asOpcode() == Opcodes::Cst ||
+          referencedObject->code(0).asOpcode() == Opcodes::MkRdx ||
           referencedObject->code(0).asOpcode() == Opcodes::Fact ||
           referencedObject->code(0).asOpcode() == Opcodes::AntiFact))
       continue;
@@ -382,14 +434,26 @@ void AeraGraphicsItem::addSourceCodeHtmlLinks(
     html.replace(
       " " + referencedLabel + "<br>",
       " " + makeHtmlLink(referencedObject, replicodeObjects) + "<br>");
-    // The same for at the end of a list.
+    // The same for at the end of an object.
     html.replace(
       " " + referencedLabel + ")",
       " " + makeHtmlLink(referencedObject, replicodeObjects) + ")");
+    // The same for at the beginning of a list.
+    html.replace(
+      "[" + referencedLabel + " ",
+      "[" + makeHtmlLink(referencedObject, replicodeObjects) + " ");
+    // The same for at the end of a list.
+    html.replace(
+      " " + referencedLabel + "]",
+      " " + makeHtmlLink(referencedObject, replicodeObjects) + "]");
+    // The same for at the only one in a list.
+    html.replace(
+      "[" + referencedLabel + "]",
+      "[" + makeHtmlLink(referencedObject, replicodeObjects) + "]");
   }
 }
 
-void AeraGraphicsItem::setItemAndArrowsAndHorizontalLinesVisible(bool visible)
+void AeraGraphicsItem::setItemAndArrowsAndHorizontalLineVisible(bool visible)
 {
   foreach(Arrow* arrow, arrows_) {
     if (visible) {
@@ -405,8 +469,8 @@ void AeraGraphicsItem::setItemAndArrowsAndHorizontalLinesVisible(bool visible)
       arrow->setVisible(false);
   }
 
-  foreach(AnchoredHorizontalLine* line, horizontalLines_)
-    line->setVisible(visible);
+  if (horizontalLine_)
+    horizontalLine_->setVisible(visible);
   
   setVisible(visible);
 }
@@ -414,8 +478,8 @@ void AeraGraphicsItem::setItemAndArrowsAndHorizontalLinesVisible(bool visible)
 void aera_visualizer::AeraGraphicsItem::adjustItemYPosition()
 {
   // Only adjust positions for non-simulation items
-  if (AeraVisulizerWindow::simulationEventTypes_.find(getAeraEvent()->eventType_) !=
-      AeraVisulizerWindow::simulationEventTypes_.end()) {
+  if (AeraVisualizerWindow::simulationEventTypes_.find(getAeraEvent()->eventType_) !=
+      AeraVisualizerWindow::simulationEventTypes_.end()) {
     return;
   }
   if (getAeraEvent()->itemInitialTopLeftPosition_ != getAeraEvent()->itemTopLeftPosition_) {
@@ -438,8 +502,8 @@ void aera_visualizer::AeraGraphicsItem::adjustItemYPosition()
         continue;
       }
       // We do not care for sim-items
-      if (AeraVisulizerWindow::simulationEventTypes_.find(valid_item->getAeraEvent()->eventType_) !=
-        AeraVisulizerWindow::simulationEventTypes_.end()) {
+      if (AeraVisualizerWindow::simulationEventTypes_.find(valid_item->getAeraEvent()->eventType_) !=
+        AeraVisualizerWindow::simulationEventTypes_.end()) {
         continue;
       }
       // If the colliding item comes from a different time-stamp we do not want to adjust the position.
@@ -510,16 +574,16 @@ void AeraGraphicsItem::textItemLinkActivated(const QString& link)
 
 void AeraGraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
-  // Highlight connected arrows and horizontal lines.
+  // Highlight connected arrows and horizontal line.
   foreach(Arrow * arrow, arrows_) {
     // The arrow base and tip pens were given to the Arrow constructor as needed.
     arrow->setPens(
-      Arrow::HighlightedPen, arrow->getHighlightArrowBasePen(), arrow->getHighlightArrowTipPen());
+      arrow->getHighlightBodyPen(), arrow->getHighlightArrowBasePen(), arrow->getHighlightArrowTipPen());
     arrow->update();
   }
-  foreach(AnchoredHorizontalLine* line, horizontalLines_) {
-    line->setPen(AnchoredHorizontalLine::HighlightedPen);
-    line->update();
+  if (horizontalLine_) {
+    horizontalLine_->setPen(AnchoredHorizontalLine::HighlightedPen);
+    horizontalLine_->update();
   }
 
   QGraphicsPolygonItem::hoverEnterEvent(event);
@@ -527,14 +591,14 @@ void AeraGraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 
 void AeraGraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
-  // Reset highlighting of connected arrows and horizontal lines.
+  // Reset highlighting of connected arrows and horizontal line.
   foreach(Arrow * arrow, arrows_) {
     arrow->setPens(Arrow::DefaultPen, Arrow::DefaultPen, Arrow::DefaultPen);
     arrow->update();
   }
-  foreach(AnchoredHorizontalLine* line, horizontalLines_) {
-    line->setPen(AnchoredHorizontalLine::DefaultPen);
-    line->update();
+  if (horizontalLine_) {
+    horizontalLine_->setPen(AnchoredHorizontalLine::DefaultPen);
+    horizontalLine_->update();
   }
 
   QGraphicsPolygonItem::hoverLeaveEvent(event);
@@ -559,7 +623,7 @@ void AeraGraphicsItem::TextItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
   auto url = document()->documentLayout()->anchorAt(event->pos());
   if (url.startsWith("#detail_oid-")) {
     uint64 detail_oid = url.mid(12).toULongLong();
-    auto object =  parent_->replicodeObjects_.getObjectByDetailOid(detail_oid);
+    auto object = parent_->replicodeObjects_.getObjectByDetailOid(detail_oid);
     if (object) {
       AeraGraphicsItem *aeraGraphicsItem = window->getAeraGraphicsItem(object);
       if (aeraGraphicsItem) {

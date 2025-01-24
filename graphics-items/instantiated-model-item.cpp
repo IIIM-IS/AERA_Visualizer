@@ -5,7 +5,7 @@
 //_/_/ Copyright (c) 2018-2025 Jeff Thompson
 //_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
 //_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
-//_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
+//_/_/ Copyright (c) 2023 Chloe Schaff
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -53,89 +53,103 @@
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 #include <regex>
+#include "aera-visualizer-window.hpp"
+#include "instantiated-model-item.hpp"
 #include <QMenu>
-#include "../submodules/AERA/r_exec/opcodes.h"
 #include "explanation-log-window.hpp"
 #include "aera-visualizer-scene.hpp"
-#include "prediction-item.hpp"
-#include "prediction-result-item.hpp"
 
 using namespace std;
-using namespace core;
 using namespace r_code;
-using namespace r_exec;
 
 namespace aera_visualizer {
 
-PredictionResultItem::PredictionResultItem(
-  PredictionResultEvent* predictionResultEvent, ReplicodeObjects& replicodeObjects, 
+ImdlItem::ImdlItem(
+  NewInstantiatedModelEvent* imdl, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-  : AeraGraphicsItem(predictionResultEvent, replicodeObjects, parent, 
-      predictionResultEvent->isSuccess() ? "Prediction Success" : "Prediction Failure"),
-  predictionResultEvent_(predictionResultEvent)
+  : AeraGraphicsItem(imdl,
+    replicodeObjects,
+    parent,
+    "Model " + makeHtmlLink(imdl->baseModel_, replicodeObjects) +
+    " " + RightDoubleArrowHtml + "<br>&nbsp;&nbsp;Instantiated Model "),
+  imdl_(imdl),
+  showState_(HIDE_IMDL),
+  replicodeObjects_(replicodeObjects)
 {
-  setFactOrAntiFactSuccessHtml();
-  setTextItemAndPolygon(factOrAntiFactSuccessHtml_, true);
+  // Extract the 2nd set of bracketed valuesfrom an expression of the form
+  //    (imdl mdl_74 [10 0s:300ms:0us 0s:400ms:0us] [b v4: v5: v6: v7:] : :)
+  smatch matches;
+  regex templateValsRegex("\\[[\\w\\s\\.:-]*\\] (\\[[\\w\\s\\.:-]*\\])");
+  std::string sourceCode = replicodeObjects_.getSourceCode(imdl_->imdl_);
+  if (regex_search(sourceCode, matches, templateValsRegex)) {
+    templateVals_ = QString::fromStdString(matches[1].str());
+  }
+
+  // Build the explanation HTML
+  explanation_ = "Input " + makeHtmlLink(imdl_->getCause(), replicodeObjects_) + " matched the LHS of model " +
+    makeHtmlLink(imdl_->baseModel_, replicodeObjects_) + " and was instantiated with template values " +
+    templateVals_ + "<br>";
+
+  // Set up the graphics item
+  setTextItemAndPolygon(makeHtml(), true);
 }
 
-void PredictionResultItem::setFactOrAntiFactSuccessHtml()
+
+QString ImdlItem::makeHtml()
 {
-  auto success = predictionResultEvent_->object_->get_reference(0);
+  QString html;
+  QString imdlSource = QString::fromStdString(replicodeObjects_.getSourceCode(imdl_->imdl_));
+  QString baseMdlLabel = QString::fromStdString(replicodeObjects_.getLabel(imdl_->baseModel_));
 
-  // Strip the ending confidence value and propagation of saliency threshold.
-  regex saliencyRegex("\\s+[\\w\\:]+\\)$");
-  regex confidenceAndSaliencyRegex("\\s+\\w+\\s+[\\w\\:]+\\)$");
-  string factOrAntiFactSuccessSource = regex_replace(replicodeObjects_.getSourceCode(
-    predictionResultEvent_->object_), confidenceAndSaliencyRegex, ")");
-  string successSource = regex_replace(replicodeObjects_.getSourceCode(success), saliencyRegex, ")");
+  if (showState_ == HIDE_IMDL) {
+    html += SelectedRadioButtonHtml + " Hide imdl" +
+      " <a href=\"#what-made-this\">" + UnselectedRadioButtonHtml + " What made this?</a><br>";
 
-  QString successLabel(replicodeObjects_.getLabel(success).c_str());
+    html += imdlSource.replace(baseMdlLabel, makeHtmlLink(imdl_->baseModel_, replicodeObjects_));
 
-  factOrAntiFactSuccessHtml_ = QString(factOrAntiFactSuccessSource.c_str()).replace(successLabel, DownArrowHtml);
-  factOrAntiFactSuccessHtml_ += QString("\n      ") + successSource.c_str();
+  }
+  else if (showState_ == WHAT_MADE_THIS) {
+    html += "<a href=\"#hide-imdl\">" + UnselectedRadioButtonHtml + " Hide imdl</a>" +
+      " " + SelectedRadioButtonHtml + " What made this?<br>";
+    
+    html += explanation_;
 
-  addSourceCodeHtmlLinks(predictionResultEvent_->object_->get_reference(0), factOrAntiFactSuccessHtml_);
-  factOrAntiFactSuccessHtml_ = htmlify(factOrAntiFactSuccessHtml_);
+    // Present the fact and imdl
+    QString imdlLabel = QString::fromStdString(replicodeObjects_.getLabel(imdl_->imdl_));
+    QString factImdl = QString::fromStdString(replicodeObjects_.getSourceCode(imdl_->factImdl_));
+
+    html += factImdl.replace(imdlLabel, DownArrowHtml);
+    html += htmlify(QString("\n      "));
+    html += imdlSource.replace(baseMdlLabel, makeHtmlLink(imdl_->baseModel_, replicodeObjects_));
+
+  }
+
+  return html;
 }
 
-void PredictionResultItem::textItemLinkActivated(const QString& link)
+
+void ImdlItem::textItemLinkActivated(const QString& link)
 {
   if (link == "#this") {
     auto menu = new QMenu();
     menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
     menu->addAction("Focus on This", [=]() { parent_->focusOnItem(this); });
     menu->addAction("Center on This", [=]() { parent_->centerOnItem(this); });
-    menu->addAction("What Made This?", [=]() {
-      QString explanation;
-      Code* factPrediction = predictionResultEvent_->object_->get_reference(0)->get_reference(0);
-      Code* input = predictionResultEvent_->object_->get_reference(0)->get_reference(1);
-
-      if (predictionResultEvent_->isSuccess()) {
-        explanation = "<b>Q: What made prediction success " +
-          makeHtmlLink(predictionResultEvent_->object_) + " ?</b><br>Input " +
-          makeHtmlLink(input) + " was matched against prediction " + makeHtmlLink(factPrediction) +
-          " with success.<br><br>";
-      }
-      else {
-        if (input->code(0).asOpcode() == Opcodes::Fact)
-          explanation = "<b>Q: What made prediction failure " +
-            makeHtmlLink(predictionResultEvent_->object_) + " ?</b><br>The value of input " +
-            makeHtmlLink(input) + " failed to match the value in prediction " + makeHtmlLink(factPrediction) +
-            ".<br><br>";
-        else if (input->code(0).asOpcode() == Opcodes::AntiFact)
-          explanation = "<b>Q: What made prediction failure " +
-            makeHtmlLink(predictionResultEvent_->object_) + " ?</b><br>Anti-fact " +
-            makeHtmlLink(input) + " asserts the absence of a fact to match prediction " + makeHtmlLink(factPrediction) +
-            ".<br><br>";
-        else
-          // We don't expect this.
-          return;
-      }
-
-      parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
+    menu->addAction("What Made This?", [=]() {     
+      parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation_);
     });
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
+  }
+  else if (link == "#hide-imdl") {
+    showState_ = HIDE_IMDL;
+    setTextItemAndPolygon(makeHtml(), true);
+    bringToFront();
+  }
+  else if (link == "#what-made-this") {
+    showState_ = WHAT_MADE_THIS;
+    setTextItemAndPolygon(makeHtml(), true);
+    bringToFront();
   }
   else
     // For #detail_oid- and others, defer to the base class.

@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ http://www.iiim.is
 //_/_/
@@ -54,6 +54,7 @@
 
 #include "aera-visualizer-window.hpp"
 #include "explanation-log-window.hpp"
+#include "find-dialog.hpp"
 #include "submodules/AERA/AERA/settings.h"
 
 #include <QApplication>
@@ -103,7 +104,7 @@ int main(int argv, char *args[])
 
   QString settingsFilePath0 = preferences.value("settingsFilePath").toString();
   if (settingsFilePath0 == "")
-    settingsFilePath0 = "../replicode/AERA/settings.xml";
+    settingsFilePath0 = "../AERA/AERA/settings.xml";
   QString settingsFilePath = QFileDialog::getOpenFileName(NULL,
     "Open AERA settings XML file", settingsFilePath0, "XML Files (*.xml);;All Files (*.*)");
   if (settingsFilePath == "")
@@ -153,7 +154,7 @@ int main(int argv, char *args[])
     return -1;
   }
 
-  AeraVisulizerWindow mainWindow(replicodeObjects);
+  AeraVisualizerWindow mainWindow(replicodeObjects);
   mainWindow.setWindowIcon(QIcon(":/images/app.ico"));
 
   if (!mainWindow.addEvents(runtimeOutputFilePath, progress))
@@ -178,6 +179,10 @@ int main(int argv, char *args[])
   explanationLogWindow->setGeometry(left + width, top, explanationLogWindowWidth, height);
   explanationLogWindow->show();
 
+  // Set up the Find dialog but don't display it
+  auto findDialog = new FindDialog(&mainWindow, replicodeObjects);
+  mainWindow.setFindWindow(findDialog);
+  
   progress.close();
   mainWindow.show();
   mainWindow.addStartupItems();

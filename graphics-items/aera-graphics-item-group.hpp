@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2025 Jeff Thompson
-//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2022-2025 Jeff Thompson
+//_/_/ Copyright (c) 2022-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2022-2025 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -51,38 +51,65 @@
 //_/_/ 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-#ifndef MODEL_PREDICTION_FROM_REQUIREMENT_DISABLED_ITEM_HPP
-#define MODEL_PREDICTION_FROM_REQUIREMENT_DISABLED_ITEM_HPP
+#ifndef AERA_GRAPHICS_ITEM_GROUP_HPP
+#define AERA_GRAPHICS_ITEM_GROUP_HPP
 
-#include "aera-graphics-item.hpp"
+#include <set>
+#include <QGraphicsRectItem>
 
 namespace aera_visualizer {
 
+class AeraGraphicsItem;
 class AeraVisualizerScene;
 
 /**
- * An ModelPredictionFromRequirementDisabledItem extends AeraGraphicsItem to show a
- * ModelPredictionFromRequirementDisabledEvent with a clickable "expand triangle" which expands
- * the item to show the full message.
+ * AeraGraphicsItemGroup holds a group of AeraGraphicsItem.
  */
-class ModelPredictionFromRequirementDisabledItem : public AeraGraphicsItem
+class AeraGraphicsItemGroup : public QGraphicsRectItem
 {
 public:
-  ModelPredictionFromRequirementDisabledItem(
-    ModelPredictionFromRequirementDisabledEvent* requirementDisabledEvent,
-    ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
+  /**
+   * Create an AeraGraphicsItemGroup.
+   * \param parent The parent AeraVisualizerScene.
+   * \param title The title shown in the corner.
+   * \param color The background color.
+   */
+  AeraGraphicsItemGroup(AeraVisualizerScene* parent, const QString& title, const QColor& color);
+
+  /**
+   * Get the next top (as computed by addChild).
+   * \return The next top or qQNaN() if it hasn't been set yet.
+   */
+  qreal getNextTop() { return nextTop_; }
+
+  void addChild(AeraGraphicsItem* child);
+
+  void removeChild(AeraGraphicsItem* child);
+
+  void fitToChildren();
+
+  /**
+   * This is called by the parent scene when its view moves.
+   */
+  void onParentViewMoved() {
+    setItemIsMovable();
+  }
 
 protected:
-  void textItemLinkActivated(const QString& link) override;
+  QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
 private:
-  void setMessageHtml();
+  /**
+   * Check the parent's view port and allow to grab to move the group box
+   * if the scene background is visible at the top or bottom. This way the user
+   * is not "trapped" if zoomed in too much.
+   */
+  void setItemIsMovable();
 
-  ModelPredictionFromRequirementDisabledEvent* requirementDisabledEvent_;
-
-  QString expandedMessageHtml_;
-  QString toolTipText_;
-  QString messageHtml_;
+  AeraVisualizerScene* parent_;
+  std::set<AeraGraphicsItem*> children_;
+  qreal nextTop_;
+  bool inCallback_;
 };
 
 }

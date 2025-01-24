@@ -5,6 +5,7 @@
 //_/_/ Copyright (c) 2018-2025 Jeff Thompson
 //_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
 //_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2023 Chloe Schaff
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -51,38 +52,35 @@
 //_/_/ 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-#ifndef MODEL_PREDICTION_FROM_REQUIREMENT_DISABLED_ITEM_HPP
-#define MODEL_PREDICTION_FROM_REQUIREMENT_DISABLED_ITEM_HPP
+#ifndef IMDL_ITEM_HPP
+#define IMDL_ITEM_HPP
 
 #include "aera-graphics-item.hpp"
+#include "replicode-objects.hpp"
 
 namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
-/**
- * An ModelPredictionFromRequirementDisabledItem extends AeraGraphicsItem to show a
- * ModelPredictionFromRequirementDisabledEvent with a clickable "expand triangle" which expands
- * the item to show the full message.
- */
-class ModelPredictionFromRequirementDisabledItem : public AeraGraphicsItem
+class ImdlItem : public AeraGraphicsItem
 {
 public:
-  ModelPredictionFromRequirementDisabledItem(
-    ModelPredictionFromRequirementDisabledEvent* requirementDisabledEvent,
-    ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
-
-protected:
-  void textItemLinkActivated(const QString& link) override;
+	ImdlItem(
+		NewInstantiatedModelEvent* imdl,
+		ReplicodeObjects& replicodeObjects,
+		AeraVisualizerScene* parent);
 
 private:
-  void setMessageHtml();
+	typedef enum { HIDE_IMDL, WHAT_MADE_THIS } ShowState;
 
-  ModelPredictionFromRequirementDisabledEvent* requirementDisabledEvent_;
+	NewInstantiatedModelEvent* imdl_;
+	ReplicodeObjects& replicodeObjects_;
+	QString templateVals_;
+	QString explanation_;
+	ShowState showState_;
 
-  QString expandedMessageHtml_;
-  QString toolTipText_;
-  QString messageHtml_;
+	QString makeHtml();
+	void ImdlItem::textItemLinkActivated(const QString& link);
 };
 
 }

@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -72,6 +72,7 @@ using namespace r_exec;
 namespace aera_visualizer {
 
 ReplicodeObjects::ReplicodeObjects()
+: intMemberRegex_("( ?\\d+)")
 {
   // Set up progressLines_. Used by getProgressLabelText to make the progress messages clearer.
   progressMessages_.push_back("Preprocessing code (1 of 2)");
@@ -385,6 +386,23 @@ QString ReplicodeObjects::getProgressLabelText(const QString& message)
   }
 
   return result;
+}
+
+bool ReplicodeObjects::getObjects(string oids, vector<Code*>& objects)
+{
+  smatch matches;
+  bool gotAllInputs = true;
+  while (regex_search(oids, matches, intMemberRegex_)) {
+    auto input = getObject(stoul(matches[1].str()));
+    if (!input)
+      gotAllInputs = false;
+    else
+      objects.push_back(input);
+
+    oids = matches.suffix();
+  }
+
+  return gotAllInputs;
 }
 
 }

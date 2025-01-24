@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -85,7 +85,7 @@ QString ModelItem::simplifyModelSource(const string& modelSource)
 {
   QString result = modelSource.c_str();
   // Strip the set of output groups and parameters.
-  // "[\\s\\x01]+" is whitespace "[\\d\\.]+" is a float value.
+  // "[\\s\\n]+" is whitespace "[\\d\\.]+" is a float value.
   // TODO: The original source may have comments, so need to strip these.
   result.replace(
     QRegularExpression("[\\s\\n]+\\[[\\w\\s]+\\]([\\s\\n]+[\\d\\.]+){5}[\\s\\n]*\\)$"), ")");
@@ -99,11 +99,11 @@ QString ModelItem::simplifyModelSource(const string& modelSource)
 
 void ModelItem::highlightLhsAndRhs(QString& html)
 {
-  // Assume the LHS and RHS are the third and fourth lines, indented by three spaces.
-  auto match = QRegularExpression("^(.+\\n.+\\n   )(.+)(\\n   )(.+)").match(html);
+  // Assume the LHS and RHS are the second and third lines, indented by three spaces.
+  auto match = QRegularExpression("^(.+\\n   )(.+)(\\n   )(.+)").match(html);
   if (match.hasMatch()) {
-    // match.captured(1) is the first and second line and indentation of the third line.
-    // match.captured(3) is the indentation of the fourth line.
+    // match.captured(1) is the first line and indentation of the second line.
+    // match.captured(3) is the indentation of the third line.
     QString lhs = "<font style=\"background-color:#ffe8e8\">" + match.captured(2) + "</font>";
     QString rhs = "<font style=\"background-color:#e0ffe0\">" + match.captured(4) + "</font>";
 

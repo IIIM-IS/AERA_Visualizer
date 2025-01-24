@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -77,10 +77,19 @@ public:
 
   AnchoredHorizontalLine(QGraphicsPolygonItem* item, qreal left, qreal right, QGraphicsItem* parent = 0);
 
+  void setLeft(qreal left) {
+    left_ = left;
+    updatePosition();
+  }
+
+  void setRight(qreal right) {
+    right_ = right;
+    updatePosition();
+  }
+
   int type() const override { return Type; }
   QRectF boundingRect() const override;
   QPainterPath shape() const override;
-  QGraphicsPolygonItem* item() const { return item_; }
 
   void updatePosition();
 

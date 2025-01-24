@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ http://www.iiim.is
 //_/_/
@@ -53,6 +53,7 @@
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 #include "arrow.hpp"
+#include "aera-graphics-item.hpp"
 #include "aera-visualizer-scene.hpp"
 
 #include <qmath.h>
@@ -70,10 +71,15 @@ const QPen Arrow::RedArrowheadPen(QColor(255, 0, 0), 2, Qt::SolidLine, Qt::Round
 
 Arrow::Arrow(
   QGraphicsPolygonItem* startItem, QGraphicsPolygonItem* endItem,
-   const QPen& highlightArrowBasePen, const QPen& highlightArrowTipPen, AeraVisualizerScene* parent)
+   const QPen& highlightBodyPen, const QPen& highlightArrowBasePen,
+   const QPen& highlightArrowTipPen, AeraVisualizerScene* parent)
 : QGraphicsLineItem(),
+  highlightBodyPen_(highlightBodyPen),
   highlightArrowBasePen_(highlightArrowBasePen),
-  highlightArrowTipPen_(highlightArrowTipPen)
+  highlightArrowTipPen_(highlightArrowTipPen),
+  wasSelected_(false),
+  startItemLastPen_(DefaultPen),
+  endItemLastPen_(DefaultPen)
 {
   parent_ = parent;
   startItem_ = startItem;
@@ -108,7 +114,7 @@ void Arrow::moveEndsSideBySide()
   // Updates the position of other arrows connected to end item
   auto aeraGraphicsEndItem = dynamic_cast<AeraGraphicsItem*>(endItem_);
   if (aeraGraphicsEndItem) {
-    aeraGraphicsEndItem->updateArrowsAndLines();
+    aeraGraphicsEndItem->updateArrowsAndLine();
   }
 
   // Fit the view with the newly positioned side-by-side items
@@ -185,17 +191,52 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
                                cos(angle + -M_PI / 2)),
     angle);
 
-  if (isSelected())
-    painter->setPen(QPen(pen().color(), 4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
-  else
-    painter->setPen(pen());
+  // If selected, change the border color of the start and end items as well as that of the arrow
+  if (isSelected()) {
+    // Remember the last pen settings if this is the first pass
+    if (!wasSelected_) {
+      startItemLastPen_ = startItem_->pen();
+      endItemLastPen_ = endItem_->pen();
+    }
+
+    // Set the colors for the arrow
+    setPens(Arrow::HighlightedPen, getHighlightArrowBasePen(), getHighlightArrowTipPen());
+    painter->setPen(Arrow::HighlightedPen);
+
+    // Set the colors for the objects on either end
+    startItem_->setPen(Arrow::HighlightedPen);
+    endItem_->setPen(Arrow::HighlightedPen);
+
+    // Keep this updated so we can debounce the deselected state
+    wasSelected_ = true;
+
+  }
+  else {
+    // If we just deselected the arrow, recolor the objects at the ends
+    if (wasSelected_) {
+      // Reset the arrow's pens
+      setPens(Arrow::DefaultPen, Arrow::DefaultPen, Arrow::DefaultPen);
+
+      // Reset the end objects' pens
+      startItem_->setPen(startItemLastPen_);
+      endItem_->setPen(endItemLastPen_);
+
+      // Make sure we only do this once
+      wasSelected_ = false;
+    }
+  }
+
+  // Draw the line
+  painter->setPen(pen());
   painter->setBrush(pen().color());
   painter->drawLine(line());
 
+  // Draw the lower arrowhead
   painter->setPen(arrowBasePen_);
   painter->setBrush(arrowBasePen_.color());
   painter->drawPolygon(arrowBase_);
 
+  // Draw the upper arrowhead
   painter->setPen(arrowTipPen_);
   painter->setBrush(arrowTipPen_.color());
   painter->drawPolygon(arrowTip_);

@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -58,9 +58,11 @@
 #include "../submodules/AERA/r_exec/factory.h"
 #include "aera-visualizer-scene.hpp"
 #include "instantiated-composite-state-item.hpp"
+#include "anchored-horizontal-line.hpp"
 #include "expandable-goal-or-pred-item.hpp"
 
 using namespace std;
+using namespace std::chrono;
 using namespace core;
 using namespace r_code;
 using namespace r_exec;
@@ -69,16 +71,26 @@ namespace aera_visualizer {
 
 ExpandableGoalOrPredItem::ExpandableGoalOrPredItem(
   AeraEvent* aeraEvent, ReplicodeObjects& replicodeObjects, const QString& prefix,
-  AeraVisualizerScene* parent)
-: AeraGraphicsItem(aeraEvent, replicodeObjects, parent, "")
+  AeraVisualizerScene* parent, QColor textItemTextColor, const QString& antiFactHtmlColor)
+: AeraGraphicsItem(aeraEvent, replicodeObjects, parent, "", textItemTextColor),
+  antiFactHtmlColor_(antiFactHtmlColor)
 {
+  afterVarNumber_ = -1;
+  beforeVarNumber_ = -1;
+  if (((_Fact*)aeraEvent->object_)->is_fact() || ((_Fact*)aeraEvent->object_)->is_anti_fact()) {
+    afterVarNumber_ = ((_Fact*)aeraEvent->object_)->get_after_var();
+    beforeVarNumber_ = ((_Fact*)aeraEvent->object_)->get_before_var();
+  }
+
   setFactGoalOrPredFactValueHtml(prefix);
 
   // Determine the shape.
   if (getAeraEvent()->object_->get_reference(0)->code(0).asOpcode() == Opcodes::Pred)
     shape_ = SHAPE_PRED;
-  else
+  else if (getAeraEvent()->object_->get_reference(0)->code(0).asOpcode() == Opcodes::Goal)
     shape_ = SHAPE_GOAL;
+  else
+    shape_ = SHAPE_RECTANGLE;
 
   setTextItemAndPolygon(valueHtml_, false, shape_);
   setToolTip(toolTipText_);
@@ -86,25 +98,27 @@ ExpandableGoalOrPredItem::ExpandableGoalOrPredItem(
 
 void ExpandableGoalOrPredItem::setFactGoalOrPredFactValueHtml(const QString& prefix)
 {
-  auto goalOrPred = getAeraEvent()->object_->get_reference(0);
-  auto factValue = goalOrPred->get_reference(0);
+  Code* goalOrPred = ((_Fact*)getAeraEvent()->object_)->get_goal();
+  if (!goalOrPred)
+    goalOrPred = ((_Fact*)getAeraEvent()->object_)->get_pred();
+  auto factValue = (goalOrPred ? goalOrPred->get_reference(0) : getAeraEvent()->object_);
   auto value = factValue->get_reference(0);
   bool valueIsDrive = (value->code(0).asOpcode() == Opcodes::Ent);
 
   // Strip the ending confidence value and propagation of saliency threshold.
   regex saliencyRegex("\\s+[\\w\\:]+\\)$");
   regex confidenceAndSaliencyRegex("\\s+\\w+\\s+[\\w\\:]+\\)$");
-  string factGoalSource = regex_replace(replicodeObjects_.getSourceCode(getAeraEvent()->object_), confidenceAndSaliencyRegex, ")");
-  string goalOrPredSource = regex_replace(replicodeObjects_.getSourceCode(goalOrPred), saliencyRegex, ")");
+  string factGoalSource = (goalOrPred ? regex_replace(replicodeObjects_.getSourceCode(getAeraEvent()->object_), confidenceAndSaliencyRegex, ")") : "");
+  string goalOrPredSource = (goalOrPred ? regex_replace(replicodeObjects_.getSourceCode(goalOrPred), saliencyRegex, ")") : "");
   string factValueSource = regex_replace(replicodeObjects_.getSourceCode(factValue), confidenceAndSaliencyRegex, ")");
   string valueSource = regex_replace(replicodeObjects_.getSourceCode(value), saliencyRegex, ")");
 
-  QString goalOrPredLabel(replicodeObjects_.getLabel(goalOrPred).c_str());
+  QString goalOrPredLabel(goalOrPred ? replicodeObjects_.getLabel(goalOrPred).c_str() : "");
   QString factValueLabel(replicodeObjects_.getLabel(factValue).c_str());
   QString valueLabel(replicodeObjects_.getLabel(value).c_str());
 
-  QString goalOrPredHtml = QString(goalOrPredSource.c_str()).replace(factValueLabel, DownArrowHtml);
-  QString factGoalHtml = QString(factGoalSource.c_str()).replace(goalOrPredLabel, goalOrPredHtml);
+  QString goalOrPredHtml = (goalOrPred ? QString(goalOrPredSource.c_str()).replace(factValueLabel, DownArrowHtml) : "");
+  QString factGoalHtml = (goalOrPred ? QString(factGoalSource.c_str()).replace(goalOrPredLabel, goalOrPredHtml) : "");
   QString factValueHtml, valueHtml;
   if (valueIsDrive) {
     // The value is a single identifier.
@@ -117,18 +131,25 @@ void ExpandableGoalOrPredItem::setFactGoalOrPredFactValueHtml(const QString& pre
   }
   
   factGoalOrPredFactValueHtml_ = prefix + " <b><a href=\"#this\">" + replicodeObjects_.getLabel(getAeraEvent()->object_).c_str() + "</a></b>\n";
-  if (is_sim()) {
-    // All outer facts in a simulation have the same time, so don't show it.
-    factGoalOrPredFactValueHtml_ += goalOrPredHtml;
-    factGoalOrPredFactValueHtml_ += "\n      " + factValueHtml;
-    if (!valueIsDrive)
-      factGoalOrPredFactValueHtml_ += "\n          " + valueHtml;
+  if (goalOrPred) {
+    if (is_sim()) {
+      // All outer facts in a simulation have the same time, so don't show it.
+      factGoalOrPredFactValueHtml_ += goalOrPredHtml;
+      factGoalOrPredFactValueHtml_ += "\n      " + factValueHtml;
+      if (!valueIsDrive)
+        factGoalOrPredFactValueHtml_ += "\n          " + valueHtml;
+    }
+    else {
+      factGoalOrPredFactValueHtml_ += factGoalHtml;
+      factGoalOrPredFactValueHtml_ += "\n              " + factValueHtml;
+      if (!valueIsDrive)
+        factGoalOrPredFactValueHtml_ += "\n                  " + valueHtml;
+    }
   }
   else {
-    factGoalOrPredFactValueHtml_ += factGoalHtml;
-    factGoalOrPredFactValueHtml_ += "\n              " + factValueHtml;
-    if (!valueIsDrive)
-      factGoalOrPredFactValueHtml_ += "\n                  " + valueHtml;
+    // No goal or pred, just a solo fact.
+    factGoalOrPredFactValueHtml_ += factValueHtml;
+    factGoalOrPredFactValueHtml_ += "\n    " + valueHtml;
   }
 
   // Set toolTipText_ before adding links and buttons and other detail.
@@ -156,11 +177,15 @@ void ExpandableGoalOrPredItem::setFactGoalOrPredFactValueHtml(const QString& pre
   factGoalOrPredFactValueHtml_.replace("down-pointing-triangle", "<a href=\"#unexpand\">" + DownPointingTriangleHtml + "</a>");
 
   if (value->code(0).asOpcode() == Opcodes::ICst)
-    valueHtml = InstantiatedCompositeStateItem::makeIcstMembersSource(value, replicodeObjects_);
+    valueHtml = InstantiatedCompositeStateItem::makeIcstMembersSource(value, replicodeObjects_, antiFactHtmlColor_);
   valueHtml_ = htmlify("right-pointing-triangle " + valueHtml, true);
   if (((_Fact*)factValue)->is_anti_fact())
-    valueHtml_ =  "<font color=\"#ff4040\">" + valueHtml_ + "</font>";
+    valueHtml_ =  "<font color=\"" + antiFactHtmlColor_ + "\">" + valueHtml_ + "</font>";
   valueHtml_.replace("right-pointing-triangle", "<a href=\"#expand\">" + RightPointingTriangleHtml + "</a>");
+
+  saveFactGoalOrPredFactValueHtml_ = factGoalOrPredFactValueHtml_;
+  saveToolTipText_ = toolTipText_;
+  saveValueHtml_ = valueHtml_;
 }
 
 void ExpandableGoalOrPredItem::textItemLinkActivated(const QString& link)
@@ -178,6 +203,58 @@ void ExpandableGoalOrPredItem::textItemLinkActivated(const QString& link)
   else
     // For #detail_oid- and others, defer to the base class.
     AeraGraphicsItem::textItemLinkActivated(link);
+}
+
+bool ExpandableGoalOrPredItem::setBinding(int varNumber, const QString& value)
+{
+  // TODO: Preprocess to know which var numbers this needs.
+
+  auto saveBinding = bindings_[varNumber];
+  int ms;
+  bool isInt = false;
+  if (!value.contains("."))
+    ms = value.toInt(&isInt);
+  if (isInt) {
+    // Interpret the int as a timestamp.
+    bindings_[varNumber] = Utils::ToString_s_ms_us(Timestamp(milliseconds(ms)), Timestamp()).c_str();
+    if (varNumber == afterVarNumber_) {
+      // TODO: Update itemTopLeftPosition_ and itemInitialTopLeftPosition_.
+      // TODO: Adjust group boundary.
+      qreal left = parent_->getTimelineX(replicodeObjects_.getTimeReference() + milliseconds(ms));
+      setPos(left - boundingRect().topLeft().x(), pos().y());
+      if (horizontalLine_)
+        horizontalLine_->setLeft(left);
+    }
+    if (varNumber == beforeVarNumber_) {
+      // TODO: Update itemTopLeftPosition_ and itemInitialTopLeftPosition_.
+      // TODO: Adjust group boundary.
+      qreal right = parent_->getTimelineX(replicodeObjects_.getTimeReference() + milliseconds(ms));
+      if (bindings_.find(afterVarNumber_) == bindings_.end())
+        // There is no after value yet. Right-justify the item to the before value.
+        setPos(right - boundingRect().width() - boundingRect().topLeft().x(), pos().y());
+      if (horizontalLine_)
+        horizontalLine_->setRight(right);
+    }
+  }
+  else
+    bindings_[varNumber] = value;
+
+  replaceBindingsFromSaved(saveFactGoalOrPredFactValueHtml_, factGoalOrPredFactValueHtml_);
+  replaceBindingsFromSaved(saveToolTipText_, toolTipText_);
+  replaceBindingsFromSaved(saveValueHtml_, valueHtml_);
+
+  // TODO: Handle the case when it is expanded.
+  setTextItemAndPolygon(valueHtml_, false, shape_);
+  setToolTip(toolTipText_);
+
+  return bindings_[varNumber] != saveBinding;
+}
+
+void ExpandableGoalOrPredItem::replaceBindingsFromSaved(const QString& saved, QString& result)
+{
+  result = saved;
+  for (pair<int, QString> pair : bindings_)
+    result.replace("(var " + QString::number(pair.first) + ")", pair.second);
 }
 
 }

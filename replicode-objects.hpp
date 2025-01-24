@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -143,6 +143,24 @@ public:
   }
 
   /**
+   * Get a list of objects that contain a specific substring in their labels
+   * \param searchString The partial label we're matching against
+   * \return A vector of matching labels (may be empty)
+   */
+  std::vector<std::string> getObjectsByLabelSubstring(const std::string& searchString) const
+  {
+    // Put matches here
+    std::vector<std::string> matches;
+
+    // Record all labels that contain searchString as a substring
+    for (std::pair<std::string, r_code::Code*> pair : labelObject_) {
+      if (pair.first.find(searchString) != std::string::npos)
+        matches.push_back(pair.first);
+    }
+    return matches;
+  }
+
+  /**
    * Get the object source code (from the decompiled objects file).
    * \param object The object.
    * \return The source code, or "" if not found. This does not have the label or view set.
@@ -164,7 +182,7 @@ public:
    */
   std::string relativeTime(Timestamp timestamp) const
   {
-    return core::Time::ToString_seconds(timestamp - timeReference_);
+    return r_code::Utils::ToString_s_ms_us(timestamp, timeReference_);
   }
 
   /**
@@ -174,6 +192,14 @@ public:
    * \return The text for progress.setLabelText.
    */
   QString getProgressLabelText(const QString& message);
+
+  /**
+   * Parse the list of integers oids and use getObject() to add each to objects.
+   * \param oids The string with the list of OID integers, e.g. "12 14". This may be "".
+   * \param objects Add found objects. This does not first clear the vector.
+   * \return True for success, false if getObject() failed to find an OID
+   */
+  bool getObjects(std::string oids, std::vector<r_code::Code*>& objects);
 
 private:
   /**
@@ -200,6 +226,7 @@ private:
   std::map<std::string, r_code::Code*> labelObject_;
   r_code::list<P<r_code::Code> > objects_;
   std::vector<QString> progressMessages_;
+  std::regex intMemberRegex_;
 };
 
 }

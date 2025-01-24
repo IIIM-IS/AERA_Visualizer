@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2025 Jeff Thompson
-//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2023-2025 Jeff Thompson
+//_/_/ Copyright (c) 2023-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2023-2025 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -51,38 +51,34 @@
 //_/_/ 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-#ifndef MODEL_PREDICTION_FROM_REQUIREMENT_DISABLED_ITEM_HPP
-#define MODEL_PREDICTION_FROM_REQUIREMENT_DISABLED_ITEM_HPP
+#ifndef REDUCTION_MARKER_ITEM_HPP
+#define REDUCTION_MARKER_ITEM_HPP
 
+#include <QGraphicsPixmapItem>
+#include <QList>
+#include <QPen>
 #include "aera-graphics-item.hpp"
 
 namespace aera_visualizer {
 
 class AeraVisualizerScene;
 
-/**
- * An ModelPredictionFromRequirementDisabledItem extends AeraGraphicsItem to show a
- * ModelPredictionFromRequirementDisabledEvent with a clickable "expand triangle" which expands
- * the item to show the full message.
- */
-class ModelPredictionFromRequirementDisabledItem : public AeraGraphicsItem
+class ReductionMarkerItem : public AeraGraphicsItem
 {
 public:
-  ModelPredictionFromRequirementDisabledItem(
-    ModelPredictionFromRequirementDisabledEvent* requirementDisabledEvent,
-    ReplicodeObjects& replicodeObjects, AeraVisualizerScene* parent);
-
-protected:
-  void textItemLinkActivated(const QString& link) override;
+  ReductionMarkerItem(
+    NewReductionMarkerEvent* newReductionMarkerEvent, ReplicodeObjects& replicodeObjects,
+    AeraVisualizerScene* parent);
 
 private:
-  void setMessageHtml();
+  /**
+   * Set mkRdxHtml_ to the HTML source code for the mk.rdx from
+   * newReductionMarkerEvent_->object_.
+   */
+  void setMkRdxHtml();
 
-  ModelPredictionFromRequirementDisabledEvent* requirementDisabledEvent_;
-
-  QString expandedMessageHtml_;
-  QString toolTipText_;
-  QString messageHtml_;
+  NewReductionMarkerEvent* newReductionMarkerEvent_;
+  QString mkRdxHtml_;
 };
 
 }

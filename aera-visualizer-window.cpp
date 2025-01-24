@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ http://www.iiim.is
 //_/_/
@@ -54,30 +54,36 @@
 
 #include <fstream>
 #include <algorithm>
-#include "submodules/AERA/r_exec/opcodes.h"
+#include "aera-checkbox.h"
+#include "graphics-items/aba-sentence-item.hpp"
+#include "graphics-items/aera-graphics-item-group.hpp"
+#include "graphics-items/aera-visualizer-scene.hpp"
 #include "graphics-items/arrow.hpp"
-#include "graphics-items/model-item.hpp"
-#include "graphics-items/composite-state-item.hpp"
 #include "graphics-items/auto-focus-fact-item.hpp"
-#include "graphics-items/prediction-item.hpp"
-#include "graphics-items/model-goal-item.hpp"
 #include "graphics-items/composite-state-goal-item.hpp"
-#include "graphics-items/model-prediction-item.hpp"
+#include "graphics-items/composite-state-item.hpp"
+#include "graphics-items/composite-state-prediction-item.hpp"
+#include "graphics-items/drive-item.hpp"
+#include "graphics-items/instantiated-composite-state-item.hpp"
+#include "graphics-items/instantiated-model-item.hpp"
+#include "graphics-items/io-device-inject-eject-item.hpp"
+#include "graphics-items/model-goal-item.hpp"
 #include "graphics-items/model-imdl-prediction-item.hpp"
+#include "graphics-items/model-item.hpp"
 #include "graphics-items/model-prediction-from-requirement-item.hpp"
 #include "graphics-items/model-prediction-from-requirement-disabled-item.hpp"
-#include "graphics-items/composite-state-prediction-item.hpp"
-#include "graphics-items/prediction-result-item.hpp"
-#include "graphics-items/instantiated-composite-state-item.hpp"
+#include "graphics-items/model-prediction-item.hpp"
 #include "graphics-items/predicted-instantiated-composite-state-item.hpp"
-#include "graphics-items/io-device-inject-eject-item.hpp"
-#include "graphics-items/drive-item.hpp"
-#include "graphics-items/simulation-commit-item.hpp"
-#include "graphics-items/promoted-prediction-item.hpp"
+#include "graphics-items/prediction-item.hpp"
+#include "graphics-items/prediction-result-item.hpp"
 #include "graphics-items/promoted-prediction-defeated-item.hpp"
-#include "graphics-items/aera-visualizer-scene.hpp"
+#include "graphics-items/promoted-prediction-item.hpp"
+#include "graphics-items/reduction-marker-item.hpp"
+#include "graphics-items/simulation-commit-item.hpp"
+#include "submodules/AERA/r_exec/opcodes.h"
+
 #include "aera-visualizer-window.hpp"
-#include "aera-checkbox.h"
+#include "find-dialog.hpp"
 
 #include <QtWidgets>
 #include <QProgressDialog>
@@ -111,45 +117,60 @@ protected:
   AeraVisualizerScene* scene_;
 };
 
-const set<int> AeraVisulizerWindow::simulationEventTypes_ = {
-  DriveInjectEvent::EVENT_TYPE, ModelGoalReduction::EVENT_TYPE, CompositeStateGoalReduction::EVENT_TYPE,
-  ModelSimulatedPredictionReduction::EVENT_TYPE, CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
-  ModelSimulatedPredictionReductionFromGoalRequirement::EVENT_TYPE, SimulationCommitEvent ::EVENT_TYPE,
-  ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE, PromotedSimulatedPredictionEvent::EVENT_TYPE,
-  PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE };
-
-const set<int> AeraVisulizerWindow::newItemEventTypes_ = {
-  NewModelEvent::EVENT_TYPE,
-  NewCompositeStateEvent::EVENT_TYPE,
-  AutoFocusNewObjectEvent::EVENT_TYPE,
-  ModelMkValPredictionReduction::EVENT_TYPE,
-  ModelImdlPredictionEvent::EVENT_TYPE,
-  ModelGoalReduction::EVENT_TYPE,
+const set<int> AeraVisualizerWindow::simulationEventTypes_ = {
+  AbaAddSentence::EVENT_TYPE,
+  AbaMarkSentence::EVENT_TYPE,
+  AbaMarkedSentenceToParent::EVENT_TYPE,
+  AbaBindVariable::EVENT_TYPE,
   CompositeStateGoalReduction::EVENT_TYPE,
+  CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
+  DriveInjectEvent::EVENT_TYPE,
+  ModelGoalReduction::EVENT_TYPE,
+  ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE,
   ModelSimulatedPredictionReduction::EVENT_TYPE,
   ModelSimulatedPredictionReductionFromGoalRequirement::EVENT_TYPE,
-  ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE,
-  CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
-  PredictionResultEvent::EVENT_TYPE,
-  NewInstantiatedCompositeStateEvent::EVENT_TYPE,
-  NewPredictedInstantiatedCompositeStateEvent::EVENT_TYPE,
-  IoDeviceInjectEvent::EVENT_TYPE,
-  IoDeviceEjectEvent::EVENT_TYPE,
-  DriveInjectEvent::EVENT_TYPE,
-  SimulationCommitEvent::EVENT_TYPE,
+  PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE,
   PromotedSimulatedPredictionEvent::EVENT_TYPE,
-  PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE };
+  SimulationCommitEvent::EVENT_TYPE };
 
-const QString AeraVisulizerWindow::SettingsKeyAutoScroll = "AutoScroll";
-const QString AeraVisulizerWindow::SettingsKeySimulationsVisible = "simulationsVisible";
-const QString AeraVisulizerWindow::SettingsKeyNonSimulationsVisible = "nonSimulationsVisible";
-const QString AeraVisulizerWindow::SettingsKeyEssenceFactsVisible = "essenceFactsVisible";
-const QString AeraVisulizerWindow::SettingsKeyInstantiatedCompositeStatesVisible = "instantiatedCompositeStatesVisible";
-const QString AeraVisulizerWindow::SettingsKeyPredictedInstantiatedCompositeStatesVisible = "predictedInstantiatedCompositeStatesVisible";
-const QString AeraVisulizerWindow::SettingsKeyRequirementsVisible = "requirementsVisible";
+const set<int> AeraVisualizerWindow::newItemEventTypes_ = {
+  AbaAddSentence::EVENT_TYPE,
+  AutoFocusNewObjectEvent::EVENT_TYPE,
+  CompositeStateGoalReduction::EVENT_TYPE,
+  CompositeStateSimulatedPredictionReduction::EVENT_TYPE,
+  DriveInjectEvent::EVENT_TYPE,
+  IoDeviceEjectEvent::EVENT_TYPE,
+  IoDeviceInjectEvent::EVENT_TYPE,
+  ModelGoalReduction::EVENT_TYPE,
+  ModelImdlPredictionEvent::EVENT_TYPE,
+  ModelMkValPredictionReduction::EVENT_TYPE,
+  NewReductionMarkerEvent::EVENT_TYPE,
+  ModelPredictionFromRequirementDisabledEvent::EVENT_TYPE,
+  ModelSimulatedPredictionReduction::EVENT_TYPE,
+  ModelSimulatedPredictionReductionFromGoalRequirement::EVENT_TYPE,
+  NewCompositeStateEvent::EVENT_TYPE,
+  NewInstantiatedCompositeStateEvent::EVENT_TYPE,
+  NewModelEvent::EVENT_TYPE,
+  NewInstantiatedModelEvent::EVENT_TYPE,
+  NewPredictedInstantiatedCompositeStateEvent::EVENT_TYPE,
+  PredictionResultEvent::EVENT_TYPE,
+  PromotedSimulatedPredictionDefeatEvent::EVENT_TYPE,
+  PromotedSimulatedPredictionEvent::EVENT_TYPE,
+  SimulationCommitEvent::EVENT_TYPE };
 
-AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
-: AeraVisulizerWindowBase(0, replicodeObjects),
+const QString AeraVisualizerWindow::SettingsKeyAutoScroll = "AutoScroll";
+const QString AeraVisualizerWindow::SettingsKeySimulationsVisible = "simulationsVisible";
+const QString AeraVisualizerWindow::SettingsKeyAllSimulationInputsVisible = "allSimulationInputsVisible";
+const QString AeraVisualizerWindow::SettingsKeySingleStepSimulationVisible = "singleStepSimulationVisible";
+const QString AeraVisualizerWindow::SettingsKeyNonSimulationsVisible = "nonSimulationsVisible";
+const QString AeraVisualizerWindow::SettingsKeyEssenceFactsVisible = "essenceFactsVisible";
+const QString AeraVisualizerWindow::SettingsKeyInstantiatedCompositeStatesVisible = "instantiatedCompositeStatesVisible";
+const QString AeraVisualizerWindow::SettingsKeyInstantiatedModelsVisible = "instantiatedModelsVisible";
+const QString AeraVisualizerWindow::SettingsKeyPredictedInstantiatedCompositeStatesVisible = "predictedInstantiatedCompositeStatesVisible";
+const QString AeraVisualizerWindow::SettingsKeyRequirementsVisible = "requirementsVisible";
+
+AeraVisualizerWindow::AeraVisualizerWindow(ReplicodeObjects& replicodeObjects)
+: AeraVisualizerWindowBase(0, replicodeObjects),
   iNextEvent_(0), explanationLogWindow_(0),
   essencePropertyObject_(replicodeObjects_.getObject("essence")),
   hoverHighlightItem_(0),
@@ -158,6 +179,7 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
   playTime_(seconds(0)),
   playTimerId_(0),
   isPlaying_(false),
+  newAbaEventsStartIndex_(0),
   itemBorderHighlightPen_(Qt::blue, 3)
 {
   createActions();
@@ -203,7 +225,7 @@ AeraVisulizerWindow::AeraVisulizerWindow(ReplicodeObjects& replicodeObjects)
   setUnifiedTitleAndToolBarOnMac(true);
 }
 
-bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgressDialog& progress)
+bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgressDialog& progress)
 {
   // load mdl 37, MDLController(113)
   regex loadModelRegex("^load mdl (\\d+), MDLController\\((\\d+)\\) strength:([\\d\\.]+) cnt:(\\d+) sr:([\\d\\.]+)$");
@@ -213,8 +235,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   // The remaining regex expressions all start with a timestamp.
   regex timestampRegex("^(\\d+)s:(\\d+)ms:(\\d+)us (.+)$");
 
-  // -> mdl 53, MDLController(389)
-  regex newModelRegex("^-> mdl (\\d+), MDLController\\((\\d+)\\)$");
+  // -> mdl 194 strength:0 cnt:1 sr:1, MDLController(314)
+  regex newModelRegex("^-> mdl (\\d+) strength:([\\d\\.]+) cnt:(\\d+) sr:([\\d\\.]+), MDLController\\((\\d+)\\)$");
   // mdl 53 cnt:2 sr:1
   regex setEvidenceCountAndSuccessRateRegex("^mdl (\\d+) cnt:(\\d+) sr:([\\d\\.]+)$");
   // mdl 75 strength:1
@@ -271,8 +293,30 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   regex simulationCommitRegex("^sim commit: fact (\\d+) pred fact success -> fact \\((\\d+)\\) goal$");
   // fact 182 -> promoted simulated pred fact 250 w/ fact 247 timings
   regex simulationPromotedSimulatedPredictionRegex("^fact (\\d+) -> promoted simulated pred fact (\\d+) w/ fact (\\d+) timings$");
-  // promoted simulated fact 251 defeated by fact 253
-  regex simulationPromotedSimulatedPredictionDefeatedRegex("^promoted simulated fact (\\d+) defeated by fact (\\d+)");
+  // promoted simulated fact 251 with DefeasibleValidity(200773) defeated by fact 253
+  regex simulationPromotedSimulatedPredictionDefeatedRegex("^promoted simulated fact (\\d+) with DefeasibleValidity\\((\\d+)\\) defeated by fact (\\d+)");
+  // Step 0: Case init: S: 304
+  regex abaCaseInitStepRegex("^Step (\\d+): Case init: S: (\\d+)$");
+  // Step 10: Case 1.(i): A: 314, Contrary 322 has body? Y, NewGId 1
+  // TODO: Handle when the Contrary already exists.
+  regex abaCase1iStepRegex("^Step (\\d+): Case 1\\.\\(i\\): A: (\\d+), Contrary (\\d+) has body\\? (\\w), NewGId (\\d+)");
+  // Step 10: Case 1.(ii): S: 304, NewUnMarkedAs: [314 316], NewUnMarkedNonAs: [312], ExistingBody: [310]
+  regex abaCase1iiStepRegex("^Step (\\d+): Case 1\\.\\(ii\\): S: (\\d+), NewUnMarkedAs: \\[(.*)\\], NewUnMarkedNonAs: \\[(.*)\\], ExistingBody: \\[(.*)\\]$");
+  // Step 10: Case 1.(iii): (:= (var 3) 15.000000)
+  // Step 10: Case 1.(iii): (<= (var 3) 15.000000)
+  regex abaCase1Or2iiiStepRegex("^Step (\\d+): Case [12]\\.\\(iii\\): \\((:=|<=) \\(var (\\d+)\\) (-?[\\.\\w]+)\\)$");
+  // Step 10: Case 2.(ia): A: 904, GId 1
+  regex abaCase2iaStepRegex("^Step (\\d+): Case 2\\.\\(ia\\): A: (\\d+), GId (\\d+)$");
+  // Step 10: Case 2.(ib): A: 904, GId 1, Culprit 864
+  regex abaCase2ibStepRegex("^Step (\\d+): Case 2\\.\\(ib\\): A: (\\d+), GId (\\d+), Culprit (\\d+)");
+  // Step 10: Case 2.(ic): A: 324, GId 1, Contrary 326 new? Y
+  regex abaCase2icStepRegex("^Step (\\d+): Case 2\\.\\(ic\\): A: (\\d+), GId (\\d+), Contrary (\\d+) new\\? (\\w)$");
+  // Step 10: Case 2.(ii): S: 322, GId 1, mark graph? N
+  regex abaCase2iiMarkStepRegex("^Step (\\d+): Case 2\\.\\(ii\\): S: (\\d+), GId (\\d+), mark graph\\? (\\w)$");
+  // Step 10: Case 2.(ii): S: 322, NewGId 1, NewUnMarkedAs: [324], NewUnMarkedNonAs: [312], ExistingBody: [310]
+  regex abaCase2iiStepRegex("^Step (\\d+): Case 2\\.\\(ii\\): S: (\\d+), NewGId (\\d+), NewUnMarkedAs: \\[(.*)\\], NewUnMarkedNonAs: \\[(.*)\\], ExistingBody: \\[(.*)\\]$");
+  // ABA solution found
+  regex abaSolutionFound("^ABA solution found$");
 
   progress.setLabelText(replicodeObjects_.getProgressLabelText("Reading runtime output"));
 
@@ -285,10 +329,12 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   progress.setMaximum(nLines);
 
   // pendingEvents is an ordered map keyed by event time. The value is a list of pending events at the time.
-  std::map<core::Timestamp, vector<shared_ptr<AeraEvent> > > pendingEvents;
+  map<core::Timestamp, vector<shared_ptr<AeraEvent> > > pendingEvents;
+
   ifstream runtimeOutputFile(runtimeOutputFilePath);
   int lineNumber = 0;
   string line;
+  int abaSolutionId = 1;
   while (getline(runtimeOutputFile, line)) {
     if (progress.wasCanceled())
       return false;
@@ -340,10 +386,12 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
 
     if (regex_search(lineAfterTimestamp, matches, newModelRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
+      core::float32 strength = stof(matches[2].str());
+      core::float32 evidenceCount = stol(matches[3].str());
+      core::float32 successRate = stof(matches[4].str());
       if (model)
-        // Use the strength, count and success rate as initialized in _TPX::build_mdl_tail.
         events_.push_back(make_shared<NewModelEvent>(
-          timestamp, model, 0, 1, 1, stoll(matches[2].str())));
+          timestamp, model, strength, evidenceCount, successRate, stoll(matches[2].str())));
     }
     else if (regex_search(lineAfterTimestamp, matches, setEvidenceCountAndSuccessRateRegex)) {
       auto model = replicodeObjects_.getObject(stoul(matches[1].str()));
@@ -379,7 +427,7 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
       auto toObject = replicodeObjects_.getObject(stoul(matches[2].str()));
       // Skip auto-focus of the same fact (such as eject facts).
       // But show auto-focus of the same anti-fact (such as prediction failure).
-      if (fromObject && toObject /*debug && !(fromObject == toObject && fromObject->code(0).asOpcode() == Opcodes::Fact) */)
+      if (fromObject && toObject)
         events_.push_back(make_shared<AutoFocusNewObjectEvent>(
           timestamp, fromObject, toObject, matches[3].str()));
     }
@@ -427,8 +475,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
           timestamp, model, input, goal_requirement, strong_requirement));
     }
     else if (regex_search(lineAfterTimestamp, matches, modelPredictionReductionRegex)) {
-      auto reduction = replicodeObjects_.getObject(stoul(matches[1].str()));
-      if (reduction) {
+      auto reduction = (MkRdx*)replicodeObjects_.getObject(stoul(matches[1].str()));
+      if (reduction && reduction->code(0).asOpcode() == Opcodes::MkRdx) {
         // Check the type of prediction.
         auto factPred = AeraEvent::getFirstProduction(reduction);
         auto pred = factPred->get_reference(0);
@@ -437,22 +485,12 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
         auto valueOpcode = value->code(0).asOpcode();
 
         if (valueOpcode == Opcodes::MkVal) {
-          int imdlPredictionEventIndex = -1;
-          auto requirement = AeraEvent::getSecondInput(reduction);
-          if (requirement) {
-            // Search events_ backwards for the previous prediction whose object_ is this->getRequirement().
-            for (int i = events_.size() - 1; i >= 0; --i) {
-              if (events_[i]->eventType_ == ModelImdlPredictionEvent::EVENT_TYPE &&
-                  ((ModelImdlPredictionEvent*)events_[i].get())->object_ == requirement) {
-                imdlPredictionEventIndex = i;
-                break;
-              }
-            }
-          }
-
-          events_.push_back(make_shared<ModelMkValPredictionReduction>(
-            timestamp, reduction, imdlPredictionEventIndex));
+          events_.push_back(make_shared<ModelMkValPredictionReduction>(timestamp, reduction));
+          events_.push_back(make_shared<NewInstantiatedModelEvent>(
+            timestamp, reduction, factPred));
         }
+
+        events_.push_back(make_shared<NewReductionMarkerEvent>(timestamp, reduction));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, modelAbductionReductionRegex)) {
@@ -526,19 +564,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
       auto input = replicodeObjects_.getObject(stoul(matches[2].str()));
 
       // Get the matching inputs.
-      string inputOids = matches[4].str();
       vector<Code*> inputs;
-      bool gotAllInputs = true;
-      while (regex_search(inputOids, matches, regex("( \\d+)"))) {
-        auto input = replicodeObjects_.getObject(stoul(matches[1].str()));
-        if (!input) {
-          gotAllInputs = false;
-          break;
-        }
-        inputs.push_back(input);
-
-        inputOids = matches.suffix();
-      }
+      bool gotAllInputs = replicodeObjects_.getObjects(matches[4].str(), inputs);
 
       if (compositeState && factPred && input && gotAllInputs)
         events_.push_back(make_shared<CompositeStateSimulatedPredictionReduction>(
@@ -548,19 +575,8 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
       auto instantiatedCompositeState = replicodeObjects_.getObject(stoul(matches[1].str()));
 
       // Get the matching inputs.
-      string inputOids = matches[2].str();
       vector<Code*> inputs;
-      bool gotAllInputs = true;
-      while (regex_search(inputOids, matches, regex("( \\d+)"))) {
-        auto input = replicodeObjects_.getObject(stoul(matches[1].str()));
-        if (!input) {
-          gotAllInputs = false;
-          break;
-        }
-        inputs.push_back(input);
-
-        inputOids = matches.suffix();
-      }
+      bool gotAllInputs = replicodeObjects_.getObjects(matches[2].str(), inputs);;
 
       if (instantiatedCompositeState && gotAllInputs)
         events_.push_back(make_shared<NewInstantiatedCompositeStateEvent>(
@@ -644,11 +660,152 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
           timestamp, promotedFact, promotedFromFact,timingsFact));
     }
     else if (regex_search(lineAfterTimestamp, matches, simulationPromotedSimulatedPredictionDefeatedRegex)) {
-      auto input = replicodeObjects_.getObject(stoul(matches[2].str()));
+      auto input = replicodeObjects_.getObject(stoul(matches[3].str()));
       auto promotedFact = replicodeObjects_.getObject(stoul(matches[1].str()));
       if (input && promotedFact)
         events_.push_back(make_shared<PromotedSimulatedPredictionDefeatEvent>(
           timestamp, input, promotedFact));
+    }
+    else if (regex_search(lineAfterTimestamp, matches, abaCaseInitStepRegex)) {
+      auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
+      if (fact) {
+        abaNewStep(stoul(matches[1].str()));
+        abaEvents_.push_back(make_shared<AbaAddSentence>(
+          timestamp, fact, false, true, abaSolutionId * 100, (Code*)NULL, "init"));
+      }
+    }
+    else if (regex_search(lineAfterTimestamp, matches, abaCase1iStepRegex)) {
+      auto assumption = replicodeObjects_.getObject(stoul(matches[2].str()));
+      auto contrary = replicodeObjects_.getObject(stoul(matches[3].str()));
+      bool contraryHasBody = (matches[4].str() == "Y");
+      int newGId = stoul(matches[5].str());
+
+      if (assumption && newGId > 0 && contrary) {
+        abaNewStep(stoul(matches[1].str()));
+        // This step sets the assumption to marked.
+        abaEvents_.push_back(make_shared<AbaMarkSentence>(timestamp, assumption));
+        // TODO: If newGId == 0 then find the contrary in an existing group.
+        // TODO: Maybe add option to show singleton opponent graphs where contraryHasBody is false.
+        if (newGId > 0 && contraryHasBody)
+          abaEvents_.push_back(make_shared<AbaAddSentence>(
+            timestamp, contrary, false, true, abaSolutionId * 100 + newGId, assumption, "1.(i)", stoul(matches[1].str())));
+      }
+    }
+    else if (regex_search(lineAfterTimestamp, matches, abaCase1iiStepRegex)) {
+      auto head = replicodeObjects_.getObject(stoul(matches[2].str()));
+      vector<Code*> newUnmarkedAssumptions;
+      vector<Code*> newUnmarkedNonAssumptions;
+      vector<Code*> existingBody;
+
+      if (head &&
+          replicodeObjects_.getObjects(matches[3].str(), newUnmarkedAssumptions) &&
+          replicodeObjects_.getObjects(matches[4].str(), newUnmarkedNonAssumptions) &&
+          replicodeObjects_.getObjects(matches[5].str(), existingBody)) {
+        abaNewStep(stoul(matches[1].str()));
+        // This step sets the head to marked.
+        abaEvents_.push_back(make_shared<AbaMarkSentence>(timestamp, head));
+
+        for (auto fact = existingBody.begin(); fact != existingBody.end(); ++fact)
+          abaEvents_.push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, *fact, head));
+        for (auto fact = newUnmarkedAssumptions.begin(); fact != newUnmarkedAssumptions.end(); ++fact)
+          abaEvents_.push_back(make_shared<AbaAddSentence>(
+            timestamp, *fact, true, false, abaSolutionId * 100, head, "1.(ii)", stoul(matches[1].str())));
+        for (auto fact = newUnmarkedNonAssumptions.begin(); fact != newUnmarkedNonAssumptions.end(); ++fact)
+          abaEvents_.push_back(make_shared<AbaAddSentence>(
+            timestamp, *fact, false, false, abaSolutionId * 100, head, "1.(ii)", stoul(matches[1].str())));
+      }
+    }
+    else if (regex_search(lineAfterTimestamp, matches, abaCase1Or2iiiStepRegex)) {
+      int varNumber = stoul(matches[3].str());
+      QString value = matches[4].str().c_str();
+      if (value.contains(".")) {
+        // Simplify the float.
+        bool ok;
+        double d = value.toDouble(&ok);
+        if (ok)
+          value = QString::number(d, 'f', 1);
+      }
+      abaEvents_.push_back(make_shared<AbaBindVariable>(timestamp, varNumber, value));
+    }
+    else if (regex_search(lineAfterTimestamp, matches, abaCase2iaStepRegex)) {
+      auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
+
+      if (fact) {
+        abaNewStep(stoul(matches[1].str()));
+        // (Don't mark the graph.)
+        abaEvents_.push_back(make_shared<AbaMarkSentence>(timestamp, fact, false));
+      }
+    }
+    else if (regex_search(lineAfterTimestamp, matches, abaCase2ibStepRegex)) {
+      auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
+      auto culprit = replicodeObjects_.getObject(stoul(matches[4].str()));
+
+      if (fact) {
+        abaNewStep(stoul(matches[1].str()));
+        // (Also mark the graph that the fact is in.)
+        abaEvents_.push_back(make_shared<AbaMarkSentence>(timestamp, fact, true));
+
+        if (culprit)
+          // The fact is the same as the culprit in a different graph.
+          abaEvents_.push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, fact, culprit));
+      }
+    }
+    else if (regex_search(lineAfterTimestamp, matches, abaCase2icStepRegex)) {
+      auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
+      auto contrary = replicodeObjects_.getObject(stoul(matches[4].str()));
+      bool contraryIsNew = (matches[5].str() == "Y");
+
+      if (fact && contrary) {
+        abaNewStep(stoul(matches[1].str()));
+        // (Also mark the graph that the fact is in.)
+        abaEvents_.push_back(make_shared<AbaMarkSentence>(timestamp, fact, true));
+        if (contraryIsNew)
+          abaEvents_.push_back(make_shared<AbaAddSentence>(
+            timestamp, contrary, false, false, abaSolutionId * 100, fact, "2.(ic)", stoul(matches[1].str())));
+      }
+    }
+    else if (regex_search(lineAfterTimestamp, matches, abaCase2iiMarkStepRegex)) {
+      auto head = replicodeObjects_.getObject(stoul(matches[2].str()));
+      bool markGraph = (matches[3].str() == "Y");
+
+      if (head) {
+        abaNewStep(stoul(matches[1].str()));
+        // This step sets the head to marked. Further actions are in abaCase2iiStepRegex.
+        abaEvents_.push_back(make_shared<AbaMarkSentence>(timestamp, head, markGraph));
+      }
+    }
+    else if (regex_search(lineAfterTimestamp, matches, abaCase2iiStepRegex)) {
+      auto head = replicodeObjects_.getObject(stoul(matches[2].str()));
+      int newGraphId = stoul(matches[3].str());
+      vector<Code*> newUnmarkedAssumptions;
+      vector<Code*> newUnmarkedNonAssumptions;
+      vector<Code*> existingBody;
+
+      if (head &&
+          replicodeObjects_.getObjects(matches[4].str(), newUnmarkedAssumptions) &&
+          replicodeObjects_.getObjects(matches[5].str(), newUnmarkedNonAssumptions) &&
+          replicodeObjects_.getObjects(matches[6].str(), existingBody)) {
+        // We have already set the head to marked with abaCase2iiMarkStepRegex. Don't call abaNewStep or add AbaMarkSentence.
+
+        for (auto fact = existingBody.begin(); fact != existingBody.end(); ++fact)
+          abaEvents_.push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, *fact, head));
+        for (auto fact = newUnmarkedAssumptions.begin(); fact != newUnmarkedAssumptions.end(); ++fact)
+          abaEvents_.push_back(make_shared<AbaAddSentence>(
+            timestamp, *fact, true, false, abaSolutionId * 100 + newGraphId, head, "2.(ii)", stoul(matches[1].str())));
+        for (auto fact = newUnmarkedNonAssumptions.begin(); fact != newUnmarkedNonAssumptions.end(); ++fact)
+          abaEvents_.push_back(make_shared<AbaAddSentence>(
+            timestamp, *fact, false, false, abaSolutionId * 100 + newGraphId, head, "2.(ii)", stoul(matches[1].str())));
+      }
+    }
+    else if (regex_search(lineAfterTimestamp, matches, abaSolutionFound)) {
+      if (newAbaEventsStartIndex_ < abaEvents_.size())
+        // Copy from abaEvents_ .
+        events_.insert(events_.end(), abaEvents_.begin() + newAbaEventsStartIndex_, abaEvents_.end());
+
+      // Start a new solution.
+      ++abaSolutionId;
+      // This is adjusted down by abaNewStep if necessary. 
+      newAbaEventsStartIndex_ = abaEvents_.size();
     }
   }
 
@@ -662,7 +819,26 @@ bool AeraVisulizerWindow::addEvents(const string& runtimeOutputFilePath, QProgre
   return true;
 }
 
-void AeraVisulizerWindow::addStartupItems()
+void AeraVisualizerWindow::abaNewStep(int step)
+{
+  if (step < abaStepIndexes_.size()) {
+    // There are already events for this step. Erase them.
+    size_t eventIndex = abaStepIndexes_[step];
+    abaStepIndexes_.erase(abaStepIndexes_.begin() + step, abaStepIndexes_.end());
+    if (eventIndex < abaEvents_.size()) {
+      abaEvents_.erase(abaEvents_.begin() + eventIndex, abaEvents_.end());
+      if (abaEvents_.size() < newAbaEventsStartIndex_)
+        newAbaEventsStartIndex_ = abaEvents_.size();
+    }
+  }
+
+  // Set abaStepIndexes_[step] to the next index in abaEvents_.
+  // This loop should only iterate once, but step may have skipped a step.
+  while (abaStepIndexes_.size() <= step)
+    abaStepIndexes_.push_back(abaEvents_.size());
+}
+
+void AeraVisualizerWindow::addStartupItems()
 {
   for (int i = 0; i < startupEvents_.size(); ++i) {
     AeraEvent* event = startupEvents_[i].get();
@@ -681,7 +857,7 @@ void AeraVisulizerWindow::addStartupItems()
   }
 }
 
-Timestamp AeraVisulizerWindow::getTimestamp(const smatch& matches, int index)
+Timestamp AeraVisualizerWindow::getTimestamp(const smatch& matches, int index)
 {
   microseconds us(1000000 * stoll(matches[index].str()) +
                      1000 * stoll(matches[index + 1].str()) +
@@ -689,7 +865,7 @@ Timestamp AeraVisulizerWindow::getTimestamp(const smatch& matches, int index)
   return replicodeObjects_.getTimeReference() + us;
 }
 
-AeraGraphicsItem* AeraVisulizerWindow::getAeraGraphicsItem(Code* object, AeraVisualizerScene** scene)
+AeraGraphicsItem* AeraVisualizerWindow::getAeraGraphicsItem(Code* object, AeraVisualizerScene** scene)
 {
   if (scene)
     // Initialize to default NULL.
@@ -712,7 +888,7 @@ AeraGraphicsItem* AeraVisulizerWindow::getAeraGraphicsItem(Code* object, AeraVis
   return NULL;
 }
 
-void AeraVisulizerWindow::zoomToAeraGraphicsItem(Code* object)
+void AeraVisualizerWindow::zoomToAeraGraphicsItem(Code* object)
 {
   AeraVisualizerScene* scene;
   auto item = getAeraGraphicsItem(object, &scene);
@@ -725,7 +901,7 @@ void AeraVisulizerWindow::zoomToAeraGraphicsItem(Code* object)
   }
 }
 
-void AeraVisulizerWindow::focusOnAeraGraphicsItem(Code* object)
+void AeraVisualizerWindow::focusOnAeraGraphicsItem(Code* object)
 {
   AeraVisualizerScene* scene;
   auto item = getAeraGraphicsItem(object, &scene);
@@ -738,7 +914,7 @@ void AeraVisulizerWindow::focusOnAeraGraphicsItem(Code* object)
   }
 }
 
-void AeraVisulizerWindow::centerOnAeraGraphicsItem(Code* object)
+void AeraVisualizerWindow::centerOnAeraGraphicsItem(Code* object)
 {
   AeraVisualizerScene* scene;
   auto item = getAeraGraphicsItem(object, &scene);
@@ -751,7 +927,7 @@ void AeraVisulizerWindow::centerOnAeraGraphicsItem(Code* object)
   }
 }
 
-void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, QPointF position)
+void AeraVisualizerWindow::textItemHoverMoveEvent(const QTextDocument* document, QPointF position)
 {
   auto url = document->documentLayout()->anchorAt(position);
   if (url == "") {
@@ -759,7 +935,7 @@ void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, 
     if (hoverHighlightItem_) {
       // Clear the previous highlighting and restore the visible state.
       hoverHighlightItem_->setPen(hoverHighlightItem_->getBorderNoHighlightPen());
-      hoverHighlightItem_->setItemAndArrowsAndHorizontalLinesVisible(hoverHighlightItemWasVisible_);
+      hoverHighlightItem_->setItemAndArrowsAndHorizontalLineVisible(hoverHighlightItemWasVisible_);
       hoverHighlightItem_ = 0;
     }
 
@@ -779,7 +955,7 @@ void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, 
       if (hoverHighlightItem_) {
         // Unhighlight a previous object.
         hoverHighlightItem_->setPen(hoverHighlightItem_->getBorderNoHighlightPen());
-        hoverHighlightItem_->setItemAndArrowsAndHorizontalLinesVisible(hoverHighlightItemWasVisible_);
+        hoverHighlightItem_->setItemAndArrowsAndHorizontalLineVisible(hoverHighlightItemWasVisible_);
         hoverHighlightItem_ = 0;
       }
 
@@ -788,7 +964,7 @@ void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, 
         hoverHighlightItemWasVisible_ = hoverHighlightItem_->isVisible();
         if (!hoverHighlightItemWasVisible_)
           // Make the item visible while we hover.
-          hoverHighlightItem_->setItemAndArrowsAndHorizontalLinesVisible(true);
+          hoverHighlightItem_->setItemAndArrowsAndHorizontalLineVisible(true);
 
         hoverHighlightItem_->setPen(itemBorderHighlightPen_);
       }
@@ -796,7 +972,7 @@ void AeraVisulizerWindow::textItemHoverMoveEvent(const QTextDocument* document, 
   }
 }
 
-Timestamp AeraVisulizerWindow::getINextStepEvent
+Timestamp AeraVisualizerWindow::getINextStepEvent
   (Timestamp maximumTime, size_t iNextEventStart, size_t& iNextStepEvent)
 {
   // TODO: This has to closely track stepEvent to duplicate its logic, so stepEvent should be
@@ -823,7 +999,10 @@ Timestamp AeraVisulizerWindow::getINextStepEvent
            event->eventType_ == SetModelStrengthEvent::EVENT_TYPE ||
            event->eventType_ == PhaseInModelEvent::EVENT_TYPE ||
            event->eventType_ == PhaseOutModelEvent::EVENT_TYPE ||
-           event->eventType_ == DeleteModelEvent::EVENT_TYPE) {
+           event->eventType_ == DeleteModelEvent::EVENT_TYPE ||
+           event->eventType_ == AbaMarkSentence::EVENT_TYPE ||
+           event->eventType_ == AbaMarkedSentenceToParent::EVENT_TYPE ||
+           event->eventType_ == AbaBindVariable::EVENT_TYPE) {
     // We already set the default iNextStepEvent.
   }
   else
@@ -833,7 +1012,7 @@ Timestamp AeraVisulizerWindow::getINextStepEvent
   return event->time_;
 }
 
-Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
+Timestamp AeraVisualizerWindow::stepEvent(Timestamp maximumTime)
 {
   if (iNextEvent_ >= events_.size())
     // Return the value meaning no change.
@@ -843,7 +1022,9 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
   if (event->time_ > maximumTime)
     return Utils_MaxTime;
 
-#if 1
+  // Report the change in time to the find dialog
+  findDialog_->reportStepEvent();
+
   auto relativeTime = duration_cast<microseconds>(event->time_ - replicodeObjects_.getTimeReference());
   auto frameStartTime = event->time_ - (relativeTime % replicodeObjects_.getSamplingPeriod());
   bool isNewFrame = (iNextEvent_ <= 0 || frameStartTime > events_[iNextEvent_ - 1]->time_);
@@ -869,10 +1050,16 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
 
     if (iCommand >= 0) {
       // Start from the committed command and get the chain of inputs and set the simulation detail OIDs.
-      std::set<int> focusSimulationDetailOids;
+      set<int> focusSimulationDetailOids;
+      set<int> otherDetailOids;
       int i = iCommand;
       while (i >= iNextEvent_) {
         focusSimulationDetailOids.insert(events_[i]->object_->get_detail_oid());
+        if (allSimulationInputsCheckBox_->checkState() == Qt::Checked) {
+          for (int j = 0; j < events_[i]->otherInputs_.size(); ++j)
+            // These will be checked below.
+            otherDetailOids.insert(events_[i]->otherInputs_[j]->get_detail_oid());
+        }
 
         auto input = events_[i]->getInput();
         if (!input)
@@ -882,8 +1069,20 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
         // Keep searching backwards (back to the first simulation event) for the event of the input.
         --i;
         for (; i >= iNextEvent_; --i) {
-          if (events_[i]->object_ == input)
+          auto event = events_[i].get();
+          if (event->object_ == input)
             break;
+
+          if (allSimulationInputsCheckBox_->checkState() == Qt::Checked) {
+            if (event->object_ && otherDetailOids.erase(event->object_->get_detail_oid()) > 0) {
+              // Focus this event and queue up other inputs to focus on.
+              focusSimulationDetailOids.insert(event->object_->get_detail_oid());
+              if (event->getInput())
+                otherDetailOids.insert(event->getInput()->get_detail_oid());
+              for (int j = 0; j < event->otherInputs_.size(); ++j)
+                otherDetailOids.insert(event->otherInputs_[j]->get_detail_oid());
+            }
+          }
         }
       }
 
@@ -891,7 +1090,6 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       mainScene_->setFocusSimulationDetailOids(focusSimulationDetailOids);
     }
   }
-#endif
 
   if (newItemEventTypes_.find(event->eventType_) != newItemEventTypes_.end()) {
     AeraGraphicsItem* newItem;
@@ -916,6 +1114,13 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     }
     else if (event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
       newItem = new CompositeStateItem((NewCompositeStateEvent*)event, replicodeObjects_, scene);
+    else if (event->eventType_ == NewReductionMarkerEvent::EVENT_TYPE) {
+      auto newReductionMarkerEvent = (NewReductionMarkerEvent*)event;
+
+      newItem = new ReductionMarkerItem(newReductionMarkerEvent, replicodeObjects_, scene);
+
+      visible = (nonSimulationsCheckBox_->checkState() == Qt::Checked);
+    }
     else if (event->eventType_ == AutoFocusNewObjectEvent::EVENT_TYPE) {
       auto autoFocusEvent = (AutoFocusNewObjectEvent*)event;
       if (event->time_ == replicodeObjects_.getTimeReference()) {
@@ -957,7 +1162,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     }
     else if (event->eventType_ == ModelImdlPredictionEvent::EVENT_TYPE) {
       auto reductionEvent = (ModelImdlPredictionEvent*)event;
-      newItem = new ImdlPredictionItem(reductionEvent, replicodeObjects_, scene);
+      newItem = new ModelImdlPredictionItem(reductionEvent, replicodeObjects_, scene);
 
       // Add an arrow to the cause.
       auto causeItem = scene->getAeraGraphicsItem(reductionEvent->cause_);
@@ -1183,7 +1388,7 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       auto defeatEvent = (PromotedSimulatedPredictionDefeatEvent*)event;
       newItem = new PromotedPredictionDefeatedItem(defeatEvent, replicodeObjects_, scene);
 
-      // Add an arrow to the input fact.
+      // Add an arrow from the input fact.
       auto inputItem = scene->getAeraGraphicsItem(defeatEvent->input_);
       if (inputItem)
         // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
@@ -1193,13 +1398,52 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       auto promotedItem = scene->getAeraGraphicsItem(defeatEvent->promotedFact_);
       if (promotedItem)
         // This is not a normal prediction or abduction, so no LHS/RHS arrowheads.
-        scene->addArrow(promotedItem, newItem);
+        scene->addArrow(newItem, promotedItem);
 
       visible = (simulationsCheckBox_->checkState() == Qt::Checked);
+    }
+    else if (event->eventType_ == AbaAddSentence::EVENT_TYPE) {
+      auto addEvent = (AbaAddSentence*)event;
+      newItem = new AbaSentenceItem(addEvent, replicodeObjects_, scene);
+
+      // Add an arrow to the parent fact.
+      auto parentItem = scene->getAeraGraphicsItem(addEvent->parent_);
+      if (parentItem) {
+        if (((AbaSentenceItem*)newItem)->isBetweenProponentAndOpponent(parentItem))
+          scene->addArrow(newItem, parentItem, Arrow::RedArrowheadPen,
+            Arrow::RedArrowheadPen, Arrow::RedArrowheadPen);
+        else if (((AbaSentenceItem*)newItem)->isBetweenProponentGraphs(parentItem) ||
+                 ((AbaSentenceItem*)newItem)->isBetweenOpponentGraphs(parentItem))
+          scene->addArrow(newItem, parentItem, Arrow::GreenArrowheadPen,
+            Arrow::GreenArrowheadPen, Arrow::GreenArrowheadPen);
+        else
+          scene->addArrow(newItem, parentItem);
+      }
+
+      scene->addHorizontalLine(newItem);
+
+      visible = (simulationsCheckBox_->checkState() == Qt::Checked);
+    }
+    else if (event->eventType_ == NewInstantiatedModelEvent::EVENT_TYPE) {
+      auto newImdlEvent = (NewInstantiatedModelEvent*)event;
+      newItem = new ImdlItem(newImdlEvent, replicodeObjects_, scene);
+
+      visible = ((instantiatedModelsCheckBox_->checkState() == Qt::Checked));
+
+      // Add an arrow to the 'fact pred' of the 'fact pred fact imdl...'
+      if (newImdlEvent->factPred_) {
+        auto factItem = scene->getAeraGraphicsItem(newImdlEvent->factPred_);
+        if (factItem)
+          scene->addArrow(factItem, newItem);
+      }
     }
 
     // Add the new item.
     scene->addAeraGraphicsItem(newItem);
+    if (newItem->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE && bindings_.size() > 0) {
+      for (pair<int, QString> pair : bindings_)
+        ((AbaSentenceItem*)newItem)->setBinding(pair.first, pair.second);
+    }
 
     if (event->object_) {
       // Add arrows to all referenced objects.
@@ -1222,8 +1466,8 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
       }
     }
 
-    // Call setItemAndArrowsAndHorizontalLinesVisible, even if visible is true because we need to hide arrows to non-visible items.
-    newItem->setItemAndArrowsAndHorizontalLinesVisible(visible);
+    // Call setItemAndArrowsAndHorizontalLineVisible, even if visible is true because we need to hide arrows to non-visible items.
+    newItem->setItemAndArrowsAndHorizontalLineVisible(visible);
 
     if (visible)
       // Only flash if visible.
@@ -1275,28 +1519,70 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
     }
   }
   else if (event->eventType_ == PhaseInModelEvent::EVENT_TYPE) {
-    auto phaseInModelEvent = (PhaseInModelEvent*)event;
-
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(phaseInModelEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(event->object_));
     if (modelItem)
       // Set the background color.
       modelItem->setBrush(Qt::white);
   }
   else if (event->eventType_ == PhaseOutModelEvent::EVENT_TYPE) {
-    auto phaseOutModelEvent = (PhaseOutModelEvent*)event;
-
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(phaseOutModelEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(event->object_));
     if (modelItem)
       // Set the background color.
       modelItem->setBrush(phasedOutModelColor_);
   }
   else if (event->eventType_ == DeleteModelEvent::EVENT_TYPE) {
-    auto deleteModelEvent = (DeleteModelEvent*)event;
-
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(deleteModelEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(event->object_));
     if (modelItem)
       // Set the background color.
       modelItem->setBrush(Qt::gray);
+  }
+  else if (event->eventType_ == AbaMarkSentence::EVENT_TYPE) {
+    auto markEvent = (AbaMarkSentence*)event;
+    auto sentenceItem = dynamic_cast<AbaSentenceItem*>(mainScene_->getAeraGraphicsItem(markEvent->fact_));
+    if (sentenceItem) {
+      sentenceItem->setStatus(AeraGraphicsItem::STATUS_DONE);
+      if (sentenceItem->isVisible()) {
+        sentenceItem->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
+        mainScene_->establishFlashTimer();
+      }
+
+      if (markEvent->alsoMarkGraph_ && sentenceItem->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
+        auto graph = mainScene_->getItemGroup(((AbaAddSentence*)sentenceItem->getAeraEvent())->graphId_);
+        if (graph)
+          graph->setBrush(AeraGraphicsItem::Color_opponent_finished_justification);
+      }
+    }
+  }
+  else if (event->eventType_ == AbaMarkedSentenceToParent::EVENT_TYPE) {
+    auto markedSentenceItem = dynamic_cast<AbaSentenceItem*>
+      (mainScene_->getAeraGraphicsItem(((AbaMarkedSentenceToParent*)event)->markedFact_));
+    auto parentItem = mainScene_->getAeraGraphicsItem(((AbaMarkedSentenceToParent*)event)->parent_);
+    if (markedSentenceItem && parentItem) {
+      if (markedSentenceItem->isBetweenProponentAndOpponent(parentItem))
+        mainScene_->addArrow(markedSentenceItem, parentItem, Arrow::RedArrowheadPen,
+          Arrow::RedArrowheadPen, Arrow::RedArrowheadPen);
+      else if (markedSentenceItem->isBetweenProponentGraphs(parentItem) ||
+               markedSentenceItem->isBetweenOpponentGraphs(parentItem))
+        mainScene_->addArrow(markedSentenceItem, parentItem, Arrow::GreenArrowheadPen,
+          Arrow::GreenArrowheadPen, Arrow::GreenArrowheadPen);
+      else
+        mainScene_->addArrow(markedSentenceItem, parentItem);
+
+      if (markedSentenceItem->isVisible() && parentItem->isVisible()) {
+        markedSentenceItem->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
+        parentItem->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
+        mainScene_->establishFlashTimer();
+      }
+    }
+  }
+  else if (event->eventType_ == AbaBindVariable::EVENT_TYPE) {
+    auto bindEvent = (AbaBindVariable*)event;
+    auto entry = bindings_.find(bindEvent->varNumber_);
+    if (entry == bindings_.end() || entry->second != bindEvent->value_) {
+      // TODO: Flash changed items.
+      bindings_[bindEvent->varNumber_] = bindEvent->value_;
+      mainScene_->abaSetBinding(bindEvent->varNumber_, bindEvent->value_);
+    }
   }
   else {
     // Skip this event.
@@ -1309,8 +1595,10 @@ Timestamp AeraVisulizerWindow::stepEvent(Timestamp maximumTime)
   return event->time_;
 }
 
-Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
+Timestamp AeraVisualizerWindow::unstepEvent(Timestamp minimumTime, bool& foundGraphicsItem)
 {
+  foundGraphicsItem = false;
+
   if (iNextEvent_ == 0)
     // Return the value meaning no change.
     return Utils_MaxTime;
@@ -1321,11 +1609,14 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
 
   --iNextEvent_;
 
+  // Report the change in time to the find dialog
+  findDialog_->reportStepEvent();
+
   AeraEvent* event = events_[iNextEvent_].get();
   if (newItemEventTypes_.find(event->eventType_) != newItemEventTypes_.end()) {
     AeraVisualizerScene* scene;
     if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
-      event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
+        event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
       scene = modelsScene_;
     else
       scene = mainScene_;
@@ -1334,8 +1625,18 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
     // Note that the event saves the updated item position and will use it when recreating the item.
     auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(scene->getAeraGraphicsItem(event->object_));
     if (aeraGraphicsItem) {
-      aeraGraphicsItem->removeArrowsAndHorizontalLines();
-      scene->removeItem(aeraGraphicsItem);
+      foundGraphicsItem = true;
+      aeraGraphicsItem->removeArrowsAndHorizontalLine();
+      scene->removeAeraGraphicsItem(aeraGraphicsItem);
+
+      // If this item was highlighted, remove it and null it out
+      if (scene->currentMatch_ == aeraGraphicsItem)
+        scene->currentMatch_ = NULL;
+      for (int i = 0; i < scene->allMatches_.size(); i++) {
+        if (scene->allMatches_.at(i) == aeraGraphicsItem)
+          scene->allMatches_.erase(scene->allMatches_.begin() + i);
+      }
+
       delete aeraGraphicsItem;
     }
   }
@@ -1381,34 +1682,69 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
   }
   else if (event->eventType_ == PhaseInModelEvent::EVENT_TYPE) {
     // Find the ModelItem for this event and set its appearance to not phased out.
-    auto phaseInModelEvent = (PhaseInModelEvent*)event;
-
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(phaseInModelEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(event->object_));
     if (modelItem)
       // Set the background color. Assume the model was phased out before phase in.
       modelItem->setBrush(phasedOutModelColor_);
   }
   else if (event->eventType_ == PhaseOutModelEvent::EVENT_TYPE) {
     // Find the ModelItem for this event and set its appearance to not phased out.
-    auto phaseOutModelEvent = (PhaseOutModelEvent*)event;
-
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(phaseOutModelEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(event->object_));
     if (modelItem)
       // Set the background color.
       modelItem->setBrush(Qt::white);
   }
   else if (event->eventType_ == DeleteModelEvent::EVENT_TYPE) {
     // Find the ModelItem for this event and set its appearance to not deleted.
-    auto deleteModelEvent = (DeleteModelEvent*)event;
-
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(deleteModelEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(event->object_));
     if (modelItem)
       // Set the background color.
       modelItem->setBrush(Qt::white);
   }
+  else if (event->eventType_ == AbaMarkSentence::EVENT_TYPE) {
+    auto markEvent = (AbaMarkSentence*)event;
+    auto sentenceItem = dynamic_cast<AbaSentenceItem*>(mainScene_->getAeraGraphicsItem(markEvent->fact_));
+    if (sentenceItem) {
+      // Revert to unmarked.
+      sentenceItem->setStatus(AeraGraphicsItem::STATUS_PROCESSING);
+      if (sentenceItem->isVisible()) {
+        sentenceItem->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
+        mainScene_->establishFlashTimer();
+      }
+
+      if (markEvent->alsoMarkGraph_ && sentenceItem->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
+        auto graph = mainScene_->getItemGroup(((AbaAddSentence*)sentenceItem->getAeraEvent())->graphId_);
+        if (graph)
+          // Revert to unmarked.
+          graph->setBrush(AeraGraphicsItem::Color_opponent_unfinished_justification);
+      }
+    }
+  }
+  else if (event->eventType_ == AbaMarkedSentenceToParent::EVENT_TYPE) {
+    auto markedSentenceItem = dynamic_cast<AbaSentenceItem*>(mainScene_->getAeraGraphicsItem(((AbaMarkedSentenceToParent*)event)->markedFact_));
+    auto parentItem = mainScene_->getAeraGraphicsItem(((AbaMarkedSentenceToParent*)event)->parent_);
+    if (markedSentenceItem) {
+      markedSentenceItem->removeAndDeleteArrowToObject(((AbaMarkedSentenceToParent*)event)->parent_);
+
+      if (parentItem && markedSentenceItem->isVisible() && parentItem->isVisible()) {
+        markedSentenceItem->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
+        parentItem->borderFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
+        mainScene_->establishFlashTimer();
+      }
+    }
+  }
+  else if (event->eventType_ == AbaBindVariable::EVENT_TYPE) {
+    auto bindEvent = (AbaBindVariable*)event;
+    auto entry = bindings_.find(bindEvent->varNumber_);
+    if (entry != bindings_.end()) {
+      // TODO: Flash changed items.
+      bindings_.erase(entry);
+      mainScene_->abaRemoveBinding(bindEvent->varNumber_);
+    }
+  }
   else
     // Skip this event.
-    return unstepEvent(minimumTime);
+    return unstepEvent(minimumTime, foundGraphicsItem);
 
   if (iNextEvent_ > 0)
     return events_[iNextEvent_ - 1]->time_;
@@ -1417,7 +1753,7 @@ Timestamp AeraVisulizerWindow::unstepEvent(Timestamp minimumTime)
     return Timestamp(seconds(0));
 }
 
-void AeraVisulizerWindow::startPlay()
+void AeraVisualizerWindow::startPlay()
 {
   if (isPlaying_)
     // Already playing.
@@ -1428,10 +1764,10 @@ void AeraVisulizerWindow::startPlay()
     children_[i]->playPauseButton_->setIcon(pauseIcon_);
   isPlaying_ = true;
   if (playTimerId_ == 0)
-    playTimerId_ = startTimer(AeraVisulizer_playTimerTick.count());
+    playTimerId_ = startTimer(AeraVisualizer_playTimerTick.count());
 }
 
-void AeraVisulizerWindow::stopPlay()
+void AeraVisualizerWindow::stopPlay()
 {
   if (playTimerId_ != 0) {
     killTimer(playTimerId_);
@@ -1444,7 +1780,7 @@ void AeraVisulizerWindow::stopPlay()
   isPlaying_ = false;
 }
 
-void AeraVisulizerWindow::setPlayTime(Timestamp time)
+void AeraVisualizerWindow::setPlayTime(Timestamp time)
 {
   playTime_ = time;
 
@@ -1480,7 +1816,7 @@ void AeraVisulizerWindow::setPlayTime(Timestamp time)
   }
 }
 
-void AeraVisulizerWindow::setSliderToPlayTime()
+void AeraVisualizerWindow::setSliderToPlayTime()
 {
   if (events_.size() == 0) {
     playSlider_->setValue(0);
@@ -1498,7 +1834,7 @@ void AeraVisulizerWindow::setSliderToPlayTime()
     children_[i]->playSlider_->setValue(value);
 }
 
-void AeraVisulizerWindow::playPauseButtonClickedImpl()
+void AeraVisualizerWindow::playPauseButtonClickedImpl()
 {
   if (isPlaying_)
     stopPlay();
@@ -1506,7 +1842,7 @@ void AeraVisulizerWindow::playPauseButtonClickedImpl()
     startPlay();
 }
 
-void AeraVisulizerWindow::stepButtonClickedImpl()
+void AeraVisualizerWindow::stepButtonClickedImpl()
 {
   stopPlay();
   size_t iNextStepEvent;
@@ -1547,6 +1883,25 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
     eventTime = events_[iNextEvent_ - 1]->time_;
 
     if (simulationsCheckBox_->isChecked()) {
+      if (singleStepSimulationCheckBox_->isChecked() &&
+          simulationEventTypes_.find(events_[iNextEvent_ - 1]->eventType_) != simulationEventTypes_.end()) {
+        // Single-step through the simulation.
+        _Fact* markedFact = 0;
+        if (events_[iNextEvent_ - 1]->eventType_ == AbaMarkSentence::EVENT_TYPE)
+          markedFact = ((AbaMarkSentence*)events_[iNextEvent_ - 1].get())->fact_;
+        if (markedFact && iNextEvent_ < events_.size() &&
+          (events_[iNextEvent_]->eventType_ == AbaAddSentence::EVENT_TYPE &&
+            ((AbaAddSentence*)events_[iNextEvent_].get())->parent_ == markedFact
+            ||
+            events_[iNextEvent_]->eventType_ == AbaMarkedSentenceToParent::EVENT_TYPE &&
+            (((AbaMarkedSentenceToParent*)events_[iNextEvent_].get())->parent_ == markedFact ||
+              ((AbaMarkedSentenceToParent*)events_[iNextEvent_].get())->markedFact_ == markedFact))) {
+          // The next event will have an arrow with this. Don't break so that we show it right away.
+        }
+        else
+          break;
+      }
+
       if (isNewFrame) {
         // In a new frame, advance until the next item would be a simulation item that is not at the first event time.
         if (iNextEvent_ < events_.size() &&
@@ -1566,10 +1921,11 @@ void AeraVisulizerWindow::stepButtonClickedImpl()
   setSliderToPlayTime();
 }
 
-void AeraVisulizerWindow::stepBackButtonClickedImpl()
+void AeraVisualizerWindow::stepBackButtonClickedImpl()
 {
   stopPlay();
-  auto newTime = max(unstepEvent(Timestamp(seconds(0))), replicodeObjects_.getTimeReference());
+  bool foundGraphicsItem;
+  auto newTime = max(unstepEvent(Timestamp(seconds(0)), foundGraphicsItem), replicodeObjects_.getTimeReference());
   if (newTime == Utils_MaxTime)
     return;
   // Debug: How to step the children also?
@@ -1578,7 +1934,12 @@ void AeraVisulizerWindow::stepBackButtonClickedImpl()
   auto relativeTime = duration_cast<microseconds>(newTime - replicodeObjects_.getTimeReference());
   auto frameStartTime = newTime - (relativeTime % replicodeObjects_.getSamplingPeriod());
   while (true) {
-    auto localNewTime = unstepEvent(frameStartTime);
+    if (simulationsCheckBox_->isChecked() && singleStepSimulationCheckBox_->isChecked() && foundGraphicsItem &&
+        simulationEventTypes_.find(events_[iNextEvent_]->eventType_) != simulationEventTypes_.end())
+      // Single-step through the simulation.
+      break;
+
+    auto localNewTime = unstepEvent(frameStartTime, foundGraphicsItem);
     if (localNewTime == Utils_MaxTime)
       break;
     newTime = localNewTime;
@@ -1588,13 +1949,13 @@ void AeraVisulizerWindow::stepBackButtonClickedImpl()
   setSliderToPlayTime();
 }
 
-void AeraVisulizerWindow::playTimeLabelClickedImpl()
+void AeraVisualizerWindow::playTimeLabelClickedImpl()
 {
   showRelativeTime_ = !showRelativeTime_;
   setPlayTime(playTime_);
 }
 
-void AeraVisulizerWindow::timerEvent(QTimerEvent* event)
+void AeraVisualizerWindow::timerEvent(QTimerEvent* event)
 {
   // TODO: Make sure we don't re-enter.
 
@@ -1609,7 +1970,7 @@ void AeraVisulizerWindow::timerEvent(QTimerEvent* event)
 
   auto maximumEventTime = events_.back()->time_;
   // TODO: Make this track the passage of real clock time.
-  auto playTime = playTime_ + AeraVisulizer_playTimerTick;
+  auto playTime = playTime_ + AeraVisualizer_playTimerTick;
 
   // Step events while events_[iNextEvent_] is less than or equal to the playTime.
   // Debug: How to step the children also?
@@ -1625,86 +1986,160 @@ void AeraVisulizerWindow::timerEvent(QTimerEvent* event)
   setSliderToPlayTime();
 }
 
-void AeraVisulizerWindow::zoomIn()
+void AeraVisualizerWindow::closeEvent(QCloseEvent* event) {
+  findDialog_->close();
+  event->accept();
+}
+
+void AeraVisualizerWindow::saveMainWindowImage()
 {
+  auto fileName = QFileDialog::getSaveFileName(this, "Save image", QDir::homePath(), "PNG (*.png)");
+  if (!fileName.isNull()) {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    QApplication::processEvents();
+
+    // Get the bounding rect including the top-left plus all AeraGraphicsItem. This excludes lines such as frame boundaries.
+    QRectF boundingRect(0, 0, 100, 100);
+    foreach(auto item, mainScene_->items()) {
+      if (dynamic_cast<AeraGraphicsItem*>(item) && item->isVisible())
+          boundingRect = boundingRect.united(item->sceneBoundingRect());
+    }
+
+    QImage image(boundingRect.size().toSize(), QImage::Format_ARGB32);
+    image.fill(Qt::transparent);
+
+    QPainter painter(&image);
+    mainScene_->render(&painter, QRectF(), boundingRect);
+    image.save(fileName, "PNG", 0);
+    QApplication::restoreOverrideCursor();
+  }
+}
+
+void AeraVisualizerWindow::zoomIn()
+{
+  // Make sure zoom is focused on the center of the screen
+  QGraphicsView* view = selectedScene_->views().at(0);
+  view->setTransformationAnchor(QGraphicsView::AnchorViewCenter);
+
+  // Zoom in
   selectedScene_->scaleViewBy(1.09);
 }
 
-void AeraVisulizerWindow::zoomOut()
+void AeraVisualizerWindow::zoomOut()
 {
+  // Make sure zoom is focused on the center of the screen
+  QGraphicsView* view = selectedScene_->views().at(0);
+  view->setTransformationAnchor(QGraphicsView::AnchorViewCenter);
+
+  // Zoom out
   selectedScene_->scaleViewBy(1 / 1.09);
 }
 
-void AeraVisulizerWindow::zoomHome()
+void AeraVisualizerWindow::zoomHome()
 {
   selectedScene_->zoomViewHome();
 }
 
-void AeraVisulizerWindow::zoomTo()
+void AeraVisualizerWindow::find()
 {
-  bool ok;
-  QString text = QInputDialog::getText(
-    this, tr("Zoom To..."), tr("Enter the object name:"), QLineEdit::Normal, "", &ok);
-  if (!ok || text == "")
-    return;
-
-  auto object = replicodeObjects_.getObject(text.toStdString());
-  if (!object) {
-    QMessageBox::information(this, "Zoom To Error", "Cannot find object " + text, QMessageBox::Ok);
-    return;
+  // Don't open the dialog multiple times, just bring it forward
+  if (!findDialog_->isVisible()) {
+    findDialog_->show();
   }
-
-  AeraVisualizerScene* scene;
-  auto item = getAeraGraphicsItem(object, &scene);
-  if (!item || !item->isVisible()) {
-    QMessageBox::information(this, "Zoom To Error", "The item '" + text + "' is not visible", QMessageBox::Ok);
-    return;
+  else {
+    findDialog_->activateWindow();
   }
-
-  scene->zoomToItem(item);
+  return;
 }
 
-void AeraVisulizerWindow::createActions()
+void AeraVisualizerWindow::findNext()
 {
+  findDialog_->findNext();
+  return;
+}
+
+void AeraVisualizerWindow::findPrev()
+{
+  findDialog_->findPrev();
+  return;
+}
+
+void AeraVisualizerWindow::fitAll() {
+  findDialog_->fitAll();
+  return;
+}
+
+void AeraVisualizerWindow::createActions()
+{
+  saveMainWindowImageAction_ = new QAction(tr("&Save Main Window Image"), this);
+  connect(saveMainWindowImageAction_, SIGNAL(triggered()), this, SLOT(saveMainWindowImage()));
+
   exitAction_ = new QAction(tr("E&xit"), this);
   exitAction_->setShortcuts(QKeySequence::Quit);
   connect(exitAction_, SIGNAL(triggered()), this, SLOT(close()));
 
   zoomInAction_ = new QAction(QIcon(":/images/zoom-in.png"), tr("Zoom In"), this);
   zoomInAction_->setStatusTip(tr("Zoom In"));
+  zoomInAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Equal));
   connect(zoomInAction_, SIGNAL(triggered()), this, SLOT(zoomIn()));
 
   zoomOutAction_ = new QAction(QIcon(":/images/zoom-out.png"), tr("Zoom Out"), this);
   zoomOutAction_->setStatusTip(tr("Zoom Out"));
+  zoomOutAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Minus));
   connect(zoomOutAction_, SIGNAL(triggered()), this, SLOT(zoomOut()));
 
   zoomHomeAction_ = new QAction(QIcon(":/images/zoom-home.png"), tr("Zoom Home"), this);
   zoomHomeAction_->setStatusTip(tr("Zoom to show all"));
+  zoomHomeAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Home));
   connect(zoomHomeAction_, SIGNAL(triggered()), this, SLOT(zoomHome()));
 
-  zoomToAction_ = new QAction(tr("Zoom To..."), this);
-  zoomToAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
-  connect(zoomToAction_, SIGNAL(triggered()), this, SLOT(zoomTo()));
+  findAction_ = new QAction(QIcon(":/images/zoom-to.png"), tr("Find"), this);
+  findAction_->setStatusTip(tr("Find a specific object"));
+  findAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
+  connect(findAction_, SIGNAL(triggered()), this, SLOT(find()));
+
+  findNextAction_ = new QAction(tr("Find Next"), this);
+  findNextAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_G));
+  connect(findNextAction_, SIGNAL(triggered()), this, SLOT(findNext()));
+  this->addAction(findNextAction_);
+
+  findPrevAction_ = new QAction(tr("Find Prev"), this);
+  findPrevAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_G));
+  connect(findPrevAction_, SIGNAL(triggered()), this, SLOT(findPrev()));
+  this->addAction(findPrevAction_);
+
+  fitAllAction_ = new QAction(tr("Fit All Matches"), this);
+  fitAllAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Home));
+  connect(fitAllAction_, SIGNAL(triggered()), this, SLOT(fitAll()));
+  this->addAction(fitAllAction_);
 }
 
-void AeraVisulizerWindow::createMenus()
+void AeraVisualizerWindow::createMenus()
 {
   QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
+  fileMenu->addAction(saveMainWindowImageAction_);
   fileMenu->addAction(exitAction_);
 
   QMenu* viewMenu = menuBar()->addMenu(tr("&View"));
+  viewMenu->addAction(zoomHomeAction_);
   viewMenu->addAction(zoomInAction_);
   viewMenu->addAction(zoomOutAction_);
-  viewMenu->addAction(zoomHomeAction_);
-  viewMenu->addAction(zoomToAction_);
+  viewMenu->addAction(findAction_);
+
+  QMenu* findMenu = menuBar()->addMenu(tr("Fin&d"));
+  findMenu->addAction(findAction_);
+  findMenu->addAction(findNextAction_);
+  findMenu->addAction(findPrevAction_);
+  findMenu->addAction(fitAllAction_);
 }
 
-void AeraVisulizerWindow::createToolbars()
+void AeraVisualizerWindow::createToolbars()
 {
   QToolBar* toolbar = addToolBar(tr("Main"));
+  toolbar->addAction(zoomHomeAction_);
   toolbar->addAction(zoomInAction_);
   toolbar->addAction(zoomOutAction_);
-  toolbar->addAction(zoomHomeAction_);
+  toolbar->addAction(findAction_);
 
   toolbar->addSeparator();
   // Checkbox for auto scroll
@@ -1713,14 +2148,26 @@ void AeraVisulizerWindow::createToolbars()
   toolbar->addSeparator();
   toolbar->addWidget(new QLabel("Show/Hide: ", this));
 
+  const QColor simulationColor("#ffffdc");
   // Show simulations by default.
   simulationsCheckBox_ = new AeraCheckbox("Simulations", SettingsKeySimulationsVisible, this, Qt::Checked);
-  simulationsCheckBox_->setColor(QColor("#ffffdc"));
+  simulationsCheckBox_->setColor(simulationColor);
   connect(simulationsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
+    allSimulationInputsCheckBox_->setEnabled(state == Qt::Checked);
+    singleStepSimulationCheckBox_->setEnabled(state == Qt::Checked);
+
     for (auto i = simulationEventTypes_.begin(); i != simulationEventTypes_.end(); ++i)
       mainScene_->setItemsVisible(*i, state == Qt::Checked);
     });
   toolbar->addWidget(simulationsCheckBox_);
+
+  allSimulationInputsCheckBox_ = new AeraCheckbox("All Inputs", SettingsKeyAllSimulationInputsVisible, this, Qt::Unchecked);
+  allSimulationInputsCheckBox_->setColor(simulationColor);
+  toolbar->addWidget(allSimulationInputsCheckBox_);
+
+  singleStepSimulationCheckBox_ = new AeraCheckbox("Single Step", SettingsKeySingleStepSimulationVisible, this, Qt::Unchecked);
+  singleStepSimulationCheckBox_->setColor(simulationColor);
+  toolbar->addWidget(singleStepSimulationCheckBox_);
 
   // Separate the non-simulations check boxes.
   toolbar->addWidget(new QLabel("    ", this));
@@ -1757,6 +2204,11 @@ void AeraVisulizerWindow::createToolbars()
   connect(instantiatedCompositeStatesCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     mainScene_->setItemsVisible(NewInstantiatedCompositeStateEvent::EVENT_TYPE, state == Qt::Checked); });
   toolbar->addWidget(instantiatedCompositeStatesCheckBox_);
+
+  instantiatedModelsCheckBox_ = new AeraCheckbox("Instantiated Models", SettingsKeyInstantiatedModelsVisible, this);
+  connect(instantiatedModelsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
+    mainScene_->setItemsVisible(NewInstantiatedModelEvent::EVENT_TYPE, state == Qt::Checked); });
+  toolbar->addWidget(instantiatedModelsCheckBox_);
 
   predictedInstantiatedCompositeStatesCheckBox_ = new AeraCheckbox("Pred. Instantiated Comp. States", SettingsKeyPredictedInstantiatedCompositeStatesVisible, this);
   connect(predictedInstantiatedCompositeStatesCheckBox_, &QCheckBox::stateChanged, [=](int state) {

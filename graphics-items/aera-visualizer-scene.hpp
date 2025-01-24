@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ http://www.iiim.is
 //_/_/
@@ -57,7 +57,6 @@
 
 #include <map>
 #include "../aera-event.hpp"
-#include "aera-graphics-item.hpp"
 #include "../replicode-objects.hpp"
 
 #include <QGraphicsScene>
@@ -71,7 +70,9 @@ class QColor;
 
 namespace aera_visualizer {
 
-class AeraVisulizerWindow;
+class AeraGraphicsItem;
+class AeraGraphicsItemGroup;
+class AeraVisualizerWindow;
 class ExplanationLogWindow;
 
 class AeraVisualizerScene : public QGraphicsScene
@@ -80,10 +81,10 @@ public:
   typedef std::function<void()> OnSceneSelected;
 
   explicit AeraVisualizerScene(
-    ReplicodeObjects& replicodeObjects, AeraVisulizerWindow* parent, bool isMainScene,
+    ReplicodeObjects& replicodeObjects, AeraVisualizerWindow* parent, bool isMainScene,
     const OnSceneSelected& onSceneSelected);
 
-  AeraVisulizerWindow* getParent() { return parent_; }
+  AeraVisualizerWindow* getParent() { return parent_; }
 
   void zoomToItem(QGraphicsItem* item);
   void focusOnItem(QGraphicsItem* item);
@@ -116,8 +117,33 @@ public:
     focusSimulationDetailOids_ = focusSimulationDetailOids;
   }
 
+  AeraGraphicsItemGroup* getItemGroup(int id) {
+    auto foundItemGroup = itemGroups_.find(id);
+    if (foundItemGroup != itemGroups_.end())
+      return foundItemGroup->second;
+    else
+      return NULL;
+  }
+
   // The initial value for the flash countdown;
   static const int FLASH_COUNT = 6;
+
+  // Start the flash timer, make it public so it's accessible by the Zoom To dialog
+  void establishFlashTimer()
+  {
+    if (flashTimerId_ == 0)
+      flashTimerId_ = startTimer(200);
+  }
+
+  // Anything on this list will be highlighted
+  AeraGraphicsItem* currentMatch_ = NULL;
+  std::vector<AeraGraphicsItem*> allMatches_;
+
+  // Adjusts border weight depending on zoom level
+  void updateHighlights();
+
+  // Reset all boxes to normal
+  void unhighlightAll();
 
 protected:
   void mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent) override;
@@ -128,7 +154,7 @@ protected:
 #endif
 
 private:
-  friend class AeraVisulizerWindow;
+  friend class AeraVisualizerWindow;
 
   /**
    * Scale the first QGraphicsView by the given factor.
@@ -137,16 +163,30 @@ private:
   void scaleViewBy(double factor);
   void zoomViewHome();
   void addAeraGraphicsItem(AeraGraphicsItem* item);
+  void removeAeraGraphicsItem(AeraGraphicsItem* item);
+
   /**
    * Add an Arrow to the scene.
    * \param startItem The Item for the start of the arrow.
    * \param endItem The Item for the end of the arrow.
-   * \param lhsItem (optional) This is either startItem or endItem:The arrowhead 
+   * \param lhsItem (optional) This is either startItem or endItem. The arrowhead 
    * next to lhsItem will have highlight pen RedArrowheadPen and the other item
    * will have highlight pen Green.ArrowheadPen . If omitted, both arrowheads will
    * have highlight pens HighlightedPen.
    */
   void addArrow(AeraGraphicsItem* startItem, AeraGraphicsItem* endItem, AeraGraphicsItem* lhsItem = 0);
+
+  /**
+   * Add an Arrow to the scene.
+   * \param startItem The Item for the start of the arrow.
+   * \param endItem The Item for the end of the arrow.
+   * \param highlightBodyPen See the Arrow constructor.
+   * \param highlightArrowBasePen See the Arrow constructor.
+   * \param highlightArrowTipPen See the Arrow constructor.
+   */
+  void addArrow(AeraGraphicsItem* startItem, AeraGraphicsItem* endItem,
+    const QPen& highlightBodyPen, const QPen& highlightArrowBasePen, const QPen& highlightArrowTipPen);
+
   void addHorizontalLine(AeraGraphicsItem* item);
   /**
    * Get the AeraGraphicsItem whose getAeraEvent() has the given object.
@@ -154,41 +194,40 @@ private:
    * \return The AeraGraphicsItem, or null if not found.
    */
   AeraGraphicsItem* getAeraGraphicsItem(r_code::Code* object);
-  void establishFlashTimer()
-  {
-    if (flashTimerId_ == 0)
-      flashTimerId_ = startTimer(200);
-  }
 
   /**
-   * Find all items with the given event type, and call setItemAndArrowsAndHorizontalLinesVisible.
+   * Find all items with the given event type, and call setItemAndArrowsAndHorizontalLineVisible.
    * \param eventType The event type of the item's getAeraEvent().
-   * \param visible The visible state for setItemAndArrowsAndHorizontalLinesVisible.
+   * \param visible The visible state for setItemAndArrowsAndHorizontalLineVisible.
    */
   void setItemsVisible(int eventType, bool visible);
 
   /**
-   * Find all items where the event type is not any of the given values, and call setItemAndArrowsAndHorizontalLinesVisible.
-   * \param notEventTypes Call setItemAndArrowsAndHorizontalLinesVisible if the event type of the item's getAeraEvent() is not any of these values.
-   * \param visible The visible state for setItemAndArrowsAndHorizontalLinesVisible.
+   * Find all items where the event type is not any of the given values, and call setItemAndArrowsAndHorizontalLineVisible.
+   * \param notEventTypes Call setItemAndArrowsAndHorizontalLineVisible if the event type of the item's getAeraEvent() is not any of these values.
+   * \param visible The visible state for setItemAndArrowsAndHorizontalLineVisible.
    */
   void setNonItemsVisible(const std::set<int>& notEventTypes, bool visible);
 
   /**
-   * Find all AutoFocusFactItem whose object_ is (fact (mk.val X property Y)), and call setItemAndArrowsAndHorizontalLinesVisible.
+   * Find all AutoFocusFactItem whose object_ is (fact (mk.val X property Y)), and call setItemAndArrowsAndHorizontalLineVisible.
    * \param property The event type of the item's object_ mk.val.
-   * \param visible The visible state for setItemAndArrowsAndHorizontalLinesVisible.
+   * \param visible The visible state for setItemAndArrowsAndHorizontalLineVisible.
    */
   void setAutoFocusItemsVisible(const std::string& property, bool visible);
   
   /**
-   * Find all items where the event type is any of the given values, and call removeArrowsAndHorizontalLines,
+   * Find all items where the event type is any of the given values, and call removeArrowsAndHorizontalLine,
    * removeItem and delete the item.
    * \param eventTypes Remove if the event type of the item's getAeraEvent() is any of these values.
    */
   void removeAllItemsByEventType(const std::set<int>& eventTypes);
 
-  AeraVisulizerWindow* parent_;
+  void abaSetBinding(int varNumber, const QString& text);
+
+  void abaRemoveBinding(int varNumber);
+
+  AeraVisualizerWindow* parent_;
   ReplicodeObjects& replicodeObjects_;
   bool isMainScene_;
   OnSceneSelected onSceneSelected_;
@@ -203,8 +242,6 @@ private:
   qreal otherSimulationNextTop_;
   Timestamp thisFrameTime_;
   qreal thisFrameLeft_;
-  QColor itemColor_;
-  QColor simulatedItemColor_;
   QColor lineColor_;
   QPen borderFlashPen_;
   QString noFlashColor_;
@@ -212,6 +249,8 @@ private:
   QString valueDownFlashColor_;
   int flashTimerId_;
   std::set<int> focusSimulationDetailOids_;
+  // The key is the group ID.
+  std::map<int, AeraGraphicsItemGroup*> itemGroups_;
   static const int frameWidth_ = 330;
 };
 

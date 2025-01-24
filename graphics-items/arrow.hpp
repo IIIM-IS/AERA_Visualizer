@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2022 Jeff Thompson
-//_/_/ Copyright (c) 2018-2022 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2022 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2025 Jeff Thompson
+//_/_/ Copyright (c) 2018-2025 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2025 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ http://www.iiim.is
 //_/_/
@@ -80,6 +80,8 @@ public:
    * Create an arrow from the startItem to the endItem.
    * \param startItem The Item for the start of the arrow.
    * \param endItem The Item for the end of the arrow.
+   * \param highlightBodyPen This pen is retrieved by getHighlightBodyPen(),
+   * but is not otherwise used.
    * \param highlightArrowBasePen This pen is retrieved by getHighlightArrowBasePen(),
    * but is not otherwise used.
    * \param highlightArrowTipPen This pen is retrieved by getHighlightArrowTipPen(),
@@ -87,19 +89,9 @@ public:
    * \param parent The parent AeraVisualizerScene.
    */
   Arrow(QGraphicsPolygonItem* startItem, QGraphicsPolygonItem* endItem,
-    const QPen& highlightArrowBasePen, const QPen& highlightArrowTipPen,
+    const QPen& highlightBodyPen, const QPen& highlightArrowBasePen,
+    const QPen& highlightArrowTipPen,
     AeraVisualizerScene* parent);
-
-  /**
-   * Create an arrow from the startItem to the endItem.
-   * getHighlightArrowBasePen( and getHighlightArrowTipPen() will return HighlightedPen.
-   * \param startItem The Item for the start of the arrow.
-   * \param endItem The Item for the end of the arrow.
-   * \param parent The parent AeraVisualizerScene.
-   */
-  Arrow(QGraphicsPolygonItem* startItem, QGraphicsPolygonItem* endItem,
-    AeraVisualizerScene* parent)
-  : Arrow(startItem, endItem, HighlightedPen, HighlightedPen, parent) {};
 
   int type() const override { return Type; }
   QRectF boundingRect() const override;
@@ -114,7 +106,8 @@ public:
 
   /**
    * Set the pens for the arrow body, base arrowhead and tip arrowhead.
-   * You can use getHighlightArrowBasePen() and getHighlightArrowTipPen() as needed.
+   * You can use getHighlightBodyPen(), getHighlightArrowBasePen() and
+   * getHighlightArrowTipPen() as needed.
    */
   void setPens(const QPen& bodyPen, const QPen& arrowBasePen, const QPen& arrowTipPen)
   {
@@ -122,6 +115,11 @@ public:
     arrowBasePen_ = arrowBasePen;
     arrowTipPen_ = arrowTipPen;
   }
+
+  /**
+   * Get the highlightBodyPen given to the constructor.
+   */
+  const QPen& getHighlightBodyPen() { return highlightBodyPen_; }
 
   /**
    * Get the highlightArrowBasePen given to the constructor.
@@ -162,12 +160,16 @@ private:
   AeraVisualizerScene* parent_;
   QGraphicsPolygonItem* startItem_;
   QGraphicsPolygonItem* endItem_;
+  QPen highlightBodyPen_;
   QPen highlightArrowBasePen_;
   QPen highlightArrowTipPen_;
   QPolygonF arrowBase_;
   QPolygonF arrowTip_;
   QPen arrowBasePen_;
   QPen arrowTipPen_;
+  bool wasSelected_;        // Use this to track a "falling edge" on the select state
+  QPen startItemLastPen_;   // Used to restore pen settings after deselection
+  QPen endItemLastPen_;     // Used to restore pen settings after deselection
 };
 
 }
