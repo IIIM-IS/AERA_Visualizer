@@ -13,6 +13,7 @@ Changes
 * Zoom To now acts like Find Next. https://github.com/IIIM-IS/AERA_Visualizer/pull/45
 * Display imdl as separate item. https://github.com/IIIM-IS/AERA_Visualizer/pull/46
 * Added "Highlight All" and "Fit All" features https://github.com/IIIM-IS/AERA_Visualizer/pull/49
+* In INSTALL, add temporary workaround note on memory leak https://github.com/IIIM-IS/AERA_Visualizer/pull/59
 * Other enhancements. Please see https://github.com/IIIM-IS/AERA_Visualizer/issues?q=is%3Aissue+is%3Aclosed
 
 AERA Visualizer Diagnostic Mode v0.2 (2022-07-01)
