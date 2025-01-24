@@ -57,6 +57,11 @@ for details. Be sure to change the `settings.xml` parameter `keep_invalidated_ob
 To run, in Visual Studio on the Debug menu, select "Run Without Debugging". Select the `settings.xml` file used by AERA, e.g.
 `C:\Users\Alice\Documents\GitHub\replicode\AERA\settings.xml` .
 
+If the AERA Visualizer freezes on loading, it might be due to a known bug in memory support. Please try the following temporary workaround:
+1) In the AERA Visualizer, open `r_code/resized_vector`.
+2) On line 98, change `#if 0` to `#if 1`.
+3) Rebuild the Solution and try again.
+
 Run from AeraVisualizer.exe
 ===========================
 
