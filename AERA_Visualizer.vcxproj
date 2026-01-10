@@ -272,10 +272,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="aera-visualizer-window.cpp" />
     <ClCompile Include="replicode-objects.cpp" />
-    <ClCompile Include="submodules\AERA\AERA\AERA_main.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="submodules\AERA\AERA\IODevices\TCP\AERA_Protobuf\tcp_connection.cpp" />
     <ClCompile Include="submodules\AERA\AERA\IODevices\TCP\AERA_Protobuf\tcp_data_message.pb.cc" />
     <ClCompile Include="submodules\AERA\AERA\IODevices\TCP\tcp_io_device.cpp" />
