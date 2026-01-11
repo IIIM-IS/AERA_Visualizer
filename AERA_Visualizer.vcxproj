@@ -137,7 +137,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>ENABLE_PROTOBUF;_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING;WIN64;_DEBUG;EXECUTIVE_EXPORTS;CORELIBRARY_EXPORTS;WITH_DETAIL_OID;VISUALIZER_REMOTE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ENABLE_PROTOBUF;_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING;WIN64;_DEBUG;EXECUTIVE_EXPORTS;CORELIBRARY_EXPORTS;WITH_DETAIL_OID;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -203,9 +203,10 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>ENABLE_PROTOBUF;_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING;WIN64;QT_NO_DEBUG;NDEBUG;EXECUTIVE_EXPORTS;CORELIBRARY_EXPORTS;WITH_DETAIL_OID;VISUALIZER_REMOTE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ENABLE_PROTOBUF;_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING;WIN64;QT_NO_DEBUG;NDEBUG;EXECUTIVE_EXPORTS;CORELIBRARY_EXPORTS;WITH_DETAIL_OID;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);$(SolutionDir)submodules\AERA\r_code;$(SolutionDir)submodules\AERA\CoreLibrary;$(SolutionDir)submodules\AERA\r_exec;$(SolutionDir)submodules\AERA\r_comp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DebugInformationFormat></DebugInformationFormat>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <WarningLevel>Level4</WarningLevel>
@@ -585,7 +586,8 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(QtMsBuild)\qt.targets" Condition="Exists('$(QtMsBuild)\qt.targets')" />
-  <ImportGroup Label="ExtensionTargets"></ImportGroup>
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
       <UserProperties />
