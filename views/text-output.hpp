@@ -84,8 +84,8 @@ public:
 	}
 
 	// These must be set after the widget is initialized
-	void setOutputFilepaths(string decompiledFilePath,
-		string runtimeOutFilePath) {
+	void setOutputFilepaths(std::string decompiledFilePath,
+		std::string runtimeOutFilePath) {
 		decompiledFilePath_ = decompiledFilePath;
 		runtimeOutFilePath_ = runtimeOutFilePath;
 	}
@@ -94,8 +94,8 @@ public:
 	void refresh();
 
 private:
-	string decompiledFilePath_;
-	string runtimeOutFilePath_;
+	std::string decompiledFilePath_;
+	std::string runtimeOutFilePath_;
 	ReplicodeObjects* replicodeObjects_;
 
 	QTextBrowser* decompiledObjectsBrowser_;
