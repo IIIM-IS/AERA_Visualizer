@@ -30,7 +30,7 @@
     primary_thz="3600000"
     secondary_thz="7200000"
   />
-  <Debug debug="yes" debug_windows="1" runtime_output_file_path="runtime_out.txt" trace_levels="FFFF">
+  <Debug debug="yes" debug_windows="0" runtime_output_file_path="runtime_out.txt" trace_levels="FFFF">
     <Resilience
       ntf_mk_resilience="1"
       goal_pred_success_resilience="1000"
