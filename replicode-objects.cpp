@@ -307,7 +307,7 @@ string ReplicodeObjects::init(AERA_interface* aera, microseconds basePeriod, QPr
 
   // Get current state of AERA
   r_comp::Metadata metadata = aera->getMetadata();  // Retreve metadata to interpret objects
-  objects_ = aera->getMem()->get_objects_(true);    // Get objects directly from AERA's memory
+  objects_ = aera->getMem()->get_objects_();    // Get objects directly from AERA's memory
   
   progress.setLabelText(getProgressLabelText("Retrieving objects"));
   QApplication::processEvents();

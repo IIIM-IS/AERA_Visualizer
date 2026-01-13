@@ -246,7 +246,7 @@ private:
   std::map<r_code::Code*, std::string> objectLabel_;
   // Key is the label from the decompiled objects, value is the Code* object.
   std::map<std::string, r_code::Code*> labelObject_;
-  r_code::list<P<r_code::Code>>* objects_;
+  const r_code::list<P<r_code::Code>>* objects_;
   std::vector<QString> progressMessages_;
   std::regex intMemberRegex_;
 };

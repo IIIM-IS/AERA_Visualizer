@@ -273,9 +273,6 @@
     <ClCompile Include="graphics-items\instantiated-model-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
-    <ClCompile Include="submodules\AERA\AERA\AERA_main.cpp">
-      <Filter>AERA</Filter>
-    </ClCompile>
     <ClCompile Include="submodules\AERA\AERA\main.cpp">
       <Filter>AERA</Filter>
     </ClCompile>

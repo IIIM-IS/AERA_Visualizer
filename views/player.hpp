@@ -124,7 +124,7 @@ public:
   }
 
   // Set runTime_ and update the aeraBar_
-  void setRunTime(milliseconds run_time) {
+  void setRunTime(std::chrono::milliseconds run_time) {
     runTime_ = run_time;
     updateAERABar();
   }
@@ -170,7 +170,7 @@ private:
   core::Timestamp playTime_;
   core::Timestamp aeraTime_;
   core::Timestamp timeReference_;
-  milliseconds runTime_;
+  std::chrono::milliseconds runTime_;
   QIcon playIcon_;
   QIcon pauseIcon_;
   QToolButton* jumpToEndButton_;
