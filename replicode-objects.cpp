@@ -76,8 +76,6 @@ using namespace r_exec;
 
 namespace aera_visualizer {
 
-  dll_export r_comp::Compiler Compiler;
-
 ReplicodeObjects::ReplicodeObjects()
 : intMemberRegex_("( ?\\d+)")
 {
