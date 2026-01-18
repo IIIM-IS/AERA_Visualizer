@@ -468,11 +468,6 @@ private:
   QColor phasedOutModelColor_;
 
   int lastLine_ = 0;      // The farthest we've read into runtime_out.txt
-  // abaStepIndexes has the index in events_ of the step number. See abaNewStep.
-  bool showRelativeTime_;
-  core::Timestamp playTime_;
-  int playTimerId_;
-  bool isPlaying_;
   // Accumulate ABA events here until a solution is found and the entries are copied to events_ .
   std::vector<std::shared_ptr<AeraEvent> > abaEvents_;
   // The index of new abaEvents_ entries (after copying events for a previous solution).
