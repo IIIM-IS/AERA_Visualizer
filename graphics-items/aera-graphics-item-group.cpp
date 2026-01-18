@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2022-2023 Jeff Thompson
-//_/_/ Copyright (c) 2022-2023 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2022-2023 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2022-2026 Jeff Thompson
+//_/_/ Copyright (c) 2022-2026 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2022-2026 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -71,6 +71,7 @@ AeraGraphicsItemGroup::AeraGraphicsItemGroup(AeraVisualizerScene* parent, const 
   setOpacity(.75);
 
   auto textItem = new QGraphicsTextItem(this);
+  textItem->setPos(-3, -6);
   textItem->setHtml("<font size = \"+1\">" + title + "</font>");
 }
 

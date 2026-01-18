@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2023 Jeff Thompson
-//_/_/ Copyright (c) 2018-2023 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2023 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2026 Jeff Thompson
+//_/_/ Copyright (c) 2018-2026 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2026 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ http://www.iiim.is
 //_/_/
@@ -80,6 +80,7 @@ class QComboBox;
 class QLineEdit;
 class QGraphicsView;
 class QProgressDialog;
+class QString;
 
 namespace aera_visualizer {
 
@@ -328,6 +329,7 @@ private slots:
   void loadNewSeed();
   void openOutput();
   void saveOutput();
+  void saveMainWindowImage();
   void zoomIn();
   void zoomOut();
   void zoomHome();
@@ -363,7 +365,8 @@ private:
 
   /**
    * If the step is already in abaStepIndexes_, get the event index and erase
-   * from events_ to the end. Set abaStepIndexes_[step] to the next index in events_.
+   * from abaEvents_ to the end, and adjust newAbaEventsStartIndex_ down to the new size
+   * of abaEvents_ . Set abaStepIndexes_[step] to the next index in abaEvents_.
    * (We need this because the ABA derivation backtracks and repeats steps.)
    * \param step The ABA step number.
    */
@@ -417,6 +420,8 @@ private:
   QAction* newInstanceAction_;
   QAction* loadOutputAction_;
   QAction* saveOutputAction_;
+
+  QAction* saveMainWindowImageAction_;
   QAction* exitAction_;
   QAction* resetAERAInstanceAction_;
   QAction* configureAERAInstanceAction_;
@@ -464,7 +469,17 @@ private:
 
   int lastLine_ = 0;      // The farthest we've read into runtime_out.txt
   // abaStepIndexes has the index in events_ of the step number. See abaNewStep.
+  bool showRelativeTime_;
+  core::Timestamp playTime_;
+  int playTimerId_;
+  bool isPlaying_;
+  // Accumulate ABA events here until a solution is found and the entries are copied to events_ .
+  std::vector<std::shared_ptr<AeraEvent> > abaEvents_;
+  // The index of new abaEvents_ entries (after copying events for a previous solution).
+  size_t newAbaEventsStartIndex_;
+  // abaStepIndexes has the index in abaEvents_ of the step number. See abaNewStep.
   std::vector<size_t> abaStepIndexes_;
+  std::map<int, QString> bindings_;
   // The AeraEvent types where stepEvent will create a new AeraGraphicsItem.
   static const std::set<int> newItemEventTypes_;
 };

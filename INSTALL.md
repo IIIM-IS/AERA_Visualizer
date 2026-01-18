@@ -14,7 +14,6 @@ Following are the detailed steps for each platform to install the prerequisites.
 
 ## Windows
 To install AERA and configure Visual Studio, see https://github.com/IIIM-IS/AERA/blob/master/INSTALL.md .
-Be sure to follow the instructions to set `WITH_DETAIL_OID` .
 
 To install Qt Framework:
 
@@ -22,18 +21,18 @@ To install Qt Framework:
   In the installer on the "Select Components" tab, expand "Qt 5.14.2" and select "MSVC 2017 64-bit".
   When the installer is finished, you can uncheck "Launch Qt Creator" since we don't need it. 
 * With Visual Studio closed, download and install the Qt Visual Studio Tools from
-  https://marketplace.visualstudio.com/items?itemName=TheQtCompany.QtVisualStudioTools2019 .
+  https://marketplace.visualstudio.com/items?itemName=TheQtCompany.QtVisualStudioTools2022 .
 * To set the QTDIR environment variable do the following with Visual Studio closed:
     * Open the System control panel.
     * Click Advanced System Settings.
     * Click Environment Variables.
     * In the "System variables" section, click New...
     * In Variable name enter `QTDIR` .
-    * In Variable value enter the directory such as `C:\Qt\Qt5.14.2\5.14.2\msvc2017_64` .
+    * In Variable value enter the directory such as `C:\Qt\5.14.2\msvc2017_64` .
     * Repeatedly click OK to close all the windows.
 * Launch Visual Studio. On the "splash" screen, click "continue without code". On the Extensions menu, click 
   "Qt VS Tools" then "Qt Versions". Click "<add new Qt version>". Click the folder icon and 
-  select the path of the qmake executable, e.g. `C:\Qt\Qt5.14.2\5.14.2\msvc2017_64\qmake.exe` . Click "OK".
+  select the path of the qmake executable, e.g. `C:\Qt\5.14.2\msvc2017_64\qmake.exe` . Click "OK".
 
 To get the AERA Visualizer code repository, launch GitHub for Desktop and sign in to GitHub. In the File menu, 
 click "Clone a Repository". Click the URL tab and enter `https://github.com/IIIM-IS/AERA_Visualizer` . 
@@ -57,6 +56,11 @@ for details. Be sure to change the `settings.xml` parameter `keep_invalidated_ob
 
 To run, in Visual Studio on the Debug menu, select "Run Without Debugging". Select the `settings.xml` file used by AERA, e.g.
 `C:\Users\Alice\Documents\GitHub\replicode\AERA\settings.xml` .
+
+If the AERA Visualizer freezes on loading, it might be due to a known bug in memory support. Please try the following temporary workaround:
+1) In the AERA Visualizer, open `r_code/resized_vector`.
+2) On line 98, change `#if 0` to `#if 1`.
+3) Rebuild the Solution and try again.
 
 Run from AeraVisualizer.exe
 ===========================

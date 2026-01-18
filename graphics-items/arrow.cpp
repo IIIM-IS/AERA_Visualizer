@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2023 Jeff Thompson
-//_/_/ Copyright (c) 2018-2023 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2023 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2026 Jeff Thompson
+//_/_/ Copyright (c) 2018-2026 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2026 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ http://www.iiim.is
 //_/_/
@@ -114,7 +114,7 @@ void Arrow::moveEndsSideBySide()
   // Updates the position of other arrows connected to end item
   auto aeraGraphicsEndItem = dynamic_cast<AeraGraphicsItem*>(endItem_);
   if (aeraGraphicsEndItem) {
-    aeraGraphicsEndItem->updateArrowsAndLines();
+    aeraGraphicsEndItem->updateArrowsAndLine();
   }
 
   // Fit the view with the newly positioned side-by-side items

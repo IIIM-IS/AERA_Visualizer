@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2023 Jeff Thompson
-//_/_/ Copyright (c) 2018-2023 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2023 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2026 Jeff Thompson
+//_/_/ Copyright (c) 2018-2026 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2026 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ Copyright (c) 2021 Leonard Eberding
 //_/_/ http://www.iiim.is
@@ -62,6 +62,7 @@
 #include "auto-focus-fact-item.hpp"
 #include "aera-graphics-item.hpp"
 #include "aera-graphics-item-group.hpp"
+#include "aba-sentence-item.hpp"
 #include "aera-visualizer-scene.hpp"
 
 #include <QGraphicsSceneMouseEvent>
@@ -166,11 +167,14 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 
     itemGroup = getItemGroup(addSentence->graphId_);
     if (!itemGroup) {
-      if (addSentence->graphId_ > 0)
+      int solutionId = addSentence->graphId_ / 100;
+      if (addSentence->graphId_ % 100 != 0)
         itemGroup = new AeraGraphicsItemGroup(
-          this, "O" + QString::number(addSentence->graphId_), AeraGraphicsItem::Color_opponent_unfinished_justification);
+          this, "O" + QString::number(solutionId) + ":" + QString::number(addSentence->graphId_ % 100),
+          AeraGraphicsItem::Color_opponent_unfinished_justification);
       else
-        itemGroup = new AeraGraphicsItemGroup(this, "P", AeraGraphicsItem::Color_proponent_justifications);
+        itemGroup = new AeraGraphicsItemGroup(
+          this, "P" + QString::number(solutionId), AeraGraphicsItem::Color_proponent_justifications);
 
       itemGroups_[addSentence->graphId_] = itemGroup;
       // Put in back of the grid lines.
@@ -422,7 +426,7 @@ void AeraVisualizerScene::addHorizontalLine(AeraGraphicsItem* item)
     }
 
     auto line = new AnchoredHorizontalLine(item, getTimelineX(after), getTimelineX(before));
-    item->addHorizontalLine(line);
+    item->setHorizontalLine(line);
     line->setZValue(-1001.0);
     addItem(line);
     line->updatePosition();
@@ -513,7 +517,7 @@ void AeraVisualizerScene::centerOnItem(QGraphicsItem *item) {
   auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
   if (aeraGraphicsItem) {
     if (!aeraGraphicsItem->isVisible())
-      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(true);
+      aeraGraphicsItem->setItemAndArrowsAndHorizontalLineVisible(true);
 
     aeraGraphicsItem->centerOn();
   }
@@ -524,7 +528,7 @@ void AeraVisualizerScene::focusOnItem(QGraphicsItem* item)
   auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
   if (aeraGraphicsItem) {
     if (!aeraGraphicsItem->isVisible())
-      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(true);
+      aeraGraphicsItem->setItemAndArrowsAndHorizontalLineVisible(true);
 
     aeraGraphicsItem->focus();
   }
@@ -564,7 +568,7 @@ void AeraVisualizerScene::setItemsVisible(int eventType, bool visible)
   foreach(QGraphicsItem * item, items()) {
     auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
     if (aeraGraphicsItem && aeraGraphicsItem->getAeraEvent()->eventType_ == eventType)
-      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(visible);
+      aeraGraphicsItem->setItemAndArrowsAndHorizontalLineVisible(visible);
   }
 }
 
@@ -574,7 +578,7 @@ void AeraVisualizerScene::setNonItemsVisible(const set<int>& notEventTypes, bool
     auto aeraGraphicsItem = dynamic_cast<AeraGraphicsItem*>(item);
     if (aeraGraphicsItem && 
         notEventTypes.find(aeraGraphicsItem->getAeraEvent()->eventType_) == notEventTypes.end())
-      aeraGraphicsItem->setItemAndArrowsAndHorizontalLinesVisible(visible);
+      aeraGraphicsItem->setItemAndArrowsAndHorizontalLineVisible(visible);
   }
 }
 
@@ -594,7 +598,7 @@ void AeraVisualizerScene::setAutoFocusItemsVisible(const string& property, bool 
 
       auto mkValProperty = mkVal->get_reference(1);
       if (mkValProperty == propertyObject)
-        autoFocusItem->setItemAndArrowsAndHorizontalLinesVisible(visible);
+        autoFocusItem->setItemAndArrowsAndHorizontalLineVisible(visible);
     }
   }
 }
@@ -611,9 +615,39 @@ void AeraVisualizerScene::removeAllItemsByEventType(const set<int>& eventTypes)
   }
 
   for (auto item = toDelete.begin(); item != toDelete.end(); ++item) {
-    (*item)->removeArrowsAndHorizontalLines();
+    (*item)->removeArrowsAndHorizontalLine();
     removeAeraGraphicsItem(*item);
     delete *item;
+  }
+}
+
+void AeraVisualizerScene::abaSetBinding(int varNumber, const QString& text)
+{
+  set<AeraGraphicsItemGroup*> toRefit;
+
+  foreach(QGraphicsItem * item, items()) {
+    auto abaItem = dynamic_cast<AbaSentenceItem*>(item);
+    if (abaItem) {
+      if (abaItem->setBinding(varNumber, text)) {
+        // The item was changed, so need to re-fit its group box.
+        auto itemGroup = getItemGroup(((AbaAddSentence*)abaItem->getAeraEvent())->graphId_);
+        if (itemGroup)
+          // fitToChildren is expensive, so only call it later, once for each group.
+          toRefit.insert(itemGroup);
+      }
+    }
+  }
+
+  for (auto itemGroup = toRefit.begin(); itemGroup != toRefit.end(); itemGroup++)
+    (*itemGroup)->fitToChildren();
+}
+
+void AeraVisualizerScene::abaRemoveBinding(int varNumber)
+{
+  foreach(QGraphicsItem * item, items()) {
+    auto abaItem = dynamic_cast<AbaSentenceItem*>(item);
+    if (abaItem)
+      abaItem->removeBinding(varNumber);
   }
 }
 

@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2023 Jeff Thompson
-//_/_/ Copyright (c) 2018-2023 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2023 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2026 Jeff Thompson
+//_/_/ Copyright (c) 2018-2026 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2026 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ http://www.iiim.is
 //_/_/
@@ -201,32 +201,36 @@ private:
   AeraGraphicsItem* getAeraGraphicsItem(r_code::Code* object);
 
   /**
-   * Find all items with the given event type, and call setItemAndArrowsAndHorizontalLinesVisible.
+   * Find all items with the given event type, and call setItemAndArrowsAndHorizontalLineVisible.
    * \param eventType The event type of the item's getAeraEvent().
-   * \param visible The visible state for setItemAndArrowsAndHorizontalLinesVisible.
+   * \param visible The visible state for setItemAndArrowsAndHorizontalLineVisible.
    */
   void setItemsVisible(int eventType, bool visible);
 
   /**
-   * Find all items where the event type is not any of the given values, and call setItemAndArrowsAndHorizontalLinesVisible.
-   * \param notEventTypes Call setItemAndArrowsAndHorizontalLinesVisible if the event type of the item's getAeraEvent() is not any of these values.
-   * \param visible The visible state for setItemAndArrowsAndHorizontalLinesVisible.
+   * Find all items where the event type is not any of the given values, and call setItemAndArrowsAndHorizontalLineVisible.
+   * \param notEventTypes Call setItemAndArrowsAndHorizontalLineVisible if the event type of the item's getAeraEvent() is not any of these values.
+   * \param visible The visible state for setItemAndArrowsAndHorizontalLineVisible.
    */
   void setNonItemsVisible(const std::set<int>& notEventTypes, bool visible);
 
   /**
-   * Find all AutoFocusFactItem whose object_ is (fact (mk.val X property Y)), and call setItemAndArrowsAndHorizontalLinesVisible.
+   * Find all AutoFocusFactItem whose object_ is (fact (mk.val X property Y)), and call setItemAndArrowsAndHorizontalLineVisible.
    * \param property The event type of the item's object_ mk.val.
-   * \param visible The visible state for setItemAndArrowsAndHorizontalLinesVisible.
+   * \param visible The visible state for setItemAndArrowsAndHorizontalLineVisible.
    */
   void setAutoFocusItemsVisible(const std::string& property, bool visible);
   
   /**
-   * Find all items where the event type is any of the given values, and call removeArrowsAndHorizontalLines,
+   * Find all items where the event type is any of the given values, and call removeArrowsAndHorizontalLine,
    * removeItem and delete the item.
    * \param eventTypes Remove if the event type of the item's getAeraEvent() is any of these values.
    */
   void removeAllItemsByEventType(const std::set<int>& eventTypes);
+
+  void abaSetBinding(int varNumber, const QString& text);
+
+  void abaRemoveBinding(int varNumber);
 
   AeraVisualizerWindow* parent_;
   ReplicodeObjects* replicodeObjects_;

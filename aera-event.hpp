@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2023 Jeff Thompson
-//_/_/ Copyright (c) 2018-2023 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2023 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2026 Jeff Thompson
+//_/_/ Copyright (c) 2018-2026 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2026 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -56,6 +56,7 @@
 
 #include <vector>
 #include <QPointF>
+#include <QString>
 #include "submodules/AERA/r_code/object.h"
 #include "submodules/AERA/r_exec/opcodes.h"
 #include "submodules/AERA/r_exec/factory.h"
@@ -754,20 +755,22 @@ public:
    * \param fact The fact produced by the step.
    * \param isAssumption True if fact is an assumption.
    * \param isClaim True if fact is the claim of the graph.
-   * \param graphId If 0 this is the proponent graph, otherwise this is a sentence
-   * in the opponent graph with this ID.
+   * \param graphId S*100 + ID, where S is the solution number and ID is 0 for proponent graph,
+   * otherwise the opponent graph ID (within the solution).
    * \param parent The fact which produced the step, or NULL if the first.
    * \param abaCase The derivation case which produced the sentence.
+   * \param step (optional) The step number to print, if greater than zero.
    */
   AbaAddSentence(core::Timestamp time, r_code::Code* fact, bool isAssumption, bool isClaim,
-      int graphId, r_code::Code* parent, const std::string& abaCase)
+      int graphId, r_code::Code* parent, const std::string& abaCase, int step = 0)
     : AeraEvent(EVENT_TYPE, time, fact),
     fact_((r_exec::_Fact*)fact),
     isAssumption_(isAssumption),
     isClaim_(isClaim),
     graphId_(graphId),
     parent_((r_exec::_Fact*)parent),
-    abaCase_(abaCase)
+    abaCase_(abaCase),
+    step_(step)
   {}
 
   r_code::Code* getInput() override { return parent_; }
@@ -780,6 +783,7 @@ public:
   int graphId_;
   r_exec::_Fact* parent_;
   std::string abaCase_;
+  int step_;
 };
 
 class AbaMarkSentence : public AeraEvent {
@@ -822,6 +826,27 @@ public:
 
   r_exec::_Fact* markedFact_;
   r_exec::_Fact* parent_;
+};
+
+class AbaBindVariable : public AeraEvent {
+public:
+  /**
+   * Create an AbaBindVariable event for binding a variable.
+   * \param time The reduction time.
+   * \param varNumber The variable number.
+   * \param value The bound value.
+   */
+  AbaBindVariable(core::Timestamp time, int varNumber, const QString& value)
+    // Set the object_ NULL since there is already an AeraEvent for it.
+    : AeraEvent(EVENT_TYPE, time, NULL),
+    varNumber_(varNumber),
+    value_(value)
+  {}
+
+  static const int EVENT_TYPE = 33;
+
+  int varNumber_;
+  QString value_;
 };
 
 }

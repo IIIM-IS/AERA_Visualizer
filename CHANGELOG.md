@@ -1,3 +1,21 @@
+AERA Visualizer Diagnostic Mode v0.3 (2025-01-23)
+-------------------------------------------------
+
+A release compatible with AERA Diagnostic Mode v0.3 .
+This is a maintentance release from Diagnostic Mode v0.2 .
+
+Bug fixes
+* Fix Qt project for Visual Studio 2022 https://github.com/IIIM-IS/AERA_Visualizer/pull/56
+
+Changes
+* Arrow endpoint highlighting. https://github.com/IIIM-IS/AERA_Visualizer/pull/42
+* Toolbar button for Zoom To. https://github.com/IIIM-IS/AERA_Visualizer/pull/43
+* Zoom To now acts like Find Next. https://github.com/IIIM-IS/AERA_Visualizer/pull/45
+* Display imdl as separate item. https://github.com/IIIM-IS/AERA_Visualizer/pull/46
+* Added "Highlight All" and "Fit All" features https://github.com/IIIM-IS/AERA_Visualizer/pull/49
+* In INSTALL, add temporary workaround note on memory leak https://github.com/IIIM-IS/AERA_Visualizer/pull/59
+* Other enhancements. Please see https://github.com/IIIM-IS/AERA_Visualizer/issues?q=is%3Aissue+is%3Aclosed
+
 AERA Visualizer Diagnostic Mode v0.2 (2022-07-01)
 -------------------------------------------------
 

@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2022-2023 Jeff Thompson
-//_/_/ Copyright (c) 2022-2023 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2022-2023 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2022-2026 Jeff Thompson
+//_/_/ Copyright (c) 2022-2026 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2022-2026 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -82,24 +82,36 @@ public:
   bool isBetweenProponentAndOpponent(AeraGraphicsItem* other) {
     if (other->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
       auto otherEvent = (AbaAddSentence*)other->getAeraEvent();
-      return (addEvent_->graphId_ != otherEvent->graphId_ &&
-              (addEvent_->graphId_ == 0 || otherEvent->graphId_ == 0));
+      return (addEvent_->graphId_ % 100 == 0 && otherEvent->graphId_ % 100 != 0 ||
+              addEvent_->graphId_ % 100 != 0 && otherEvent->graphId_ % 100 == 0);
     }
 
     return false;
   }
 
-  bool isBetweenOpponents(AeraGraphicsItem* other) {
+  bool isBetweenProponentGraphs(AeraGraphicsItem* other) {
     if (other->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
       auto otherEvent = (AbaAddSentence*)other->getAeraEvent();
       return (addEvent_->graphId_ != otherEvent->graphId_ &&
-        addEvent_->graphId_ > 0 && otherEvent->graphId_ > 0);
+        addEvent_->graphId_ % 100 == 0 && otherEvent->graphId_ % 100 == 0);
+    }
+
+    return false;
+  }
+
+  bool isBetweenOpponentGraphs(AeraGraphicsItem* other) {
+    if (other->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
+      auto otherEvent = (AbaAddSentence*)other->getAeraEvent();
+      return (addEvent_->graphId_ != otherEvent->graphId_ &&
+        addEvent_->graphId_ % 100 != 0 && otherEvent->graphId_ % 100 != 0);
     }
 
     return false;
   }
 
 protected:
+  void setTextItemAndPolygon(QString html, bool prependHeaderHtml, Shape shape = SHAPE_RECTANGLE, qreal targetWidth = 0) override;
+
   void textItemLinkActivated(const QString& link) override;
 
 private:
