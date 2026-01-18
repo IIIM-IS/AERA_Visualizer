@@ -178,10 +178,6 @@ AeraVisualizerWindow::AeraVisualizerWindow()
   essencePropertyObject_(NULL),
   hoverHighlightItem_(0),
   phasedOutModelColor_(255, 192, 192),
-  showRelativeTime_(true),
-  playTime_(seconds(0)),
-  playTimerId_(0),
-  isPlaying_(false),
   newAbaEventsStartIndex_(0),
   itemBorderHighlightPen_(Qt::blue, 3)
 {
