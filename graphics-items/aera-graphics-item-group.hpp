@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2022-2023 Jeff Thompson
-//_/_/ Copyright (c) 2022-2023 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2022-2023 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2022-2026 Jeff Thompson
+//_/_/ Copyright (c) 2022-2026 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2022-2026 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -86,6 +86,8 @@ public:
 
   void removeChild(AeraGraphicsItem* child);
 
+  void fitToChildren();
+
   /**
    * This is called by the parent scene when its view moves.
    */
@@ -97,8 +99,6 @@ protected:
   QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
 private:
-  void fitToChildren();
-
   /**
    * Check the parent's view port and allow to grab to move the group box
    * if the scene background is visible at the top or bottom. This way the user

@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2022-2023 Jeff Thompson
-//_/_/ Copyright (c) 2022-2023 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2022-2023 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2022-2026 Jeff Thompson
+//_/_/ Copyright (c) 2022-2026 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2022-2026 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -70,8 +70,11 @@ namespace aera_visualizer {
 AbaSentenceItem::AbaSentenceItem(
   AbaAddSentence* addEvent, ReplicodeObjects& replicodeObjects,
   AeraVisualizerScene* parent)
-: ExpandableGoalOrPredItem(addEvent, replicodeObjects,
-    QString("Case ") + addEvent->abaCase_.c_str() + " " + RightDoubleArrowHtml, parent,
+: statusTextItem_(0),
+  ExpandableGoalOrPredItem(addEvent, replicodeObjects,
+    QString("Case ") + addEvent->abaCase_.c_str() + 
+    (addEvent->step_ > 0 ? " Step " + QString::number(addEvent->step_) : QString("")) +
+    " " + RightDoubleArrowHtml, parent,
     Qt::white, "#ffc0c0"),
   addEvent_(addEvent)
 {
@@ -80,7 +83,7 @@ AbaSentenceItem::AbaSentenceItem(
     // Highlight causal events.
     setBrush(QColor(0x00, 0x99, 0x99));
   else {
-    if (addEvent->graphId_ > 0) {
+    if (addEvent->graphId_ % 100 > 0) {
       // Get colors for the opponent graph.
       if (addEvent->isAssumption_)
         setBrush(Color_opponent_ms_asm_culprit);
@@ -100,6 +103,14 @@ AbaSentenceItem::AbaSentenceItem(
   setStatus(STATUS_PROCESSING);
 }
 
+void AbaSentenceItem::setTextItemAndPolygon(QString html, bool prependHeaderHtml, Shape shape, qreal targetWidth)
+{
+  ExpandableGoalOrPredItem::setTextItemAndPolygon(html, prependHeaderHtml, shape, targetWidth);
+  if (statusTextItem_)
+    // Restore the position of the status text.
+    statusTextItem_->setPos(boundingRect().left() - 2, boundingRect().top() - 12);
+}
+
 void AbaSentenceItem::textItemLinkActivated(const QString& link)
 {
   if (link == "#this") {
@@ -116,7 +127,8 @@ void AbaSentenceItem::textItemLinkActivated(const QString& link)
         explanation = "<b>Q: What made " + makeHtmlLink(addEvent_->fact_) +
         " ?</b><br>Sentence " + makeHtmlLink(addEvent_->parent_) +
         " is an assumption which is not already considered for attack, so a new opponent graph O" +
-        QString::number(addEvent_->graphId_) + " was created with this contrary as the claim.<br><br>";
+        QString::number(addEvent_->graphId_ / 100) + ":" + QString::number(addEvent_->graphId_ % 100) +
+        " was created with this contrary as the claim.<br><br>";
       else if (addEvent_->abaCase_ == "1.(ii)")
         explanation = "<b>Q: What made " + makeHtmlLink(addEvent_->fact_) +
         " ?</b><br>Sentence " + makeHtmlLink(addEvent_->parent_) +
@@ -137,10 +149,6 @@ void AbaSentenceItem::textItemLinkActivated(const QString& link)
 
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
-  }
-  if (link == "#expand" || link == "#unexpand") {
-    ExpandableGoalOrPredItem::textItemLinkActivated(link);
-    statusTextItem_->setPos(boundingRect().left() - 2, boundingRect().top() - 12);
   }
   else
     // For #detail_oid- and others, defer to the base class.

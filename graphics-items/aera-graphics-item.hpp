@@ -2,9 +2,9 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2023 Jeff Thompson
-//_/_/ Copyright (c) 2018-2023 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2023 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2026 Jeff Thompson
+//_/_/ Copyright (c) 2018-2026 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2018-2026 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ Copyright (c) 2021 Leonard Eberding
 //_/_/ http://www.iiim.is
@@ -123,11 +123,11 @@ public:
   void removeAndDeleteArrowToObject(r_code::Code* object);
 
   /**
-   * Remove all arrows and horizontal lines and remove them from the parent scene.
+   * Remove all arrows and horizontal line and remove them from the parent scene.
    */
-  void removeArrowsAndHorizontalLines();
-  void addHorizontalLine(AnchoredHorizontalLine* line) { horizontalLines_.append(line); }
-  void updateArrowsAndLines();
+  void removeArrowsAndHorizontalLine();
+  void setHorizontalLine(AnchoredHorizontalLine* line);
+  void updateArrowsAndLine();
   AeraEvent* getAeraEvent() { return aeraEvent_; }
   QString getHtml() { return textItem_->toHtml(); }
 
@@ -197,10 +197,10 @@ public:
   }
 
   /**
-   * Set the the visible state of this item and the connected arrows and anchored horizontal lines.
+   * Set the the visible state of this item and the connected arrows and anchored horizontal line.
    * \param visible The visible state.
    */
-  void setItemAndArrowsAndHorizontalLinesVisible(bool visible);
+  void setItemAndArrowsAndHorizontalLineVisible(bool visible);
 
   /**
    * Adjust the position of the item.
@@ -319,7 +319,7 @@ protected:
    * \param targetWidth (optional) The target screen width of the item. If omitted of if this is 
    * less than the default width based on the item contents, then it is ignored.
    */
-  void setTextItemAndPolygon(QString html, bool prependHeaderHtml, Shape shape = SHAPE_RECTANGLE, qreal targetWidth = 0);
+  virtual void setTextItemAndPolygon(QString html, bool prependHeaderHtml, Shape shape = SHAPE_RECTANGLE, qreal targetWidth = 0);
 
   virtual void textItemLinkActivated(const QString& link);
 
@@ -328,11 +328,11 @@ protected:
   QString headerHtml_;
   TextItem* textItem_;
   QPen borderNoHighlightPen_;
+  AnchoredHorizontalLine* horizontalLine_;
 
 private:
   AeraEvent* aeraEvent_;
   QList<Arrow*> arrows_;
-  QList<AnchoredHorizontalLine*> horizontalLines_;
   QColor textItemTextColor_;
   QPen savedPen_;
 };
