@@ -2113,7 +2113,7 @@ void AeraVisualizerWindow::updateObjectsAndEvents()
   taskEnvironmentView_->refresh();
 
   // Some views require the text outputs
-  aera_->brainDump();
+  aera_->brainDump(&replicodeObjects_.getObjectLabelMap());
   textOutputView_->refresh();
 
   // Clean up
@@ -2128,7 +2128,7 @@ void AeraVisualizerWindow::openOutput()
 void AeraVisualizerWindow::saveOutput()
 {
   // Save everything and display a confirmation
-  aera_->brainDump();
+  aera_->brainDump(&replicodeObjects_.getObjectLabelMap());
   QString decompiled_objects = QString::fromStdString(aera_->getSettings()->decompilation_file_path_);
   QString runtime_out = QString::fromStdString(aera_->getSettings()->runtime_output_file_path_);
   QMessageBox::information(this, "Success!",

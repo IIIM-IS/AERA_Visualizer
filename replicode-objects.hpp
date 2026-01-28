@@ -214,6 +214,13 @@ public:
     return initialized_;
   }
 
+  /**
+   * Get a const reference to the map of Code* object to label. 
+   */
+  const std::map<r_code::Code*, std::string>& getObjectLabelMap() {
+    return objectLabel_;
+  }
+
 private:
   /**
    * Create a unique label for object and assign objectLabel_ and labelObject_ . Recursively call this for
