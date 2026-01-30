@@ -2060,7 +2060,7 @@ void AeraVisualizerWindow::loadNewSeed()
 
   // This version isn't resettable just yet
   newInstanceAction_->setEnabled(false);
-  loadOutputAction_->setEnabled(false);
+  openOutputAction_->setEnabled(false);
 
   // Enable the UI now that there's something to analyze
   setUIEnabled(true);
@@ -2069,7 +2069,7 @@ void AeraVisualizerWindow::loadNewSeed()
   setAERAstatus("AERA running", false);
 }
 
-void AeraVisualizerWindow::updateObjectsAndEvents()
+void AeraVisualizerWindow::updateObjectsAndEvents(bool live)
 {
   // Create the progress dialog to show while compiling and reading the runtime output.
   QProgressDialog progress("", "Cancel", 0, 100);
@@ -2083,18 +2083,25 @@ void AeraVisualizerWindow::updateObjectsAndEvents()
   progress.show();
   QApplication::processEvents();
   
-  // Process in Replicode objects from the AERA instance
-  Settings settings = *aera_->getSettings();
-  string error = replicodeObjects_.init(aera_, microseconds(settings.base_period_), progress);
-  if (error == "cancel")
-    return;
-  if (error != "") {
-    QMessageBox::information(NULL, "Compiler Error", error.c_str(), QMessageBox::Ok);
-    return;
+  // If connected to a live instance, retrieve settings_ and replicodeObjects_ from there
+  if (live) {
+    settings_ = *aera_->getSettings();
+    string error = replicodeObjects_.init(aera_, microseconds(settings_.base_period_), progress);
+    if (error == "cancel")
+      return;
+    if (error != "") {
+      QMessageBox::information(NULL, "Compiler Error", error.c_str(), QMessageBox::Ok);
+      return;
+    }
+  }
+
+  // Otherwise, settings_ and replicodeObjects_ should have already been filled by openOutput
+  else {
+    // TODO: Might be best to validate settings_ and replicodeObjects_ just in case?
   }
   
   // Process runtime_out.txt for events (these form the basis for graphics objects)
-  if (!addEvents(settings.runtime_output_file_path_, progress))
+  if (!addEvents(settings_.runtime_output_file_path_, progress))
     return;
 
   // Show the last progress message
@@ -2106,14 +2113,17 @@ void AeraVisualizerWindow::updateObjectsAndEvents()
   explanationLogView_->setReplicodeObjects(&replicodeObjects_);
   semanticsView_->setReplicodeObjects(&replicodeObjects_);
   playerView_->setTimeReference(replicodeObjects_.getTimeReference());
-  playerView_->setRunTime(milliseconds(settings.run_time_));
   playerView_->setPlayTime(replicodeObjects_.getTimeReference());
   findDialog_->setReplicodeObjects(&replicodeObjects_);
   mainScene_->setReplicodeObjects(&replicodeObjects_);
-  taskEnvironmentView_->refresh();
-
-  // Some views require the text outputs
-  aera_->brainDump(&replicodeObjects_.getObjectLabelMap());
+  
+  // Some changes only matter during a live run
+  if (live) {
+    playerView_->setRunTime(milliseconds(settings_.run_time_));
+    taskEnvironmentView_->refresh();
+    aera_->brainDump(&replicodeObjects_.getObjectLabelMap());   // Some views require the text outputs
+  }
+  
   textOutputView_->refresh();
 
   // Clean up
@@ -2122,7 +2132,79 @@ void AeraVisualizerWindow::updateObjectsAndEvents()
 
 void AeraVisualizerWindow::openOutput()
 {
-  //
+  // Configure QSettings to use .ini files to store settings
+  QSettings::setDefaultFormat(QSettings::IniFormat);
+
+  QSettings preferences;
+
+  QString settingsFilePath0 = preferences.value("settingsFilePath").toString();
+  if (settingsFilePath0 == "")
+    settingsFilePath0 = "./settings.xml";
+  QString settingsFilePath = QFileDialog::getOpenFileName(NULL, "Open AERA settings XML file", settingsFilePath0, "XML Files (*.xml);;All Files (*.*)");
+  if (settingsFilePath == "")
+    return;
+  preferences.setValue("settingsFilePath", settingsFilePath);
+  
+  if (!settings_.load(settingsFilePath.toStdString().c_str())) {
+    QMessageBox::information(NULL, "XML Error", "Cannot load XML file " + settingsFilePath, QMessageBox::Ok);
+    return;
+  }
+
+  // Files are relative to the directory of settingsFilePath.
+  QDir settingsFileDir = QFileInfo(settingsFilePath).dir();
+  string runtimeOutputFilePath = settingsFileDir.absoluteFilePath(settings_.runtime_output_file_path_.c_str()).toStdString();
+  
+  // Test opening the file now so we can exit on error.
+  ifstream testOpen(runtimeOutputFilePath);
+  if (!testOpen) {
+    QMessageBox::information(NULL, "File Error",
+      QString("Can't open debug stream output file: ") + runtimeOutputFilePath.c_str(), QMessageBox::Ok);
+    return;
+  }
+
+  // Create the progress dialog to show while compiling and reading the runtime output.
+  QProgressDialog progress("", "Cancel", 0, 100);
+  progress.setWindowModality(Qt::WindowModal);
+  // Remove the '?' in the title.
+  progress.setWindowFlags(progress.windowFlags() & ~Qt::WindowContextHelpButtonHint);
+  progress.setWindowIcon(QIcon(":/images/app.ico"));
+  progress.setWindowTitle("Initializing");
+  progress.setAutoReset(false);
+  progress.setAutoClose(false);
+  progress.show();
+  QApplication::processEvents();
+  
+  // Initialize replicodeObjects_
+  string error = replicodeObjects_.init(
+    settingsFileDir.absoluteFilePath(settings_.usr_class_path_.c_str()).toStdString(),
+    settingsFileDir.absoluteFilePath(settings_.decompilation_file_path_.c_str()).toStdString(),
+    microseconds(settings_.base_period_), progress);
+  if (error == "cancel")
+    return;
+  if (error != "") {
+    QMessageBox::information(NULL, "Compiler Error", error.c_str(), QMessageBox::Ok);
+    return;
+  }
+
+  // Put the filename in the title
+  setWindowTitle(QString("AERA Visualizer (EXPERIMENTAL) - ") + QFileInfo(settings_.source_file_name_.c_str()).fileName());
+
+  // Point the text view to the right output files
+  textOutputView_->setOutputFilepaths(settings_.decompilation_file_path_, settings_.runtime_output_file_path_);
+  
+  // Disable these to prevent (re)loading anything
+  newInstanceAction_->setEnabled(false);
+  openOutputAction_->setEnabled(false);
+
+  // Enable the UI now that there's something to analyze
+  setUIEnabled(true);
+
+  // Indicate that everything's loaded
+  setAERAstatus("Viewing previous AERA run", false);
+  playerView_->indicatePreviousRun();
+  
+  // Push the data to the GUI without trying to fetch anything from AERA
+  updateObjectsAndEvents(false);
 }
 
 void AeraVisualizerWindow::saveOutput()
@@ -2259,10 +2341,10 @@ void AeraVisualizerWindow::createActions()
   newInstanceAction_->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
   connect(newInstanceAction_, SIGNAL(triggered()), this, SLOT(loadNewSeed()));
 
-  loadOutputAction_ = new QAction(tr("&Open AERA Output"), this);
-  loadOutputAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
-  loadOutputAction_->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
-  connect(loadOutputAction_, SIGNAL(triggered()), this, SLOT(openOutput()));
+  openOutputAction_ = new QAction(tr("&Open AERA Output"), this);
+  openOutputAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
+  openOutputAction_->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
+  connect(openOutputAction_, SIGNAL(triggered()), this, SLOT(openOutput()));
 
   saveOutputAction_ = new QAction(tr("&Save AERA Output"), this);
   saveOutputAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
@@ -2331,7 +2413,7 @@ void AeraVisualizerWindow::createMenus()
 
   QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
   fileMenu->addAction(newInstanceAction_);
-  //fileMenu->addAction(loadOutputAction_); // Leave this out until it's implemented properly
+  fileMenu->addAction(openOutputAction_);
   fileMenu->addAction(saveOutputAction_);
   fileMenu->addAction(saveMainWindowImageAction_);
   fileMenu->addAction(exitAction_);

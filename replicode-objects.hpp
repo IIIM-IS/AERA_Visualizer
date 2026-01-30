@@ -253,7 +253,8 @@ private:
   std::map<r_code::Code*, std::string> objectLabel_;
   // Key is the label from the decompiled objects, value is the Code* object.
   std::map<std::string, r_code::Code*> labelObject_;
-  const r_code::list<P<r_code::Code>>* objects_;
+  const r_code::list<P<r_code::Code>>* objects_;  // Pointer to AERA's objects_ (or localObjects_)
+  r_code::list<P<r_code::Code>> localObjects_;    // Store objects here when there's no AERA instance to point to
   std::vector<QString> progressMessages_;
   std::regex intMemberRegex_;
 };

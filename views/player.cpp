@@ -327,31 +327,37 @@ void PlayerView::updateLabels() {
   }
   playTimeLabel_->setText(buffer);
 
-  // Update the AERA time label
-  // TO DO: On the first step, the AERA time label briefly flashes a large negative number
-  //        before correcting to the right value. This is because aeraTime_ starts off at 0.
-  //        This should be fixed to make sure that aeraTime_ starts off at timeReference_
-  if (showRelativeTime_)
-    total_us = duration_cast<microseconds>(aeraTime_ - timeReference_).count();
-  else
-    total_us = duration_cast<microseconds>(aeraTime_.time_since_epoch()).count();
-  us = total_us % 1000;
-  ms = total_us / 1000;
-  s = ms / 1000;
-  ms = ms % 1000;
-  
-  memset(buffer, 0x0, 100);
-  if (showRelativeTime_)
-    sprintf(buffer, "      AERA %03ds:%03dms:%03dus", (int)s, (int)ms, (int)us);
-  else {
-    // Get the UTC time.
-    time_t gmtTime = s;
-    struct tm* t = gmtime(&gmtTime);
-    sprintf(buffer, "      AERA %04d-%02d-%02d   UTC\n           %02d:%02d:%02d:%03d:%03d",
-      t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
-      t->tm_hour, t->tm_min, t->tm_sec, (int)ms, (int)us);
+
+  // Update the AERA time label or display a message that AERA's done running
+  if (aeraTimeLabel_->isEnabled()) {
+    // TO DO: On the first step, the AERA time label briefly flashes a large negative number
+    //        before correcting to the right value. This is because aeraTime_ starts off at 0.
+    //        This should be fixed to make sure that aeraTime_ starts off at timeReference_
+    if (showRelativeTime_)
+      total_us = duration_cast<microseconds>(aeraTime_ - timeReference_).count();
+    else
+      total_us = duration_cast<microseconds>(aeraTime_.time_since_epoch()).count();
+    us = total_us % 1000;
+    ms = total_us / 1000;
+    s = ms / 1000;
+    ms = ms % 1000;
+
+    memset(buffer, 0x0, 100);
+    if (showRelativeTime_)
+      sprintf(buffer, "      AERA %03ds:%03dms:%03dus", (int)s, (int)ms, (int)us);
+    else {
+      // Get the UTC time.
+      time_t gmtTime = s;
+      struct tm* t = gmtime(&gmtTime);
+      sprintf(buffer, "      AERA %04d-%02d-%02d   UTC\n           %02d:%02d:%02d:%03d:%03d",
+        t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
+        t->tm_hour, t->tm_min, t->tm_sec, (int)ms, (int)us);
+    }
+    aeraTimeLabel_->setText(buffer);
   }
-  aeraTimeLabel_->setText(buffer);
+  else {
+    aeraTimeLabel_->setText("      AERA ---s:---ms:---us");
+  }
 }
 
 void PlayerView::setSliderToPlayTime()
@@ -403,6 +409,20 @@ void PlayerView::setUIEnabled(bool enabled) {
   aeraTimeLabel_->setEnabled(enabled);
 
   stepTogetherCheckbox_->setEnabled(enabled);
+}
+
+void PlayerView::indicatePreviousRun() {
+  aeraPlayPauseButton_->setEnabled(false);
+  aeraStepButton_->setEnabled(false);
+  aeraJumpToEndButton_->setEnabled(false);
+  
+  aeraTimeLabel_->setEnabled(false);
+
+  stepTogetherCheckbox_->setEnabled(false);
+
+  // Complete the progress bar and update the label
+  aeraBar_->setValue(aeraBar_->maximum());
+  aeraBar_->setEnabled(false);
 }
 
 void PlayerView::timerEvent(QTimerEvent* event)

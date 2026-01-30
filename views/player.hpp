@@ -146,6 +146,9 @@ public:
   // Used to turn the player controls on or off
   void setUIEnabled(bool enabled);
 
+  // Disables AERA controls because the visualizer is running without an AERA instance
+  void indicatePreviousRun();
+
 private slots:
   void vis_playPauseButtonClicked();
   void vis_stepFwdButtonClicked();

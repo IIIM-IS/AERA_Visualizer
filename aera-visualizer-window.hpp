@@ -346,12 +346,15 @@ private:
   void createStatusBar();
 
   QToolBar* timelineControls_;
-
+  
   /**
-  * Snapshots another images of AERA's state and reads in new lines from
-  * runtime_out.txt. This should be done after advancing AERA forwards.
+  * Reads new data on the run, updates replicodeObjects_ and settings_ accordingly,
+  * and pushes the data to the GUI elements. Can be configured to read directly from
+  * AERA's memory during a live run (the default option) or to assume settings_ and
+  * replicodeObjects_ have already been filled in by openOutput(). Should be called
+  * after openOutput() or after stepping AERA.
   */
-  void updateObjectsAndEvents();
+  void updateObjectsAndEvents(bool live = true);
 
   /**
    * Get the time stamp from the decimal strings of seconds, milliseconds and
@@ -407,6 +410,7 @@ private:
 
   AERA_interface* aera_;
   ReplicodeObjects replicodeObjects_;
+  Settings settings_;
 
   SemanticsView* semanticsView_;
   PlayerView* playerView_;
@@ -418,7 +422,7 @@ private:
   AeraVisualizerScene* selectedScene_;
   
   QAction* newInstanceAction_;
-  QAction* loadOutputAction_;
+  QAction* openOutputAction_;
   QAction* saveOutputAction_;
 
   QAction* saveMainWindowImageAction_;

@@ -88,7 +88,7 @@ ReplicodeObjects::ReplicodeObjects()
 
   initialized_ = false;
 }
-/*
+
 string ReplicodeObjects::init(const string& userClassesFilePath, const string& decompiledFilePath,
     microseconds basePeriod, QProgressDialog& progress)
 {
@@ -201,12 +201,12 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     }
   }
 
-  // Transfer imageObjects to objects_, unpacking and processing as needed.
+  // Transfer imageObjects to localObjects_, unpacking and processing as needed.
   // Imitate _Mem::load.
   for (uint32 i = 0; i < imageObjects.size(); ++i) {
     Code* object = imageObjects[i];
     int32 dummyLocation;
-    objects_->push_back(object, dummyLocation);
+    localObjects_.push_back(object, dummyLocation);
     // We don't need to delete, so don't set the storage index.
 
     switch (object->code(0).getDescriptor()) {
@@ -242,20 +242,23 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     }
   }
 
+  // Point to our local copy of the objects (not to AERA's objects_)
+  objects_ = &localObjects_;
+
   _Mem::init_timestamps(timeReference_, *objects_);
 
   // We have to get the source code by decompiling the packet objects in objects_ (not from
   // the original decompiled code in decompiledFilePath) because variable names can be different.
   r_comp::Image packedImage;
   packedImage.object_names_.symbols_ = image.object_names_.symbols_;
-  packedImage.add_objects(objects_, true);
+  packedImage.add_objects(*objects_, true);
 
   Decompiler decompiler;
   decompiler.init(&metadata);
 
   // Fill the objectNames map from the image and use it in decompile_references.
   unordered_map<uint16, std::string> objectNames;
-  for (auto i = 0; i < packedImage.code_segment_.objects_->size(); ++i) {
+  for (auto i = 0; i < packedImage.code_segment_.objects_.size(); ++i) {
     if (progress.wasCanceled())
       return "cancel";
     progress.setValue(imageObjects.size() + i);
@@ -266,7 +269,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
   }
   decompiler.decompile_references(&packedImage, &objectNames);
 
-  for (uint16 i = 0; i < packedImage.code_segment_.objects_->size(); ++i) {
+  for (uint16 i = 0; i < packedImage.code_segment_.objects_.size(); ++i) {
     if (progress.wasCanceled())
       return "cancel";
     progress.setValue(2 * imageObjects.size() + i);
@@ -291,7 +294,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
 
   return "";
 }
-*/
+
 
 string ReplicodeObjects::init(AERA_interface* aera, microseconds basePeriod, QProgressDialog& progress)
 {
