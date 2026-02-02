@@ -60,6 +60,7 @@
 #include "aera-event.hpp"
 #include "aera-visualizer-window-base.hpp"
 #include "aera-checkbox.h"
+#include "abagraph.hpp"
 
 #include <vector>
 #include <QIcon>
@@ -79,6 +80,7 @@ namespace aera_visualizer {
 
 class ExplanationLogWindow;
 class FindDialog;
+class AbaSentenceItem;
 
 /**
  * AeraVisualizerWindow extends AeraVisualizerWindowBase to present the player
@@ -197,6 +199,8 @@ public:
   AeraVisualizerScene* getModelsScene() {
     return modelsScene_;
   }
+
+  void abaSentenceItemClicked(AbaSentenceItem* item);
 
 protected:
   /**
@@ -356,6 +360,7 @@ private:
   std::map<int, QString> bindings_;
   // The AeraEvent types where stepEvent will create a new AeraGraphicsItem.
   static const std::set<int> newItemEventTypes_;
+  AbaGraph abagraph_;
 };
 
 }

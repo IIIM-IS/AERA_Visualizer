@@ -180,6 +180,7 @@ AeraVisualizerWindow::AeraVisualizerWindow(ReplicodeObjects& replicodeObjects)
   playTimerId_(0),
   isPlaying_(false),
   newAbaEventsStartIndex_(0),
+  abagraph_("/work/abagraph-mercury/mercury/abagraph.exe"),
   itemBorderHighlightPen_(Qt::blue, 3)
 {
   createActions();
@@ -2219,6 +2220,11 @@ void AeraVisualizerWindow::createToolbars()
   connect(requirementsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     mainScene_->setItemsVisible(ModelImdlPredictionEvent::EVENT_TYPE, state == Qt::Checked);  });
   toolbar->addWidget(requirementsCheckBox_);
+}
+
+void AeraVisualizerWindow::abaSentenceItemClicked(AbaSentenceItem* item)
+{
+  auto line = abagraph_.readLine("abc");
 }
 
 }

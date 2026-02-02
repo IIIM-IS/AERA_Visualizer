@@ -98,7 +98,7 @@ AbaSentenceItem::AbaSentenceItem(
     }
   }
 
-  statusTextItem_ = new QGraphicsTextItem(this);
+  statusTextItem_ = new StatusTextItem(this);
   statusTextItem_->setPos(boundingRect().left() - 2, boundingRect().top() - 12);
   setStatus(STATUS_PROCESSING);
 }
@@ -153,6 +153,11 @@ void AbaSentenceItem::textItemLinkActivated(const QString& link)
   else
     // For #detail_oid- and others, defer to the base class.
     ExpandableGoalOrPredItem::textItemLinkActivated(link);
+}
+
+void AbaSentenceItem::StatusTextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+{
+  parent_->parent_->getParent()->abaSentenceItemClicked(parent_);
 }
 
 }

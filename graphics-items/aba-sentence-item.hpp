@@ -109,6 +109,22 @@ public:
     return false;
   }
 
+  class StatusTextItem : public QGraphicsTextItem {
+  public:
+    StatusTextItem(AbaSentenceItem* parent)
+    : QGraphicsTextItem(parent),
+      parent_(parent)
+  {
+      setFlags(QGraphicsItem::ItemIsSelectable);
+  }
+
+  protected:
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+
+  private:
+    AbaSentenceItem* parent_;
+  };
+
 protected:
   void setTextItemAndPolygon(QString html, bool prependHeaderHtml, Shape shape = SHAPE_RECTANGLE, qreal targetWidth = 0) override;
 
@@ -116,7 +132,7 @@ protected:
 
 private:
   AbaAddSentence* addEvent_;
-  QGraphicsTextItem* statusTextItem_;
+  StatusTextItem* statusTextItem_;
 };
 
 }
