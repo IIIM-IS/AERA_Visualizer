@@ -179,7 +179,6 @@ AeraVisualizerWindow::AeraVisualizerWindow(ReplicodeObjects& replicodeObjects)
   playTime_(seconds(0)),
   playTimerId_(0),
   isPlaying_(false),
-  newAbaEventsStartIndex_(0),
   abagraph_("/work/abagraph-mercury/mercury/abagraph.exe"),
   itemBorderHighlightPen_(Qt::blue, 3)
 {
@@ -296,6 +295,8 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
   regex simulationPromotedSimulatedPredictionRegex("^fact (\\d+) -> promoted simulated pred fact (\\d+) w/ fact (\\d+) timings$");
   // promoted simulated fact 251 with DefeasibleValidity(200773) defeated by fact 253
   regex simulationPromotedSimulatedPredictionDefeatedRegex("^promoted simulated fact (\\d+) with DefeasibleValidity\\((\\d+)\\) defeated by fact (\\d+)");
+  // Step 1 start
+  regex abaStepStartRegex("^Step (\\d+) start$");
   // Step 0: Case init: S: 304
   regex abaCaseInitStepRegex("^Step (\\d+): Case init: S: (\\d+)$");
   // Step 10: Case 1.(i): A: 314, Contrary 322 has body? Y, NewGId 1
@@ -667,32 +668,39 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
         events_.push_back(make_shared<PromotedSimulatedPredictionDefeatEvent>(
           timestamp, input, promotedFact));
     }
+    else if (regex_search(lineAfterTimestamp, matches, abaStepStartRegex)) {
+      int step = stoul(matches[1].str());
+      // Erase events for the step and higher steps (presumably backtracking).
+      for (auto it = abaEvents_.find(step); it != abaEvents_.end(); ++it)
+        it->second.clear();
+    }
     else if (regex_search(lineAfterTimestamp, matches, abaCaseInitStepRegex)) {
+      int step = stoul(matches[1].str());
       auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
       if (fact) {
-        abaNewStep(stoul(matches[1].str()));
-        abaEvents_.push_back(make_shared<AbaAddSentence>(
+        abaEvents_[step].push_back(make_shared<AbaAddSentence>(
           timestamp, fact, false, true, abaSolutionId * 100, (Code*)NULL, "init"));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase1iStepRegex)) {
+      int step = stoul(matches[1].str());
       auto assumption = replicodeObjects_.getObject(stoul(matches[2].str()));
       auto contrary = replicodeObjects_.getObject(stoul(matches[3].str()));
       bool contraryHasBody = (matches[4].str() == "Y");
       int newGId = stoul(matches[5].str());
 
       if (assumption && newGId > 0 && contrary) {
-        abaNewStep(stoul(matches[1].str()));
         // This step sets the assumption to marked.
-        abaEvents_.push_back(make_shared<AbaMarkSentence>(timestamp, assumption));
+        abaEvents_[step].push_back(make_shared<AbaMarkSentence>(timestamp, assumption));
         // TODO: If newGId == 0 then find the contrary in an existing group.
         // TODO: Maybe add option to show singleton opponent graphs where contraryHasBody is false.
         if (newGId > 0 && contraryHasBody)
-          abaEvents_.push_back(make_shared<AbaAddSentence>(
+          abaEvents_[step].push_back(make_shared<AbaAddSentence>(
             timestamp, contrary, false, true, abaSolutionId * 100 + newGId, assumption, "1.(i)", stoul(matches[1].str())));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase1iiStepRegex)) {
+      int step = stoul(matches[1].str());
       auto head = replicodeObjects_.getObject(stoul(matches[2].str()));
       vector<Code*> newUnmarkedAssumptions;
       vector<Code*> newUnmarkedNonAssumptions;
@@ -702,21 +710,21 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
           replicodeObjects_.getObjects(matches[3].str(), newUnmarkedAssumptions) &&
           replicodeObjects_.getObjects(matches[4].str(), newUnmarkedNonAssumptions) &&
           replicodeObjects_.getObjects(matches[5].str(), existingBody)) {
-        abaNewStep(stoul(matches[1].str()));
         // This step sets the head to marked.
-        abaEvents_.push_back(make_shared<AbaMarkSentence>(timestamp, head));
+        abaEvents_[step].push_back(make_shared<AbaMarkSentence>(timestamp, head));
 
         for (auto fact = existingBody.begin(); fact != existingBody.end(); ++fact)
-          abaEvents_.push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, *fact, head));
+          abaEvents_[step].push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, *fact, head));
         for (auto fact = newUnmarkedAssumptions.begin(); fact != newUnmarkedAssumptions.end(); ++fact)
-          abaEvents_.push_back(make_shared<AbaAddSentence>(
+          abaEvents_[step].push_back(make_shared<AbaAddSentence>(
             timestamp, *fact, true, false, abaSolutionId * 100, head, "1.(ii)", stoul(matches[1].str())));
         for (auto fact = newUnmarkedNonAssumptions.begin(); fact != newUnmarkedNonAssumptions.end(); ++fact)
-          abaEvents_.push_back(make_shared<AbaAddSentence>(
+          abaEvents_[step].push_back(make_shared<AbaAddSentence>(
             timestamp, *fact, false, false, abaSolutionId * 100, head, "1.(ii)", stoul(matches[1].str())));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase1Or2iiiStepRegex)) {
+      int step = stoul(matches[1].str());
       int varNumber = stoul(matches[3].str());
       QString value = matches[4].str().c_str();
       if (value.contains(".")) {
@@ -726,56 +734,57 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
         if (ok)
           value = QString::number(d, 'f', 1);
       }
-      abaEvents_.push_back(make_shared<AbaBindVariable>(timestamp, varNumber, value));
+      abaEvents_[step].push_back(make_shared<AbaBindVariable>(timestamp, varNumber, value));
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase2iaStepRegex)) {
+      int step = stoul(matches[1].str());
       auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
 
       if (fact) {
-        abaNewStep(stoul(matches[1].str()));
         // (Don't mark the graph.)
-        abaEvents_.push_back(make_shared<AbaMarkSentence>(timestamp, fact, false));
+        abaEvents_[step].push_back(make_shared<AbaMarkSentence>(timestamp, fact, false));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase2ibStepRegex)) {
+      int step = stoul(matches[1].str());
       auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
       auto culprit = replicodeObjects_.getObject(stoul(matches[4].str()));
 
       if (fact) {
-        abaNewStep(stoul(matches[1].str()));
         // (Also mark the graph that the fact is in.)
-        abaEvents_.push_back(make_shared<AbaMarkSentence>(timestamp, fact, true));
+        abaEvents_[step].push_back(make_shared<AbaMarkSentence>(timestamp, fact, true));
 
         if (culprit)
           // The fact is the same as the culprit in a different graph.
-          abaEvents_.push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, fact, culprit));
+          abaEvents_[step].push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, fact, culprit));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase2icStepRegex)) {
+      int step = stoul(matches[1].str());
       auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
       auto contrary = replicodeObjects_.getObject(stoul(matches[4].str()));
       bool contraryIsNew = (matches[5].str() == "Y");
 
       if (fact && contrary) {
-        abaNewStep(stoul(matches[1].str()));
         // (Also mark the graph that the fact is in.)
-        abaEvents_.push_back(make_shared<AbaMarkSentence>(timestamp, fact, true));
+        abaEvents_[step].push_back(make_shared<AbaMarkSentence>(timestamp, fact, true));
         if (contraryIsNew)
-          abaEvents_.push_back(make_shared<AbaAddSentence>(
+          abaEvents_[step].push_back(make_shared<AbaAddSentence>(
             timestamp, contrary, false, false, abaSolutionId * 100, fact, "2.(ic)", stoul(matches[1].str())));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase2iiMarkStepRegex)) {
+      int step = stoul(matches[1].str());
       auto head = replicodeObjects_.getObject(stoul(matches[2].str()));
       bool markGraph = (matches[3].str() == "Y");
 
       if (head) {
-        abaNewStep(stoul(matches[1].str()));
         // This step sets the head to marked. Further actions are in abaCase2iiStepRegex.
-        abaEvents_.push_back(make_shared<AbaMarkSentence>(timestamp, head, markGraph));
+        abaEvents_[step].push_back(make_shared<AbaMarkSentence>(timestamp, head, markGraph));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase2iiStepRegex)) {
+      int step = stoul(matches[1].str());
       auto head = replicodeObjects_.getObject(stoul(matches[2].str()));
       int newGraphId = stoul(matches[3].str());
       vector<Code*> newUnmarkedAssumptions;
@@ -786,27 +795,26 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
           replicodeObjects_.getObjects(matches[4].str(), newUnmarkedAssumptions) &&
           replicodeObjects_.getObjects(matches[5].str(), newUnmarkedNonAssumptions) &&
           replicodeObjects_.getObjects(matches[6].str(), existingBody)) {
-        // We have already set the head to marked with abaCase2iiMarkStepRegex. Don't call abaNewStep or add AbaMarkSentence.
+        // We have already set the head to marked with abaCase2iiMarkStepRegex. Don't add AbaMarkSentence.
 
         for (auto fact = existingBody.begin(); fact != existingBody.end(); ++fact)
-          abaEvents_.push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, *fact, head));
+          abaEvents_[step].push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, *fact, head));
         for (auto fact = newUnmarkedAssumptions.begin(); fact != newUnmarkedAssumptions.end(); ++fact)
-          abaEvents_.push_back(make_shared<AbaAddSentence>(
+          abaEvents_[step].push_back(make_shared<AbaAddSentence>(
             timestamp, *fact, true, false, abaSolutionId * 100 + newGraphId, head, "2.(ii)", stoul(matches[1].str())));
         for (auto fact = newUnmarkedNonAssumptions.begin(); fact != newUnmarkedNonAssumptions.end(); ++fact)
-          abaEvents_.push_back(make_shared<AbaAddSentence>(
+          abaEvents_[step].push_back(make_shared<AbaAddSentence>(
             timestamp, *fact, false, false, abaSolutionId * 100 + newGraphId, head, "2.(ii)", stoul(matches[1].str())));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaSolutionFound)) {
-      if (newAbaEventsStartIndex_ < abaEvents_.size())
-        // Copy from abaEvents_ .
-        events_.insert(events_.end(), abaEvents_.begin() + newAbaEventsStartIndex_, abaEvents_.end());
+      // Copy from abaEvents_ .
+      for (auto it = abaEvents_.begin(); it != abaEvents_.end(); ++it)
+        events_.insert(events_.end(), it->second.begin(), it->second.end());
 
       // Start a new solution.
       ++abaSolutionId;
-      // This is adjusted down by abaNewStep if necessary. 
-      newAbaEventsStartIndex_ = abaEvents_.size();
+      abaEvents_.clear();
     }
   }
 
@@ -818,25 +826,6 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
   pendingEvents.clear();
 
   return true;
-}
-
-void AeraVisualizerWindow::abaNewStep(int step)
-{
-  if (step < abaStepIndexes_.size()) {
-    // There are already events for this step. Erase them.
-    size_t eventIndex = abaStepIndexes_[step];
-    abaStepIndexes_.erase(abaStepIndexes_.begin() + step, abaStepIndexes_.end());
-    if (eventIndex < abaEvents_.size()) {
-      abaEvents_.erase(abaEvents_.begin() + eventIndex, abaEvents_.end());
-      if (abaEvents_.size() < newAbaEventsStartIndex_)
-        newAbaEventsStartIndex_ = abaEvents_.size();
-    }
-  }
-
-  // Set abaStepIndexes_[step] to the next index in abaEvents_.
-  // This loop should only iterate once, but step may have skipped a step.
-  while (abaStepIndexes_.size() <= step)
-    abaStepIndexes_.push_back(abaEvents_.size());
 }
 
 void AeraVisualizerWindow::addStartupItems()
