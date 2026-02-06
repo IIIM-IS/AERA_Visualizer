@@ -172,10 +172,10 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 
     itemGroup = getItemGroup(addSentence->graphId_);
     if (!itemGroup) {
-      int solutionId = addSentence->graphId_ / 100;
-      if (addSentence->graphId_ % 100 != 0)
+      int solutionId = addSentence->graphId_ / PROPONENT_GRAPH_ID_MULTIPLIER;
+      if (addSentence->graphId_ % PROPONENT_GRAPH_ID_MULTIPLIER != 0)
         itemGroup = new AeraGraphicsItemGroup(
-          this, "O" + QString::number(solutionId) + ":" + QString::number(addSentence->graphId_ % 100),
+          this, "O" + QString::number(solutionId) + ":" + QString::number(addSentence->graphId_ % PROPONENT_GRAPH_ID_MULTIPLIER),
           AeraGraphicsItem::Color_opponent_unfinished_justification);
       else
         // AbaSolutionFound event will set to Color_proponent_justifications.

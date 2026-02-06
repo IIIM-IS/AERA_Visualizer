@@ -687,7 +687,7 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
       auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
       if (fact) {
         (*solutionEvents)[step].push_back(make_shared<AbaAddSentence>(
-          timestamp, fact, false, true, abaSolutionId * 100, (Code*)NULL, "init"));
+          timestamp, fact, false, true, abaSolutionId * PROPONENT_GRAPH_ID_MULTIPLIER, (Code*)NULL, "init"));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase1iStepRegex)) {
@@ -704,7 +704,8 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
         // TODO: Maybe add option to show singleton opponent graphs where contraryHasBody is false.
         if (newGId > 0 && contraryHasBody)
           (*solutionEvents)[step].push_back(make_shared<AbaAddSentence>(
-            timestamp, contrary, false, true, abaSolutionId * 100 + newGId, assumption, "1.(i)", stoul(matches[1].str())));
+            timestamp, contrary, false, true, abaSolutionId * PROPONENT_GRAPH_ID_MULTIPLIER + newGId, assumption, 
+            "1.(i)", stoul(matches[1].str())));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase1iiStepRegex)) {
@@ -725,10 +726,12 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
           (*solutionEvents)[step].push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, *fact, head));
         for (auto fact = newUnmarkedAssumptions.begin(); fact != newUnmarkedAssumptions.end(); ++fact)
           (*solutionEvents)[step].push_back(make_shared<AbaAddSentence>(
-            timestamp, *fact, true, false, abaSolutionId * 100, head, "1.(ii)", stoul(matches[1].str())));
+            timestamp, *fact, true, false, abaSolutionId * PROPONENT_GRAPH_ID_MULTIPLIER, head,
+            "1.(ii)", stoul(matches[1].str())));
         for (auto fact = newUnmarkedNonAssumptions.begin(); fact != newUnmarkedNonAssumptions.end(); ++fact)
           (*solutionEvents)[step].push_back(make_shared<AbaAddSentence>(
-            timestamp, *fact, false, false, abaSolutionId * 100, head, "1.(ii)", stoul(matches[1].str())));
+            timestamp, *fact, false, false, abaSolutionId * PROPONENT_GRAPH_ID_MULTIPLIER, head,
+            "1.(ii)", stoul(matches[1].str())));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase1Or2iiiStepRegex)) {
@@ -778,7 +781,8 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
         (*solutionEvents)[step].push_back(make_shared<AbaMarkSentence>(timestamp, fact, true));
         if (contraryIsNew)
           (*solutionEvents)[step].push_back(make_shared<AbaAddSentence>(
-            timestamp, contrary, false, false, abaSolutionId * 100, fact, "2.(ic)", stoul(matches[1].str())));
+            timestamp, contrary, false, false, abaSolutionId * PROPONENT_GRAPH_ID_MULTIPLIER, fact,
+            "2.(ic)", stoul(matches[1].str())));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase2iiMarkStepRegex)) {
@@ -809,10 +813,12 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
           (*solutionEvents)[step].push_back(make_shared<AbaMarkedSentenceToParent>(timestamp, *fact, head));
         for (auto fact = newUnmarkedAssumptions.begin(); fact != newUnmarkedAssumptions.end(); ++fact)
           (*solutionEvents)[step].push_back(make_shared<AbaAddSentence>(
-            timestamp, *fact, true, false, abaSolutionId * 100 + newGraphId, head, "2.(ii)", stoul(matches[1].str())));
+            timestamp, *fact, true, false, abaSolutionId * PROPONENT_GRAPH_ID_MULTIPLIER + newGraphId, head,
+            "2.(ii)", stoul(matches[1].str())));
         for (auto fact = newUnmarkedNonAssumptions.begin(); fact != newUnmarkedNonAssumptions.end(); ++fact)
           (*solutionEvents)[step].push_back(make_shared<AbaAddSentence>(
-            timestamp, *fact, false, false, abaSolutionId * 100 + newGraphId, head, "2.(ii)", stoul(matches[1].str())));
+            timestamp, *fact, false, false, abaSolutionId * PROPONENT_GRAPH_ID_MULTIPLIER + newGraphId, head,
+            "2.(ii)", stoul(matches[1].str())));
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaSolutionFound)) {
@@ -1608,7 +1614,7 @@ Timestamp AeraVisualizerWindow::stepEvent(Timestamp maximumTime)
   }
   else if (event->eventType_ == AbaSolutionFound::EVENT_TYPE) {
     auto solutionFoundEvent = (AbaSolutionFound*)event;
-    auto graph = mainScene_->getItemGroup(solutionFoundEvent->graphId_ * 100);
+    auto graph = mainScene_->getItemGroup(solutionFoundEvent->graphId_ * PROPONENT_GRAPH_ID_MULTIPLIER);
     if (graph)
       graph->setBrush(AeraGraphicsItem::Color_proponent_justifications);
   }
@@ -1772,7 +1778,7 @@ Timestamp AeraVisualizerWindow::unstepEvent(Timestamp minimumTime, bool& foundGr
   }
   else if (event->eventType_ == AbaSolutionFound::EVENT_TYPE) {
     auto solutionFoundEvent = (AbaSolutionFound*)event;
-    auto graph = mainScene_->getItemGroup(solutionFoundEvent->graphId_ * 100);
+    auto graph = mainScene_->getItemGroup(solutionFoundEvent->graphId_ * PROPONENT_GRAPH_ID_MULTIPLIER);
     if (graph)
       // Revert to partial solution.
       graph->setBrush(AeraGraphicsItem::Color_proponent_partial_justifications);

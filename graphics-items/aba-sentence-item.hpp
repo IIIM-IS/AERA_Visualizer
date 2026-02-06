@@ -82,8 +82,10 @@ public:
   bool isBetweenProponentAndOpponent(AeraGraphicsItem* other) {
     if (other->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
       auto otherEvent = (AbaAddSentence*)other->getAeraEvent();
-      return (addEvent_->graphId_ % 100 == 0 && otherEvent->graphId_ % 100 != 0 ||
-              addEvent_->graphId_ % 100 != 0 && otherEvent->graphId_ % 100 == 0);
+      return (addEvent_->graphId_ % PROPONENT_GRAPH_ID_MULTIPLIER == 0 &&
+                otherEvent->graphId_ % PROPONENT_GRAPH_ID_MULTIPLIER != 0 ||
+              addEvent_->graphId_ % PROPONENT_GRAPH_ID_MULTIPLIER != 0 &&
+                otherEvent->graphId_ % PROPONENT_GRAPH_ID_MULTIPLIER == 0);
     }
 
     return false;
@@ -93,7 +95,8 @@ public:
     if (other->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
       auto otherEvent = (AbaAddSentence*)other->getAeraEvent();
       return (addEvent_->graphId_ != otherEvent->graphId_ &&
-        addEvent_->graphId_ % 100 == 0 && otherEvent->graphId_ % 100 == 0);
+        addEvent_->graphId_ % PROPONENT_GRAPH_ID_MULTIPLIER == 0 && 
+        otherEvent->graphId_ % PROPONENT_GRAPH_ID_MULTIPLIER == 0);
     }
 
     return false;
@@ -103,7 +106,8 @@ public:
     if (other->getAeraEvent()->eventType_ == AbaAddSentence::EVENT_TYPE) {
       auto otherEvent = (AbaAddSentence*)other->getAeraEvent();
       return (addEvent_->graphId_ != otherEvent->graphId_ &&
-        addEvent_->graphId_ % 100 != 0 && otherEvent->graphId_ % 100 != 0);
+        addEvent_->graphId_ % PROPONENT_GRAPH_ID_MULTIPLIER != 0 &&
+        otherEvent->graphId_ % PROPONENT_GRAPH_ID_MULTIPLIER != 0);
     }
 
     return false;
