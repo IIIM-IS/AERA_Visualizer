@@ -849,6 +849,25 @@ public:
   QString value_;
 };
 
+class AbaSolutionFound : public AeraEvent {
+public:
+  /**
+   * Create an AbaSolutionFound event to mark a partial solution as found.
+   * \param time The reduction time.
+   * \param graphId The proponent graph ID.
+   */
+  AbaSolutionFound(core::Timestamp time, int graphId)
+    // Set the object_ NULL since there is already an AeraEvent for it.
+    : AeraEvent(EVENT_TYPE, time, NULL),
+    graphId_(graphId)
+  {
+  }
+
+  static const int EVENT_TYPE = 34;
+
+  int graphId_;
+};
+
 }
 
 #endif
