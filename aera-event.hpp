@@ -856,18 +856,18 @@ public:
   /**
    * Create an AbaSolutionFound event to mark a partial solution as found.
    * \param time The reduction time.
-   * \param graphId The proponent graph ID.
+   * \param solutionId The solution ID (will be matched with the proponent graph).
    */
-  AbaSolutionFound(core::Timestamp time, int graphId)
+  AbaSolutionFound(core::Timestamp time, int solutionId)
     // Set the object_ NULL since there is already an AeraEvent for it.
     : AeraEvent(EVENT_TYPE, time, NULL),
-    graphId_(graphId)
+    solutionId_(solutionId)
   {
   }
 
   static const int EVENT_TYPE = 34;
 
-  int graphId_;
+  int solutionId_;
 };
 
 }

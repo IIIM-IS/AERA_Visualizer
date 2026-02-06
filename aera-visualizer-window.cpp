@@ -1614,7 +1614,7 @@ Timestamp AeraVisualizerWindow::stepEvent(Timestamp maximumTime)
   }
   else if (event->eventType_ == AbaSolutionFound::EVENT_TYPE) {
     auto solutionFoundEvent = (AbaSolutionFound*)event;
-    auto graph = mainScene_->getItemGroup(solutionFoundEvent->graphId_ * PROPONENT_GRAPH_ID_MULTIPLIER);
+    auto graph = mainScene_->getItemGroup(solutionFoundEvent->solutionId_ * PROPONENT_GRAPH_ID_MULTIPLIER);
     if (graph)
       graph->setBrush(AeraGraphicsItem::Color_proponent_justifications);
   }
@@ -1778,7 +1778,7 @@ Timestamp AeraVisualizerWindow::unstepEvent(Timestamp minimumTime, bool& foundGr
   }
   else if (event->eventType_ == AbaSolutionFound::EVENT_TYPE) {
     auto solutionFoundEvent = (AbaSolutionFound*)event;
-    auto graph = mainScene_->getItemGroup(solutionFoundEvent->graphId_ * PROPONENT_GRAPH_ID_MULTIPLIER);
+    auto graph = mainScene_->getItemGroup(solutionFoundEvent->solutionId_ * PROPONENT_GRAPH_ID_MULTIPLIER);
     if (graph)
       // Revert to partial solution.
       graph->setBrush(AeraGraphicsItem::Color_proponent_partial_justifications);
