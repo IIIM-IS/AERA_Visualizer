@@ -119,6 +119,7 @@ protected:
 
 const set<int> AeraVisualizerWindow::simulationEventTypes_ = {
   AbaAddSentence::EVENT_TYPE,
+  AbaSolutionFound::EVENT_TYPE,
   AbaMarkSentence::EVENT_TYPE,
   AbaMarkedSentenceToParent::EVENT_TYPE,
   AbaBindVariable::EVENT_TYPE,
@@ -318,7 +319,7 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
   // Step 10: Case 2.(ii): S: 322, NewGId 1, NewUnMarkedAs: [324], NewUnMarkedNonAs: [312], ExistingBody: [310]
   regex abaCase2iiStepRegex("^Step (\\d+): Case 2\\.\\(ii\\): S: (\\d+), NewGId (\\d+), NewUnMarkedAs: \\[(.*)\\], NewUnMarkedNonAs: \\[(.*)\\], ExistingBody: \\[(.*)\\]$");
   // ABA solution found
-  regex abaSolutionFound("^ABA solution found$");
+  regex abaSolutionFound("^Step (\\d+): Solution found$");
 
   progress.setLabelText(replicodeObjects_.getProgressLabelText("Reading runtime output"));
 
@@ -336,8 +337,8 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
   ifstream runtimeOutputFile(runtimeOutputFilePath);
   int lineNumber = 0;
   string line;
-  int abaSolutionId = 1; // Legacy
   int newSolutionId = 1;
+  int abaSolutionId = newSolutionId; // Legacy
   abaSolutions_[newSolutionId] = AbaSolution(0, 0);
   auto solutionEvents = &abaSolutions_[newSolutionId].abaEvents_;
   // The IDs of solutions that have already been copied to events_.
@@ -675,6 +676,7 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
     }
     else if (regex_search(lineAfterTimestamp, matches, abaSolutionStartRegex)) {
       newSolutionId = stoul(matches[1].str());
+      //abaSolutionId = newSolutionId; // Legacy
       int parentSolutionId = stoul(matches[2].str());
       int parentStep = stoul(matches[3].str());
       abaSolutions_[newSolutionId] = AbaSolution(parentSolutionId, parentStep);
@@ -814,6 +816,10 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
       }
     }
     else if (regex_search(lineAfterTimestamp, matches, abaSolutionFound)) {
+      int step = stoul(matches[1].str());
+      //(*solutionEvents)[step].push_back(make_shared<AbaSolutionFound>(timestamp, newSolutionId));
+      (*solutionEvents)[step].push_back(make_shared<AbaSolutionFound>(timestamp, abaSolutionId)); // Legacy
+
       // Copy from abaEvents_ working backwards through parent solutions.
       vector<shared_ptr<AeraEvent> > reverseEvents;
       int solutionId = newSolutionId;
@@ -1015,6 +1021,7 @@ Timestamp AeraVisualizerWindow::getINextStepEvent
            event->eventType_ == PhaseInModelEvent::EVENT_TYPE ||
            event->eventType_ == PhaseOutModelEvent::EVENT_TYPE ||
            event->eventType_ == DeleteModelEvent::EVENT_TYPE ||
+           event->eventType_ == AbaSolutionFound::EVENT_TYPE ||
            event->eventType_ == AbaMarkSentence::EVENT_TYPE ||
            event->eventType_ == AbaMarkedSentenceToParent::EVENT_TYPE ||
            event->eventType_ == AbaBindVariable::EVENT_TYPE) {
@@ -1599,6 +1606,12 @@ Timestamp AeraVisualizerWindow::stepEvent(Timestamp maximumTime)
       mainScene_->abaSetBinding(bindEvent->varNumber_, bindEvent->value_);
     }
   }
+  else if (event->eventType_ == AbaSolutionFound::EVENT_TYPE) {
+    auto solutionFoundEvent = (AbaSolutionFound*)event;
+    auto graph = mainScene_->getItemGroup(solutionFoundEvent->graphId_ * 100);
+    if (graph)
+      graph->setBrush(AeraGraphicsItem::Color_proponent_justifications);
+  }
   else {
     // Skip this event.
     ++iNextEvent_;
@@ -1756,6 +1769,13 @@ Timestamp AeraVisualizerWindow::unstepEvent(Timestamp minimumTime, bool& foundGr
       bindings_.erase(entry);
       mainScene_->abaRemoveBinding(bindEvent->varNumber_);
     }
+  }
+  else if (event->eventType_ == AbaSolutionFound::EVENT_TYPE) {
+    auto solutionFoundEvent = (AbaSolutionFound*)event;
+    auto graph = mainScene_->getItemGroup(solutionFoundEvent->graphId_ * 100);
+    if (graph)
+      // Revert to partial solution.
+      graph->setBrush(AeraGraphicsItem::Color_proponent_partial_justifications);
   }
   else
     // Skip this event.
