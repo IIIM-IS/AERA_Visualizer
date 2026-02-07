@@ -338,7 +338,7 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
   int lineNumber = 0;
   string line;
   int newSolutionId = 1;
-  int abaSolutionId = newSolutionId; // Legacy
+  int abaSolutionId = newSolutionId;
   abaSolutions_[newSolutionId] = AbaSolution(0, 0);
   auto solutionEvents = &abaSolutions_[newSolutionId].abaEvents_;
   // The IDs of solutions that have already been copied to events_.
@@ -676,7 +676,7 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
     }
     else if (regex_search(lineAfterTimestamp, matches, abaSolutionStartRegex)) {
       newSolutionId = stoul(matches[1].str());
-      //abaSolutionId = newSolutionId; // Legacy
+      //abaSolutionId = newSolutionId; // non-Legacy
       int parentSolutionId = stoul(matches[2].str());
       int parentStep = stoul(matches[3].str());
       abaSolutions_[newSolutionId] = AbaSolution(parentSolutionId, parentStep);
@@ -838,6 +838,7 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
           // Also reverse the list of events.
           reverseEvents.insert(reverseEvents.end(), it->second.rbegin(), it->second.rend());
         }
+        // TODO: Remember the step number in case the next time starts from a higher step.
         solutionsCopied.insert(solutionId);
 
         // Update solutionId with the parent.
