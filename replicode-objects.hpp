@@ -215,10 +215,14 @@ public:
   }
 
   /**
-   * Get a const reference to the map of Code* object to label. 
+   * Get a map of Code* object to label. 
    */
-  const std::map<r_code::Code*, std::string>& getObjectLabelMap() {
-    return objectLabel_;
+ std::map<r_code::Code*, std::string> getObjectLabelMap() {
+   std::map<r_code::Code*, std::string> result;
+   for (auto o = objectLabel_.begin(); o != objectLabel_.end(); ++o) {
+     result[o->first] = o->second;
+   }
+    return result;
   }
 
 private:
@@ -248,13 +252,11 @@ private:
   std::chrono::microseconds basePeriod_;
   core::Timestamp timeReference_;
   // Key is the Code* object, value is the source code from the decompiled objects.
-  std::map<r_code::Code*, std::string> objectSourceCode_;
+  std::map<P<r_code::Code>, std::string> objectSourceCode_;
   // Key is the Code* object, value is the label from the decompiled objects.
-  std::map<r_code::Code*, std::string> objectLabel_;
+  std::map<P<r_code::Code>, std::string> objectLabel_;
   // Key is the label from the decompiled objects, value is the Code* object.
-  std::map<std::string, r_code::Code*> labelObject_;
-  const r_code::list<P<r_code::Code>>* objects_;  // Pointer to AERA's objects_ (or localObjects_)
-  r_code::list<P<r_code::Code>> localObjects_;    // Store objects here when there's no AERA instance to point to
+  std::map<std::string, P<r_code::Code>> labelObject_;
   std::vector<QString> progressMessages_;
   std::regex intMemberRegex_;
 };
