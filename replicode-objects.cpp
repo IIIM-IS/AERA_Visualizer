@@ -201,12 +201,13 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     }
   }
 
-  // Transfer imageObjects to localObjects_, unpacking and processing as needed.
+  r_code::list<P<r_code::Code>> objects;
+  // Transfer imageObjects to objects, unpacking and processing as needed.
   // Imitate _Mem::load.
   for (uint32 i = 0; i < imageObjects.size(); ++i) {
     Code* object = imageObjects[i];
     int32 dummyLocation;
-    localObjects_.push_back(object, dummyLocation);
+    objects.push_back(object, dummyLocation);
     // We don't need to delete, so don't set the storage index.
 
     switch (object->code(0).getDescriptor()) {
@@ -242,16 +243,34 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     }
   }
 
-  // Point to our local copy of the objects (not to AERA's objects_)
-  objects_ = &localObjects_;
+  // Call assignLabel to set up objectLabel_, etc.
+  int i = 0;
+  unordered_map<const Class*, uint16> objectIdPerClass;
+  // Initialize objectIdPerClass.
+  for (size_t j = 0; j < metadata.classes_by_opcodes_.size(); ++j) {
+    if (metadata.classes_by_opcodes_[j].str_opcode != "undefined")
+      objectIdPerClass[&metadata.classes_by_opcodes_[j]] = 0;
+  }
+  r_code::list<P<r_code::Code> >::const_iterator o;
+  for (o = objects.begin(); o != objects.end(); ++o) {
+    i++;
 
-  _Mem::init_timestamps(timeReference_, *objects_);
+    if (progress.wasCanceled())
+      return "cancel";
+    progress.setValue(i);
+    if (i % 100 == 0)
+      QApplication::processEvents();
+
+    assignLabel(*o, objectIdPerClass, metadata, image.object_names_.symbols_);
+  }
+
+  _Mem::init_timestamps(timeReference_, objects);
 
   // We have to get the source code by decompiling the packet objects in objects_ (not from
   // the original decompiled code in decompiledFilePath) because variable names can be different.
   r_comp::Image packedImage;
   packedImage.object_names_.symbols_ = image.object_names_.symbols_;
-  packedImage.add_objects(*objects_, true);
+  packedImage.add_objects(objects, true);
 
   Decompiler decompiler;
   decompiler.init(&metadata);
