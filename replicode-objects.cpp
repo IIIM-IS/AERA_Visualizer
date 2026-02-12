@@ -135,6 +135,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     if (!testOpen)
       return "Can't open decompiled objects file: " + decompiledFilePath;
   }
+  // This sets timeReference_ .
   auto decompiledOut = processDecompiledObjects(decompiledFilePath, objectOids, objectDetailOids);
 
   // Preprocess and compile the processed decompiler output, using the metadata we got above.
@@ -243,75 +244,9 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     }
   }
 
-  // Call assignLabel to set up objectLabel_, etc.
-  int i = 0;
-  unordered_map<const Class*, uint16> objectIdPerClass;
-  // Initialize objectIdPerClass.
-  for (size_t j = 0; j < metadata.classes_by_opcodes_.size(); ++j) {
-    if (metadata.classes_by_opcodes_[j].str_opcode != "undefined")
-      objectIdPerClass[&metadata.classes_by_opcodes_[j]] = 0;
-  }
-  r_code::list<P<r_code::Code> >::const_iterator o;
-  for (o = objects.begin(); o != objects.end(); ++o) {
-    i++;
-
-    if (progress.wasCanceled())
-      return "cancel";
-    progress.setValue(i);
-    if (i % 100 == 0)
-      QApplication::processEvents();
-
-    assignLabel(*o, objectIdPerClass, metadata, image.object_names_.symbols_);
-  }
-
   _Mem::init_timestamps(timeReference_, objects);
 
-  // We have to get the source code by decompiling the packet objects in objects_ (not from
-  // the original decompiled code in decompiledFilePath) because variable names can be different.
-  r_comp::Image packedImage;
-  packedImage.object_names_.symbols_ = image.object_names_.symbols_;
-  packedImage.add_objects(objects, true);
-
-  Decompiler decompiler;
-  decompiler.init(&metadata);
-
-  // Fill the objectNames map from the image and use it in decompile_references.
-  unordered_map<uint16, std::string> objectNames;
-  for (auto i = 0; i < packedImage.code_segment_.objects_.size(); ++i) {
-    if (progress.wasCanceled())
-      return "cancel";
-    progress.setValue(imageObjects.size() + i);
-    if (i % 100 == 0)
-      QApplication::processEvents();
-
-    objectNames[i] = compiler.getObjectName(i);
-  }
-  decompiler.decompile_references(&packedImage, &objectNames);
-
-  for (uint16 i = 0; i < packedImage.code_segment_.objects_.size(); ++i) {
-    if (progress.wasCanceled())
-      return "cancel";
-    progress.setValue(2 * imageObjects.size() + i);
-    if (i % 100 == 0)
-      QApplication::processEvents();
-
-    auto object = getObjectByDetailOid(packedImage.code_segment_.objects_[i]->detail_oid_);
-    if (object) {
-      std::ostringstream decompiledCode;
-      decompiler.decompile_object(i, &decompiledCode, timeReference_, false, false, false);
-      auto source = decompiledCode.str();
-
-      // Strip ending newlines.
-      while (source[source.size() - 1] == '\n')
-        source = source.substr(0, source.size() - 1);
-      objectSourceCode_[object] = source;
-    }
-  }
-
-  // Mark that initialization is complete
-  initialized_ = true;
-
-  return "";
+  return initHelper(metadata, &objects, image.object_names_.symbols_, progress);
 }
 
 
@@ -338,9 +273,18 @@ string ReplicodeObjects::init(AERA_interface* aera, microseconds basePeriod, QPr
   progress.setLabelText(getProgressLabelText("Postprocessing code"));
   progress.setMaximum(objects->size() * 3);
 
+  // Make sure to set this
+  timeReference_ = aera->getStartTime();
+
   // Use these names where available
   std::unordered_map<uint32, std::string> seedNames = aera->getSeedNames().symbols_;
 
+  return initHelper(metadata, objects, seedNames, progress);
+}
+
+string ReplicodeObjects::initHelper(
+  r_comp::Metadata& metadata, r_code::list<P<r_code::Code>>* objects, unordered_map<uint32, string>& seedNames, QProgressDialog& progress)
+{
   int i = 0;
   unordered_map<const Class*, uint16> objectIdPerClass;
   // Initialize objectIdPerClass.
@@ -360,9 +304,6 @@ string ReplicodeObjects::init(AERA_interface* aera, microseconds basePeriod, QPr
 
     assignLabel(*o, objectIdPerClass, metadata, seedNames);
   }
-
-  // Make sure to set this
-  timeReference_ = aera->getStartTime();
 
   // Get the source code by decompiling the packed objects in objects
   r_comp::Image packedImage;
