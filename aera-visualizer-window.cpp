@@ -2100,8 +2100,13 @@ void AeraVisualizerWindow::updateObjectsAndEvents(bool live)
     // TODO: Might be best to validate settings_ and replicodeObjects_ just in case?
   }
   
+  QSettings preferences;
+  // This was already set by openOutput.
+  QString settingsFilePath = preferences.value("settingsFilePath").toString();
+  // Files are relative to the directory of settingsFilePath.
+  QDir settingsFileDir = QFileInfo(settingsFilePath).dir();
   // Process runtime_out.txt for events (these form the basis for graphics objects)
-  if (!addEvents(settings_.runtime_output_file_path_, progress))
+  if (!addEvents(settingsFileDir.absoluteFilePath(settings_.runtime_output_file_path_.c_str()).toStdString(), progress))
     return;
 
   // Show the last progress message
