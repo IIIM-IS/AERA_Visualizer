@@ -174,6 +174,7 @@ const QString AeraVisualizerWindow::SettingsKeyRequirementsVisible = "requiremen
 
 AeraVisualizerWindow::AeraVisualizerWindow()
 : QMainWindow(0),
+  aera_(0),
   iNextEvent_(0), explanationLogView_(0),
   essencePropertyObject_(NULL),
   hoverHighlightItem_(0),
@@ -1971,8 +1972,9 @@ void AeraVisualizerWindow::timerTick() {
 void AeraVisualizerWindow::closeEvent(QCloseEvent* event) {
   findDialog_->close();
 
-  // Shut down AERA when we're done
-  aera_->stop();
+  if (aera_)
+    // Shut down AERA when we're done
+    aera_->stop();
   
   // Save current state for next time
   QSettings preferences;
