@@ -201,12 +201,13 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     }
   }
 
-  // Transfer imageObjects to localObjects_, unpacking and processing as needed.
+  r_code::list<P<r_code::Code>> objects;
+  // Transfer imageObjects to objects, unpacking and processing as needed.
   // Imitate _Mem::load.
   for (uint32 i = 0; i < imageObjects.size(); ++i) {
     Code* object = imageObjects[i];
     int32 dummyLocation;
-    localObjects_.push_back(object, dummyLocation);
+    objects.push_back(object, dummyLocation);
     // We don't need to delete, so don't set the storage index.
 
     switch (object->code(0).getDescriptor()) {
@@ -242,16 +243,34 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     }
   }
 
-  // Point to our local copy of the objects (not to AERA's objects_)
-  objects_ = &localObjects_;
+  // Call assignLabel to set up objectLabel_, etc.
+  int i = 0;
+  unordered_map<const Class*, uint16> objectIdPerClass;
+  // Initialize objectIdPerClass.
+  for (size_t j = 0; j < metadata.classes_by_opcodes_.size(); ++j) {
+    if (metadata.classes_by_opcodes_[j].str_opcode != "undefined")
+      objectIdPerClass[&metadata.classes_by_opcodes_[j]] = 0;
+  }
+  r_code::list<P<r_code::Code> >::const_iterator o;
+  for (o = objects.begin(); o != objects.end(); ++o) {
+    i++;
 
-  _Mem::init_timestamps(timeReference_, *objects_);
+    if (progress.wasCanceled())
+      return "cancel";
+    progress.setValue(i);
+    if (i % 100 == 0)
+      QApplication::processEvents();
+
+    assignLabel(*o, objectIdPerClass, metadata, image.object_names_.symbols_);
+  }
+
+  _Mem::init_timestamps(timeReference_, objects);
 
   // We have to get the source code by decompiling the packet objects in objects_ (not from
   // the original decompiled code in decompiledFilePath) because variable names can be different.
   r_comp::Image packedImage;
   packedImage.object_names_.symbols_ = image.object_names_.symbols_;
-  packedImage.add_objects(*objects_, true);
+  packedImage.add_objects(objects, true);
 
   Decompiler decompiler;
   decompiler.init(&metadata);
@@ -308,7 +327,7 @@ string ReplicodeObjects::init(AERA_interface* aera, microseconds basePeriod, QPr
 
   // Get current state of AERA
   r_comp::Metadata metadata = aera->getMetadata();  // Retreve metadata to interpret objects
-  objects_ = aera->getMem()->get_objects_();    // Get objects directly from AERA's memory
+  auto objects = const_cast<r_code::list<P<r_code::Code>>*>(aera->getMem()->get_objects_());    // Get objects directly from AERA's memory
   
   progress.setLabelText(getProgressLabelText("Retrieving objects"));
   QApplication::processEvents();
@@ -317,7 +336,7 @@ string ReplicodeObjects::init(AERA_interface* aera, microseconds basePeriod, QPr
   
   // We update progress for 3 loops of imageObjects.size().
   progress.setLabelText(getProgressLabelText("Postprocessing code"));
-  progress.setMaximum(objects_->size() * 3);
+  progress.setMaximum(objects->size() * 3);
 
   // Use these names where available
   std::unordered_map<uint32, std::string> seedNames = aera->getSeedNames().symbols_;
@@ -330,7 +349,7 @@ string ReplicodeObjects::init(AERA_interface* aera, microseconds basePeriod, QPr
       objectIdPerClass[&metadata.classes_by_opcodes_[j]] = 0;
   }
   r_code::list<P<r_code::Code> >::const_iterator o;
-  for (o = objects_->begin(); o != objects_->end(); ++o) {
+  for (o = objects->begin(); o != objects->end(); ++o) {
     i++;
 
     if (progress.wasCanceled())
@@ -345,10 +364,10 @@ string ReplicodeObjects::init(AERA_interface* aera, microseconds basePeriod, QPr
   // Make sure to set this
   timeReference_ = aera->getStartTime();
 
-  // Get the source code by decompiling the packed objects in objects_
+  // Get the source code by decompiling the packed objects in objects
   r_comp::Image packedImage;
   packedImage.object_names_.symbols_ = seedNames;
-  packedImage.add_objects(*objects_, true);
+  packedImage.add_objects(*objects, true);
 
   Decompiler decompiler;
   decompiler.init(&metadata);
@@ -371,7 +390,7 @@ string ReplicodeObjects::init(AERA_interface* aera, microseconds basePeriod, QPr
   for (uint16 i = 0; i < packedImage.code_segment_.objects_.size(); ++i) {
     if (progress.wasCanceled())
       return "cancel";
-    progress.setValue(2 * objects_->size() + i);
+    progress.setValue(2 * objects->size() + i);
     if (i % 100 == 0)
       QApplication::processEvents();
 
@@ -550,9 +569,10 @@ Code* ReplicodeObjects::getObject(uint32 oid) const
   if (oid == UNDEFINED_OID)
     return NULL;
 
-  for (auto o = objects_->begin(); o != objects_->end(); ++o) {
-    if ((*o)->get_oid() == oid)
-      return *o;
+  // Use objectLabel_ because its keys are the objects.
+  for (auto o = objectLabel_.begin(); o != objectLabel_.end(); ++o) {
+    if (o->first->get_oid() == oid)
+      return o->first;
   }
 
   return NULL;
@@ -560,7 +580,7 @@ Code* ReplicodeObjects::getObject(uint32 oid) const
 
 Code* ReplicodeObjects::getObjectByDetailOid(uint64 detailOid) const
 {
-  // Use objectLabel_ because objects_ only has the "top" injected objects with an OID.
+  // Use objectLabel_ because its keys are the objects.
   for (auto o = objectLabel_.begin(); o != objectLabel_.end(); ++o) {
     if (o->first->get_detail_oid() == detailOid)
       return o->first;
