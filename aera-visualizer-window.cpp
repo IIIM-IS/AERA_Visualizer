@@ -341,8 +341,8 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
   int abaSolutionId = newSolutionId;
   abaSolutions_[newSolutionId] = AbaSolution(0, 0);
   auto solutionEvents = &abaSolutions_[newSolutionId].abaEvents_;
-  // The IDs of solutions that have already been copied to events_.
-  set<int> solutionsCopied;
+  // Map of solutions ID -> max step number of solution steps that have already been copied to events_.
+  map<int, int> solutionMaxStepCopied;
   while (getline(runtimeOutputFile, line)) {
     if (progress.wasCanceled())
       return false;
@@ -829,23 +829,30 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
       // Copy from abaEvents_ working backwards through parent solutions.
       vector<shared_ptr<AeraEvent> > reverseEvents;
       int solutionId = newSolutionId;
-      int maxStep = INT_MAX;
+      int maxStepToCopy = INT_MAX;
       while (true) {
+        int maxStepCopied = (solutionMaxStepCopied.count(solutionId) > 0 ? solutionMaxStepCopied[solutionId] : - 1);
+        int maxStepCopiedThisPass = -1;
         for (auto it = abaSolutions_[solutionId].abaEvents_.rbegin();
              it != abaSolutions_[solutionId].abaEvents_.rend(); ++it) {
-          if (it->first > maxStep)
+          if (it->first <= maxStepCopied)
+            // We have already copied this step and lower.
+            break;
+          if (it->first > maxStepToCopy)
+            // Wait to start copying.
             continue;
+
+          maxStepCopiedThisPass = max(maxStepCopiedThisPass, it->first);
           // Also reverse the list of events.
           reverseEvents.insert(reverseEvents.end(), it->second.rbegin(), it->second.rend());
         }
-        // TODO: Remember the step number in case the next time starts from a higher step.
-        solutionsCopied.insert(solutionId);
+        // Update the highest step copied for this solutionId.
+        solutionMaxStepCopied[solutionId] = max(maxStepCopied, maxStepCopiedThisPass);
 
-        // Update solutionId with the parent.
-        maxStep = abaSolutions_[solutionId].parentSolutionStep_;
+        // Update solutionId with the parent. We will start copying at parentSolutionStep_.
+        maxStepToCopy = abaSolutions_[solutionId].parentSolutionStep_;
         solutionId = abaSolutions_[solutionId].parentSolutionId_;
-        if (solutionId == 0 || solutionsCopied.find(solutionId) != solutionsCopied.end())
-          // Parent events are already in events_ (or no parent).
+        if (solutionId == 0)
           break;
       }
 
