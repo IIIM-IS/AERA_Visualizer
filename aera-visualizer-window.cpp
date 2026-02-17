@@ -174,6 +174,7 @@ const QString AeraVisualizerWindow::SettingsKeyRequirementsVisible = "requiremen
 
 AeraVisualizerWindow::AeraVisualizerWindow()
 : QMainWindow(0),
+  aera_(0),
   iNextEvent_(0), explanationLogView_(0),
   essencePropertyObject_(NULL),
   hoverHighlightItem_(0),
@@ -1971,8 +1972,9 @@ void AeraVisualizerWindow::timerTick() {
 void AeraVisualizerWindow::closeEvent(QCloseEvent* event) {
   findDialog_->close();
 
-  // Shut down AERA when we're done
-  aera_->stop();
+  if (aera_)
+    // Shut down AERA when we're done
+    aera_->stop();
   
   // Save current state for next time
   QSettings preferences;
@@ -2100,8 +2102,13 @@ void AeraVisualizerWindow::updateObjectsAndEvents(bool live)
     // TODO: Might be best to validate settings_ and replicodeObjects_ just in case?
   }
   
+  QSettings preferences;
+  // This was already set by openOutput.
+  QString settingsFilePath = preferences.value("settingsFilePath").toString();
+  // Files are relative to the directory of settingsFilePath.
+  QDir settingsFileDir = QFileInfo(settingsFilePath).dir();
   // Process runtime_out.txt for events (these form the basis for graphics objects)
-  if (!addEvents(settings_.runtime_output_file_path_, progress))
+  if (!addEvents(settingsFileDir.absoluteFilePath(settings_.runtime_output_file_path_.c_str()).toStdString(), progress))
     return;
 
   // Show the last progress message

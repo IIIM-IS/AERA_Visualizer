@@ -227,6 +227,13 @@ public:
 
 private:
   /**
+   * Complete the work of either of the init methods.
+   */
+  std::string ReplicodeObjects::initHelper(
+    r_comp::Metadata& metadata, r_code::list<P<r_code::Code>>* objects, std::unordered_map<uint32, std::string>& seedNames,
+    QProgressDialog& progress);
+
+  /**
    * Create a unique label for object and assign objectLabel_ and labelObject_ . Recursively call this for
    * referenced objects. If the object is already in objectLabel_, then do nothing. This updates objectIdPerClass.
    */
