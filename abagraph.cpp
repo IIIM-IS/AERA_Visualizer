@@ -53,6 +53,8 @@
 
 #include "abagraph.hpp"
 
+using namespace std;
+
 namespace aera_visualizer {
 
 AbaGraph::AbaGraph(const QString& path)
@@ -65,15 +67,27 @@ AbaGraph::AbaGraph(const QString& path)
   // If not started, then abagraph_.state() != QProcess::Running.
 }
 
-QString AbaGraph::readLine(const QString& prompt)
+vector<QString> AbaGraph::readResponse(const QString& prompt)
 {
   if (abagraph_.state() != QProcess::Running)
-    return "";
+    return vector<QString>();
 
   abagraph_.write((prompt + "\n").toStdString().c_str());
-  if (!abagraph_.waitForReadyRead(5000))
-    return "";
-  return QString::fromUtf8(abagraph_.readLine()).trimmed();
+
+  vector<QString> response;
+  while (true) {
+    if (!abagraph_.canReadLine()) {
+      if (!abagraph_.waitForReadyRead(5000))
+        return vector<QString>();
+    }
+
+    auto line = QString::fromUtf8(abagraph_.readLine()).trimmed();
+    if (line == "")
+      break;
+    response.push_back(line);
+  }
+
+  return response;
 }
 
 }

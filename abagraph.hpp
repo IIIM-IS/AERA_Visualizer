@@ -71,10 +71,11 @@ public:
 
 private:
   /**
-   * Send the prompt and return the response, or "" if timeout. This will append the "\n" to the prompt.
+   * Send the prompt and return the response lines until a blank line, or nothing if timeout.
+   * This will append the "\n" to the prompt.
    */
 public:
-  QString readLine(const QString& prompt);
+  std::vector<QString> readResponse(const QString& prompt);
 
   QProcess abagraph_;
 };

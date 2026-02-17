@@ -2272,7 +2272,7 @@ void AeraVisualizerWindow::createToolbars()
 
 void AeraVisualizerWindow::abaSentenceItemClicked(AbaSentenceItem* item)
 {
-  auto line = abagraph_.readLine("abc");
+  auto response = abagraph_.readResponse("abc");
 }
 
 }
