@@ -180,7 +180,7 @@ AeraVisualizerWindow::AeraVisualizerWindow(ReplicodeObjects& replicodeObjects)
   playTime_(seconds(0)),
   playTimerId_(0),
   isPlaying_(false),
-  abagraph_("/work/abagraph-mercury/mercury/abagraph.exe"),
+  abagraph_(""), // ("/work/abagraph-mercury/mercury/abagraph.exe"),
   itemBorderHighlightPen_(Qt::blue, 3)
 {
   createActions();
@@ -2272,7 +2272,7 @@ void AeraVisualizerWindow::createToolbars()
 
 void AeraVisualizerWindow::abaSentenceItemClicked(AbaSentenceItem* item)
 {
-  auto response = abagraph_.readResponse("abc");
+  //auto response = abagraph_.readResponse("abc");
 }
 
 }
