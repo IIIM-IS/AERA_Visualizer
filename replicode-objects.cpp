@@ -299,8 +299,8 @@ string ReplicodeObjects::initHelper(
     if (progress.wasCanceled())
       return "cancel";
     progress.setValue(i);
-    if (i % 100 == 0)
-      QApplication::processEvents();
+    //if (i % 100 == 0)
+    //  QApplication::processEvents();
 
     assignLabel(*o, objectIdPerClass, metadata, seedNames);
   }
