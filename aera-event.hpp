@@ -747,6 +747,8 @@ public:
   r_exec::MkRdx* mk_rdx_;
 };
 
+const int PROPONENT_GRAPH_ID_MULTIPLIER = 10000;
+
 class AbaAddSentence : public AeraEvent {
 public:
   /**
@@ -755,8 +757,8 @@ public:
    * \param fact The fact produced by the step.
    * \param isAssumption True if fact is an assumption.
    * \param isClaim True if fact is the claim of the graph.
-   * \param graphId S*100 + ID, where S is the solution number and ID is 0 for proponent graph,
-   * otherwise the opponent graph ID (within the solution).
+   * \param graphId S*PROPONENT_GRAPH_ID_MULTIPLIER + ID, where S is the solution number and
+   * ID is 0 for proponent graph, otherwise the opponent graph ID (within the solution).
    * \param parent The fact which produced the step, or NULL if the first.
    * \param abaCase The derivation case which produced the sentence.
    * \param step (optional) The step number to print, if greater than zero.
@@ -847,6 +849,25 @@ public:
 
   int varNumber_;
   QString value_;
+};
+
+class AbaSolutionFound : public AeraEvent {
+public:
+  /**
+   * Create an AbaSolutionFound event to mark a partial solution as found.
+   * \param time The reduction time.
+   * \param solutionId The solution ID (will be matched with the proponent graph).
+   */
+  AbaSolutionFound(core::Timestamp time, int solutionId)
+    // Set the object_ NULL since there is already an AeraEvent for it.
+    : AeraEvent(EVENT_TYPE, time, NULL),
+    solutionId_(solutionId)
+  {
+  }
+
+  static const int EVENT_TYPE = 34;
+
+  int solutionId_;
 };
 
 }

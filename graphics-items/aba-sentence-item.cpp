@@ -83,7 +83,7 @@ AbaSentenceItem::AbaSentenceItem(
     // Highlight causal events.
     setBrush(QColor(0x00, 0x99, 0x99));
   else {
-    if (addEvent->graphId_ % 100 > 0) {
+    if (addEvent->graphId_ % PROPONENT_GRAPH_ID_MULTIPLIER > 0) {
       // Get colors for the opponent graph.
       if (addEvent->isAssumption_)
         setBrush(Color_opponent_ms_asm_culprit);
@@ -98,7 +98,7 @@ AbaSentenceItem::AbaSentenceItem(
     }
   }
 
-  statusTextItem_ = new QGraphicsTextItem(this);
+  statusTextItem_ = new StatusTextItem(this);
   statusTextItem_->setPos(boundingRect().left() - 2, boundingRect().top() - 12);
   setStatus(STATUS_PROCESSING);
 }
@@ -127,7 +127,8 @@ void AbaSentenceItem::textItemLinkActivated(const QString& link)
         explanation = "<b>Q: What made " + makeHtmlLink(addEvent_->fact_) +
         " ?</b><br>Sentence " + makeHtmlLink(addEvent_->parent_) +
         " is an assumption which is not already considered for attack, so a new opponent graph O" +
-        QString::number(addEvent_->graphId_ / 100) + ":" + QString::number(addEvent_->graphId_ % 100) +
+        QString::number(addEvent_->graphId_ / PROPONENT_GRAPH_ID_MULTIPLIER) + ":" +
+        QString::number(addEvent_->graphId_ % PROPONENT_GRAPH_ID_MULTIPLIER) +
         " was created with this contrary as the claim.<br><br>";
       else if (addEvent_->abaCase_ == "1.(ii)")
         explanation = "<b>Q: What made " + makeHtmlLink(addEvent_->fact_) +
@@ -153,6 +154,11 @@ void AbaSentenceItem::textItemLinkActivated(const QString& link)
   else
     // For #detail_oid- and others, defer to the base class.
     ExpandableGoalOrPredItem::textItemLinkActivated(link);
+}
+
+void AbaSentenceItem::StatusTextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+{
+  parent_->parent_->getParent()->abaSentenceItemClicked(parent_);
 }
 
 }
