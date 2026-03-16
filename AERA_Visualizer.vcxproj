@@ -239,6 +239,7 @@
     </QtRcc>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="abagraph.cpp" />
     <ClCompile Include="aera-checkbox.cpp" />
     <ClCompile Include="graphics-items\aba-sentence-item.cpp" />
     <ClCompile Include="graphics-items\aera-graphics-item-group.cpp" />
@@ -428,6 +429,7 @@
     <QtMoc Include="views\explanation-log.hpp" />
     <QtMoc Include="find-dialog.hpp" />
     <QtMoc Include="aera-checkbox.h" />
+    <ClInclude Include="abagraph.hpp" />
     <ClInclude Include="aera-event.hpp" />
     <ClInclude Include="graphics-items\aba-sentence-item.hpp" />
     <ClInclude Include="graphics-items\aera-graphics-item-group.hpp" />

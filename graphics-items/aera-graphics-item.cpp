@@ -88,6 +88,7 @@ const QString AeraGraphicsItem::RedXHtml = "<font size=\"+1\"><b>&#10060;</b></f
 const QColor AeraGraphicsItem::DefaultItemColor(255, 255, 255);
 const QColor AeraGraphicsItem::SimulatedItemColor(255, 255, 220);
 
+const QColor AeraGraphicsItem::Color_proponent_partial_justifications(231, 246, 252);
 const QColor AeraGraphicsItem::Color_proponent_justifications(0xA2, 0xDD, 0xF3);
 const QColor AeraGraphicsItem::Color_proponent_asm_toBeProved(0x7C, 0x0A, 0xA2);
 const QColor AeraGraphicsItem::Color_proponent_asm(0x11, 0x77, 0x11);

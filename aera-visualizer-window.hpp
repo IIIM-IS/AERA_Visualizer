@@ -64,6 +64,7 @@
 #include "views/player.hpp"
 #include "views/text-output.hpp"
 #include "views/task-environment.hpp"
+#include "abagraph.hpp"
 
 #include <vector>
 #include <QIcon>
@@ -90,6 +91,7 @@ class FindDialog;
 class PlayerView;
 class TextOutputView;
 class TaskEnvironmentView;
+class AbaSentenceItem;
 
 /**
  * AeraVisualizerWindow extends AeraVisualizerWindowBase to present the player
@@ -104,6 +106,19 @@ public:
    * Create an AeraVisualizerWindow
    */
   AeraVisualizerWindow();
+
+  class AbaSolution {
+  public:
+    AbaSolution() : parentSolutionId_(0), parentSolutionStep_(0) {}
+    AbaSolution(int parentSolutionId, int parentSolutionStep)
+      : parentSolutionId_(parentSolutionId), parentSolutionStep_(parentSolutionStep) {
+    }
+
+    int parentSolutionId_;
+    int parentSolutionStep_;
+    // map of step number -> list of events.
+    std::map<int, std::vector<std::shared_ptr<AeraEvent> > > abaEvents_;
+  };
 
   /**
    * Scan the runtimeOutputFilePath and add to startupEvents_ and events_. Call this once after creating the window.
@@ -287,6 +302,7 @@ public:
     }
   }
 
+  void abaSentenceItemClicked(AbaSentenceItem* item);
 
 protected:
   /**
@@ -365,15 +381,6 @@ private:
    * \return The timestamp.
    */
   core::Timestamp getTimestamp(const std::smatch& matches, int index = 1);
-
-  /**
-   * If the step is already in abaStepIndexes_, get the event index and erase
-   * from abaEvents_ to the end, and adjust newAbaEventsStartIndex_ down to the new size
-   * of abaEvents_ . Set abaStepIndexes_[step] to the next index in abaEvents_.
-   * (We need this because the ABA derivation backtracks and repeats steps.)
-   * \param step The ABA step number.
-   */
-  void abaNewStep(int step);
 
   // Use these to turn the UI on and off depending on whether anything is currently loaded
   void setUIEnabled(bool enabled);
@@ -472,15 +479,12 @@ private:
   QColor phasedOutModelColor_;
 
   int lastLine_ = 0;      // The farthest we've read into runtime_out.txt
-  // Accumulate ABA events here until a solution is found and the entries are copied to events_ .
-  std::vector<std::shared_ptr<AeraEvent> > abaEvents_;
-  // The index of new abaEvents_ entries (after copying events for a previous solution).
-  size_t newAbaEventsStartIndex_;
-  // abaStepIndexes has the index in abaEvents_ of the step number. See abaNewStep.
-  std::vector<size_t> abaStepIndexes_;
   std::map<int, QString> bindings_;
   // The AeraEvent types where stepEvent will create a new AeraGraphicsItem.
   static const std::set<int> newItemEventTypes_;
+  AbaGraph abagraph_;
+  // map of solutionId -> AbaSolution.
+  std::map<int, AbaSolution> abaSolutions_;
 };
 
 }
