@@ -58,12 +58,19 @@
 #include <regex>
 #include "graphics-items/aera-graphics-item.hpp"
 #include "aera-event.hpp"
-#include "aera-visualizer-window-base.hpp"
 #include "aera-checkbox.h"
+#include "views/explanation-log.hpp"
+#include "views/semantics.hpp"
+#include "views/player.hpp"
+#include "views/text-output.hpp"
+#include "views/task-environment.hpp"
 #include "abagraph.hpp"
 
 #include <vector>
 #include <QIcon>
+#include <QDockWidget>
+#include <QMainWindow>
+#include <QSettings>
 
 class AeraVisualizerScene;
 
@@ -78,24 +85,27 @@ class QString;
 
 namespace aera_visualizer {
 
-class ExplanationLogWindow;
+// Some views require forward declaration
+class ExplanationLogView;
 class FindDialog;
+class PlayerView;
+class TextOutputView;
+class TaskEnvironmentView;
 class AbaSentenceItem;
 
 /**
  * AeraVisualizerWindow extends AeraVisualizerWindowBase to present the player
  * control panel and a window for visualizing the processing of AERA objects.
  */
-class AeraVisualizerWindow : public AeraVisualizerWindowBase
+class AeraVisualizerWindow : public QMainWindow
 {
   Q_OBJECT
 
 public:
   /**
-   * Create an AeraVisualizerWindow. After creating the window, call addEvents().
-   * \param replicodeObjects The ReplicodeObjects used to find objects.
+   * Create an AeraVisualizerWindow
    */
-  AeraVisualizerWindow(ReplicodeObjects& replicodeObjects);
+  AeraVisualizerWindow();
 
   class AbaSolution {
   public:
@@ -126,12 +136,7 @@ public:
    */
   void addStartupItems();
 
-  void setExplanationLogWindow(ExplanationLogWindow* explanationLogWindow)
-  {
-    explanationLogWindow_ = explanationLogWindow;
-  }
-
-  ExplanationLogWindow* getExplanationLogWindow() { return explanationLogWindow_;  }
+  ExplanationLogView* getExplanationLogView() { return explanationLogView_;  }
 
   void setFindWindow(FindDialog* zoomToWindow)
   {
@@ -210,7 +215,91 @@ public:
   }
 
   AeraVisualizerScene* getModelsScene() {
-    return modelsScene_;
+    return semanticsView_->getModelsScene();
+  }
+
+  // Step all the way back to the start
+  core::Timestamp vis_jumpToStart();
+
+  // Step back once
+  core::Timestamp vis_stepBack();
+
+  // Step forwards once
+  core::Timestamp vis_stepFwd();
+
+  // Step all the way to the end
+  core::Timestamp vis_jumpToEnd();
+
+  // Step AERA forwards
+  core::Timestamp aera_stepFwd();
+
+  // Let AERA run all the way to the end
+  core::Timestamp aera_jumpToEnd();
+
+  /**
+   * Called by a PlayerView in setSliderToPlayTime
+   */
+  int getNumberOfEvents() {
+    return events_.size();
+  }
+
+  /**
+   * Called by a PlayerView in setSliderToPlayTime
+   */
+  core::Timestamp getTimeOfLastEvent() {
+    return events_.back()->time_;
+  }
+
+  /**
+   * Called by a PlayerView in setSliderToPlayTime
+   */
+  void scrollToTime(Timestamp time) {
+    // If auto scroll is enabled, ensure the new item is visible
+    QSettings settings;
+    if (mainScene_ && settings.value("AutoScroll", Qt::Unchecked).toInt() == Qt::Checked) {
+      mainScene_->scrollToTimestamp(time);
+    }
+  }
+
+  /**
+  * Called by a PlayerView to tick forwards when playing
+  */
+  void timerTick();
+
+  // Get AERA's current time
+  core::Timestamp getAERATime() {
+    return aera_->getCurrentTime();
+  }
+
+  // These are used to set status messages for the labels in the status bar
+  void setAERAstatus(QString message, bool alert) {
+    AERAStatusLabel_->setText(message);
+
+    if (alert)
+      AERAStatusLabel_->setStyleSheet(statusStylesheet_red_);
+    else
+      AERAStatusLabel_->setStyleSheet(statusStylesheet_normal_);
+  }
+
+  enum OperatingMode { PAUSED, WORKING, BABBLING, ERR };
+
+  void setOperatingModeStatus(QString message, OperatingMode mode) {
+    operatingModeStatusLabel_->setText(message);
+
+    switch (mode) {
+      case PAUSED:
+        operatingModeStatusLabel_->setStyleSheet(statusStylesheet_normal_);
+        break;
+      case WORKING:
+        operatingModeStatusLabel_->setStyleSheet(statusStylesheet_green_);
+        break;
+      case BABBLING:
+        operatingModeStatusLabel_->setStyleSheet(statusStylesheet_yellow_);
+        break;
+      case ERR:
+        operatingModeStatusLabel_->setStyleSheet(statusStylesheet_red_);
+        break;
+    }
   }
 
   void abaSentenceItemClicked(AbaSentenceItem* item);
@@ -249,10 +338,13 @@ protected:
    */
   core::Timestamp unstepEvent(core::Timestamp minimumTime, bool& foundGraphicsItem);
 
-  ExplanationLogWindow* explanationLogWindow_;
+  ExplanationLogView* explanationLogView_;
   FindDialog* findDialog_;
 
 private slots:
+  void loadNewSeed();
+  void openOutput();
+  void saveOutput();
   void saveMainWindowImage();
   void zoomIn();
   void zoomOut();
@@ -263,10 +355,22 @@ private slots:
   void fitAll();
 
 private:
-  friend class AeraVisualizerWindowBase;
+  void createDockWidgets();
   void createActions();
   void createMenus();
   void createToolbars();
+  void createStatusBar();
+
+  QToolBar* timelineControls_;
+  
+  /**
+  * Reads new data on the run, updates replicodeObjects_ and settings_ accordingly,
+  * and pushes the data to the GUI elements. Can be configured to read directly from
+  * AERA's memory during a live run (the default option) or to assume settings_ and
+  * replicodeObjects_ have already been filled in by openOutput(). Should be called
+  * after openOutput() or after stepping AERA.
+  */
+  void updateObjectsAndEvents(bool live = true);
 
   /**
    * Get the time stamp from the decimal strings of seconds, milliseconds and
@@ -278,40 +382,60 @@ private:
    */
   core::Timestamp getTimestamp(const std::smatch& matches, int index = 1);
 
-  /**
-   * Enable the play timer to play events and set the playPauseButton_ icon.
-   * If isPlaying_ is already true, do nothing.
-   */
-  void startPlay();
-
-  /**
-   * Disable the play timer, set the playPauseButton_ icon and set isPlaying_ false.
-   */
-  void stopPlay();
-
-  /**
-   * Set playTime_ and update the playTimeLabel_.
-   */
-  void setPlayTime(core::Timestamp time);
-
-  /**
-   * Set the playSlider_ position based on playTime_.
-   */
-  void setSliderToPlayTime();
-
-  void playPauseButtonClickedImpl();
-  void stepButtonClickedImpl();
-  void stepBackButtonClickedImpl();
-  void playTimeLabelClickedImpl();
-  void timerEvent(QTimerEvent* event) override;
+  // Use these to turn the UI on and off depending on whether anything is currently loaded
+  void setUIEnabled(bool enabled);
+  
   void closeEvent(QCloseEvent* event) override;
+
+
+  // Status bar stylesheets
+  QString statusStylesheet_normal_ =
+    "QLabel {"
+    " border-top: 1px solid;"
+    "}";
+
+  QString statusStylesheet_green_ =
+    "QLabel {"
+    " border-top: 1px solid;"
+    " background-color: limegreen;"
+    " color: white;"
+    "}";
+
+  QString statusStylesheet_yellow_ =
+    "QLabel {"
+    " border-top: 1px solid;"
+    " background-color: khaki;"
+    "}";
+
+  QString statusStylesheet_red_ =
+    "QLabel {"
+    " border-top: 1px solid;"
+    " background-color: tomato;"
+    " color: white;"
+    "}";
+  
+
+  AERA_interface* aera_;
+  ReplicodeObjects replicodeObjects_;
+  Settings settings_;
+
+  SemanticsView* semanticsView_;
+  PlayerView* playerView_;
+  TextOutputView* textOutputView_;
+  TaskEnvironmentView* taskEnvironmentView_;
 
   AeraVisualizerScene* modelsScene_;
   AeraVisualizerScene* mainScene_;
   AeraVisualizerScene* selectedScene_;
+  
+  QAction* newInstanceAction_;
+  QAction* openOutputAction_;
+  QAction* saveOutputAction_;
 
   QAction* saveMainWindowImageAction_;
   QAction* exitAction_;
+  QAction* resetAERAInstanceAction_;
+  QAction* configureAERAInstanceAction_;
   QAction* zoomInAction_;
   QAction* zoomOutAction_;
   QAction* zoomHomeAction_;
@@ -341,6 +465,9 @@ private:
   AeraCheckbox* predictedInstantiatedCompositeStatesCheckBox_;
   AeraCheckbox* requirementsCheckBox_;
 
+  QLabel* AERAStatusLabel_;
+  QLabel* operatingModeStatusLabel_;
+
   std::vector<std::shared_ptr<AeraEvent> > startupEvents_;
   std::vector<std::shared_ptr<AeraEvent> > events_;
   size_t iNextEvent_;
@@ -351,10 +478,7 @@ private:
   r_code::Code* essencePropertyObject_;
   QColor phasedOutModelColor_;
 
-  bool showRelativeTime_;
-  core::Timestamp playTime_;
-  int playTimerId_;
-  bool isPlaying_;
+  int lastLine_ = 0;      // The farthest we've read into runtime_out.txt
   std::map<int, QString> bindings_;
   // The AeraEvent types where stepEvent will create a new AeraGraphicsItem.
   static const std::set<int> newItemEventTypes_;

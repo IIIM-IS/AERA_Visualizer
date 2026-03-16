@@ -2,9 +2,10 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2026 Jeff Thompson
-//_/_/ Copyright (c) 2018-2026 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2026 Icelandic Institute for Intelligent Machines
+//_/_/ Copyright (c) 2018-2023 Jeff Thompson
+//_/_/ Copyright (c) 2018-2023 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2023-2026 Chloe Schaff
+//_/_/ Copyright (c) 2018-2023 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -51,92 +52,51 @@
 //_/_/ 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-#ifndef AERA_VISUALIZER_WINDOW_BASE_HPP
-#define AERA_VISUALIZER_WINDOW_BASE_HPP
+#ifndef SEMANTICS_HPP
+#define SEMANTICS_HPP
 
-#include <vector>
-#include <QMainWindow>
-#include <QPushButton>
-#include <QToolButton>
-#include <QSlider>
-#include <QLabel>
-#include "submodules/AERA/r_code/utils.h"
-#include "replicode-objects.hpp"
+#include <QDockWidget>
+#include "../replicode-objects.hpp"
+#include "../graphics-items/aera-visualizer-scene.hpp"
 
 namespace aera_visualizer {
 
-class AeraVisualizerWindow;
-
-// https://wiki.qt.io/Clickable_QLabel
-class ClickableLabel : public QLabel {
-  Q_OBJECT
+	/**
+ * SemanticsView extends QDockWidget to allow the user to
+ * rearrange it as needed
+ */
+class SemanticsView : public QDockWidget
+{
+	Q_OBJECT
 
 public:
-  explicit ClickableLabel(
-    const QString& text, QWidget* parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags());
-  ~ClickableLabel();
+	/**
+	 * Create a SemanticsView.
+	 * \param mainWindow The main parent window for this window.
+	 */
+	SemanticsView(AeraVisualizerWindow* mainWindow);
 
-signals:
-  void clicked();
+	// Used to update the replicodeObjects during live operation
+	void setReplicodeObjects(ReplicodeObjects* replicodeObjects) {
+		modelsScene_->setReplicodeObjects(replicodeObjects);
+	}
 
-protected:
-  void mousePressEvent(QMouseEvent* event) override;
-};
-
-/**
- * AeraVisualizerWindowBase extends QMainWindow and is a base class for
- * visualizer windows like AeraVisualizerWindow which manages the player
- * control panel of the main window and derived windows.
- */
-class AeraVisualizerWindowBase : public QMainWindow
-{
-  Q_OBJECT
-
-protected:
-  /**
-   * Create an AeraVisualizerWindowBase and create the player control panel widget. This is 
-   * called by the derived class, which should add getPlayerControlPanel() to its window.
-   * \param mainWindow The main parent window for this window, or 0 if this is already
-   * The main window.
-   * \param runtimeOutputFilePath The file path of the runtime output,
-   * typically ending in "runtime_out.txt".
-   */
-  AeraVisualizerWindowBase(AeraVisualizerWindow* mainWindow, ReplicodeObjects& replicodeObjects);
-
-  /**
-   * Get the player control panel widget which has a play button, slider bar and time label.
-   * The derived class should add this to its window.
-   */
-  QWidget* getPlayerControlPanel() { return playerControlPanel_;  }
-
-  AeraVisualizerWindow* mainWindow_;
-  ReplicodeObjects& replicodeObjects_;
+	// Make this available so it can be updated by the main window
+	AeraVisualizerScene* getModelsScene() { return modelsScene_; }
 
 private slots:
-  void playPauseButtonClicked();
-  void stepButtonClicked();
-  void stepBackButtonClicked();
-  void playSliderValueChanged(int value);
-  void playTimeLabelClicked();
+	void zoomIn();
+	void zoomOut();
+	void zoomHome();
 
 private:
-  friend class AeraVisualizerWindow;
-  void createPlayerControlPanel();
+	AeraVisualizerScene* modelsScene_;
 
-  QIcon playIcon_;
-  QIcon pauseIcon_;
-  QToolButton* playPauseButton_;
-  QToolButton* stepBackButton_;
-  QToolButton* stepButton_;
-  QSlider* playSlider_;
-  ClickableLabel* playTimeLabel_;
-
-  std::vector<AeraVisualizerWindowBase*> children_;
-  QWidget* playerControlPanel_;
+	QAction* zoomInAction_;
+	QAction* zoomOutAction_;
+	QAction* zoomHomeAction_;
+	
 };
-
-static const std::chrono::milliseconds AeraVisualizer_playTimerTick(100);
-
 }
 
 #endif

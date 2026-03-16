@@ -4,6 +4,7 @@
 //_/_/ 
 //_/_/ Copyright (c) 2018-2026 Jeff Thompson
 //_/_/ Copyright (c) 2018-2026 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2023-2026 Chloe Schaff
 //_/_/ Copyright (c) 2018-2026 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
@@ -58,9 +59,13 @@
 #include "submodules/AERA/r_comp/compiler.h"
 #include "submodules/AERA/r_comp/decompiler.h"
 #include "submodules/AERA/r_exec/model_base.h"
+#include "submodules/AERA/r_exec/opcodes.h"
+#include "submodules/AERA/AERA/main.h"
 #include "replicode-objects.hpp"
 #include <QApplication>
 #include <QProgressDialog>
+
+#include <QMessageBox>
 
 using namespace std;
 using namespace std::chrono;
@@ -75,16 +80,26 @@ ReplicodeObjects::ReplicodeObjects()
 : intMemberRegex_("( ?\\d+)")
 {
   // Set up progressLines_. Used by getProgressLabelText to make the progress messages clearer.
-  progressMessages_.push_back("Preprocessing code (1 of 2)");
-  progressMessages_.push_back("Preprocessing code (2 of 2)");
-  progressMessages_.push_back("Compiling code");
+  progressMessages_.push_back("Snapshotting AERA state");
+  progressMessages_.push_back("Retrieving objects");
   progressMessages_.push_back("Postprocessing code");
   progressMessages_.push_back("Reading runtime output");
+  progressMessages_.push_back("Setting up workspace");
+
+  initialized_ = false;
 }
 
 string ReplicodeObjects::init(const string& userClassesFilePath, const string& decompiledFilePath,
     microseconds basePeriod, QProgressDialog& progress)
 {
+  // TO DO: These will need to be reconciled with the slightly different ones of the other init
+  // Set up progressLines_. Used by getProgressLabelText to make the progress messages clearer.
+  progressMessages_.push_back("Preprocessing code (1 of 2)");
+  progressMessages_.push_back("Preprocessing code (2 of 2)");
+  progressMessages_.push_back("Compiling code");
+  progressMessages_.push_back("Postprocessing code");
+  progressMessages_.push_back("Reading runtime output");
+
   basePeriod_ = basePeriod;
 
   // Run the proprocessor on the user operators (which includes std.replicode) just to
@@ -120,6 +135,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     if (!testOpen)
       return "Can't open decompiled objects file: " + decompiledFilePath;
   }
+  // This sets timeReference_ .
   auto decompiledOut = processDecompiledObjects(decompiledFilePath, objectOids, objectDetailOids);
 
   // Preprocess and compile the processed decompiler output, using the metadata we got above.
@@ -136,7 +152,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     return error;
 
   istringstream preprocessedIn(preprocessedOut.str());
-  Compiler compiler(true);
+  r_comp::Compiler compiler(true);
   r_comp::Image image;
 
   progress.setLabelText(getProgressLabelText("Compiling code"));
@@ -186,12 +202,13 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     }
   }
 
-  // Transfer imageObjects to objects_, unpacking and processing as needed.
+  r_code::list<P<r_code::Code>> objects;
+  // Transfer imageObjects to objects, unpacking and processing as needed.
   // Imitate _Mem::load.
   for (uint32 i = 0; i < imageObjects.size(); ++i) {
     Code* object = imageObjects[i];
     int32 dummyLocation;
-    objects_.push_back(object, dummyLocation);
+    objects.push_back(object, dummyLocation);
     // We don't need to delete, so don't set the storage index.
 
     switch (object->code(0).getDescriptor()) {
@@ -227,34 +244,94 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     }
   }
 
-  _Mem::init_timestamps(timeReference_, objects_);
+  _Mem::init_timestamps(timeReference_, objects);
 
-  // We have to get the source code by decompiling the packet objects in objects_ (not from
-  // the original decompiled code in decompiledFilePath) because variable names can be different.
+  return initHelper(metadata, &objects, image.object_names_.symbols_, progress);
+}
+
+
+string ReplicodeObjects::init(AERA_interface* aera, microseconds basePeriod, QProgressDialog& progress)
+{
+  // Store this
+  basePeriod_ = basePeriod;
+
+  progress.setLabelText(getProgressLabelText("Snapshotting AERA state"));
+  QApplication::processEvents();
+  if (progress.wasCanceled())
+    return "cancel";
+
+  // Get current state of AERA
+  r_comp::Metadata metadata = aera->getMetadata();  // Retreve metadata to interpret objects
+  auto objects = const_cast<r_code::list<P<r_code::Code>>*>(aera->getMem()->get_objects_());    // Get objects directly from AERA's memory
+  
+  progress.setLabelText(getProgressLabelText("Retrieving objects"));
+  QApplication::processEvents();
+  if (progress.wasCanceled())
+    return "cancel";
+  
+  // We update progress for 3 loops of imageObjects.size().
+  progress.setLabelText(getProgressLabelText("Postprocessing code"));
+  progress.setMaximum(objects->size() * 3);
+
+  // Make sure to set this
+  timeReference_ = aera->getStartTime();
+
+  // Use these names where available
+  std::unordered_map<uint32, std::string> seedNames = aera->getSeedNames().symbols_;
+
+  return initHelper(metadata, objects, seedNames, progress);
+}
+
+string ReplicodeObjects::initHelper(
+  r_comp::Metadata& metadata, r_code::list<P<r_code::Code>>* objects, unordered_map<uint32, string>& seedNames, QProgressDialog& progress)
+{
+  int i = 0;
+  unordered_map<const Class*, uint16> objectIdPerClass;
+  // Initialize objectIdPerClass.
+  for (size_t j = 0; j < metadata.classes_by_opcodes_.size(); ++j) {
+    if (metadata.classes_by_opcodes_[j].str_opcode != "undefined")
+      objectIdPerClass[&metadata.classes_by_opcodes_[j]] = 0;
+  }
+  r_code::list<P<r_code::Code> >::const_iterator o;
+  for (o = objects->begin(); o != objects->end(); ++o) {
+    i++;
+
+    if (progress.wasCanceled())
+      return "cancel";
+    progress.setValue(i);
+    //if (i % 100 == 0)
+    //  QApplication::processEvents();
+
+    assignLabel(*o, objectIdPerClass, metadata, seedNames);
+  }
+
+  // Get the source code by decompiling the packed objects in objects
   r_comp::Image packedImage;
-  packedImage.object_names_.symbols_ = image.object_names_.symbols_;
-  packedImage.add_objects(objects_, true);
+  packedImage.object_names_.symbols_ = seedNames;
+  packedImage.add_objects(*objects, true);
 
   Decompiler decompiler;
   decompiler.init(&metadata);
 
-  // Fill the objectNames map from the image and use it in decompile_references.
+  // Fill the objectNames map from objectLabel_ and use it in decompile_references.
   unordered_map<uint16, std::string> objectNames;
   for (auto i = 0; i < packedImage.code_segment_.objects_.size(); ++i) {
     if (progress.wasCanceled())
       return "cancel";
-    progress.setValue(imageObjects.size() + i);
+    progress.setValue(objectLabel_.size() + i);
     if (i % 100 == 0)
       QApplication::processEvents();
 
-    objectNames[i] = compiler.getObjectName(i);
+    auto object = getObjectByDetailOid(packedImage.code_segment_.objects_[i]->detail_oid_);
+    if (object)
+      objectNames[i] = objectLabel_[object];
   }
   decompiler.decompile_references(&packedImage, &objectNames);
 
   for (uint16 i = 0; i < packedImage.code_segment_.objects_.size(); ++i) {
     if (progress.wasCanceled())
       return "cancel";
-    progress.setValue(2 * imageObjects.size() + i);
+    progress.setValue(2 * objects->size() + i);
     if (i % 100 == 0)
       QApplication::processEvents();
 
@@ -271,8 +348,93 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
     }
   }
 
+  // Mark that initialization is complete
+  initialized_ = true;
+  
   return "";
 }
+
+// Get a string for the value such as "a", "b" ... "z", "aa", "ab" ....
+static std::string makeSuffix(uint32 value) {
+  string result;
+  do {
+    // Get the lowest digit as base 26 and prepend a char from 'a' to 'z'.
+    uint32 lowest = value % 26;
+    result = (char)('a' + lowest) + result;
+
+    // Shift.
+    value /= 26;
+  } while (value != 0);
+
+  return result;
+}
+
+// Assign object labels. All internal references use OIDs, detail OIDs, or reference
+// so the labels can be assigned more or less arbitrarily. If available, we'll use
+// the name used in the seed program. If not,  this code follows the convention for
+// runtime_out.txt (search for the macro `OUTPUT_LINE`).
+void ReplicodeObjects::assignLabel(
+  Code* object, unordered_map<const Class*, uint16>& objectIdPerClass,
+  const r_comp::Metadata& metadata, const std::unordered_map<uint32, std::string>& seedNames)
+{
+  if (objectLabel_.find(object) != objectLabel_.end())
+    // Already processed.
+    return;
+
+  uint32 oid = object->get_oid();
+  string label;
+
+  // If a name already exists, use it
+  if (seedNames.find(oid) != seedNames.end())
+    label = seedNames.at(oid);
+
+  // If not, assign it as CLASS_OID or similar
+  else {
+    // Imitate Decompiler::decompile_references.
+    // https://github.com/IIIM-IS/AERA/blob/df783dc59f4e5344dcfeb219f7239e4079bbd65d/r_comp/decompiler.cpp#L268-L306
+    // Retrieve prefix from opcode
+    const Class* c = &metadata.classes_by_opcodes_[object->code(0).asOpcode()];
+    string className = c->str_opcode;
+
+    // A class name like mk.val has a dot, but this isn't allowed as an identifier.
+    replace(className.begin(), className.end(), '.', '_');
+    // A class name like |fact has a bar, but this isn't allowed as an identifier.
+    // (Use regex_replace because it can handle multi-character strings.)
+    regex verticalBarRegex("\\|");
+    className = regex_replace(className, verticalBarRegex, "anti_");
+
+    if (object->get_oid() != UNDEFINED_OID)
+      // Use the object's OID.
+      label = className + "_" + std::to_string(oid);
+    else {
+      // Create a name with a unique ID.
+      uint16 last_object_ID = objectIdPerClass[c];
+      objectIdPerClass[c] = last_object_ID + 1;
+      label = className + std::to_string(last_object_ID);
+    }
+
+    if (labelObject_.find(label) != labelObject_.end()) {
+      // The created name matches an existing name. Keep trying an added
+      // suffix until it is unique.
+      for (uint32 value = 1; true; ++value) {
+        std::string new_label = label + makeSuffix(value);
+        if (labelObject_.find(new_label) == labelObject_.end()) {
+          label = new_label;
+          break;
+        }
+      }
+    }
+  }
+
+  // Save to objectLabel and labelObject
+  objectLabel_[object] = label;
+  labelObject_[label] = object;
+
+  // Recursively label the referenced objects.
+  for (int i = 0; i < object->references_size(); ++i)
+    assignLabel(object->get_reference(i), objectIdPerClass, metadata, seedNames);
+}
+
 
 string ReplicodeObjects::processDecompiledObjects(
   string decompiledFilePath, map<string, uint32>& objectOids, map<string, uint64>& objectDetailOids)
@@ -348,9 +510,10 @@ Code* ReplicodeObjects::getObject(uint32 oid) const
   if (oid == UNDEFINED_OID)
     return NULL;
 
-  for (auto o = objects_.begin(); o != objects_.end(); ++o) {
-    if ((*o)->get_oid() == oid)
-      return *o;
+  // Use objectLabel_ because its keys are the objects.
+  for (auto o = objectLabel_.begin(); o != objectLabel_.end(); ++o) {
+    if (o->first->get_oid() == oid)
+      return o->first;
   }
 
   return NULL;
@@ -358,9 +521,10 @@ Code* ReplicodeObjects::getObject(uint32 oid) const
 
 Code* ReplicodeObjects::getObjectByDetailOid(uint64 detailOid) const
 {
-  for (auto o = objects_.begin(); o != objects_.end(); ++o) {
-    if ((*o)->get_detail_oid() == detailOid)
-      return *o;
+  // Use objectLabel_ because its keys are the objects.
+  for (auto o = objectLabel_.begin(); o != objectLabel_.end(); ++o) {
+    if (o->first->get_detail_oid() == detailOid)
+      return o->first;
   }
 
   return NULL;

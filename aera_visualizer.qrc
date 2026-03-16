@@ -9,5 +9,8 @@
         <file>images/play-step.png</file>
         <file>images/app.ico</file>
         <file>images/zoom-to.png</file>
+        <file>images/jump-end.png</file>
+        <file>images/jump-start.png</file>
+        <file>images/logo_faded.png</file>
     </qresource>
 </RCC>

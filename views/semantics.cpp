@@ -2,10 +2,10 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2026 Jeff Thompson
-//_/_/ Copyright (c) 2018-2026 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2026 Icelandic Institute for Intelligent Machines
-//_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
+//_/_/ Copyright (c) 2018-2023 Jeff Thompson
+//_/_/ Copyright (c) 2018-2023 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2023-2026 Chloe Schaff
+//_/_/ Copyright (c) 2018-2023 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -52,46 +52,76 @@
 //_/_/ 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-#include <regex>
-#include <QMenu>
-#include "../views/explanation-log.hpp"
-#include "../aera-visualizer-window.hpp"
-#include "../submodules/AERA/r_exec/factory.h"
-#include "aera-visualizer-scene.hpp"
-#include "instantiated-composite-state-item.hpp"
-#include "model-prediction-from-requirement-item.hpp"
 
-using namespace std;
-using namespace core;
-using namespace r_code;
-using namespace r_exec;
+#include "semantics.hpp"
+#include "../aera-visualizer-window.hpp"
+
+#include <QGraphicsView>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QToolBar>
+
 
 namespace aera_visualizer {
 
-ModelPredictionFromRequirementItem::ModelPredictionFromRequirementItem(
-  ModelSimulatedPredictionReductionFromGoalRequirement* modelReduction, ReplicodeObjects& replicodeObjects,
-  AeraVisualizerScene* parent)
-: ExpandableGoalOrPredItem(modelReduction, replicodeObjects,
-    "Model " + makeHtmlLink(modelReduction->model_, replicodeObjects) + " from goal requirement " + RightDoubleArrowHtml,
-    parent),
-  modelReduction_(modelReduction)
+SemanticsView::SemanticsView(AeraVisualizerWindow* mainWindow)
+	: QDockWidget("Models and Composite States", mainWindow)
 {
+	QWidget* container = new QWidget();
+	container->setObjectName("semantics_container");
+	//container->setStyleSheet("QWidget#container { background-color: rgb(255,0,0); margin:5px; border:1px solid rgb(0, 0, 0); }");
+
+	modelsScene_ = new AeraVisualizerScene(mainWindow, false);
+
+	
+	zoomInAction_ = new QAction(QIcon(":/images/zoom-in.png"), tr("Zoom In"), this);
+	zoomInAction_->setStatusTip(tr("Zoom In"));
+	zoomInAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Equal));
+	connect(zoomInAction_, SIGNAL(triggered()), this, SLOT(zoomIn()));
+
+	zoomOutAction_ = new QAction(QIcon(":/images/zoom-out.png"), tr("Zoom Out"), this);
+	zoomOutAction_->setStatusTip(tr("Zoom Out"));
+	zoomOutAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Minus));
+	connect(zoomOutAction_, SIGNAL(triggered()), this, SLOT(zoomOut()));
+
+	zoomHomeAction_ = new QAction(QIcon(":/images/zoom-home.png"), tr("Zoom Home"), this);
+	zoomHomeAction_->setStatusTip(tr("Zoom to show all"));
+	zoomHomeAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Home));
+	connect(zoomHomeAction_, SIGNAL(triggered()), this, SLOT(zoomHome()));
+
+	auto modelsSceneView = new QGraphicsView(modelsScene_, this);
+	modelsSceneView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	modelsSceneView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	modelsSceneView->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
+
+	QToolBar* zoomControls = new QToolBar(this);
+	zoomControls->addAction(zoomHomeAction_);
+	zoomControls->addAction(zoomInAction_);
+	zoomControls->addAction(zoomOutAction_);
+	zoomControls->setIconSize(QSize(16, 16));
+
+	QVBoxLayout* stack = new QVBoxLayout(this);
+	stack->addWidget(modelsSceneView);
+	stack->addWidget(zoomControls);
+	container->setLayout(stack);
+
+	setWidget(container);
 }
 
-void ModelPredictionFromRequirementItem::textItemLinkActivated(const QString& link)
+void SemanticsView::zoomIn()
 {
-  if (link == "#this") {
-    auto menu = new QMenu();
-    menu->addAction("Zoom to This", [=]() { parent_->zoomToItem(this); });
-    menu->addAction("Focus on This", [=]() { parent_->focusOnItem(this); });
-    menu->addAction("Center on This", [=]() { parent_->centerOnItem(this); });
+	modelsScene_->scaleViewBy(1.09);
+}
 
-    menu->exec(QCursor::pos() - QPoint(10, 10));
-    delete menu;
-  }
-  else
-    // For #expand, #detail_oid- and others, defer to the base class.
-    ExpandableGoalOrPredItem::textItemLinkActivated(link);
+void SemanticsView::zoomOut()
+{
+	modelsScene_->scaleViewBy(1 / 1.09);
+}
+
+void SemanticsView::zoomHome()
+{
+	modelsScene_->zoomViewHome();
 }
 
 }

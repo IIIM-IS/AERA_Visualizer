@@ -2,10 +2,10 @@
 //_/_/
 //_/_/ AERA Visualizer
 //_/_/ 
-//_/_/ Copyright (c) 2018-2026 Jeff Thompson
-//_/_/ Copyright (c) 2018-2026 Kristinn R. Thorisson
-//_/_/ Copyright (c) 2018-2026 Icelandic Institute for Intelligent Machines
-//_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
+//_/_/ Copyright (c) 2018-2023 Jeff Thompson
+//_/_/ Copyright (c) 2018-2023 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2023-2026 Chloe Schaff
+//_/_/ Copyright (c) 2018-2023 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -52,73 +52,60 @@
 //_/_/ 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-#include "aera-visualizer-window.hpp"
-#include "views/explanation-log.hpp"
-#include "find-dialog.hpp"
-#include "submodules/AERA/AERA/settings.h"
-#include "submodules/AERA/AERA/main.h"
 
-#include <QApplication>
-#include <QCoreApplication>
-#include <QSettings>
-#include <QMessageBox>
-#include <QFileDialog>
-#include <QScreen>
-#include <QProxyStyle>
-#include <QProgressDialog>
-#include <QPalette>
+#include "text-output.hpp"
+#include "../aera-visualizer-window.hpp"
 
-#include <QtDebug>
-
-using namespace std;
-using namespace std::chrono;
-using namespace aera_visualizer;
+#include <QTabWidget>
+#include <QTextBrowser>
 
 
-int main(int argv, char *args[])
-{
-  Q_INIT_RESOURCE(aera_visualizer);
+namespace aera_visualizer {
 
-  QApplication app(argv, args);
+	TextOutputView::TextOutputView(AeraVisualizerWindow* mainWindow)
+		: QDockWidget("Raw Data", mainWindow)
+	{
 
-  // Override the tool tip style with 0 delay.
-  class MyProxyStyle : public QProxyStyle
-  {
-  public:
-    using QProxyStyle::QProxyStyle;
-    int styleHint(StyleHint hint, const QStyleOption* option = nullptr, const QWidget* widget = nullptr, QStyleHintReturn* returnData = nullptr) const override {
-      if (hint == QStyle::SH_ToolTip_WakeUpDelay) { return 0; }
-      else if (hint == QStyle::SH_ToolTip_FallAsleepDelay) { return 0; }
-      return QProxyStyle::styleHint(hint, option, widget, returnData);
-    }
-  };
-  app.setStyle(new MyProxyStyle(qApp->style()));
+		// Set up the browsers
+		decompiledObjectsBrowser_ = new QTextBrowser(this);
+		runtimeOutBrowser_ = new QTextBrowser(this);
+		decompiledObjectsBrowser_->setText("No AERA output to read");
+		runtimeOutBrowser_->setText("No AERA output to read");
 
-  //QPalette darkMode = QPalette();
-  //darkMode.setColor(QPalette::Window, QColor(38, 50, 56));
-  //darkMode.setColor(QPalette::WindowText, QColor(236, 239, 241));
-  //app.setPalette(darkMode);
+		// Put it all in a QTabWidget
+		QTabWidget* tabs = new QTabWidget(this);
+		tabs->setObjectName("textoutput_container");
+		tabs->addTab(decompiledObjectsBrowser_, "Decompiled Objects");
+		tabs->addTab(runtimeOutBrowser_, "Runtime Output");
 
-  // Globally remove the '?' from the QInputDialog title bar.
-  QApplication::setAttribute(Qt::AA_DisableWindowContextHelpButton);
+		setWidget(tabs);
+	}
 
-  // Set the organization and application name
-  // Enables using the settings from anywhere
-  QCoreApplication::setOrganizationName("IIIM");
-  QCoreApplication::setApplicationName("AERA_Visualizer");
+	void TextOutputView::refresh() {
+		// TO DO: Refreshing should only load new lines without changing what's currently
+		// displayed so you don't lose your spot every time you step AERA forwards.
+		
+		// Check that these are set
+		if (decompiledFilePath_.empty() || runtimeOutFilePath_.empty())
+			return;
 
-  // Configure QSettings to use .ini files to store settings
-  QSettings::setDefaultFormat(QSettings::IniFormat);
+		// Open the files
+		ifstream decompiledObjectsFile(decompiledFilePath_);
+		ifstream runtimeOutputFile(runtimeOutFilePath_);
 
-  AeraVisualizerWindow mainWindow;
-  mainWindow.setWindowIcon(QIcon(":/images/app.ico"));
-  mainWindow.setWindowState(Qt::WindowMaximized);
+		// Load in decompiled objects
+		string decompiledObjects;
+		string line;
+		while (getline(decompiledObjectsFile, line))
+			decompiledObjects += line + "\n";
 
-  // Set up the Find dialog but don't display it
-  auto findDialog = new FindDialog(&mainWindow);
-  mainWindow.setFindWindow(findDialog);
-  mainWindow.show();
-  mainWindow.addStartupItems();
+		decompiledObjectsBrowser_->setText(QString::fromStdString(decompiledObjects));
 
-  return app.exec();
+		// Load in runtime output
+		string runtimeOut;
+		while (getline(runtimeOutputFile, line))
+			runtimeOut += line + "\n";
+
+		runtimeOutBrowser_->setText(QString::fromStdString(runtimeOut));
+	}
 }

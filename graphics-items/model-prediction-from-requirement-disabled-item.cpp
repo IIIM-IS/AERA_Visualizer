@@ -53,7 +53,7 @@
 
 #include <regex>
 #include <QMenu>
-#include "../explanation-log-window.hpp"
+#include "../views/explanation-log.hpp"
 #include "../aera-visualizer-window.hpp"
 #include "../submodules/AERA/r_exec/factory.h"
 #include "aera-visualizer-scene.hpp"

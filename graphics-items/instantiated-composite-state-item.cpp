@@ -56,7 +56,7 @@
 #include <regex>
 #include <algorithm>
 #include <QRegularExpression>
-#include "explanation-log-window.hpp"
+#include "views/explanation-log.hpp"
 #include "aera-visualizer-scene.hpp"
 #include "model-item.hpp"
 #include "composite-state-item.hpp"

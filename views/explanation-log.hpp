@@ -4,8 +4,8 @@
 //_/_/ 
 //_/_/ Copyright (c) 2018-2026 Jeff Thompson
 //_/_/ Copyright (c) 2018-2026 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2023-2026 Chloe Schaff
 //_/_/ Copyright (c) 2018-2026 Icelandic Institute for Intelligent Machines
-//_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -52,73 +52,75 @@
 //_/_/ 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-#include "aera-visualizer-window.hpp"
-#include "views/explanation-log.hpp"
-#include "find-dialog.hpp"
-#include "submodules/AERA/AERA/settings.h"
-#include "submodules/AERA/AERA/main.h"
+#ifndef EXPLANATION_LOG_HPP
+#define EXPLANATION_LOG_HPP
 
-#include <QApplication>
-#include <QCoreApplication>
-#include <QSettings>
-#include <QMessageBox>
-#include <QFileDialog>
-#include <QScreen>
-#include <QProxyStyle>
-#include <QProgressDialog>
-#include <QPalette>
+#include <QTextBrowser>
+#include <QDockWidget>
+#include "../aera-visualizer-window.hpp"
 
-#include <QtDebug>
+namespace aera_visualizer {
 
-using namespace std;
-using namespace std::chrono;
-using namespace aera_visualizer;
+class AeraVisualizerWindow;
 
-
-int main(int argv, char *args[])
+/**
+ * ExplanationLogView extends QDockWidget to allow the user to
+ * rearrange it as needed
+ */
+class ExplanationLogView : public QDockWidget
 {
-  Q_INIT_RESOURCE(aera_visualizer);
+  Q_OBJECT
 
-  QApplication app(argv, args);
+public:
+  /**
+   * Create an ExplanationLogView.
+   * \param mainWindow The main parent window for this window.
+   */
+  ExplanationLogView(AeraVisualizerWindow* mainWindow);
 
-  // Override the tool tip style with 0 delay.
-  class MyProxyStyle : public QProxyStyle
+  // Used to update the replicodeObjects during live operation
+  void setReplicodeObjects(ReplicodeObjects* replicodeObjects) {
+    replicodeObjects_ = replicodeObjects;
+  }
+
+  void appendHtml(const QString& html)
   {
+    // TODO: Does QTextBrowser have an actual append operation?
+    html_ += html;
+    textBrowser_->setText(html_);
+  }
+
+  void appendHtml(const std::string& html) { appendHtml(QString(html.c_str())); }
+
+private slots:
+  void textBrowserAnchorClicked(const QUrl& url);
+
+private:
+  /**
+   * ExplanationLogView::TextBrowser extends QTextBrowser so that we can override its
+   * mouseMoveEvent.
+   */
+  class TextBrowser : public QTextBrowser {
   public:
-    using QProxyStyle::QProxyStyle;
-    int styleHint(StyleHint hint, const QStyleOption* option = nullptr, const QWidget* widget = nullptr, QStyleHintReturn* returnData = nullptr) const override {
-      if (hint == QStyle::SH_ToolTip_WakeUpDelay) { return 0; }
-      else if (hint == QStyle::SH_ToolTip_FallAsleepDelay) { return 0; }
-      return QProxyStyle::styleHint(hint, option, widget, returnData);
-    }
+    TextBrowser(ExplanationLogView* parent)
+      : QTextBrowser(parent), parent_(parent)
+    {}
+
+    ExplanationLogView* parent_;
+
+  protected:
+    void mouseMoveEvent(QMouseEvent* event) override;
   };
-  app.setStyle(new MyProxyStyle(qApp->style()));
+  friend TextBrowser;
 
-  //QPalette darkMode = QPalette();
-  //darkMode.setColor(QPalette::Window, QColor(38, 50, 56));
-  //darkMode.setColor(QPalette::WindowText, QColor(236, 239, 241));
-  //app.setPalette(darkMode);
+  AeraVisualizerWindow* mainWindow_;
+  ReplicodeObjects* replicodeObjects_;
 
-  // Globally remove the '?' from the QInputDialog title bar.
-  QApplication::setAttribute(Qt::AA_DisableWindowContextHelpButton);
+  // TODO: We should be able to use textBrowser_ to append HTML.
+  QString html_;
+  TextBrowser* textBrowser_;
+};
 
-  // Set the organization and application name
-  // Enables using the settings from anywhere
-  QCoreApplication::setOrganizationName("IIIM");
-  QCoreApplication::setApplicationName("AERA_Visualizer");
-
-  // Configure QSettings to use .ini files to store settings
-  QSettings::setDefaultFormat(QSettings::IniFormat);
-
-  AeraVisualizerWindow mainWindow;
-  mainWindow.setWindowIcon(QIcon(":/images/app.ico"));
-  mainWindow.setWindowState(Qt::WindowMaximized);
-
-  // Set up the Find dialog but don't display it
-  auto findDialog = new FindDialog(&mainWindow);
-  mainWindow.setFindWindow(findDialog);
-  mainWindow.show();
-  mainWindow.addStartupItems();
-
-  return app.exec();
 }
+
+#endif

@@ -77,15 +77,10 @@ using namespace r_exec;
 
 namespace aera_visualizer {
 
-AeraVisualizerScene::AeraVisualizerScene(
-  ReplicodeObjects& replicodeObjects, AeraVisualizerWindow* parent, bool isMainScene,
-  const OnSceneSelected& onSceneSelected)
+AeraVisualizerScene::AeraVisualizerScene(AeraVisualizerWindow* parent, bool isMainScene)
 : QGraphicsScene(parent),
   parent_(parent),
-  replicodeObjects_(replicodeObjects),
   isMainScene_(isMainScene),
-  onSceneSelected_(onSceneSelected),
-  essencePropertyObject_(replicodeObjects.getObject("essence")),
   didInitialFit_(false),
   thisFrameTime_(seconds(0)),
   thisFrameLeft_(0),
@@ -126,8 +121,8 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 
     if (isMainScene_) {
       // Adjust the position to align the first item to the left side.
-      int firstFrameNumber = duration_cast<microseconds>(aeraEvent->time_ - replicodeObjects_.getTimeReference()).count() /
-        replicodeObjects_.getSamplingPeriod().count();
+      int firstFrameNumber = duration_cast<microseconds>(aeraEvent->time_ - replicodeObjects_->getTimeReference()).count() /
+        replicodeObjects_->getSamplingPeriod().count();
       int firstFrameLeft = frameWidth_ * firstFrameNumber;
       // Temporarily set to NoAnchor to override other controls.
       auto saveAnchor = view->transformationAnchor();
@@ -141,7 +136,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
       line->setZValue(-2000);
 
       // Add all the frame boundary lines and timestamps.
-      for (auto frameTime = replicodeObjects_.getTimeReference(); true; frameTime += replicodeObjects_.getSamplingPeriod()) {
+      for (auto frameTime = replicodeObjects_->getTimeReference(); true; frameTime += replicodeObjects_->getSamplingPeriod()) {
         int frameLeft = getTimelineX(frameTime);
         if (frameLeft > sceneRect().right())
           break;
@@ -149,7 +144,7 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
         auto line = addLine(frameLeft, sceneRect().top(), frameLeft, sceneRect().bottom(),
           QPen(Qt::lightGray, 1, Qt::DashLine));
         line->setZValue(-2000);
-        auto text = addText(replicodeObjects_.relativeTime(frameTime).c_str());
+        auto text = addText(replicodeObjects_->relativeTime(frameTime).c_str());
         text->setZValue(-100);
         text->setDefaultTextColor(Qt::darkGray);
         text->setPos(frameLeft, 0);
@@ -191,11 +186,11 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
 
   if (qIsNaN(aeraEvent->itemTopLeftPosition_.x())) {
     // Assign an initial position.
-    // Only update positions based on time for the main scene.
-    if (isMainScene_ && aeraEvent->time_ >= thisFrameTime_ + replicodeObjects_.getSamplingPeriod()) {
+    // Only update positions based on time for the main scehe.
+    if (isMainScene_ && aeraEvent->time_ >= thisFrameTime_ + replicodeObjects_->getSamplingPeriod()) {
       // Start a new frame (or the first frame).
-      auto relativeTime = duration_cast<microseconds>(aeraEvent->time_ - replicodeObjects_.getTimeReference());
-      thisFrameTime_ = aeraEvent->time_ - (relativeTime % replicodeObjects_.getSamplingPeriod());
+      auto relativeTime = duration_cast<microseconds>(aeraEvent->time_ - replicodeObjects_->getTimeReference());
+      thisFrameTime_ = aeraEvent->time_ - (relativeTime % replicodeObjects_->getSamplingPeriod());
       thisFrameLeft_ = getTimelineX(thisFrameTime_);
       // Reset the top.
       eventTypeNextTop_.clear();
@@ -241,10 +236,10 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
         else {
           top = eventTypeFirstTop_[eventType];
 
-          if (thisFrameTime_ - replicodeObjects_.getTimeReference() < milliseconds(150) &&
+          if (thisFrameTime_ - replicodeObjects_->getTimeReference() < milliseconds(150) &&
               eventType == AutoFocusNewObjectEvent::EVENT_TYPE &&
               aeraEvent->object_->get_reference(0)->references_size() >= 2 &&
-              aeraEvent->object_->get_reference(0)->get_reference(1) == replicodeObjects_.getObject("essence"))
+              aeraEvent->object_->get_reference(0)->get_reference(1) == replicodeObjects_->getObject("essence"))
             // Debug: The first essence item. Override to make the same types of values line up. Should use a layout algorithm.
             top = 296;
         }
@@ -356,9 +351,6 @@ void AeraVisualizerScene::mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent)
     return;
 
   views().at(0)->setDragMode(QGraphicsView::ScrollHandDrag);
-  if (onSceneSelected_)
-    // Notify the parent that this scene was selected.
-    onSceneSelected_();
   QGraphicsScene::mousePressEvent(mouseEvent);
 }
 
@@ -562,8 +554,8 @@ void AeraVisualizerScene::zoomToItem(QGraphicsItem* item)
 }
 
 void AeraVisualizerScene::scrollToTimestamp(core::Timestamp timestamp) {
-  auto relativeTime = duration_cast<microseconds>(timestamp - replicodeObjects_.getTimeReference());
-  auto frameStartTime = timestamp - (relativeTime % replicodeObjects_.getSamplingPeriod());
+  auto relativeTime = duration_cast<microseconds>(timestamp - replicodeObjects_->getTimeReference());
+  auto frameStartTime = timestamp - (relativeTime % replicodeObjects_->getSamplingPeriod());
   qreal xPos = getTimelineX(frameStartTime);
   // This point marks the top left of the scrolled scene
   // it is used to keep the same y position while scrolling
@@ -593,7 +585,7 @@ void AeraVisualizerScene::setNonItemsVisible(const set<int>& notEventTypes, bool
 
 void AeraVisualizerScene::setAutoFocusItemsVisible(const string& property, bool visible)
 {
-  auto propertyObject = (property == "essence" ? essencePropertyObject_ : replicodeObjects_.getObject(property));
+  auto propertyObject = (property == "essence" ? essencePropertyObject_ : replicodeObjects_->getObject(property));
   if (!propertyObject)
     return;
 

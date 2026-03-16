@@ -55,7 +55,7 @@
 #include <regex>
 #include <QMenu>
 #include "../submodules/AERA/r_exec/opcodes.h"
-#include "explanation-log-window.hpp"
+#include "views/explanation-log.hpp"
 #include "aera-visualizer-scene.hpp"
 #include "prediction-item.hpp"
 #include "prediction-result-item.hpp"
@@ -132,7 +132,7 @@ void PredictionResultItem::textItemLinkActivated(const QString& link)
           return;
       }
 
-      parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
+      parent_->getParent()->getExplanationLogView()->appendHtml(explanation);
     });
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;

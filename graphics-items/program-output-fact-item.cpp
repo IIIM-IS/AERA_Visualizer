@@ -55,7 +55,7 @@
 #include <regex>
 #include <algorithm>
 #include <QMenu>
-#include "explanation-log-window.hpp"
+#include "views/explanation-log.hpp"
 #include "aera-visualizer-scene.hpp"
 #include "program-reduction-item.hpp"
 #include "program-output-fact-item.hpp"
@@ -111,7 +111,7 @@ void ProgramOutputFactItem::textItemLinkActivated(const QString& link)
         " ?</b><br>This an output of instantiated program <b>" + 
         replicodeObjects_.getLabel(mkRdx->get_reference(0)).c_str() +
         "</b>, according to<br>program reduction " + makeHtmlLink(mkRdx) + "<br><br>";
-      parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
+      parent_->getParent()->getExplanationLogView()->appendHtml(explanation);
     });
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;

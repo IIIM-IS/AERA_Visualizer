@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="aera-visualizer-window-base.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="aera-visualizer-window.cpp" />
     <ClCompile Include="submodules\AERA\submodules\CoreLibrary\CoreLibrary\base.cpp">
@@ -176,7 +175,6 @@
     <ClCompile Include="submodules\AERA\usr_operators\auto_focus_callback.cpp">
       <Filter>usr_operators</Filter>
     </ClCompile>
-    <ClCompile Include="explanation-log-window.cpp" />
     <ClCompile Include="graphics-items\aera-graphics-item.cpp">
       <Filter>graphics-items</Filter>
     </ClCompile>
@@ -274,6 +272,63 @@
     <ClCompile Include="find-dialog.cpp" />
     <ClCompile Include="graphics-items\instantiated-model-item.cpp">
       <Filter>graphics-items</Filter>
+    </ClCompile>
+    <ClCompile Include="submodules\AERA\AERA\main.cpp">
+      <Filter>AERA</Filter>
+    </ClCompile>
+    <ClCompile Include="submodules\AERA\AERA\test_mem.cpp">
+      <Filter>AERA</Filter>
+    </ClCompile>
+    <ClCompile Include="submodules\AERA\AERA\IODevices\TCP\tcp_io_device.cpp">
+      <Filter>AERA\TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="submodules\AERA\AERA\IODevices\video_screen\video_screen.cpp">
+      <Filter>AERA\video_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="submodules\AERA\AERA\IODevices\video_screen\video_screen_io_device.cpp">
+      <Filter>AERA\video_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="submodules\AERA\usr_operators\usr_operators.cpp">
+      <Filter>usr_operators</Filter>
+    </ClCompile>
+    <ClCompile Include="submodules\AERA\usr_operators\Callbacks\callbacks.cpp">
+      <Filter>usr_operators\Callbacks</Filter>
+    </ClCompile>
+    <ClCompile Include="submodules\AERA\usr_operators\Operators\operators.cpp">
+      <Filter>usr_operators\Operators</Filter>
+    </ClCompile>
+    <ClCompile Include="submodules\AERA\usr_operators\TestProgram\test_program.cpp">
+      <Filter>usr_operators\TestProgram</Filter>
+    </ClCompile>
+    <ClCompile Include="submodules\AERA\usr_operators\Callbacks\callbacks.cpp">
+      <Filter>usr_operators\Callbacks</Filter>
+    </ClCompile>
+    <ClCompile Include="submodules\AERA\AERA\main.cpp">
+      <Filter>AERA</Filter>
+    </ClCompile>
+    <ClCompile Include="submodules\AERA\AERA\IODevices\TCP\AERA_Protobuf\tcp_data_message.pb.cc">
+      <Filter>AERA\TCP\AERA_Protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="views\explanation-log.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="views\semantics.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="views\player.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="template.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="views\text-output.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="views\task-environment.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="submodules\AERA\AERA\IODevices\TCP\AERA_Protobuf\tcp_connection.cpp">
+      <Filter>AERA\TCP\AERA_Protobuf</Filter>
     </ClCompile>
     <ClCompile Include="graphics-items\reduction-marker-item.cpp">
       <Filter>graphics-items</Filter>
@@ -544,6 +599,48 @@
     <ClInclude Include="graphics-items\instantiated-model-item.hpp">
       <Filter>graphics-items</Filter>
     </ClInclude>
+    <ClInclude Include="submodules\AERA\AERA\settings.h">
+      <Filter>AERA</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\AERA\AERA\test_mem.h">
+      <Filter>AERA</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\AERA\AERA\IODevices\TCP\tcp_io_device.h">
+      <Filter>AERA\TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\AERA\AERA\IODevices\video_screen\video_screen.h">
+      <Filter>AERA\video_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\AERA\AERA\IODevices\video_screen\video_screen_io_device.h">
+      <Filter>AERA\video_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\AERA\usr_operators\types.h">
+      <Filter>usr_operators</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\AERA\usr_operators\usr_operators.h">
+      <Filter>usr_operators</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\AERA\usr_operators\Operators\operators.h">
+      <Filter>usr_operators\Operators</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\AERA\usr_operators\TestProgram\test_program.h">
+      <Filter>usr_operators\TestProgram</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\AERA\usr_operators\Callbacks\callbacks.h">
+      <Filter>usr_operators\Callbacks</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\AERA\AERA\main.h">
+      <Filter>AERA</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\AERA\AERA\IODevices\TCP\AERA_Protobuf\tcp_data_message.pb.h">
+      <Filter>AERA\TCP\AERA_Protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\AERA\AERA\IODevices\TCP\AERA_Protobuf\utils.h">
+      <Filter>AERA\TCP\AERA_Protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\AERA\AERA\IODevices\TCP\AERA_Protobuf\tcp_connection.h">
+      <Filter>AERA\TCP\AERA_Protobuf</Filter>
+    </ClInclude>
     <ClInclude Include="graphics-items\reduction-marker-item.hpp">
       <Filter>graphics-items</Filter>
     </ClInclude>
@@ -582,11 +679,6 @@
     <QtRcc Include="aera_visualizer.qrc" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-      <ParseFiles>true</ParseFiles>
-    </Filter>
     <Filter Include="CoreLibrary">
       <UniqueIdentifier>{4661bd21-5c81-4926-8264-de72870e17d1}</UniqueIdentifier>
     </Filter>
@@ -608,22 +700,66 @@
     <Filter Include="images">
       <UniqueIdentifier>{0c46a924-114d-4f51-ab3b-c17420510b01}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-      <ParseFiles>true</ParseFiles>
+    <Filter Include="AERA">
+      <UniqueIdentifier>{1700dbb8-d407-4371-8464-3cd5441be005}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AERA\TCP">
+      <UniqueIdentifier>{56b30223-17c7-4452-8952-f5a3d1d61655}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AERA\video_screen">
+      <UniqueIdentifier>{f6c7d77b-50fa-4ec4-b066-14ac5943103c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr_operators\Callbacks">
+      <UniqueIdentifier>{ecafbbf5-d886-4965-aeeb-bc61cd2cdfdf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr_operators\Operators">
+      <UniqueIdentifier>{22415666-9a12-4fe3-ac53-c8f999199933}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr_operators\TestProgram">
+      <UniqueIdentifier>{879a16b2-cbbb-4d5b-936b-e2b33accdaf1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AERA\TCP\AERA_Protobuf">
+      <UniqueIdentifier>{87fa3823-719a-413e-a685-93bf8e623e16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="views">
+      <UniqueIdentifier>{b52052e6-842a-4ea7-8d49-098cb620080a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="aera-visualizer-window.hpp" />
-    <QtMoc Include="aera-visualizer-window-base.hpp" />
-    <QtMoc Include="explanation-log-window.hpp" />
     <QtMoc Include="aera-checkbox.h" />
     <QtMoc Include="find-dialog.hpp" />
+    <QtMoc Include="views\explanation-log.hpp">
+      <Filter>views</Filter>
+    </QtMoc>
+    <QtMoc Include="views\semantics.hpp">
+      <Filter>views</Filter>
+    </QtMoc>
+    <QtMoc Include="views\player.hpp">
+      <Filter>views</Filter>
+    </QtMoc>
+    <QtMoc Include="template.hpp">
+      <Filter>views</Filter>
+    </QtMoc>
+    <QtMoc Include="views\text-output.hpp">
+      <Filter>views</Filter>
+    </QtMoc>
+    <QtMoc Include="views\task-environment.hpp">
+      <Filter>views</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <None Include="submodules\AERA\r_exec\r_exec.vcxproj">
       <Filter>r_exec</Filter>
     </None>
+    <None Include="submodules\AERA\AERA\IODevices\TCP\AERA_Protobuf\tcp_data_message.proto">
+      <Filter>AERA\TCP\AERA_Protobuf</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="submodules\AERA\AERA\settings.xml">
+      <Filter>AERA</Filter>
+    </Xml>
+    <Xml Include="settings.xml" />
   </ItemGroup>
 </Project>

@@ -55,7 +55,7 @@
 #include <regex>
 #include <algorithm>
 #include <QMenu>
-#include "explanation-log-window.hpp"
+#include "views/explanation-log.hpp"
 #include "aera-visualizer-scene.hpp"
 #include "instantiated-composite-state-item.hpp"
 #include "model-item.hpp"
@@ -322,7 +322,7 @@ void PredictionItem::textItemLinkActivated(const QString& link)
         QString::number(modelReduction_->imdlPredictionEventIndex_) + "\">" +
         replicodeObjects_.getLabel(requirementFactPred).c_str() + "</a>:<br>" +
         factPredFactImdlHtml + "<br><br>";
-      parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
+      parent_->getParent()->getExplanationLogView()->appendHtml(explanation);
     });
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;

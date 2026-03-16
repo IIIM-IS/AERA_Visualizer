@@ -5,7 +5,7 @@
 //_/_/ Copyright (c) 2018-2026 Jeff Thompson
 //_/_/ Copyright (c) 2018-2026 Kristinn R. Thorisson
 //_/_/ Copyright (c) 2018-2026 Icelandic Institute for Intelligent Machines
-//_/_/ Copyright (c) 2023 Chloe Schaff
+//_/_/ Copyright (c) 2023-2026 Chloe Schaff
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -56,7 +56,7 @@
 #include "aera-visualizer-window.hpp"
 #include "instantiated-model-item.hpp"
 #include <QMenu>
-#include "explanation-log-window.hpp"
+#include "views/explanation-log.hpp"
 #include "aera-visualizer-scene.hpp"
 
 using namespace std;
@@ -136,7 +136,7 @@ void ImdlItem::textItemLinkActivated(const QString& link)
     menu->addAction("Focus on This", [=]() { parent_->focusOnItem(this); });
     menu->addAction("Center on This", [=]() { parent_->centerOnItem(this); });
     menu->addAction("What Made This?", [=]() {     
-      parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation_);
+      parent_->getParent()->getExplanationLogView()->appendHtml(explanation_);
     });
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;

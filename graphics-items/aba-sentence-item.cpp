@@ -53,7 +53,7 @@
 
 #include <regex>
 #include <QMenu>
-#include "../explanation-log-window.hpp"
+#include "../views/explanation-log.hpp"
 #include "../aera-visualizer-window.hpp"
 #include "../submodules/AERA/r_exec/factory.h"
 #include "aera-visualizer-scene.hpp"
@@ -145,7 +145,7 @@ void AbaSentenceItem::textItemLinkActivated(const QString& link)
         " ?</b><br>Sentence " + makeHtmlLink(addEvent_->parent_) +
         " is not an assumption, so it is the head of a rule which is expanded by adding the body sentences, including this one.<br><br>";
 
-      parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
+      parent_->getParent()->getExplanationLogView()->appendHtml(explanation);
     });
 
     menu->exec(QCursor::pos() - QPoint(10, 10));

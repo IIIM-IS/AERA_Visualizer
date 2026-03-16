@@ -55,7 +55,7 @@
 #include <regex>
 #include <algorithm>
 #include <QMenu>
-#include "explanation-log-window.hpp"
+#include "views/explanation-log.hpp"
 #include "aera-visualizer-scene.hpp"
 #include "instantiated-composite-state-item.hpp"
 #include "model-item.hpp"
@@ -143,7 +143,7 @@ void ModelImdlPredictionItem::textItemLinkActivated(const QString& link)
         " and the predicted instantiated model on the RHS is a requirement for model " +
         makeHtmlLink(imdl->get_reference(0)) + ".<br><br>";
 
-      parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
+      parent_->getParent()->getExplanationLogView()->appendHtml(explanation);
       });
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;

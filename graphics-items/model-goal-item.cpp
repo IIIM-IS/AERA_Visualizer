@@ -54,7 +54,7 @@
 
 #include <regex>
 #include <QMenu>
-#include "../explanation-log-window.hpp"
+#include "../views/explanation-log.hpp"
 #include "../aera-visualizer-window.hpp"
 #include "../submodules/AERA/r_exec/factory.h"
 #include "aera-visualizer-scene.hpp"
@@ -96,7 +96,7 @@ void ModelGoalItem::textItemLinkActivated(const QString& link)
           " ?</b><br>Model " + makeHtmlLink(modelReduction_->model_) +
           " abduced this from drive <b>" + replicodeObjects_.getLabel(value).c_str() + "</b> in " +
           makeHtmlLink(factSuperGoal) + "<br><br>";
-        parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
+        parent_->getParent()->getExplanationLogView()->appendHtml(explanation);
         });
     }
 

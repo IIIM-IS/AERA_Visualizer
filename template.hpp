@@ -4,8 +4,8 @@
 //_/_/ 
 //_/_/ Copyright (c) 2018-2026 Jeff Thompson
 //_/_/ Copyright (c) 2018-2026 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2023-2026 Chloe Schaff
 //_/_/ Copyright (c) 2018-2026 Icelandic Institute for Intelligent Machines
-//_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -52,73 +52,48 @@
 //_/_/ 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-#include "aera-visualizer-window.hpp"
-#include "views/explanation-log.hpp"
-#include "find-dialog.hpp"
-#include "submodules/AERA/AERA/settings.h"
-#include "submodules/AERA/AERA/main.h"
+#ifndef TEMPLATE_HPP
+#define TEMPLATE_HPP
 
-#include <QApplication>
-#include <QCoreApplication>
-#include <QSettings>
-#include <QMessageBox>
-#include <QFileDialog>
-#include <QScreen>
-#include <QProxyStyle>
-#include <QProgressDialog>
-#include <QPalette>
+#include <QDockWidget>
+#include "../aera-visualizer-window.hpp"
+#include "../replicode-objects.hpp"
 
-#include <QtDebug>
+/* This file can be used as a template for creating new views for
+* the visualizer. Each view extends a QDockWidget so it can be dragged
+* around and reconfigured by the user. Most of its communication should
+* be with the mainWindow_, but it's also okay for views to talk directly
+* to eachother where relevant. See createDockWidgets() in
+* aera-visualizer-window.cpp as an example of how to add this to the window.
+* Remember to add a class VIEWNAME statement to main.cpp since views will
+* give weird errors if not forwardly-declared.
+*/
 
-using namespace std;
-using namespace std::chrono;
-using namespace aera_visualizer;
+namespace aera_visualizer {
 
+	/**
+ * VIEWNAME extends QDockWidget to allow the user to
+ * rearrange it as needed
+ */
+	class TemplateView : public QDockWidget
+	{
+		Q_OBJECT
 
-int main(int argv, char *args[])
-{
-  Q_INIT_RESOURCE(aera_visualizer);
+	public:
+		/**
+		 * Create a View.
+		 * \param mainWindow The main parent window for this window.
+		 */
+		TemplateView(AeraVisualizerWindow* mainWindow);
 
-  QApplication app(argv, args);
+		// Used to update the replicodeObjects (if you need access to those)
+		void setReplicodeObjects(ReplicodeObjects* replicodeObjects) {
+			replicodeObjects_ = replicodeObjects;
+		}
 
-  // Override the tool tip style with 0 delay.
-  class MyProxyStyle : public QProxyStyle
-  {
-  public:
-    using QProxyStyle::QProxyStyle;
-    int styleHint(StyleHint hint, const QStyleOption* option = nullptr, const QWidget* widget = nullptr, QStyleHintReturn* returnData = nullptr) const override {
-      if (hint == QStyle::SH_ToolTip_WakeUpDelay) { return 0; }
-      else if (hint == QStyle::SH_ToolTip_FallAsleepDelay) { return 0; }
-      return QProxyStyle::styleHint(hint, option, widget, returnData);
-    }
-  };
-  app.setStyle(new MyProxyStyle(qApp->style()));
-
-  //QPalette darkMode = QPalette();
-  //darkMode.setColor(QPalette::Window, QColor(38, 50, 56));
-  //darkMode.setColor(QPalette::WindowText, QColor(236, 239, 241));
-  //app.setPalette(darkMode);
-
-  // Globally remove the '?' from the QInputDialog title bar.
-  QApplication::setAttribute(Qt::AA_DisableWindowContextHelpButton);
-
-  // Set the organization and application name
-  // Enables using the settings from anywhere
-  QCoreApplication::setOrganizationName("IIIM");
-  QCoreApplication::setApplicationName("AERA_Visualizer");
-
-  // Configure QSettings to use .ini files to store settings
-  QSettings::setDefaultFormat(QSettings::IniFormat);
-
-  AeraVisualizerWindow mainWindow;
-  mainWindow.setWindowIcon(QIcon(":/images/app.ico"));
-  mainWindow.setWindowState(Qt::WindowMaximized);
-
-  // Set up the Find dialog but don't display it
-  auto findDialog = new FindDialog(&mainWindow);
-  mainWindow.setFindWindow(findDialog);
-  mainWindow.show();
-  mainWindow.addStartupItems();
-
-  return app.exec();
+	private:
+		ReplicodeObjects* replicodeObjects_;
+	};
 }
+
+#endif

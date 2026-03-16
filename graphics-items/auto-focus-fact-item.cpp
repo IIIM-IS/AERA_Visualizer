@@ -54,7 +54,7 @@
 
 #include <regex>
 #include <QMenu>
-#include "explanation-log-window.hpp"
+#include "views/explanation-log.hpp"
 #include "../aera-visualizer-window.hpp"
 #include "aera-visualizer-scene.hpp"
 #include "auto-focus-fact-item.hpp"
@@ -112,7 +112,7 @@ void AutoFocusFactItem::textItemLinkActivated(const QString& link)
 
         QString explanation = "<b>Q: What made auto focus " + makeHtmlLink(autoFocusNewObjectEvent_->object_) +
           " ?</b><br>The auto focus controller made this from " + makeHtmlLink(fromObject) + "<br><br>";
-        parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
+        parent_->getParent()->getExplanationLogView()->appendHtml(explanation);
       });
     }
 

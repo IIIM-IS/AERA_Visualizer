@@ -73,18 +73,22 @@ namespace aera_visualizer {
 class AeraGraphicsItem;
 class AeraGraphicsItemGroup;
 class AeraVisualizerWindow;
-class ExplanationLogWindow;
+class ExplanationLogView;
 
 class AeraVisualizerScene : public QGraphicsScene
 {
 public:
   typedef std::function<void()> OnSceneSelected;
 
-  explicit AeraVisualizerScene(
-    ReplicodeObjects& replicodeObjects, AeraVisualizerWindow* parent, bool isMainScene,
-    const OnSceneSelected& onSceneSelected);
+  explicit AeraVisualizerScene(AeraVisualizerWindow* parent, bool isMainScene);
 
   AeraVisualizerWindow* getParent() { return parent_; }
+
+  // Used to update the replicodeObjects during live operation
+  void setReplicodeObjects(ReplicodeObjects* replicodeObjects) {
+    replicodeObjects_ = replicodeObjects;
+    essencePropertyObject_ = replicodeObjects_->getObject("essence");
+  }
 
   void zoomToItem(QGraphicsItem* item);
   void focusOnItem(QGraphicsItem* item);
@@ -98,8 +102,8 @@ public:
    */
   qreal getTimelineX(core::Timestamp timestamp)
   {
-    double microsecondsPerPixel = (double)replicodeObjects_.getSamplingPeriod().count() / frameWidth_;
-    auto relativeTime = std::chrono::duration_cast<std::chrono::microseconds>(timestamp - replicodeObjects_.getTimeReference());
+    double microsecondsPerPixel = (double)replicodeObjects_->getSamplingPeriod().count() / frameWidth_;
+    auto relativeTime = std::chrono::duration_cast<std::chrono::microseconds>(timestamp - replicodeObjects_->getTimeReference());
     return relativeTime.count() / microsecondsPerPixel;
   }
 
@@ -145,6 +149,13 @@ public:
   // Reset all boxes to normal
   void unhighlightAll();
 
+  /**
+   * Scale the first QGraphicsView by the given factor.
+   * This also sets currentScaleFactor.
+   */
+  void scaleViewBy(double factor);
+  void zoomViewHome();
+
 protected:
   void mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent) override;
   void mouseReleaseEvent(QGraphicsSceneMouseEvent* mouseEvent) override;
@@ -156,12 +167,6 @@ protected:
 private:
   friend class AeraVisualizerWindow;
 
-  /**
-   * Scale the first QGraphicsView by the given factor.
-   * This also sets currentScaleFactor.
-   */
-  void scaleViewBy(double factor);
-  void zoomViewHome();
   void addAeraGraphicsItem(AeraGraphicsItem* item);
   void removeAeraGraphicsItem(AeraGraphicsItem* item);
 
@@ -228,9 +233,8 @@ private:
   void abaRemoveBinding(int varNumber);
 
   AeraVisualizerWindow* parent_;
-  ReplicodeObjects& replicodeObjects_;
+  ReplicodeObjects* replicodeObjects_;
   bool isMainScene_;
-  OnSceneSelected onSceneSelected_;
   r_code::Code* essencePropertyObject_;
   bool didInitialFit_;
   QList<QGraphicsTextItem*> timestampTexts_;

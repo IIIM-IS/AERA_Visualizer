@@ -5,7 +5,7 @@
 //_/_/ Copyright (c) 2018-2026 Jeff Thompson
 //_/_/ Copyright (c) 2018-2026 Kristinn R. Thorisson
 //_/_/ Copyright (c) 2018-2026 Icelandic Institute for Intelligent Machines
-//_/_/ Copyright (c) 2023 Chloe Schaff
+//_/_/ Copyright (c) 2023-2026 Chloe Schaff
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -66,11 +66,10 @@ using namespace std;
 
 namespace aera_visualizer {
 
-  FindDialog::FindDialog(AeraVisualizerWindow* parent, ReplicodeObjects& replicodeObjects) : QDialog(parent) {
+  FindDialog::FindDialog(AeraVisualizerWindow* parent) : QDialog(parent) {
 
-    // Store these for reference
+    // Store this for reference
     parentWindow_ = parent;
-    replicodeObjects_ = replicodeObjects;
 
     // Set up the window
     setWindowTitle("Find");
@@ -239,12 +238,12 @@ namespace aera_visualizer {
     parentWindow_->getModelsScene()->unhighlightAll();
 
     // Search for matching object labels
-    std::vector<std::string> labels = replicodeObjects_.getObjectsByLabelSubstring(searchTerm_);
+    std::vector<std::string> labels = replicodeObjects_->getObjectsByLabelSubstring(searchTerm_);
 
     // Filter the labels and get only the ones with valid graphics items
     matches_.clear();
     for (int i = 0; i < labels.size(); i++) {
-      auto object = replicodeObjects_.getObject(labels.at(i));
+      auto object = replicodeObjects_->getObject(labels.at(i));
       if (!object)
         continue;
 
@@ -343,7 +342,7 @@ namespace aera_visualizer {
 
     // Get the current match
     AeraGraphicsItem* item = matches_.at(n_);
-    std::string label = replicodeObjects_.getLabel(item->getAeraEvent()->object_);
+    std::string label = replicodeObjects_->getLabel(item->getAeraEvent()->object_);
 
     // Make sure an item was actually found
     if (!item) {
@@ -354,7 +353,7 @@ namespace aera_visualizer {
     // Deal with invisible items
     if (!item->isVisible()) {
       if (!skipHidden_->isChecked()) {
-        setStatus(item->makeHtmlLink(item->getAeraEvent()->object_, replicodeObjects_) + " is invisible");
+        setStatus(item->makeHtmlLink(item->getAeraEvent()->object_, *replicodeObjects_) + " is invisible");
 
         // Unhighlight the last item
         if (item->getParentScene()->currentMatch_) {
@@ -406,7 +405,7 @@ namespace aera_visualizer {
 
     // Get the current match
     AeraGraphicsItem* item = matches_.at(n_);
-    std::string label = replicodeObjects_.getLabel(item->getAeraEvent()->object_);
+    std::string label = replicodeObjects_->getLabel(item->getAeraEvent()->object_);
 
     // Make sure an item was actually found
     if (!item) {
@@ -417,7 +416,7 @@ namespace aera_visualizer {
     // Deal with invisible items
     if (!item->isVisible()) {
       if (!skipHidden_->isChecked()) {
-        setStatus(item->makeHtmlLink(item->getAeraEvent()->object_, replicodeObjects_) + " is invisible");
+        setStatus(item->makeHtmlLink(item->getAeraEvent()->object_, *replicodeObjects_) + " is invisible");
 
         // Unhighlight the last item
         if (item->getParentScene()->currentMatch_) {
@@ -587,7 +586,7 @@ namespace aera_visualizer {
 
     for (int i = 0; i < matches_.size(); i++) {
       AeraGraphicsItem* item = matches_.at(i);
-      std::string label = replicodeObjects_.getLabel(item->getAeraEvent()->object_);
+      std::string label = replicodeObjects_->getLabel(item->getAeraEvent()->object_);
       printVector += QString::fromStdString(std::to_string(i)) + " -> " + QString::fromStdString(label) + "\n";
     }
 
@@ -599,7 +598,7 @@ namespace aera_visualizer {
   void FindDialog::hiddenLinkHovered(const QString& link) {
     if (link.startsWith("#detail_oid-")) {
       uint64 detail_oid = link.mid(12).toULongLong();
-      auto object = replicodeObjects_.getObjectByDetailOid(detail_oid);
+      auto object = replicodeObjects_->getObjectByDetailOid(detail_oid);
       if (object) {
         AeraGraphicsItem* aeraGraphicsItem = parentWindow_->getAeraGraphicsItem(object);
         if (aeraGraphicsItem) {
@@ -617,7 +616,7 @@ namespace aera_visualizer {
   void FindDialog::hiddenLinkActivated(const QString& link) {
     if (link.startsWith("#detail_oid-")) {
       uint64 detail_oid = link.mid(12).toULongLong();
-      auto object = replicodeObjects_.getObjectByDetailOid(detail_oid);
+      auto object = replicodeObjects_->getObjectByDetailOid(detail_oid);
       if (object) {
         AeraGraphicsItem* aeraGraphicsItem = parentWindow_->getAeraGraphicsItem(object);
         if (aeraGraphicsItem) {

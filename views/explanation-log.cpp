@@ -6,6 +6,8 @@
 //_/_/ Copyright (c) 2018-2026 Kristinn R. Thorisson
 //_/_/ Copyright (c) 2018-2026 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
+//_/_/ Copyright (c) 2023-2026 Chloe Schaff
+//_/_/ Copyright (c) 2018-2023 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
 //_/_/ --- Open-Source BSD License, with CADIA Clause v 1.0 ---
@@ -53,11 +55,11 @@
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 #include <QtWidgets>
-#include "submodules/AERA/r_exec/opcodes.h"
-#include "graphics-items/program-reduction-item.hpp"
-#include "graphics-items/io-device-inject-eject-item.hpp"
-#include "aera-visualizer-window.hpp"
-#include "explanation-log-window.hpp"
+#include "explanation-log.hpp"
+#include "../submodules/AERA/r_exec/opcodes.h"
+#include "../graphics-items/program-reduction-item.hpp"
+#include "../graphics-items/io-device-inject-eject-item.hpp"
+#include "../aera-visualizer-window.hpp"
 
 using namespace std;
 using namespace r_code;
@@ -65,24 +67,20 @@ using namespace r_exec;
 
 namespace aera_visualizer {
 
-ExplanationLogWindow::ExplanationLogWindow(AeraVisualizerWindow* mainWindow, ReplicodeObjects& replicodeObjects)
-  : AeraVisualizerWindowBase(mainWindow, replicodeObjects)
+ExplanationLogView::ExplanationLogView(AeraVisualizerWindow* mainWindow)
+  : QDockWidget("Explanation Log", mainWindow)
 {
-  auto centralLayout = new QVBoxLayout();
+  mainWindow_ = mainWindow;
+
+  // Set up the text browser widget
   textBrowser_ = new TextBrowser(this);
+  setWidget(textBrowser_);
   connect(textBrowser_, SIGNAL(anchorClicked(const QUrl&)), this, SLOT(textBrowserAnchorClicked(const QUrl&)));
-  centralLayout->addWidget(textBrowser_);
-  centralLayout->addWidget(getPlayerControlPanel());
 
-  QWidget* centralWidget = new QWidget();
-  centralWidget->setLayout(centralLayout);
-  setCentralWidget(centralWidget);
-
-  setWindowTitle(tr("Explanation Log"));
-  setUnifiedTitleAndToolBarOnMac(true);
+  setMinimumWidth(200);
 }
 
-void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
+void ExplanationLogView::textBrowserAnchorClicked(const QUrl& url)
 {
   if (url.url().startsWith("#requirement_prediction-")) {
     // There is no item for a requirement prediction, so show a menu for a "What Is" explanation.
@@ -101,26 +99,26 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
     menu->addAction("What Is This?", [=]() {
       // TODO: Handle this in a static method of PredictionItem.
       // TODO: Handle the case of an anti-fact imdl prediction.
-      QString explanation = QString("<b>Q: What is requirement prediction ") + replicodeObjects_.getLabel(requirementFactPred).c_str() +
-        "?</b><br>Input " + AeraGraphicsItem::makeHtmlLink(cause, replicodeObjects_) +
-        " matched the LHS of model " + AeraGraphicsItem::makeHtmlLink(predictingModel, replicodeObjects_) +
+      QString explanation = QString("<b>Q: What is requirement prediction ") + replicodeObjects_->getLabel(requirementFactPred).c_str() +
+        "?</b><br>Input " + AeraGraphicsItem::makeHtmlLink(cause, *replicodeObjects_) +
+        " matched the LHS of model " + AeraGraphicsItem::makeHtmlLink(predictingModel, *replicodeObjects_) +
         " and the requirement is the RHS of the model, which predicts that model " + 
-        AeraGraphicsItem::makeHtmlLink(predictedModel, replicodeObjects_) +
+        AeraGraphicsItem::makeHtmlLink(predictedModel, *replicodeObjects_) +
         " will succeed when instantiated with the given template values.<br><br>";
       appendHtml(explanation);
     });
-    menu->addAction(QString("Zoom to ") + replicodeObjects_.getLabel(requirementFactPred).c_str(),
+    menu->addAction(QString("Zoom to ") + replicodeObjects_->getLabel(requirementFactPred).c_str(),
       [=]() { mainWindow_->zoomToAeraGraphicsItem(requirementFactPred); });
-    menu->addAction(QString("Focus on ") + replicodeObjects_.getLabel(requirementFactPred).c_str(),
+    menu->addAction(QString("Focus on ") + replicodeObjects_->getLabel(requirementFactPred).c_str(),
       [=]() { mainWindow_->focusOnAeraGraphicsItem(requirementFactPred); });
-    menu->addAction(QString("Center on ") + replicodeObjects_.getLabel(requirementFactPred).c_str(),
+    menu->addAction(QString("Center on ") + replicodeObjects_->getLabel(requirementFactPred).c_str(),
       [=]() { mainWindow_->centerOnAeraGraphicsItem(requirementFactPred); });
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;
   }
   else if (url.url().startsWith("#detail_oid-")) {
     uint64 detail_oid = url.url().mid(12).toULongLong();
-    auto object = replicodeObjects_.getObjectByDetailOid(detail_oid);
+    auto object = replicodeObjects_->getObjectByDetailOid(detail_oid);
     if (!object)
       return;
 
@@ -130,13 +128,13 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
       menu->addAction("What Is This?", [=]() {
         // TODO: Handle this in a static method of ProgramReductionItem.
         QString reductionHtml = ProgramReductionItem::simplifyMkRdxSource(
-          replicodeObjects_.getSourceCode(object)).c_str();
-        AeraGraphicsItem::addSourceCodeHtmlLinks(object, reductionHtml, replicodeObjects_);
+          replicodeObjects_->getSourceCode(object)).c_str();
+        AeraGraphicsItem::addSourceCodeHtmlLinks(object, reductionHtml, *replicodeObjects_);
         reductionHtml = AeraGraphicsItem::htmlify(reductionHtml);
 
-        string explanation = "<b>Q: What is program reduction " + replicodeObjects_.getLabel(object) +
+        string explanation = "<b>Q: What is program reduction " + replicodeObjects_->getLabel(object) +
           "?</b><br>This the notification of a reduction of instantiated program <b>" + 
-          replicodeObjects_.getLabel(object->get_reference(0)) + 
+          replicodeObjects_->getLabel(object->get_reference(0)) + 
           "</b> . It has the following sets of input objects and output actions.<br>" + 
           reductionHtml.toStdString() + "<br><br>";
         appendHtml(explanation);
@@ -154,11 +152,11 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
 
       // Show the menu.
       auto menu = new QMenu();
-      menu->addAction(QString("Zoom to ") + replicodeObjects_.getLabel(object).c_str(),
+      menu->addAction(QString("Zoom to ") + replicodeObjects_->getLabel(object).c_str(),
         [=]() { mainWindow_->zoomToAeraGraphicsItem(object); });
-      menu->addAction(QString("Focus on ") + replicodeObjects_.getLabel(object).c_str(),
+      menu->addAction(QString("Focus on ") + replicodeObjects_->getLabel(object).c_str(),
                       [=]() { mainWindow_->focusOnAeraGraphicsItem(object); });
-      menu->addAction(QString("Center on ") + replicodeObjects_.getLabel(object).c_str(),
+      menu->addAction(QString("Center on ") + replicodeObjects_->getLabel(object).c_str(),
                       [=]() { mainWindow_->centerOnAeraGraphicsItem(object); });
       menu->exec(QCursor::pos() - QPoint(10, 10));
       delete menu;
@@ -166,7 +164,7 @@ void ExplanationLogWindow::textBrowserAnchorClicked(const QUrl& url)
   }
 }
 
-void ExplanationLogWindow::TextBrowser::mouseMoveEvent(QMouseEvent* event)
+void ExplanationLogView::TextBrowser::mouseMoveEvent(QMouseEvent* event)
 {
   parent_->mainWindow_->textItemHoverMoveEvent(document(), event->pos());
 

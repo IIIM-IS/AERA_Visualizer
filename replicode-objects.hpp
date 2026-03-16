@@ -4,6 +4,7 @@
 //_/_/ 
 //_/_/ Copyright (c) 2018-2026 Jeff Thompson
 //_/_/ Copyright (c) 2018-2026 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2023-2026 Chloe Schaff
 //_/_/ Copyright (c) 2018-2026 Icelandic Institute for Intelligent Machines
 //_/_/ http://www.iiim.is
 //_/_/
@@ -59,6 +60,7 @@
 #include <regex>
 #include <QString>
 #include "submodules/AERA/r_exec/mem.h"
+#include "submodules/AERA/AERA/main.h"
 
 class QProgressDialog;
 
@@ -88,6 +90,8 @@ public:
    */
   std::string init(const std::string& userClassesFilePath, const std::string& decompiledFilePath,
     std::chrono::microseconds basePeriod, QProgressDialog& progress);
+
+  std::string init(AERA_interface* aera, std::chrono::microseconds basePeriod, QProgressDialog& progress);
 
   /**
    * Get the sampling period, which is 2 * base_period from settings.xml. This should
@@ -152,6 +156,10 @@ public:
     // Put matches here
     std::vector<std::string> matches;
 
+    // Skip over this if we're not loaded yet
+    if (!initialized_)
+      return matches;
+
     // Record all labels that contain searchString as a substring
     for (std::pair<std::string, r_code::Code*> pair : labelObject_) {
       if (pair.first.find(searchString) != std::string::npos)
@@ -201,7 +209,37 @@ public:
    */
   bool getObjects(std::string oids, std::vector<r_code::Code*>& objects);
 
+  // Return whether the object has been initialized
+  bool initialized() {
+    return initialized_;
+  }
+
+  /**
+   * Get a map of Code* object to label. 
+   */
+ std::map<r_code::Code*, std::string> getObjectLabelMap() {
+   std::map<r_code::Code*, std::string> result;
+   for (auto o = objectLabel_.begin(); o != objectLabel_.end(); ++o) {
+     result[o->first] = o->second;
+   }
+    return result;
+  }
+
 private:
+  /**
+   * Complete the work of either of the init methods.
+   */
+  std::string ReplicodeObjects::initHelper(
+    r_comp::Metadata& metadata, r_code::list<P<r_code::Code>>* objects, std::unordered_map<uint32, std::string>& seedNames,
+    QProgressDialog& progress);
+
+  /**
+   * Create a unique label for object and assign objectLabel_ and labelObject_ . Recursively call this for
+   * referenced objects. If the object is already in objectLabel_, then do nothing. This updates objectIdPerClass.
+   */
+  void assignLabel(r_code::Code* object, std::unordered_map<const r_comp::Class*, uint16>& objectIdPerClass,
+    const r_comp::Metadata& metadata, const std::unordered_map<uint32, std::string>& seedNames);
+
   /**
    * Process the decompiled objects file to remove OIDs, detail OIDs and info lines starting with ">".
    * This sets timeReference_ from the header info line. This gets the object's source code, which is
@@ -216,15 +254,16 @@ private:
     std::string decompiledFilePath, std::map<std::string, core::uint32>& objectOids,
     std::map<std::string, core::uint64>& objectDetailOids);
 
+  bool initialized_ = false;
+
   std::chrono::microseconds basePeriod_;
   core::Timestamp timeReference_;
   // Key is the Code* object, value is the source code from the decompiled objects.
-  std::map<r_code::Code*, std::string> objectSourceCode_;
+  std::map<P<r_code::Code>, std::string> objectSourceCode_;
   // Key is the Code* object, value is the label from the decompiled objects.
-  std::map<r_code::Code*, std::string> objectLabel_;
+  std::map<P<r_code::Code>, std::string> objectLabel_;
   // Key is the label from the decompiled objects, value is the Code* object.
-  std::map<std::string, r_code::Code*> labelObject_;
-  r_code::list<P<r_code::Code> > objects_;
+  std::map<std::string, P<r_code::Code>> labelObject_;
   std::vector<QString> progressMessages_;
   std::regex intMemberRegex_;
 };

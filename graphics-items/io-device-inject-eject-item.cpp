@@ -53,7 +53,7 @@
 
 #include <regex>
 #include <QMenu>
-#include "explanation-log-window.hpp"
+#include "views/explanation-log.hpp"
 #include "../aera-visualizer-window.hpp"
 #include "aera-visualizer-scene.hpp"
 #include "io-device-inject-eject-item.hpp"
@@ -154,7 +154,7 @@ void IoDeviceInjectEjectItem::textItemLinkActivated(const QString& link)
         explanation += "<br><br>";
       }
 
-      parent_->getParent()->getExplanationLogWindow()->appendHtml(explanation);
+      parent_->getParent()->getExplanationLogView()->appendHtml(explanation);
     });
     menu->exec(QCursor::pos() - QPoint(10, 10));
     delete menu;

@@ -4,6 +4,7 @@
 //_/_/ 
 //_/_/ Copyright (c) 2018-2026 Jeff Thompson
 //_/_/ Copyright (c) 2018-2026 Kristinn R. Thorisson
+//_/_/ Copyright (c) 2023-2026 Chloe Schaff
 //_/_/ Copyright (c) 2018-2026 Icelandic Institute for Intelligent Machines
 //_/_/ Copyright (c) 2021 Karl Asgeir Geirsson
 //_/_/ http://www.iiim.is
@@ -81,6 +82,8 @@
 #include "graphics-items/reduction-marker-item.hpp"
 #include "graphics-items/simulation-commit-item.hpp"
 #include "submodules/AERA/r_exec/opcodes.h"
+#include "submodules/AERA/AERA/settings.h"
+#include "submodules/AERA/AERA/main.h"
 
 #include "aera-visualizer-window.hpp"
 #include "find-dialog.hpp"
@@ -170,60 +173,56 @@ const QString AeraVisualizerWindow::SettingsKeyInstantiatedModelsVisible = "inst
 const QString AeraVisualizerWindow::SettingsKeyPredictedInstantiatedCompositeStatesVisible = "predictedInstantiatedCompositeStatesVisible";
 const QString AeraVisualizerWindow::SettingsKeyRequirementsVisible = "requirementsVisible";
 
-AeraVisualizerWindow::AeraVisualizerWindow(ReplicodeObjects& replicodeObjects)
-: AeraVisualizerWindowBase(0, replicodeObjects),
-  iNextEvent_(0), explanationLogWindow_(0),
-  essencePropertyObject_(replicodeObjects_.getObject("essence")),
+AeraVisualizerWindow::AeraVisualizerWindow()
+: QMainWindow(0),
+  aera_(0),
+  iNextEvent_(0), explanationLogView_(0),
+  essencePropertyObject_(NULL),
   hoverHighlightItem_(0),
   phasedOutModelColor_(255, 192, 192),
-  showRelativeTime_(true),
-  playTime_(seconds(0)),
-  playTimerId_(0),
-  isPlaying_(false),
   abagraph_(""), // ("/work/abagraph-mercury/mercury/abagraph.exe"),
   itemBorderHighlightPen_(Qt::blue, 3)
 {
   createActions();
-  createMenus();
-
-  // Set mainScene_ to null so that setPlayTime will not try to auto-scroll it.
-  mainScene_ = 0;
-  setPlayTime(replicodeObjects_.getTimeReference());
-
   createToolbars();
 
-  modelsScene_ = new AeraVisualizerScene(replicodeObjects_, this, false,
-    [=]() { selectedScene_ = modelsScene_; });
-  auto modelsSceneView = new QGraphicsView(modelsScene_, this);
-  modelsSceneView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  modelsSceneView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  mainScene_ = new AeraVisualizerScene(this, true);
 
-  mainScene_ = new AeraVisualizerScene(replicodeObjects_, this, true,
-    [=]() { selectedScene_ = mainScene_; });
   // Use a MyQGraphicsView so that we can track movements to the scene view.
   auto mainSceneView = new MyQGraphicsView(mainScene_, this);
   mainSceneView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   mainSceneView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  
   // Set a default selected scene.
   selectedScene_ = mainScene_;
-
-  auto splitter = new QSplitter(this);
-  splitter->addWidget(modelsSceneView);
-  splitter->addWidget(mainSceneView);
-  // The splitter sizes are proportional.
-  splitter->setSizes(QList<int>() << 100 << 750);
-
-  auto centralLayout = new QVBoxLayout();
-  // A stretch factor of 1, vs. the playerControlPanel factor of 0, makes the splitter maximize its space.
-  centralLayout->addWidget(splitter, 1);
-  centralLayout->addWidget(getPlayerControlPanel());
+  
+  createDockWidgets();
+  createMenus();
+  createStatusBar();
 
   auto centralWidget = new QWidget();
+  auto centralLayout = new QVBoxLayout();
+  centralLayout->addWidget(mainSceneView);
+  centralLayout->addWidget(timelineControls_);
   centralWidget->setLayout(centralLayout);
   setCentralWidget(centralWidget);
 
-  setWindowTitle(tr("AERA Visualizer"));
+  setWindowTitle(tr("AERA Visualizer (EXPERIMENTAL)"));
   setUnifiedTitleAndToolBarOnMac(true);
+
+  // Reset the widgets to the way they were last time
+  QSettings preferences;
+  restoreGeometry(preferences.value("geometry").toByteArray());
+  restoreState(preferences.value("state").toByteArray());
+
+  // Turn everything off until something's loaded in
+  setUIEnabled(false);
+
+  // Indicate that AERA hasn't been started
+  setAERAstatus("AERA instance has not been started", true);
+  
+  // This feature isn't implemented yet so just leave this one empty
+  setOperatingModeStatus("", PAUSED);
 }
 
 bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgressDialog& progress)
@@ -351,6 +350,12 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
     progress.setValue(lineNumber);
     if (lineNumber % 100 == 0)
       QApplication::processEvents();
+
+    // Fast foward past the last line read
+    if (lineNumber <= lastLine_)
+      continue;
+    else
+      lastLine_ = lineNumber;
 
     smatch matches;
 
@@ -883,12 +888,12 @@ void AeraVisualizerWindow::addStartupItems()
 
     if (event->eventType_ == NewModelEvent::EVENT_TYPE)
       // TODO: Add arrows.
-      modelsScene_->addAeraGraphicsItem(
-        new ModelItem((NewModelEvent*)event, replicodeObjects_, modelsScene_));
+      semanticsView_->getModelsScene()->addAeraGraphicsItem(
+        new ModelItem((NewModelEvent*)event, replicodeObjects_, semanticsView_->getModelsScene()));
     else if (event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
       // TODO: Add arrows.
-      modelsScene_->addAeraGraphicsItem(
-        new CompositeStateItem((NewCompositeStateEvent*)event, replicodeObjects_, modelsScene_));
+      semanticsView_->getModelsScene()->addAeraGraphicsItem(
+        new CompositeStateItem((NewCompositeStateEvent*)event, replicodeObjects_, semanticsView_->getModelsScene()));
   }
 }
 
@@ -906,10 +911,10 @@ AeraGraphicsItem* AeraVisualizerWindow::getAeraGraphicsItem(Code* object, AeraVi
     // Initialize to default NULL.
     *scene = 0;
 
-  auto item = modelsScene_->getAeraGraphicsItem(object);
+  auto item = semanticsView_->getModelsScene()->getAeraGraphicsItem(object);
   if (item) {
     if (scene)
-      *scene = modelsScene_;
+      *scene = semanticsView_->getModelsScene();
     return item;
   }
 
@@ -1134,7 +1139,7 @@ Timestamp AeraVisualizerWindow::stepEvent(Timestamp maximumTime)
     AeraVisualizerScene* scene;
     if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
       event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
-      scene = modelsScene_;
+      scene = semanticsView_->getModelsScene();
     else
       scene = mainScene_;
 
@@ -1520,7 +1525,7 @@ Timestamp AeraVisualizerWindow::stepEvent(Timestamp maximumTime)
     setSuccessRateEvent->object_->code(MDL_CNT) = Atom::Float(setSuccessRateEvent->evidenceCount_);
     setSuccessRateEvent->object_->code(MDL_SR) = Atom::Float(setSuccessRateEvent->successRate_);
 
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(setSuccessRateEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(semanticsView_->getModelsScene()->getAeraGraphicsItem(setSuccessRateEvent->object_));
     if (modelItem) {
       modelItem->updateFromModel();
       if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
@@ -1535,7 +1540,7 @@ Timestamp AeraVisualizerWindow::stepEvent(Timestamp maximumTime)
         modelItem->evidenceCountFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
         modelItem->successRateFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
       }
-      modelsScene_->establishFlashTimer();
+      semanticsView_->getModelsScene()->establishFlashTimer();
     }
   }
   else if (event->eventType_ == SetModelStrengthEvent::EVENT_TYPE) {
@@ -1547,27 +1552,27 @@ Timestamp AeraVisualizerWindow::stepEvent(Timestamp maximumTime)
     // Update the model.
     setStrengthEvent->object_->code(MDL_STRENGTH) = Atom::Float(setStrengthEvent->strength_);
 
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(setStrengthEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(semanticsView_->getModelsScene()->getAeraGraphicsItem(setStrengthEvent->object_));
     if (modelItem) {
       modelItem->updateFromModel();
       modelItem->strengthFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
-      modelsScene_->establishFlashTimer();
+      semanticsView_->getModelsScene()->establishFlashTimer();
     }
   }
   else if (event->eventType_ == PhaseInModelEvent::EVENT_TYPE) {
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(event->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(semanticsView_->getModelsScene()->getAeraGraphicsItem(event->object_));
     if (modelItem)
       // Set the background color.
       modelItem->setBrush(Qt::white);
   }
   else if (event->eventType_ == PhaseOutModelEvent::EVENT_TYPE) {
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(event->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(semanticsView_->getModelsScene()->getAeraGraphicsItem(event->object_));
     if (modelItem)
       // Set the background color.
       modelItem->setBrush(phasedOutModelColor_);
   }
   else if (event->eventType_ == DeleteModelEvent::EVENT_TYPE) {
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(event->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(semanticsView_->getModelsScene()->getAeraGraphicsItem(event->object_));
     if (modelItem)
       // Set the background color.
       modelItem->setBrush(Qt::gray);
@@ -1659,7 +1664,7 @@ Timestamp AeraVisualizerWindow::unstepEvent(Timestamp minimumTime, bool& foundGr
     AeraVisualizerScene* scene;
     if (event->eventType_ == NewModelEvent::EVENT_TYPE ||
         event->eventType_ == NewCompositeStateEvent::EVENT_TYPE)
-      scene = modelsScene_;
+      scene = semanticsView_->getModelsScene();
     else
       scene = mainScene_;
 
@@ -1689,7 +1694,7 @@ Timestamp AeraVisualizerWindow::unstepEvent(Timestamp minimumTime, bool& foundGr
     setSuccessRateEvent->object_->code(MDL_CNT) = Atom::Float(setSuccessRateEvent->oldEvidenceCount_);
     setSuccessRateEvent->object_->code(MDL_SR) = Atom::Float(setSuccessRateEvent->oldSuccessRate_);
 
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(setSuccessRateEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(semanticsView_->getModelsScene()->getAeraGraphicsItem(setSuccessRateEvent->object_));
     if (modelItem) {
       if (setSuccessRateEvent->evidenceCount_ != setSuccessRateEvent->oldEvidenceCount_ &&
           setSuccessRateEvent->successRate_ == setSuccessRateEvent->oldSuccessRate_)
@@ -1705,7 +1710,7 @@ Timestamp AeraVisualizerWindow::unstepEvent(Timestamp minimumTime, bool& foundGr
       }
 
       modelItem->updateFromModel();
-      modelsScene_->establishFlashTimer();
+      semanticsView_->getModelsScene()->establishFlashTimer();
     }
   }
   else if (event->eventType_ == SetModelStrengthEvent::EVENT_TYPE) {
@@ -1714,31 +1719,31 @@ Timestamp AeraVisualizerWindow::unstepEvent(Timestamp minimumTime, bool& foundGr
 
     setStrengthEvent->object_->code(MDL_STRENGTH) = Atom::Float(setStrengthEvent->oldStrength_);
 
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(setStrengthEvent->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(semanticsView_->getModelsScene()->getAeraGraphicsItem(setStrengthEvent->object_));
     if (modelItem) {
       modelItem->strengthFlashCountdown_ = AeraVisualizerScene::FLASH_COUNT;
 
       modelItem->updateFromModel();
-      modelsScene_->establishFlashTimer();
+      semanticsView_->getModelsScene()->establishFlashTimer();
     }
   }
   else if (event->eventType_ == PhaseInModelEvent::EVENT_TYPE) {
     // Find the ModelItem for this event and set its appearance to not phased out.
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(event->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(semanticsView_->getModelsScene()->getAeraGraphicsItem(event->object_));
     if (modelItem)
       // Set the background color. Assume the model was phased out before phase in.
       modelItem->setBrush(phasedOutModelColor_);
   }
   else if (event->eventType_ == PhaseOutModelEvent::EVENT_TYPE) {
     // Find the ModelItem for this event and set its appearance to not phased out.
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(event->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(semanticsView_->getModelsScene()->getAeraGraphicsItem(event->object_));
     if (modelItem)
       // Set the background color.
       modelItem->setBrush(Qt::white);
   }
   else if (event->eventType_ == DeleteModelEvent::EVENT_TYPE) {
     // Find the ModelItem for this event and set its appearance to not deleted.
-    auto modelItem = dynamic_cast<ModelItem*>(modelsScene_->getAeraGraphicsItem(event->object_));
+    auto modelItem = dynamic_cast<ModelItem*>(semanticsView_->getModelsScene()->getAeraGraphicsItem(event->object_));
     if (modelItem)
       // Set the background color.
       modelItem->setBrush(Qt::white);
@@ -1802,101 +1807,48 @@ Timestamp AeraVisualizerWindow::unstepEvent(Timestamp minimumTime, bool& foundGr
     return Timestamp(seconds(0));
 }
 
-void AeraVisualizerWindow::startPlay()
-{
-  if (isPlaying_)
-    // Already playing.
-    return;
+core::Timestamp AeraVisualizerWindow::aera_stepFwd() {
+  // Indicate that AERA's running
+  playerView_->setAERARunning();
+  setCursor(QCursor(Qt::BusyCursor)); // This may take a minute
 
-  playPauseButton_->setIcon(pauseIcon_);
-  for (size_t i = 0; i < children_.size(); ++i)
-    children_[i]->playPauseButton_->setIcon(pauseIcon_);
-  isPlaying_ = true;
-  if (playTimerId_ == 0)
-    playTimerId_ = startTimer(AeraVisualizer_playTimerTick.count());
+  // Run AERA a bit
+  // TO DO: This only works for steps >200ms. Best guess is there's something in the interface between
+  //        AERA and the Visualizer that breaks on short steps since AERA seems to do just fine with 
+  //        them when run on its own.
+  aera_->runFor(milliseconds(250));
+
+  // Update everything
+  updateObjectsAndEvents();
+  setCursor(QCursor(Qt::ArrowCursor)); // Back to normal
+
+  // Return the current time
+  return aera_->getCurrentTime();
 }
 
-void AeraVisualizerWindow::stopPlay()
-{
-  if (playTimerId_ != 0) {
-    killTimer(playTimerId_);
-    playTimerId_ = 0;
-  }
+core::Timestamp AeraVisualizerWindow::aera_jumpToEnd() {
+  // Indicate that AERA's running
+  playerView_->setAERARunning();
+  setCursor(QCursor(Qt::BusyCursor)); // This may take a minute
 
-  playPauseButton_->setIcon(playIcon_);
-  for (size_t i = 0; i < children_.size(); ++i)
-    children_[i]->playPauseButton_->setIcon(playIcon_);
-  isPlaying_ = false;
+  // Run AERA to the end and call processEvents to keep the visualizer from freezing
+  while (aera_->step())
+    QApplication::processEvents();
+
+  // Update everything
+  updateObjectsAndEvents();
+  setCursor(QCursor(Qt::ArrowCursor)); // Back to normal
+
+  // Return the current time
+  return aera_->getCurrentTime();
 }
 
-void AeraVisualizerWindow::setPlayTime(Timestamp time)
+core::Timestamp AeraVisualizerWindow::vis_stepFwd()
 {
-  playTime_ = time;
-
-  uint64 total_us;
-  if (showRelativeTime_)
-    total_us = duration_cast<microseconds>(time - replicodeObjects_.getTimeReference()).count();
-  else
-    total_us = duration_cast<microseconds>(time.time_since_epoch()).count();
-  uint64 us = total_us % 1000;
-  uint64 ms = total_us / 1000;
-  uint64 s = ms / 1000;
-  ms = ms % 1000;
-
-  char buffer[100];
-  if (showRelativeTime_)
-    sprintf(buffer, "%03ds:%03dms:%03dus", (int)s, (int)ms, (int)us);
-  else {
-    // Get the UTC time.
-    time_t gmtTime = s;
-    struct tm* t = gmtime(&gmtTime);
-    sprintf(buffer, "%04d-%02d-%02d   UTC\n%02d:%02d:%02d:%03d:%03d",
-      t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
-      t->tm_hour, t->tm_min, t->tm_sec, (int)ms, (int)us);
-  }
-  playTimeLabel_->setText(buffer);
-  for (size_t i = 0; i < children_.size(); ++i)
-    children_[i]->playTimeLabel_->setText(buffer);
-
-  QSettings settings;
-  // If auto scroll is enabled, ensure the new item is visible
-  if (mainScene_ && settings.value("AutoScroll", Qt::Unchecked).toInt() == Qt::Checked) {
-    mainScene_->scrollToTimestamp(time);
-  }
-}
-
-void AeraVisualizerWindow::setSliderToPlayTime()
-{
-  if (events_.size() == 0) {
-    playSlider_->setValue(0);
-    for (size_t i = 0; i < children_.size(); ++i)
-      children_[i]->playSlider_->setValue(0);
-    return;
-  }
-
-  auto maximumEventTime = events_.back()->time_;
-  int value = playSlider_->maximum() * 
-    ((double)duration_cast<microseconds>(playTime_ - replicodeObjects_.getTimeReference()).count() /
-     duration_cast<microseconds>(maximumEventTime - replicodeObjects_.getTimeReference()).count());
-  playSlider_->setValue(value);
-  for (size_t i = 0; i < children_.size(); ++i)
-    children_[i]->playSlider_->setValue(value);
-}
-
-void AeraVisualizerWindow::playPauseButtonClickedImpl()
-{
-  if (isPlaying_)
-    stopPlay();
-  else
-    startPlay();
-}
-
-void AeraVisualizerWindow::stepButtonClickedImpl()
-{
-  stopPlay();
+  playerView_->stopPlay();
   size_t iNextStepEvent;
   if (getINextStepEvent(Utils_MaxTime, iNextEvent_, iNextStepEvent) == Utils_MaxTime)
-    return;
+    return playerView_->getAERATime();
   auto eventTime = events_[iNextStepEvent]->time_;
 
   // Keep stepping remaining events in this same frame.
@@ -1966,17 +1918,19 @@ void AeraVisualizerWindow::stepButtonClickedImpl()
     }
   }
 
-  setPlayTime(eventTime);
-  setSliderToPlayTime();
+  // Scroll to the current time
+  scrollToTime(eventTime);
+
+  return eventTime;
 }
 
-void AeraVisualizerWindow::stepBackButtonClickedImpl()
+core::Timestamp AeraVisualizerWindow::vis_stepBack()
 {
-  stopPlay();
+  playerView_->stopPlay();
   bool foundGraphicsItem;
   auto newTime = max(unstepEvent(Timestamp(seconds(0)), foundGraphicsItem), replicodeObjects_.getTimeReference());
   if (newTime == Utils_MaxTime)
-    return;
+    return replicodeObjects_.getTimeReference();
   // Debug: How to step the children also?
 
   // Keep unstepping remaining events in this same frame.
@@ -1994,32 +1948,61 @@ void AeraVisualizerWindow::stepBackButtonClickedImpl()
     newTime = localNewTime;
   }
 
-  setPlayTime(max(newTime, replicodeObjects_.getTimeReference()));
-  setSliderToPlayTime();
+  // Scroll to the current time
+  scrollToTime(max(newTime, replicodeObjects_.getTimeReference()));
+
+  return max(newTime, replicodeObjects_.getTimeReference());
 }
 
-void AeraVisualizerWindow::playTimeLabelClickedImpl()
-{
-  showRelativeTime_ = !showRelativeTime_;
-  setPlayTime(playTime_);
+core::Timestamp AeraVisualizerWindow::vis_jumpToStart() {
+  // This only works if we have a time reference to jump to
+  if (!replicodeObjects_.initialized())
+    return playerView_->getPlayTime();
+
+  core::Timestamp startTime = replicodeObjects_.getTimeReference();
+  core::Timestamp playTime = playerView_->getPlayTime();
+
+  // Step until the beginning
+  while (playTime > startTime)
+    playTime = vis_stepBack();
+
+  // Scroll to the current time
+  scrollToTime(playTime);
+
+  return playTime;
 }
 
-void AeraVisualizerWindow::timerEvent(QTimerEvent* event)
-{
-  // TODO: Make sure we don't re-enter.
+core::Timestamp AeraVisualizerWindow::vis_jumpToEnd() {
+  // This only works if we have a time reference to jump to
+  if (!replicodeObjects_.initialized())
+    return playerView_->getPlayTime();
 
-  if (event->timerId() != playTimerId_)
-    // This timer event is not for us.
-    return;
+  core::Timestamp endTime = playerView_->getAERATime();
+  core::Timestamp playTime = playerView_->getPlayTime();
 
+  setCursor(QCursor(Qt::BusyCursor)); // This may take a minute
+
+  // Step until the end
+  while (playTime < endTime)
+    playTime = vis_stepFwd();
+
+  setCursor(QCursor(Qt::ArrowCursor)); // Back to normal
+
+  // Scroll to the current time
+  scrollToTime(playTime);
+
+  return playTime;
+}
+
+void AeraVisualizerWindow::timerTick() {
   if (events_.size() == 0) {
-    stopPlay();
+    playerView_->stopPlay();
     return;
   }
 
   auto maximumEventTime = events_.back()->time_;
   // TODO: Make this track the passage of real clock time.
-  auto playTime = playTime_ + AeraVisualizer_playTimerTick;
+  auto playTime = playerView_->getPlayTime() + AeraVisualizer_playTimerTick;
 
   // Step events while events_[iNextEvent_] is less than or equal to the playTime.
   // Debug: How to step the children also?
@@ -2028,16 +2011,266 @@ void AeraVisualizerWindow::timerEvent(QTimerEvent* event)
   if (iNextEvent_ >= events_.size()) {
     // We have played all events.
     playTime = maximumEventTime;
-    stopPlay();
+    playerView_->stopPlay();
   }
 
-  setPlayTime(playTime);
-  setSliderToPlayTime();
+  playerView_->setPlayTime(playTime);
+  scrollToTime(playTime);
 }
 
 void AeraVisualizerWindow::closeEvent(QCloseEvent* event) {
   findDialog_->close();
+
+  if (aera_)
+    // Shut down AERA when we're done
+    aera_->stop();
+  
+  // Save current state for next time
+  QSettings preferences;
+  preferences.setValue("geometry", saveGeometry());
+  preferences.setValue("state", saveState());
+  
   event->accept();
+}
+
+void AeraVisualizerWindow::loadNewSeed()
+{ // TO DO: This is temporarily disabled until the user can select seed programs directly.
+  //        For that to work, we'll need to finish the work on the settings-GUI branch
+  /*
+  // Try and retrieve the last settings file loaded (fall back to the local one)
+  QSettings preferences;
+  QString settingsFilePath0 = preferences.value("settingsFilePath").toString();
+  if (settingsFilePath0 == "")
+    settingsFilePath0 = "./settings.xml";
+
+  // Present a file dialog to the user so they can choose a settings file
+  QString settingsFilePath = QFileDialog::getOpenFileName(NULL,
+    "Open AERA settings XML file", settingsFilePath0, "XML Files (*.xml);;All Files (*.*)");
+  if (settingsFilePath == "")
+    return;
+  else
+    preferences.setValue("settingsFilePath", settingsFilePath);
+    */
+  QString settingsFilePath = "settings.xml";
+
+  // Load the settings
+  Settings settings;
+  if (!settings.load(settingsFilePath.toStdString().c_str())) {
+    QMessageBox::information(NULL, "XML Error", "Cannot load XML file " + settingsFilePath, QMessageBox::Ok);
+    return;
+  }
+
+  // Put the filename in the title
+  setWindowTitle(QString("AERA Visualizer (EXPERIMENTAL) - ") + QFileInfo(settings.source_file_name_.c_str()).fileName());
+
+  // Show a dialog while AERA starts (it may hang a bit on the TCP I/O device)
+  QProgressDialog progress(this);
+  progress.setWindowTitle("Please wait");
+  progress.setWindowIcon(QIcon(":/images/app.ico"));
+  progress.setMinimum(0);
+  progress.setMaximum(100);
+
+  if (settings.io_device_ == "tcp_io_device") {
+    progress.setWindowTitle("Standing by");
+    progress.setLabelText("Waiting for a TCP connection, please start external program...");
+  }
+  else
+    progress.setLabelText("Starting AERA, please wait...");
+
+  progress.show();
+  QApplication::processEvents();
+
+  // Reset AERA
+  aera_ = new AERA_interface(settingsFilePath.toStdString().c_str(), "");
+  
+  // Clear the progress dialog
+  progress.setValue(100);
+    
+  // Files are relative to the directory of settingsFilePath.
+  QDir settingsFileDir = QFileInfo(settingsFilePath).dir();
+  string runtimeOutputFilePath = settingsFileDir.absoluteFilePath(settings.runtime_output_file_path_.c_str()).toStdString();
+  {
+    // Test opening the file now so we can exit on error.
+    ifstream testOpen(runtimeOutputFilePath);
+    if (!testOpen) {
+      QMessageBox::information(NULL, "File Error",
+        QString("Can't open debug stream output file: ") + runtimeOutputFilePath.c_str(), QMessageBox::Ok);
+      return;
+    }
+  }
+
+  // Create replicodeObjects_ but don't initialize it
+  replicodeObjects_ = ReplicodeObjects();
+  findDialog_->setReplicodeObjects(&replicodeObjects_);
+
+  // Send this to the text output so it can read in the outputs
+  textOutputView_->setOutputFilepaths(settings.decompilation_file_path_, settings.runtime_output_file_path_);
+
+  // Update internal environment view with a link to AERA so it can access TestMem
+  taskEnvironmentView_->setAERA(aera_);
+
+  // This version isn't resettable just yet
+  newInstanceAction_->setEnabled(false);
+  openOutputAction_->setEnabled(false);
+
+  // Enable the UI now that there's something to analyze
+  setUIEnabled(true);
+
+  // Indicate that AERA is started
+  setAERAstatus("AERA running", false);
+}
+
+void AeraVisualizerWindow::updateObjectsAndEvents(bool live)
+{
+  // Create the progress dialog to show while compiling and reading the runtime output.
+  QProgressDialog progress("", "Cancel", 0, 100);
+  progress.setWindowModality(Qt::WindowModal);
+  // Remove the '?' in the title.
+  progress.setWindowFlags(progress.windowFlags() & ~Qt::WindowContextHelpButtonHint);
+  progress.setWindowIcon(QIcon(":/images/app.ico"));
+  progress.setWindowTitle("Initializing");
+  progress.setAutoReset(false);
+  progress.setAutoClose(false);
+  progress.show();
+  QApplication::processEvents();
+  
+  // If connected to a live instance, retrieve settings_ and replicodeObjects_ from there
+  if (live) {
+    settings_ = *aera_->getSettings();
+    string error = replicodeObjects_.init(aera_, microseconds(settings_.base_period_), progress);
+    if (error == "cancel")
+      return;
+    if (error != "") {
+      QMessageBox::information(NULL, "Compiler Error", error.c_str(), QMessageBox::Ok);
+      return;
+    }
+  }
+
+  // Otherwise, settings_ and replicodeObjects_ should have already been filled by openOutput
+  else {
+    // TODO: Might be best to validate settings_ and replicodeObjects_ just in case?
+  }
+  
+  QSettings preferences;
+  // This was already set by openOutput.
+  QString settingsFilePath = preferences.value("settingsFilePath").toString();
+  // Files are relative to the directory of settingsFilePath.
+  QDir settingsFileDir = QFileInfo(settingsFilePath).dir();
+  // Process runtime_out.txt for events (these form the basis for graphics objects)
+  if (!addEvents(settingsFileDir.absoluteFilePath(settings_.runtime_output_file_path_.c_str()).toStdString(), progress))
+    return;
+
+  // Show the last progress message
+  progress.setLabelText(replicodeObjects_.getProgressLabelText("Setting up workspace"));
+  QApplication::processEvents();
+
+  // Pass on the changes
+  essencePropertyObject_ = replicodeObjects_.getObject("essence");
+  explanationLogView_->setReplicodeObjects(&replicodeObjects_);
+  semanticsView_->setReplicodeObjects(&replicodeObjects_);
+  playerView_->setTimeReference(replicodeObjects_.getTimeReference());
+  playerView_->setPlayTime(replicodeObjects_.getTimeReference());
+  findDialog_->setReplicodeObjects(&replicodeObjects_);
+  mainScene_->setReplicodeObjects(&replicodeObjects_);
+  
+  // Some changes only matter during a live run
+  if (live) {
+    playerView_->setRunTime(milliseconds(settings_.run_time_));
+    taskEnvironmentView_->refresh();
+    aera_->brainDump(&replicodeObjects_.getObjectLabelMap());   // Some views require the text outputs
+  }
+  
+  textOutputView_->refresh();
+
+  // Clean up
+  progress.close();
+}
+
+void AeraVisualizerWindow::openOutput()
+{
+  // Configure QSettings to use .ini files to store settings
+  QSettings::setDefaultFormat(QSettings::IniFormat);
+
+  QSettings preferences;
+
+  QString settingsFilePath0 = preferences.value("settingsFilePath").toString();
+  if (settingsFilePath0 == "")
+    settingsFilePath0 = "./settings.xml";
+  QString settingsFilePath = QFileDialog::getOpenFileName(NULL, "Open AERA settings XML file", settingsFilePath0, "XML Files (*.xml);;All Files (*.*)");
+  if (settingsFilePath == "")
+    return;
+  preferences.setValue("settingsFilePath", settingsFilePath);
+  
+  if (!settings_.load(settingsFilePath.toStdString().c_str())) {
+    QMessageBox::information(NULL, "XML Error", "Cannot load XML file " + settingsFilePath, QMessageBox::Ok);
+    return;
+  }
+
+  // Files are relative to the directory of settingsFilePath.
+  QDir settingsFileDir = QFileInfo(settingsFilePath).dir();
+  string runtimeOutputFilePath = settingsFileDir.absoluteFilePath(settings_.runtime_output_file_path_.c_str()).toStdString();
+  
+  // Test opening the file now so we can exit on error.
+  ifstream testOpen(runtimeOutputFilePath);
+  if (!testOpen) {
+    QMessageBox::information(NULL, "File Error",
+      QString("Can't open debug stream output file: ") + runtimeOutputFilePath.c_str(), QMessageBox::Ok);
+    return;
+  }
+
+  // Create the progress dialog to show while compiling and reading the runtime output.
+  QProgressDialog progress("", "Cancel", 0, 100);
+  progress.setWindowModality(Qt::WindowModal);
+  // Remove the '?' in the title.
+  progress.setWindowFlags(progress.windowFlags() & ~Qt::WindowContextHelpButtonHint);
+  progress.setWindowIcon(QIcon(":/images/app.ico"));
+  progress.setWindowTitle("Initializing");
+  progress.setAutoReset(false);
+  progress.setAutoClose(false);
+  progress.show();
+  QApplication::processEvents();
+  
+  // Initialize replicodeObjects_
+  string error = replicodeObjects_.init(
+    settingsFileDir.absoluteFilePath(settings_.usr_class_path_.c_str()).toStdString(),
+    settingsFileDir.absoluteFilePath(settings_.decompilation_file_path_.c_str()).toStdString(),
+    microseconds(settings_.base_period_), progress);
+  if (error == "cancel")
+    return;
+  if (error != "") {
+    QMessageBox::information(NULL, "Compiler Error", error.c_str(), QMessageBox::Ok);
+    return;
+  }
+
+  // Put the filename in the title
+  setWindowTitle(QString("AERA Visualizer (EXPERIMENTAL) - ") + QFileInfo(settings_.source_file_name_.c_str()).fileName());
+
+  // Point the text view to the right output files
+  textOutputView_->setOutputFilepaths(settings_.decompilation_file_path_, settings_.runtime_output_file_path_);
+  
+  // Disable these to prevent (re)loading anything
+  newInstanceAction_->setEnabled(false);
+  openOutputAction_->setEnabled(false);
+
+  // Enable the UI now that there's something to analyze
+  setUIEnabled(true);
+
+  // Indicate that everything's loaded
+  setAERAstatus("Viewing previous AERA run", false);
+  playerView_->indicatePreviousRun();
+  
+  // Push the data to the GUI without trying to fetch anything from AERA
+  updateObjectsAndEvents(false);
+}
+
+void AeraVisualizerWindow::saveOutput()
+{
+  // Save everything and display a confirmation
+  aera_->brainDump(&replicodeObjects_.getObjectLabelMap());
+  QString decompiled_objects = QString::fromStdString(aera_->getSettings()->decompilation_file_path_);
+  QString runtime_out = QString::fromStdString(aera_->getSettings()->runtime_output_file_path_);
+  QMessageBox::information(this, "Success!",
+    "Outut saved to \"" + decompiled_objects + "\" and \"" + runtime_out + "\"");
 }
 
 void AeraVisualizerWindow::saveMainWindowImage()
@@ -2118,14 +2351,80 @@ void AeraVisualizerWindow::fitAll() {
   return;
 }
 
+void AeraVisualizerWindow::createDockWidgets() {
+  // Configure docking settings
+  setDockNestingEnabled(true);
+  setDockOptions(QMainWindow::AnimatedDocks | QMainWindow::AllowNestedDocks | QMainWindow::AllowTabbedDocks);
+
+  // Set up the semantics view
+  semanticsView_ = new SemanticsView(this);
+  semanticsView_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea);
+  semanticsView_->setObjectName("SemanticsView");
+  addDockWidget(Qt::LeftDockWidgetArea, semanticsView_);
+  
+  // Set up the explanation log
+  explanationLogView_ = new ExplanationLogView(this);
+  explanationLogView_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea);
+  explanationLogView_->setObjectName("ExplanationLog");
+  addDockWidget(Qt::RightDockWidgetArea, explanationLogView_);
+
+  // Set up the text view
+  textOutputView_ = new TextOutputView(this);
+  textOutputView_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea);
+  textOutputView_->setObjectName("TextOutputView");
+  addDockWidget(Qt::RightDockWidgetArea, textOutputView_);
+
+  // Set up the internal environment view
+  taskEnvironmentView_ = new TaskEnvironmentView(this);
+  taskEnvironmentView_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea);
+  taskEnvironmentView_->setObjectName("TaskEnvironmentView");
+  addDockWidget(Qt::LeftDockWidgetArea, taskEnvironmentView_);
+
+  // Make the player a fixed dock widget so it's always at the bottom of the window
+  playerView_ = new PlayerView(this);
+  playerView_->setFeatures(QDockWidget::NoDockWidgetFeatures);
+  playerView_->setObjectName("PlayerView");
+  addDockWidget(Qt::BottomDockWidgetArea, playerView_);
+}
+
 void AeraVisualizerWindow::createActions()
 {
+  // TO DO: This should allow the user to select a seed .replicode file
+  //newInstanceAction_ = new QAction(tr("&Load seed program"), this);
+  newInstanceAction_ = new QAction(tr("&Start AERA"), this);
+  newInstanceAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
+  //newInstanceAction_->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
+  newInstanceAction_->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+  connect(newInstanceAction_, SIGNAL(triggered()), this, SLOT(loadNewSeed()));
+
+  openOutputAction_ = new QAction(tr("&Open AERA Output"), this);
+  openOutputAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
+  openOutputAction_->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
+  connect(openOutputAction_, SIGNAL(triggered()), this, SLOT(openOutput()));
+
+  saveOutputAction_ = new QAction(tr("&Save AERA Output"), this);
+  saveOutputAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
+  saveOutputAction_->setIcon(style()->standardIcon(QStyle::SP_DialogSaveButton));
+  connect(saveOutputAction_, SIGNAL(triggered()), this, SLOT(saveOutput()));
   saveMainWindowImageAction_ = new QAction(tr("&Save Main Window Image"), this);
   connect(saveMainWindowImageAction_, SIGNAL(triggered()), this, SLOT(saveMainWindowImage()));
 
   exitAction_ = new QAction(tr("E&xit"), this);
   exitAction_->setShortcuts(QKeySequence::Quit);
+  exitAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_W));
+  exitAction_->setIcon(style()->standardIcon(QStyle::SP_TitleBarCloseButton));
   connect(exitAction_, SIGNAL(triggered()), this, SLOT(close()));
+
+  resetAERAInstanceAction_ = new QAction(tr("&Reset AERA Instance"), this);
+  resetAERAInstanceAction_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_R));
+  resetAERAInstanceAction_->setIcon(style()->standardIcon(QStyle::SP_DialogResetButton));
+  resetAERAInstanceAction_->setEnabled(false);
+  //connect(resetAERAInstanceAction_, SIGNAL(triggered()), this, SLOT(close()));
+
+  configureAERAInstanceAction_ = new QAction(tr("&Configure AERA Instance"), this);
+  configureAERAInstanceAction_->setIcon(style()->standardIcon(QStyle::SP_FileDialogInfoView));
+  configureAERAInstanceAction_->setEnabled(false);
+  //connect(configureAERAInstanceAction_, SIGNAL(triggered()), this, SLOT(close()));
 
   zoomInAction_ = new QAction(QIcon(":/images/zoom-in.png"), tr("Zoom In"), this);
   zoomInAction_->setStatusTip(tr("Zoom In"));
@@ -2165,15 +2464,27 @@ void AeraVisualizerWindow::createActions()
 
 void AeraVisualizerWindow::createMenus()
 {
+  // Reset the menu so we can add more actions
+  menuBar()->clear();
+
   QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
+  fileMenu->addAction(newInstanceAction_);
+  fileMenu->addAction(openOutputAction_);
+  fileMenu->addAction(saveOutputAction_);
   fileMenu->addAction(saveMainWindowImageAction_);
   fileMenu->addAction(exitAction_);
 
-  QMenu* viewMenu = menuBar()->addMenu(tr("&View"));
-  viewMenu->addAction(zoomHomeAction_);
-  viewMenu->addAction(zoomInAction_);
-  viewMenu->addAction(zoomOutAction_);
+  // These are turned off until they're fully implemented
+  //QMenu* AERAMenu = menuBar()->addMenu(tr("&AERA"));
+  //AERAMenu->addAction(resetAERAInstanceAction_);
+  //AERAMenu->addAction(configureAERAInstanceAction_);
+
+  QMenu* viewMenu = menuBar()->addMenu(tr("&Views"));
   viewMenu->addAction(findAction_);
+  viewMenu->addAction(explanationLogView_->toggleViewAction());
+  viewMenu->addAction(semanticsView_->toggleViewAction());
+  viewMenu->addAction(textOutputView_->toggleViewAction());
+  viewMenu->addAction(taskEnvironmentView_->toggleViewAction());
 
   QMenu* findMenu = menuBar()->addMenu(tr("Fin&d"));
   findMenu->addAction(findAction_);
@@ -2184,18 +2495,19 @@ void AeraVisualizerWindow::createMenus()
 
 void AeraVisualizerWindow::createToolbars()
 {
-  QToolBar* toolbar = addToolBar(tr("Main"));
-  toolbar->addAction(zoomHomeAction_);
-  toolbar->addAction(zoomInAction_);
-  toolbar->addAction(zoomOutAction_);
-  toolbar->addAction(findAction_);
+  timelineControls_ = new QToolBar(this); //addToolBar(tr("Main"));
+  timelineControls_->addAction(zoomHomeAction_);
+  timelineControls_->addAction(zoomInAction_);
+  timelineControls_->addAction(zoomOutAction_);
+  timelineControls_->addAction(findAction_);
+  timelineControls_->setIconSize(QSize(16, 16));
 
-  toolbar->addSeparator();
+  timelineControls_->addSeparator();
   // Checkbox for auto scroll
-  toolbar->addWidget(new AeraCheckbox("Auto-scroll", SettingsKeyAutoScroll, this));
+  timelineControls_->addWidget(new AeraCheckbox("Auto-scroll", SettingsKeyAutoScroll, this));
 
-  toolbar->addSeparator();
-  toolbar->addWidget(new QLabel("Show/Hide: ", this));
+  timelineControls_->addSeparator();
+  timelineControls_->addWidget(new QLabel("Show/Hide: ", this));
 
   const QColor simulationColor("#ffffdc");
   // Show simulations by default.
@@ -2208,18 +2520,18 @@ void AeraVisualizerWindow::createToolbars()
     for (auto i = simulationEventTypes_.begin(); i != simulationEventTypes_.end(); ++i)
       mainScene_->setItemsVisible(*i, state == Qt::Checked);
     });
-  toolbar->addWidget(simulationsCheckBox_);
+  timelineControls_->addWidget(simulationsCheckBox_);
 
   allSimulationInputsCheckBox_ = new AeraCheckbox("All Inputs", SettingsKeyAllSimulationInputsVisible, this, Qt::Unchecked);
   allSimulationInputsCheckBox_->setColor(simulationColor);
-  toolbar->addWidget(allSimulationInputsCheckBox_);
+  timelineControls_->addWidget(allSimulationInputsCheckBox_);
 
   singleStepSimulationCheckBox_ = new AeraCheckbox("Single Step", SettingsKeySingleStepSimulationVisible, this, Qt::Unchecked);
   singleStepSimulationCheckBox_->setColor(simulationColor);
-  toolbar->addWidget(singleStepSimulationCheckBox_);
+  timelineControls_->addWidget(singleStepSimulationCheckBox_);
 
   // Separate the non-simulations check boxes.
-  toolbar->addWidget(new QLabel("    ", this));
+  timelineControls_->addWidget(new QLabel("    ", this));
 
   // Show non-simulations by default.
   nonSimulationsCheckBox_ = new AeraCheckbox("Non-Simulations", SettingsKeyNonSimulationsVisible, this, Qt::Checked);
@@ -2242,32 +2554,72 @@ void AeraVisualizerWindow::createToolbars()
         ModelImdlPredictionEvent::EVENT_TYPE, requirementsCheckBox_->checkState() == Qt::Checked);
     }
   });
-  toolbar->addWidget(nonSimulationsCheckBox_);
+  timelineControls_->addWidget(nonSimulationsCheckBox_);
 
   essenceFactsCheckBox_ = new AeraCheckbox("Essence Facts", SettingsKeyEssenceFactsVisible, this);
   connect(essenceFactsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     mainScene_->setAutoFocusItemsVisible("essence", state == Qt::Checked);  });
-  toolbar->addWidget(essenceFactsCheckBox_);
+  timelineControls_->addWidget(essenceFactsCheckBox_);
 
   instantiatedCompositeStatesCheckBox_ = new AeraCheckbox("Instantiated Comp. States", SettingsKeyInstantiatedCompositeStatesVisible, this);
   connect(instantiatedCompositeStatesCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     mainScene_->setItemsVisible(NewInstantiatedCompositeStateEvent::EVENT_TYPE, state == Qt::Checked); });
-  toolbar->addWidget(instantiatedCompositeStatesCheckBox_);
+  timelineControls_->addWidget(instantiatedCompositeStatesCheckBox_);
 
   instantiatedModelsCheckBox_ = new AeraCheckbox("Instantiated Models", SettingsKeyInstantiatedModelsVisible, this);
   connect(instantiatedModelsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     mainScene_->setItemsVisible(NewInstantiatedModelEvent::EVENT_TYPE, state == Qt::Checked); });
-  toolbar->addWidget(instantiatedModelsCheckBox_);
+  timelineControls_->addWidget(instantiatedModelsCheckBox_);
 
   predictedInstantiatedCompositeStatesCheckBox_ = new AeraCheckbox("Pred. Instantiated Comp. States", SettingsKeyPredictedInstantiatedCompositeStatesVisible, this);
   connect(predictedInstantiatedCompositeStatesCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     mainScene_->setItemsVisible(NewPredictedInstantiatedCompositeStateEvent::EVENT_TYPE, state == Qt::Checked); });
-  toolbar->addWidget(predictedInstantiatedCompositeStatesCheckBox_);
+  timelineControls_->addWidget(predictedInstantiatedCompositeStatesCheckBox_);
 
   requirementsCheckBox_ = new AeraCheckbox("Requirements", SettingsKeyRequirementsVisible, this);
   connect(requirementsCheckBox_, &QCheckBox::stateChanged, [=](int state) {
     mainScene_->setItemsVisible(ModelImdlPredictionEvent::EVENT_TYPE, state == Qt::Checked);  });
-  toolbar->addWidget(requirementsCheckBox_);
+  timelineControls_->addWidget(requirementsCheckBox_);
+}
+
+
+void AeraVisualizerWindow::createStatusBar() {
+  AERAStatusLabel_ = new QLabel(this);
+  operatingModeStatusLabel_ = new QLabel(this);
+  QStatusBar* mainWindowStatusBar = new QStatusBar(this);
+
+  mainWindowStatusBar->insertPermanentWidget(0, AERAStatusLabel_, 1);            // Left side
+  mainWindowStatusBar->insertPermanentWidget(1, operatingModeStatusLabel_, 1);   // Right side
+  setStatusBar(mainWindowStatusBar);
+}
+
+
+void AeraVisualizerWindow::setUIEnabled(bool enabled) {
+  // Actions
+  saveOutputAction_->setEnabled(enabled);
+  resetAERAInstanceAction_->setEnabled(enabled);
+  configureAERAInstanceAction_->setEnabled(enabled);
+  zoomInAction_->setEnabled(enabled);
+  zoomOutAction_->setEnabled(enabled);
+  zoomHomeAction_->setEnabled(enabled);
+  findAction_->setEnabled(enabled);
+  findNextAction_->setEnabled(enabled);
+  findPrevAction_->setEnabled(enabled);
+  fitAllAction_->setEnabled(enabled);
+
+  // Checkboxes
+  simulationsCheckBox_->setEnabled(enabled);
+  allSimulationInputsCheckBox_->setEnabled(enabled);
+  singleStepSimulationCheckBox_->setEnabled(enabled);
+  nonSimulationsCheckBox_->setEnabled(enabled);
+  essenceFactsCheckBox_->setEnabled(enabled);
+  instantiatedCompositeStatesCheckBox_->setEnabled(enabled);
+  instantiatedModelsCheckBox_->setEnabled(enabled);
+  predictedInstantiatedCompositeStatesCheckBox_->setEnabled(enabled);
+  requirementsCheckBox_->setEnabled(enabled);
+
+  // Views
+  playerView_->setUIEnabled(enabled);
 }
 
 void AeraVisualizerWindow::abaSentenceItemClicked(AbaSentenceItem* item)
