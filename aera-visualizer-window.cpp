@@ -336,10 +336,9 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
   ifstream runtimeOutputFile(runtimeOutputFilePath);
   int lineNumber = 0;
   string line;
-  int newSolutionId = 1;
-  int abaSolutionId = newSolutionId;
-  abaSolutions_[newSolutionId] = AbaSolution(0, 0);
-  auto solutionEvents = &abaSolutions_[newSolutionId].abaEvents_;
+  int abaSolutionId = 1;
+  abaSolutions_[abaSolutionId] = AbaSolution(0, 0);
+  auto solutionEvents = &abaSolutions_[abaSolutionId].abaEvents_;
   // Map of solutions ID -> max step number of solution steps that have already been copied to events_.
   map<int, int> solutionMaxStepCopied;
   while (getline(runtimeOutputFile, line)) {
@@ -680,12 +679,11 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
           timestamp, input, promotedFact));
     }
     else if (regex_search(lineAfterTimestamp, matches, abaSolutionStartRegex)) {
-      newSolutionId = stoul(matches[1].str());
-      //abaSolutionId = newSolutionId; // non-Legacy
+      abaSolutionId = stoul(matches[1].str());
       int parentSolutionId = stoul(matches[2].str());
       int parentStep = stoul(matches[3].str());
-      abaSolutions_[newSolutionId] = AbaSolution(parentSolutionId, parentStep);
-      solutionEvents = &abaSolutions_[newSolutionId].abaEvents_;
+      abaSolutions_[abaSolutionId] = AbaSolution(parentSolutionId, parentStep);
+      solutionEvents = &abaSolutions_[abaSolutionId].abaEvents_;
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCaseInitStepRegex)) {
       int step = stoul(matches[1].str());
@@ -828,12 +826,11 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
     }
     else if (regex_search(lineAfterTimestamp, matches, abaSolutionFound)) {
       int step = stoul(matches[1].str());
-      //(*solutionEvents)[step].push_back(make_shared<AbaSolutionFound>(timestamp, newSolutionId));
-      (*solutionEvents)[step].push_back(make_shared<AbaSolutionFound>(timestamp, abaSolutionId)); // Legacy
+      (*solutionEvents)[step].push_back(make_shared<AbaSolutionFound>(timestamp, abaSolutionId));
 
       // Copy from abaEvents_ working backwards through parent solutions.
       vector<shared_ptr<AeraEvent> > reverseEvents;
-      int solutionId = newSolutionId;
+      int solutionId = abaSolutionId;
       int maxStepToCopy = INT_MAX;
       while (true) {
         int maxStepCopied = (solutionMaxStepCopied.count(solutionId) > 0 ? solutionMaxStepCopied[solutionId] : - 1);
@@ -863,8 +860,7 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
 
       // Reverse copy to events_.
       events_.insert(events_.end(), reverseEvents.rbegin(), reverseEvents.rend());
-      // Expect to match abaSolutionStartRegex which will set newSolutionId and solutionEvents.
-      ++abaSolutionId; // Legacy
+      // Expect to match abaSolutionStartRegex which will set abaSolutionId and solutionEvents.
     }
   }
 
