@@ -2169,6 +2169,8 @@ void AeraVisualizerWindow::updateObjectsAndEvents(bool live)
   findDialog_->setReplicodeObjects(&replicodeObjects_);
   mainScene_->setReplicodeObjects(&replicodeObjects_);
   
+  addStartupItems();
+
   // Some changes only matter during a live run
   if (live) {
     playerView_->setRunTime(milliseconds(settings_.run_time_));
