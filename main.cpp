@@ -118,7 +118,6 @@ int main(int argv, char *args[])
   auto findDialog = new FindDialog(&mainWindow);
   mainWindow.setFindWindow(findDialog);
   mainWindow.show();
-  mainWindow.addStartupItems();
 
   return app.exec();
 }
