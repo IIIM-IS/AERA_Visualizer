@@ -80,6 +80,7 @@ namespace aera_visualizer {
 AeraVisualizerScene::AeraVisualizerScene(AeraVisualizerWindow* parent, bool isMainScene)
 : QGraphicsScene(parent),
   parent_(parent),
+  replicodeObjects_(0),
   isMainScene_(isMainScene),
   didInitialFit_(false),
   thisFrameTime_(seconds(0)),
