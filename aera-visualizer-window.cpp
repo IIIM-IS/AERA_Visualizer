@@ -297,6 +297,8 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
   regex simulationPromotedSimulatedPredictionDefeatedRegex("^promoted simulated fact (\\d+) with DefeasibleValidity\\((\\d+)\\) defeated by fact (\\d+)");
   // Start solution 8 from solution 5 step 45
   regex abaSolutionStartRegex("^Start solution (\\d+) from solution (\\d+) step (\\d+)$");
+  // Solution 5
+  regex abaSolutionIdRegex("^Solution (\\d+)$");
   // Step 0: Case init: S: 304
   regex abaCaseInitStepRegex("^Step (\\d+): Case init: S: (\\d+)$");
   // Step 10: Case 1.(i): A: 314, Contrary 322 has body? Y, NewGId 1
@@ -679,10 +681,13 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
           timestamp, input, promotedFact));
     }
     else if (regex_search(lineAfterTimestamp, matches, abaSolutionStartRegex)) {
-      abaSolutionId = stoul(matches[1].str());
+      int solutionId = stoul(matches[1].str());
       int parentSolutionId = stoul(matches[2].str());
       int parentStep = stoul(matches[3].str());
-      abaSolutions_[abaSolutionId] = AbaSolution(parentSolutionId, parentStep);
+      abaSolutions_[solutionId] = AbaSolution(parentSolutionId, parentStep);
+    }
+    else if (regex_search(lineAfterTimestamp, matches, abaSolutionIdRegex)) {
+      abaSolutionId = stoul(matches[1].str());
       solutionEvents = &abaSolutions_[abaSolutionId].abaEvents_;
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCaseInitStepRegex)) {
