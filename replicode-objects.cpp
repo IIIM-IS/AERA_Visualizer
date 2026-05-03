@@ -77,7 +77,7 @@ using namespace r_exec;
 namespace aera_visualizer {
 
 ReplicodeObjects::ReplicodeObjects()
-: intMemberRegex_("( ?\\d+)")
+: intMemberRegex_(" ?(\\d+)")
 {
   // Set up progressLines_. Used by getProgressLabelText to make the progress messages clearer.
   progressMessages_.push_back("Snapshotting AERA state");
