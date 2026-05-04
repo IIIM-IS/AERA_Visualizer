@@ -180,7 +180,7 @@ AeraVisualizerWindow::AeraVisualizerWindow()
   essencePropertyObject_(NULL),
   hoverHighlightItem_(0),
   phasedOutModelColor_(255, 192, 192),
-  abagraph_(""), // ("/work/abagraph-mercury/mercury/abagraph.exe"),
+  abagraph_("", replicodeObjects_), // ("/work/abagraph-mercury/mercury/abagraph.exe", replicodeObjects_),
   itemBorderHighlightPen_(Qt::blue, 3)
 {
   createActions();
@@ -692,7 +692,7 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCaseInitStepRegex)) {
       int step = stoul(matches[1].str());
-      auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
+      auto fact = abagraph_.getObject(stoul(matches[2].str()));
       if (fact) {
         (*solutionEvents)[step].push_back(make_shared<AbaAddSentence>(
           timestamp, fact, false, true, abaSolutionId * PROPONENT_GRAPH_ID_MULTIPLIER, (Code*)NULL, "init"));
@@ -700,8 +700,8 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase1iStepRegex)) {
       int step = stoul(matches[1].str());
-      auto assumption = replicodeObjects_.getObject(stoul(matches[2].str()));
-      auto contrary = replicodeObjects_.getObject(stoul(matches[3].str()));
+      auto assumption = abagraph_.getObject(stoul(matches[2].str()));
+      auto contrary = abagraph_.getObject(stoul(matches[3].str()));
       bool contraryHasBody = (matches[4].str() == "Y");
       int newGId = stoul(matches[5].str());
 
@@ -718,15 +718,15 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase1iiStepRegex)) {
       int step = stoul(matches[1].str());
-      auto head = replicodeObjects_.getObject(stoul(matches[2].str()));
+      auto head = abagraph_.getObject(stoul(matches[2].str()));
       vector<Code*> newUnmarkedAssumptions;
       vector<Code*> newUnmarkedNonAssumptions;
       vector<Code*> existingBody;
 
       if (head &&
-          replicodeObjects_.getObjects(matches[3].str(), newUnmarkedAssumptions) &&
-          replicodeObjects_.getObjects(matches[4].str(), newUnmarkedNonAssumptions) &&
-          replicodeObjects_.getObjects(matches[5].str(), existingBody)) {
+          abagraph_.getObjects(matches[3].str(), newUnmarkedAssumptions) &&
+          abagraph_.getObjects(matches[4].str(), newUnmarkedNonAssumptions) &&
+          abagraph_.getObjects(matches[5].str(), existingBody)) {
         // This step sets the head to marked.
         (*solutionEvents)[step].push_back(make_shared<AbaMarkSentence>(timestamp, head));
 
@@ -757,7 +757,7 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase2iaStepRegex)) {
       int step = stoul(matches[1].str());
-      auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
+      auto fact = abagraph_.getObject(stoul(matches[2].str()));
 
       if (fact) {
         // (Don't mark the graph.)
@@ -766,8 +766,8 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase2ibStepRegex)) {
       int step = stoul(matches[1].str());
-      auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
-      auto culprit = replicodeObjects_.getObject(stoul(matches[4].str()));
+      auto fact = abagraph_.getObject(stoul(matches[2].str()));
+      auto culprit = abagraph_.getObject(stoul(matches[4].str()));
 
       if (fact) {
         // (Also mark the graph that the fact is in.)
@@ -780,8 +780,8 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase2icStepRegex)) {
       int step = stoul(matches[1].str());
-      auto fact = replicodeObjects_.getObject(stoul(matches[2].str()));
-      auto contrary = replicodeObjects_.getObject(stoul(matches[4].str()));
+      auto fact = abagraph_.getObject(stoul(matches[2].str()));
+      auto contrary = abagraph_.getObject(stoul(matches[4].str()));
       bool contraryIsNew = (matches[5].str() == "Y");
 
       if (fact && contrary) {
@@ -795,7 +795,7 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase2iiMarkStepRegex)) {
       int step = stoul(matches[1].str());
-      auto head = replicodeObjects_.getObject(stoul(matches[2].str()));
+      auto head = abagraph_.getObject(stoul(matches[2].str()));
       bool markGraph = (matches[3].str() == "Y");
 
       if (head) {
@@ -805,16 +805,16 @@ bool AeraVisualizerWindow::addEvents(const string& runtimeOutputFilePath, QProgr
     }
     else if (regex_search(lineAfterTimestamp, matches, abaCase2iiStepRegex)) {
       int step = stoul(matches[1].str());
-      auto head = replicodeObjects_.getObject(stoul(matches[2].str()));
+      auto head = abagraph_.getObject(stoul(matches[2].str()));
       int newGraphId = stoul(matches[3].str());
       vector<Code*> newUnmarkedAssumptions;
       vector<Code*> newUnmarkedNonAssumptions;
       vector<Code*> existingBody;
 
       if (head &&
-          replicodeObjects_.getObjects(matches[4].str(), newUnmarkedAssumptions) &&
-          replicodeObjects_.getObjects(matches[5].str(), newUnmarkedNonAssumptions) &&
-          replicodeObjects_.getObjects(matches[6].str(), existingBody)) {
+          abagraph_.getObjects(matches[4].str(), newUnmarkedAssumptions) &&
+          abagraph_.getObjects(matches[5].str(), newUnmarkedNonAssumptions) &&
+          abagraph_.getObjects(matches[6].str(), existingBody)) {
         // We have already set the head to marked with abaCase2iiMarkStepRegex. Don't add AbaMarkSentence.
 
         for (auto fact = existingBody.begin(); fact != existingBody.end(); ++fact)

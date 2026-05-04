@@ -54,9 +54,13 @@
 #ifndef ABAGRAPH_HPP
 #define ABAGRAPH_HPP
 
-#include <QProcess>;
+#include <regex>
+#include <QProcess>
+#include "submodules/AERA/r_code/object.h"
 
 namespace aera_visualizer {
+
+class ReplicodeObjects;
 
 /**
  * AbaGraph is an interface to the abagraph process.
@@ -66,18 +70,35 @@ public:
   /**
    * Create a new AbaGraph and start the process.
    * \param path The path to the abagraph executable. If "" then don't start the process.
+   * \param replicodeObjects
    */
-  AbaGraph(const QString& path);
+  AbaGraph(const QString& path, ReplicodeObjects& replicodeObjects);
 
-private:
   /**
    * Send the prompt and return the response lines until a blank line, or nothing if timeout.
    * This will append the "\n" to the prompt.
    */
-public:
   std::vector<QString> readResponse(const QString& prompt);
 
+  /**
+   * Get the object by the ABA ID.
+   * \param id The ABA ID.
+   * \return The object, or NULL if not found.
+   */
+  r_code::Code* getObject(uint32 id);
+
+  /**
+   * Parse the list of integers ABA IDs and use getObject() to add each to objects.
+   * \param ids The string with the list of ABA ID integers, e.g. "12 14". This may be "".
+   * \param objects Add found objects. This does not first clear the vector.
+   * \return True for success, false if getObject() failed to find an ID
+   */
+  bool getObjects(std::string ids, std::vector<r_code::Code*>& objects);
+
+private:
   QProcess abagraph_;
+  ReplicodeObjects& replicodeObjects_;
+  std::regex intMemberRegex_;
 };
 
 }

@@ -52,12 +52,16 @@
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 #include "abagraph.hpp"
+#include "replicode-objects.hpp"
 
 using namespace std;
+using namespace r_code;
 
 namespace aera_visualizer {
 
-AbaGraph::AbaGraph(const QString& path)
+AbaGraph::AbaGraph(const QString& path, ReplicodeObjects& replicodeObjects)
+  : replicodeObjects_(replicodeObjects),
+    intMemberRegex_(" ?(\\d+)")
 {
   if (path == "")
     return;
@@ -88,6 +92,28 @@ vector<QString> AbaGraph::readResponse(const QString& prompt)
   }
 
   return response;
+}
+
+Code* AbaGraph::getObject(uint32 id)
+{
+  return replicodeObjects_.getObject(id);
+}
+
+bool AbaGraph::getObjects(string ids, vector<Code*>& objects)
+{
+  smatch matches;
+  bool gotAllInputs = true;
+  while (regex_search(ids, matches, intMemberRegex_)) {
+    auto input = getObject(stoul(matches[1].str()));
+    if (!input)
+      gotAllInputs = false;
+    else
+      objects.push_back(input);
+
+    ids = matches.suffix();
+  }
+
+  return gotAllInputs;
 }
 
 }
