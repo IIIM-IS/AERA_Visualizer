@@ -382,6 +382,10 @@ private:
    */
   core::Timestamp getTimestamp(const std::smatch& matches, int index = 1);
 
+  void addAbaEvent(int solutionId, int step, const std::shared_ptr<AeraEvent>& event) {
+    abaSolutions_[solutionId].abaEvents_[step].push_back(event);
+  }
+
   // Use these to turn the UI on and off depending on whether anything is currently loaded
   void setUIEnabled(bool enabled);
   
