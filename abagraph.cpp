@@ -85,10 +85,10 @@ QString AbaGraph::readResponse(const QString& prompt)
         return "";
     }
 
-    auto line = QString::fromUtf8(abagraph_.readLine()).trimmed();
-    if (line == "")
+    auto line = QString::fromUtf8(abagraph_.readLine()).remove("\r");
+    if (line == "\n")
       break;
-    response += line + "\n";
+    response += line;
   }
 
   return response;
