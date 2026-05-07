@@ -75,10 +75,10 @@ public:
   AbaGraph(const QString& path, ReplicodeObjects& replicodeObjects);
 
   /**
-   * Send the prompt and return the response lines until a blank line, or nothing if timeout.
+   * Send the prompt and return the response lines until a blank line, or "" if timeout.
    * This will append the "\n" to the prompt.
    */
-  std::vector<QString> readResponse(const QString& prompt);
+  QString readResponse(const QString& prompt);
 
   /**
    * Get the object by the ABA ID.

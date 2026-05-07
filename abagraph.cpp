@@ -71,24 +71,24 @@ AbaGraph::AbaGraph(const QString& path, ReplicodeObjects& replicodeObjects)
   // If not started, then abagraph_.state() != QProcess::Running.
 }
 
-vector<QString> AbaGraph::readResponse(const QString& prompt)
+QString AbaGraph::readResponse(const QString& prompt)
 {
   if (abagraph_.state() != QProcess::Running)
-    return vector<QString>();
+    return "";
 
   abagraph_.write((prompt + "\n").toStdString().c_str());
 
-  vector<QString> response;
+  QString response;
   while (true) {
     if (!abagraph_.canReadLine()) {
       if (!abagraph_.waitForReadyRead(5000))
-        return vector<QString>();
+        return "";
     }
 
     auto line = QString::fromUtf8(abagraph_.readLine()).trimmed();
     if (line == "")
       break;
-    response.push_back(line);
+    response += line + "\n";
   }
 
   return response;
