@@ -180,7 +180,8 @@ AeraVisualizerWindow::AeraVisualizerWindow()
   essencePropertyObject_(NULL),
   hoverHighlightItem_(0),
   phasedOutModelColor_(255, 192, 192),
-  abagraph_("", replicodeObjects_), // ("/work/abagraph-mercury/mercury/abagraph.exe", replicodeObjects_),
+  //abagraph_("/work/abagraph-mercury/mercury/abagraph.exe", replicodeObjects_),
+  abagraph_("", replicodeObjects_),
   itemBorderHighlightPen_(Qt::blue, 3)
 {
   createActions();
@@ -2625,7 +2626,7 @@ void AeraVisualizerWindow::setUIEnabled(bool enabled) {
 
 void AeraVisualizerWindow::abaSentenceItemClicked(AbaSentenceItem* item)
 {
-  //auto response = abagraph_.readResponse("abc");
+  //auto response = abagraph_.readResponse("step");
 }
 
 }
