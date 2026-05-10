@@ -246,7 +246,7 @@ string ReplicodeObjects::init(const string& userClassesFilePath, const string& d
 
   _Mem::init_timestamps(timeReference_, objects);
 
-  return initHelper(metadata, &objects, image.object_names_.symbols_, progress);
+  return initHelper(metadata, &objects, image.object_names_.symbols_, &progress);
 }
 
 
@@ -279,11 +279,11 @@ string ReplicodeObjects::init(AERA_interface* aera, microseconds basePeriod, QPr
   // Use these names where available
   std::unordered_map<uint32, std::string> seedNames = aera->getSeedNames().symbols_;
 
-  return initHelper(metadata, objects, seedNames, progress);
+  return initHelper(metadata, objects, seedNames, &progress);
 }
 
 string ReplicodeObjects::initHelper(
-  r_comp::Metadata& metadata, r_code::list<P<r_code::Code>>* objects, unordered_map<uint32, string>& seedNames, QProgressDialog& progress)
+  r_comp::Metadata& metadata, r_code::list<P<r_code::Code>>* objects, unordered_map<uint32, string>& seedNames, QProgressDialog* progress)
 {
   int i = 0;
   unordered_map<const Class*, uint16> objectIdPerClass;
@@ -296,9 +296,11 @@ string ReplicodeObjects::initHelper(
   for (o = objects->begin(); o != objects->end(); ++o) {
     i++;
 
-    if (progress.wasCanceled())
-      return "cancel";
-    progress.setValue(i);
+    if (progress) {
+      if (progress->wasCanceled())
+        return "cancel";
+      progress->setValue(i);
+    }
     //if (i % 100 == 0)
     //  QApplication::processEvents();
 
@@ -316,9 +318,11 @@ string ReplicodeObjects::initHelper(
   // Fill the objectNames map from objectLabel_ and use it in decompile_references.
   unordered_map<uint16, std::string> objectNames;
   for (auto i = 0; i < packedImage.code_segment_.objects_.size(); ++i) {
-    if (progress.wasCanceled())
-      return "cancel";
-    progress.setValue(objectLabel_.size() + i);
+    if (progress) {
+      if (progress->wasCanceled())
+        return "cancel";
+      progress->setValue(objectLabel_.size() + i);
+    }
     if (i % 100 == 0)
       QApplication::processEvents();
 
@@ -329,9 +333,11 @@ string ReplicodeObjects::initHelper(
   decompiler.decompile_references(&packedImage, &objectNames);
 
   for (uint16 i = 0; i < packedImage.code_segment_.objects_.size(); ++i) {
-    if (progress.wasCanceled())
-      return "cancel";
-    progress.setValue(2 * objects->size() + i);
+    if (progress) {
+      if (progress->wasCanceled())
+        return "cancel";
+      progress->setValue(2 * objects->size() + i);
+    }
     if (i % 100 == 0)
       QApplication::processEvents();
 

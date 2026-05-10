@@ -231,7 +231,7 @@ private:
    */
   std::string ReplicodeObjects::initHelper(
     r_comp::Metadata& metadata, r_code::list<P<r_code::Code>>* objects, std::unordered_map<uint32, std::string>& seedNames,
-    QProgressDialog& progress);
+    QProgressDialog* progress = 0);
 
   /**
    * Create a unique label for object and assign objectLabel_ and labelObject_ . Recursively call this for
