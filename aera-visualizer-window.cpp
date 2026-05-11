@@ -2173,8 +2173,6 @@ void AeraVisualizerWindow::updateObjectsAndEvents(bool live)
   findDialog_->setReplicodeObjects(&replicodeObjects_);
   mainScene_->setReplicodeObjects(&replicodeObjects_);
   
-  addStartupItems();
-
   // Some changes only matter during a live run
   if (live) {
     playerView_->setRunTime(milliseconds(settings_.run_time_));
@@ -2263,6 +2261,7 @@ void AeraVisualizerWindow::openOutput()
   
   // Push the data to the GUI without trying to fetch anything from AERA
   updateObjectsAndEvents(false);
+  addStartupItems();
 }
 
 void AeraVisualizerWindow::saveOutput()
