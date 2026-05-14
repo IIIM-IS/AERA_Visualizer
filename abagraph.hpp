@@ -57,7 +57,6 @@
 #include <regex>
 #include <QProcess>
 #include "submodules/AERA/r_code/object.h"
-#include "submodules/AERA/AERA/main.h"
 
 namespace aera_visualizer {
 
@@ -96,13 +95,9 @@ public:
    */
   bool getObjects(std::string ids, std::vector<r_code::Code*>& objects);
 
-  void setAeraInterface(AERA_interface* aera) { aera_ = aera; }
-
 private:
   QProcess abagraph_;
   ReplicodeObjects& replicodeObjects_;
-  AERA_interface *aera_;
-  std::regex idNotFoundRegex_;
   std::regex intMemberRegex_;
 };
 
