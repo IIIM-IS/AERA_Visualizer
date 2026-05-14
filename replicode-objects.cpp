@@ -282,6 +282,91 @@ string ReplicodeObjects::init(AERA_interface* aera, microseconds basePeriod, QPr
   return initHelper(metadata, objects, seedNames, &progress);
 }
 
+string ReplicodeObjects::compileLine(AERA_interface* aera, const QString& line)
+{
+  map<string, uint32> objectOids;
+  map<string, uint64> objectDetailOids;
+  string decompiledOut;
+
+  regex oidAndDetailOidRegex("^(\\d+)\\((\\d+)\\) (\\w+)(:)(.+)$");
+  smatch matches;
+  string trimmed = line.trimmed().toStdString();
+  if (regex_search(trimmed, matches, oidAndDetailOidRegex)) {
+    auto oid = stoul(matches[1].str());
+    auto detailOid = stoul(matches[2].str());
+    auto name = matches[3].str();
+    auto sourceCodeStart = matches[5].str();
+    objectOids[name] = oid;
+    objectDetailOids[name] = detailOid;
+
+    // Use the line without the OID.
+    decompiledOut = name + ':' + sourceCodeStart + '\n';
+  }
+  else
+    return "unrecognized format: " + trimmed;
+
+  istringstream decompiledIn(decompiledOut);
+  ostringstream preprocessedOut;
+
+  Preprocessor preprocessor;
+  string error;
+  if (!preprocessor.process(&decompiledIn, "line", &preprocessedOut, error, NULL))
+    return error;
+
+  istringstream preprocessedIn(preprocessedOut.str());
+  r_comp::Image* image = aera->debugGetSeed();
+  r_comp::Metadata metadata = aera->getMetadata();
+  r_comp::Compiler* compiler = aera->getCompiler();
+  size_t startSize = image->code_segment_.objects_.size();
+
+  if (!compiler->compile(&preprocessedIn, image, &metadata, error, false)) {
+    auto iError = (size_t)preprocessedIn.tellg();
+    auto nBeforeError = min(iError, 50);
+    auto nAfterError = min(preprocessedIn.str().size() - iError, 50);
+    string codeBefore = preprocessedIn.str().substr(iError - nBeforeError, nBeforeError);
+    string codeAfter = preprocessedIn.str().substr(iError, nBeforeError);
+    return codeBefore + "\n<< " + error + "\n" + codeAfter;
+  }
+
+  // Transfer new objects from the compiler image to imageObjects.
+  r_code::resized_vector<r_code::Code*>& imageObjects = aera->ram_objects_;
+  // tempMem is only used internally for calling build_object.
+  MemExec<LObject, MemStatic> tempMem;
+  image->get_objects(&tempMem, aera->ram_objects_, startSize);
+
+  // Set the OIDs and detail OIDs of objects in imageObjects based on the decompiled output.
+  // Set up objectLabel_ and labelObject_ based on the object in imageObjects.
+  for (auto i = startSize; i < imageObjects.size(); ++i) {
+    string label = compiler->getObjectName(i);
+    if (label != "") {
+      objectLabel_[imageObjects[i]] = label;
+      labelObject_[label] = imageObjects[i];
+
+      auto oidEntry = objectOids.find(label);
+      if (oidEntry != objectOids.end())
+        imageObjects[i]->set_oid(oidEntry->second);
+
+      auto detailOidEntry = objectDetailOids.find(label);
+      if (detailOidEntry != objectDetailOids.end())
+        imageObjects[i]->set_detail_oid(detailOidEntry->second);
+    }
+  }
+
+  r_code::list<P<r_code::Code>> objects;
+  // Transfer imageObjects to objects.
+  // Imitate _Mem::load.
+  for (uint32 i = startSize; i < imageObjects.size(); ++i) {
+    Code* object = imageObjects[i];
+    int32 dummyLocation;
+    objects.push_back(object, dummyLocation);
+    // We don't need to delete, so don't set the storage index.
+  }
+
+  _Mem::init_timestamps(timeReference_, objects);
+
+  return initHelper(metadata, &objects, image->object_names_.symbols_);
+}
+
 string ReplicodeObjects::initHelper(
   r_comp::Metadata& metadata, r_code::list<P<r_code::Code>>* objects, unordered_map<uint32, string>& seedNames, QProgressDialog* progress)
 {
@@ -455,7 +540,6 @@ string ReplicodeObjects::processDecompiledObjects(
   regex oidAndDetailOidRegex("^(\\d+)\\((\\d+)\\) (\\w+)(:)(.+)$");
 
   // Scan the input and fill decompiledOut.
-  uint64 currentDetailOid = 0;
   ostringstream decompiledOut;
   string line;
   while (getline(rawDecompiledFile, line)) {
@@ -485,9 +569,6 @@ string ReplicodeObjects::processDecompiledObjects(
 
       // Use the line without the OID.
       decompiledOut << name << ':' << sourceCodeStart << endl;
-
-      // We are starting a new object.
-      currentDetailOid = detailOid;
     }
     else if (regex_search(line, matches, oidAndDetailOidRegex)) {
       auto oid = stoul(matches[1].str());
@@ -499,9 +580,6 @@ string ReplicodeObjects::processDecompiledObjects(
 
       // Use the line without the OID.
       decompiledOut << name << ':' << sourceCodeStart << endl;
-
-      // We are starting a new object.
-      currentDetailOid = detailOid;
     }
     else
       // Use the line as-is.
