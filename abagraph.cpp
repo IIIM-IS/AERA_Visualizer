@@ -61,6 +61,8 @@ namespace aera_visualizer {
 
 AbaGraph::AbaGraph(const QString& path, ReplicodeObjects& replicodeObjects)
   : replicodeObjects_(replicodeObjects),
+    aera_(0),
+    idNotFoundRegex_("error: expecting more elements\n[a-z]+_aba(\\d+)"),
     intMemberRegex_(" ?(\\d+)")
 {
   if (path == "")
@@ -96,7 +98,33 @@ QString AbaGraph::readResponse(const QString& prompt)
 
 Code* AbaGraph::getObject(uint32 id)
 {
-  return replicodeObjects_.getObject(id);
+  // TODO: Map ABA ID to AERA.
+  auto obj = replicodeObjects_.getObject(id);
+  if (obj)
+    return obj;
+
+  set<uint32> referencedIds;
+  while (true) {
+    auto response = readResponse("decomp " + QString::number(id));
+    // TODO: Check for error.
+    auto error = replicodeObjects_.compileLine(aera_, response);
+    if (error == "")
+      return replicodeObjects_.getObject(id);
+
+    smatch matches;
+    if (regex_search(error, matches, idNotFoundRegex_)) {
+      uint32 referencedId = stoul(matches[1].str());
+      if (referencedIds.count(referencedId) > 0)
+        // Already tried and failed to get the referenced object.
+        return 0;
+
+      referencedIds.insert(referencedId);
+      // Decompile the referenced object and try again.
+      getObject(referencedId);
+    }
+    else
+      return 0;
+  }
 }
 
 bool AbaGraph::getObjects(string ids, vector<Code*>& objects)
