@@ -2082,7 +2082,8 @@ void AeraVisualizerWindow::loadNewSeed()
 
   // Reset AERA
   aera_ = new AERA_interface(settingsFilePath.toStdString().c_str(), "");
-  
+  abagraph_.setAeraInterface(aera_);
+
   // Clear the progress dialog
   progress.setValue(100);
     
