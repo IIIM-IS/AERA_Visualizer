@@ -118,9 +118,9 @@ public:
     StatusTextItem(AbaSentenceItem* parent)
     : QGraphicsTextItem(parent),
       parent_(parent)
-  {
+    {
       setFlags(QGraphicsItem::ItemIsSelectable);
-  }
+    }
 
   protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
