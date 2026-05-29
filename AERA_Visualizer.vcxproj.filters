@@ -334,6 +334,9 @@
       <Filter>graphics-items</Filter>
     </ClCompile>
     <ClCompile Include="abagraph.cpp" />
+    <ClCompile Include="graphics-items\aba-step-failed-item.cpp">
+      <Filter>graphics-items</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aera-event.hpp" />
@@ -645,6 +648,9 @@
       <Filter>graphics-items</Filter>
     </ClInclude>
     <ClInclude Include="abagraph.hpp" />
+    <ClInclude Include="graphics-items\aba-step-failed-item.hpp">
+      <Filter>graphics-items</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="images\pause.png">

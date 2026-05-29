@@ -242,6 +242,7 @@
     <ClCompile Include="abagraph.cpp" />
     <ClCompile Include="aera-checkbox.cpp" />
     <ClCompile Include="graphics-items\aba-sentence-item.cpp" />
+    <ClCompile Include="graphics-items\aba-step-failed-item.cpp" />
     <ClCompile Include="graphics-items\aera-graphics-item-group.cpp" />
     <ClCompile Include="graphics-items\aera-graphics-item.cpp" />
     <ClCompile Include="graphics-items\aera-visualizer-scene.cpp" />
@@ -413,6 +414,7 @@
     <QtRcc Include="aera_visualizer.qrc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="graphics-items\aba-step-failed-item.hpp" />
     <ClInclude Include="submodules\AERA\AERA\IODevices\TCP\AERA_Protobuf\tcp_connection.h" />
     <ClInclude Include="submodules\AERA\AERA\IODevices\TCP\AERA_Protobuf\tcp_data_message.pb.h" />
     <ClInclude Include="submodules\AERA\AERA\IODevices\TCP\AERA_Protobuf\utils.h" />
