@@ -61,6 +61,7 @@ namespace aera_visualizer {
 
 AbaGraph::AbaGraph(const QString& path, ReplicodeObjects& replicodeObjects)
   : replicodeObjects_(replicodeObjects),
+    aera_(0),
     intMemberRegex_(" ?(\\d+)")
 {
   if (path == "")
