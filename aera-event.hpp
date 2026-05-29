@@ -854,7 +854,7 @@ public:
 class AbaSolutionFound : public AeraEvent {
 public:
   /**
-   * Create an AbaSolutionFound event to mark a partial solution as found.
+   * Create an AbaSolutionFound event to mark a partial solution as actual.
    * \param time The reduction time.
    * \param solutionId The solution ID (will be matched with the proponent graph).
    */
@@ -868,6 +868,34 @@ public:
   static const int EVENT_TYPE = 34;
 
   int solutionId_;
+};
+
+class AbaStepFailedEvent : public AeraEvent {
+public:
+  /**
+   * Create an AbaStepFailedEvent event to mark a step as failed.
+   * \param time The reduction time.
+   * \param graphId S*PROPONENT_GRAPH_ID_MULTIPLIER + ID, where S is the solution number and
+   * ID is 0 for proponent graph, otherwise the opponent graph ID (within the solution).
+   * \param step The step number to print.
+   * \param parent The fact which produced the step.
+   */
+  AbaStepFailedEvent(core::Timestamp time, int graphId, int step, r_code::Code* parent)
+    // Set the object_ NULL since there is already an AeraEvent for it.
+    : AeraEvent(EVENT_TYPE, time, NULL),
+    graphId_(graphId),
+    step_(step),
+    parent_(parent)
+  {
+  }
+
+  r_code::Code* getInput() override { return parent_; }
+
+  static const int EVENT_TYPE = 35;
+
+  int graphId_;
+  int step_;
+  r_code::Code* parent_;
 };
 
 }
