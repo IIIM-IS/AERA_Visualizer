@@ -93,8 +93,6 @@ public:
 
   std::string init(AERA_interface* aera, std::chrono::microseconds basePeriod, QProgressDialog& progress);
 
-  std::string compileLine(AERA_interface* aera, const QString& line);
-
   /**
    * Get the sampling period, which is 2 * base_period from settings.xml. This should
    * match sampling_period in user.classes.replicode. This method follows Mem::get_sampling_period().
