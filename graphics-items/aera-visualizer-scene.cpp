@@ -163,22 +163,26 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
      AeraVisualizerWindow::simulationEventTypes_.end());
 
   AeraGraphicsItemGroup* itemGroup = 0;
-  if (aeraEvent->eventType_ == AbaAddSentence::EVENT_TYPE) {
-    auto addSentence = (AbaAddSentence*)aeraEvent;
+  int graphId = 0;
+  if (aeraEvent->eventType_ == AbaAddSentence::EVENT_TYPE)
+    graphId = ((AbaAddSentence*)aeraEvent)->graphId_;
+  else if (aeraEvent->eventType_ == AbaStepFailedEvent::EVENT_TYPE)
+    graphId = ((AbaStepFailedEvent*)aeraEvent)->graphId_;
 
-    itemGroup = getItemGroup(addSentence->graphId_);
+  if (graphId != 0) {
+    itemGroup = getItemGroup(graphId);
     if (!itemGroup) {
-      int solutionId = addSentence->graphId_ / PROPONENT_GRAPH_ID_MULTIPLIER;
-      if (addSentence->graphId_ % PROPONENT_GRAPH_ID_MULTIPLIER != 0)
+      int solutionId = graphId / PROPONENT_GRAPH_ID_MULTIPLIER;
+      if (graphId % PROPONENT_GRAPH_ID_MULTIPLIER != 0)
         itemGroup = new AeraGraphicsItemGroup(
-          this, "O" + QString::number(solutionId) + ":" + QString::number(addSentence->graphId_ % PROPONENT_GRAPH_ID_MULTIPLIER),
+          this, "O" + QString::number(solutionId) + ":" + QString::number(graphId % PROPONENT_GRAPH_ID_MULTIPLIER),
           AeraGraphicsItem::Color_opponent_unfinished_justification);
       else
         // AbaSolutionFound event will set to Color_proponent_justifications.
         itemGroup = new AeraGraphicsItemGroup(
           this, "P" + QString::number(solutionId), AeraGraphicsItem::Color_proponent_partial_justifications);
 
-      itemGroups_[addSentence->graphId_] = itemGroup;
+      itemGroups_[graphId] = itemGroup;
       // Put in back of the grid lines.
       itemGroup->setZValue(-2100);
       addItem(itemGroup);
@@ -273,6 +277,10 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
         // Special case. aeraEvent->object_ is null, so use the input_.
         left = getTimelineX(((_Fact*)((PromotedSimulatedPredictionDefeatEvent*)aeraEvent)->input_
                                        ->get_reference(0)->get_reference(0))->get_after());
+      else if (aeraEvent->eventType_ == AbaStepFailedEvent::EVENT_TYPE)
+        // Special case. Use the parent.
+        // TODO: Check get_after_var() like below.
+        left = getTimelineX(((_Fact*)((AbaStepFailedEvent*)aeraEvent)->parent_)->get_after());
       else {
         // We know that a simulated item's object usually has the form (fact (goal_or_pred (fact ...)))
         if (((_Fact*)aeraEvent->object_)->get_goal())
@@ -281,9 +289,14 @@ void AeraVisualizerScene::addAeraGraphicsItem(AeraGraphicsItem* item)
             item->boundingRect().width();
         else if (((_Fact*)aeraEvent->object_)->get_pred())
           left = getTimelineX(((_Fact*)aeraEvent->object_->get_reference(0)->get_reference(0))->get_after());
-        else
+        else {
           // No goal or pred, just a solo fact. Position like a goal.
-          left = getTimelineX(((_Fact*)aeraEvent->object_)->get_after());
+          if (((_Fact*)aeraEvent->object_)->get_after_var() >= 0)
+            // Assume this is an AbaSentenceItem. The position will be adjusted by setBinding.
+            left = getTimelineX(thisFrameTime_);
+          else
+            left = getTimelineX(((_Fact*)aeraEvent->object_)->get_after());
+        }
       }
     }
     else {
@@ -422,8 +435,8 @@ void AeraVisualizerScene::addHorizontalLine(AeraGraphicsItem* item)
         before = pred->get_target()->get_before();
       }
       else {
-        after = fact->get_after();
-        before = fact->get_before();
+        after = (fact->get_after_var() < 0 ? fact->get_after() : thisFrameTime_);
+        before = (fact->get_before_var() < 0 ? fact->get_before() : thisFrameTime_);
       }
     }
 
