@@ -208,7 +208,7 @@ AeraVisualizerWindow::AeraVisualizerWindow()
   centralWidget->setLayout(centralLayout);
   setCentralWidget(centralWidget);
 
-  setWindowTitle(tr("AERA Visualizer (EXPERIMENTAL)"));
+  setWindowTitle(tr("AERA Visualizer"));
   setUnifiedTitleAndToolBarOnMac(true);
 
   // Reset the widgets to the way they were last time
@@ -2061,7 +2061,7 @@ void AeraVisualizerWindow::loadNewSeed()
   }
 
   // Put the filename in the title
-  setWindowTitle(QString("AERA Visualizer (EXPERIMENTAL) - ") + QFileInfo(settings.source_file_name_.c_str()).fileName());
+  setWindowTitle(QString("AERA Visualizer - ") + QFileInfo(settings.source_file_name_.c_str()).fileName());
 
   // Show a dialog while AERA starts (it may hang a bit on the TCP I/O device)
   QProgressDialog progress(this);
@@ -2244,7 +2244,7 @@ void AeraVisualizerWindow::openOutput()
   }
 
   // Put the filename in the title
-  setWindowTitle(QString("AERA Visualizer (EXPERIMENTAL) - ") + QFileInfo(settings_.source_file_name_.c_str()).fileName());
+  setWindowTitle(QString("AERA Visualizer - ") + QFileInfo(settings_.source_file_name_.c_str()).fileName());
 
   // Point the text view to the right output files
   textOutputView_->setOutputFilepaths(settings_.decompilation_file_path_, settings_.runtime_output_file_path_);
