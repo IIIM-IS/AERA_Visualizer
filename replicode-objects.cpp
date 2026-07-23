@@ -455,7 +455,6 @@ string ReplicodeObjects::processDecompiledObjects(
   regex oidAndDetailOidRegex("^(\\d+)\\((\\d+)\\) (\\w+)(:)(.+)$");
 
   // Scan the input and fill decompiledOut.
-  uint64 currentDetailOid = 0;
   ostringstream decompiledOut;
   string line;
   while (getline(rawDecompiledFile, line)) {
@@ -485,9 +484,6 @@ string ReplicodeObjects::processDecompiledObjects(
 
       // Use the line without the OID.
       decompiledOut << name << ':' << sourceCodeStart << endl;
-
-      // We are starting a new object.
-      currentDetailOid = detailOid;
     }
     else if (regex_search(line, matches, oidAndDetailOidRegex)) {
       auto oid = stoul(matches[1].str());
@@ -499,9 +495,6 @@ string ReplicodeObjects::processDecompiledObjects(
 
       // Use the line without the OID.
       decompiledOut << name << ':' << sourceCodeStart << endl;
-
-      // We are starting a new object.
-      currentDetailOid = detailOid;
     }
     else
       // Use the line as-is.
